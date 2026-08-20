@@ -1,0 +1,436 @@
+{% load static %}
+{% load tailwind_tags %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    {% tailwind_css %}
+    <script src="{% static 'js/htmx.min.js' %}" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/directeur/directeur_style.css' %}">
+     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lenis@1.3.25/dist/lenis.min.js"></script> 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script src="https://unpkg.com/splitting/dist/splitting.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/splitting/dist/splitting.css">
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+    <title>Cockpit Direction - KOZ Services</title>
+</head>
+<body class="bg-slate-50 text-slate-800 font-inter min-h-screen selection:bg-blue-600 selection:text-white">
+
+    <!-- Messages Flash Notification -->
+    {% if messages %}
+    <div class="fixed top-20 right-5 z-50 space-y-2 max-w-sm">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} shadow-xl rounded-xl border border-slate-200 bg-white/95 backdrop-blur-md text-sm p-4 text-slate-800 animate-slide-in-right">
+            <span>{{ message }}</span>
+             <button onclick="this.parentElement.remove()" class="text-xs opacity-60 hover:opacity-100">
+            <i class="fas fa-xmark"></i>
+        </button>
+        </div>
+        {% endfor %}
+       
+    </div>
+    {% endif %}
+
+    <!-- Top Navigation Executive (Light Theme) -->
+    <nav class="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b border-slate-200/80 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Brand & Status -->
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-700 via-blue-600 to-cyan-500 p-0.5 shadow-md shadow-blue-500/20">
+                        <div class="w-full h-full bg-white rounded-[10px] flex items-center justify-center">
+                            <span class="text-transparent bg-clip-text bg-gradient-to-tr from-blue-700 to-cyan-600 font-extrabold text-xl">K</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-lg tracking-wide text-slate-900">KOZ SERVICES</span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                                Direction
+                            </span>
+                        </div>
+                        <p class="text-[11px] text-slate-500 hidden sm:block">Console de Pilotage Général</p>
+                    </div>
+                </div>
+
+                <!-- Fast Actions & Profil Header -->
+                <div class="flex items-center gap-3">
+                    <!-- Dropdown Action Rapide (Regroupement des Modales) -->
+                    <div class="relative group">
+                        <button id="quickActionsTrigger" type="button" aria-haspopup="true" aria-expanded="false" class="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-bold px-4 py-2 rounded-xl text-xs sm:text-sm transition-all duration-200 shadow-md shadow-blue-500/20 active:scale-95">
+                            <i class="fas fa-plus text-xs"></i>
+                            <span class="hidden sm:inline">Créer / Ajouter</span>
+                            <i class="fas fa-chevron-down text-xs ml-1 transition-transform group-hover:rotate-180"></i>
+                        </button>
+
+                        <!-- Menu déroulant des Modales (Light Style) -->
+                        <div id="quickActionsMenu" class="absolute right-0 mt-2 w-72 bg-white border border-slate-200 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible group-hover:block transition-all duration-200 z-50 p-2 divide-y divide-slate-100 hidden">
+                            <!-- Section Utilisateurs -->
+                            <div class="py-1">
+                                <span class="px-3 py-1 text-[10px] font-bold tracking-wider text-slate-400 uppercase block">Administration</span>
+                                <button onclick="document.getElementById('userregister_modal').showModal()" class="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition flex items-center gap-2">
+                                    <i class="fas fa-user-plus text-blue-600 w-4"></i> Ajouter un utilisateur
+                                </button>
+                                <button onclick="document.getElementById('change_pass_modal').showModal()" class="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition flex items-center gap-2">
+                                    <i class="fas fa-key text-slate-400 w-4"></i> Changer mot de passe
+                                </button>
+                            </div>
+                            <!-- Section Flotte & Véhicules -->
+                            <div class="py-1">
+                                <span class="px-3 py-1 text-[10px] font-bold tracking-wider text-slate-400 uppercase block">Flotte & Parc</span>
+                                <button onclick="document.getElementById('vehicul_modal').showModal()" class="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition flex items-center gap-2">
+                                    <i class="fas fa-car text-emerald-600 w-4"></i> Ajouter un véhicule
+                                </button>
+                                <button onclick="document.getElementById('marque_modal').showModal()" class="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition flex items-center gap-2">
+                                    <i class="fas fa-trademark text-emerald-600 w-4"></i> Ajouter une marque
+                                </button>
+                                <button onclick="document.getElementById('type_vehicul_modal').showModal()" class="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition flex items-center gap-2">
+                                    <i class="fas fa-car-side text-teal-600 w-4"></i> Ajouter type de véhicule
+                                </button>
+                            </div>
+                            <!-- Section Produits & Services -->
+                            <div class="py-1">
+                                <span class="px-3 py-1 text-[10px] font-bold tracking-wider text-slate-400 uppercase block">Offre & Catalogue</span>
+                                <button onclick="document.getElementById('create_product_modal').showModal()" class="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition flex items-center gap-2">
+                                    <i class="fas fa-box text-amber-600 w-4"></i> Ajouter un produit
+                                </button>
+                                <button onclick="document.getElementById('create_categorie_modal').showModal()" class="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition flex items-center gap-2">
+                                    <i class="fas fa-tags text-amber-600 w-4"></i> Ajouter une catégorie
+                                </button>
+                                <button onclick="document.getElementById('create_marque_product_modal').showModal()" class="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition flex items-center gap-2">
+                                    <i class="fas fa-box text-amber-600 w-4"></i> Ajouter une marque de produit
+                                </button>
+                                <button onclick="document.getElementById('services_modal').showModal()" class="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition flex items-center gap-2">
+                                    <i class="fas fa-wrench text-indigo-600 w-4"></i> Ajouter un service
+                                </button>
+                                <button onclick="document.getElementById('types_services_modal').showModal()" class="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition flex items-center gap-2">
+                                    <i class="fas fa-layer-group text-indigo-600 w-4"></i> Ajouter type de service
+                                </button>
+                            </div>
+                            <!-- Section Média & Actualités -->
+                            <div class="py-1">
+                                <span class="px-3 py-1 text-[10px] font-bold tracking-wider text-slate-400 uppercase block">Communication</span>
+                                <button onclick="document.getElementById('actualite_modal').showModal()" class="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition flex items-center gap-2">
+                                    <i class="fas fa-newspaper text-rose-600 w-4"></i> Publier une actualité
+                                </button>
+                                <button onclick="document.getElementById('avis_reseau_modal').showModal()" class="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition flex items-center gap-2">
+                                    <i class="fas fa-comment-medical text-rose-600 w-4"></i> Ajouter un avis réseau
+                                </button>
+                                <button onclick="document.getElementById('video_temoignage_modal').showModal()" class="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition flex items-center gap-2">
+                                    <i class="fas fa-video text-rose-600 w-4"></i> Ajouter témoignage vidéo
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Déconnexion -->
+                    <a href="{% url 'auth_app:logout-sur-erp' %}" id="logoutBtn" class="bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-700 border border-slate-200/80 p-2 sm:px-3 sm:py-2 rounded-xl text-xs transition-all duration-200 flex items-center gap-2">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span class="hidden md:inline">Déconnexion</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Content Area -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+        <div id="result-toast-container" class="result-toast-container"></div>
+
+        <!-- Banner Welcome Executive (Bleu Roi & Effet Glass) -->
+        <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-700 via-blue-800 to-indigo-900 border border-blue-600/30 p-6 sm:p-8 shadow-xl shadow-blue-900/10 text-white">
+            <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-cyan-400/20 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div class="space-y-2">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span class="text-xs font-semibold text-blue-200 uppercase tracking-widest">Opérationnel</span>
+                    </div>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">
+                        Bonjour, <span class="text-cyan-300">{{ user.nom_complet }}</span>
+                    </h1>
+                    <p class="text-blue-100/90 text-sm max-w-xl">
+                        Supervisez l'activité globale, les flux commerciaux et contrôlez la performance de KOZ Services en temps réel.
+                    </p>
+                </div>
+
+                <!-- Info carte Directeur compacte -->
+                <div class="flex items-center gap-4 bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/20">
+                    <div class="w-12 h-12 rounded-xl bg-white/20 border border-white/30 flex items-center justify-center text-cyan-300 text-xl font-bold">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <div class="text-xs space-y-0.5 text-blue-50">
+                        <p>Compte : <strong class="text-white">{{ user.email }}</strong></p>
+                        <p>Rôle : <span class="text-cyan-300 font-semibold">Directeur Général</span></p>
+                        <p class="text-blue-200/80 text-[10px]"><i class="fas fa-calendar-alt mr-1"></i>{% now "l d F Y" %}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 1 : Dashboard KPI & Ventes -->
+        <div class="space-y-4">
+            <div class="flex items-center justify-between">
+                <h2 class="text-xs font-bold tracking-wider text-slate-500 uppercase flex items-center gap-2">
+                    <i class="fas fa-chart-line text-blue-600"></i> Pilotage Commercial & Analytique
+                </h2>
+                <a href="{% url 'dashboard_app:dashboard-view' %}" class="text-xs font-semibold text-blue-600 hover:text-blue-700 transition flex items-center gap-1">
+                    Vue détaillée <i class="fas fa-arrow-right text-[10px]"></i>
+                </a>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Card 1: Dashboard Analytics -->
+                <a href="{% url 'dashboard_app:dashboard-view' %}" class="group relative bg-white hover:bg-blue-50/40 p-5 rounded-2xl border border-slate-200/80 hover:border-blue-400 transition-all duration-300 shadow-sm hover:shadow-md">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
+                            <i class="fas fa-chart-pie text-lg"></i>
+                        </div>
+                        <span class="text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">KPIs</span>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900 group-hover:text-blue-600 transition">Tableau des Métriques</h3>
+                    <p class="text-slate-500 text-xs mt-1">Vue synthétique sur le chiffre d'affaires et la rentabilité.</p>
+                </a>
+
+                <!-- Card 2: Ventes & Contrats -->
+                <a href="{% url 'commercial_app:vente-list' %}" class="group relative bg-white hover:bg-emerald-50/40 p-5 rounded-2xl border border-slate-200/80 hover:border-emerald-400 transition-all duration-300 shadow-sm hover:shadow-md">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 group-hover:scale-110 transition-transform">
+                            <i class="fas fa-receipt text-lg"></i>
+                        </div>
+                        <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">Revenus</span>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900 group-hover:text-emerald-600 transition">Journal des Ventes</h3>
+                    <p class="text-slate-500 text-xs mt-1">Suivi des transactions conclues et des encaissements.</p>
+                </a>
+
+                <!-- Card 3: Offres Commerciales -->
+                <a href="{% url 'commercial_app:offre-list' %}" class="group relative bg-white hover:bg-indigo-50/40 p-5 rounded-2xl border border-slate-200/80 hover:border-indigo-400 transition-all duration-300 shadow-sm hover:shadow-md">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 group-hover:scale-110 transition-transform">
+                            <i class="fas fa-file-signature text-lg"></i>
+                        </div>
+                        <span class="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">Pipeline</span>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900 group-hover:text-indigo-600 transition">Offres & Devis</h3>
+                    <p class="text-slate-500 text-xs mt-1">Validation des propositions financières transmises.</p>
+                </a>
+
+                <!-- Card 4: Demandes & Financement -->
+                <a href="{% url 'leads_app:list-demande-financement' %}" class="group relative bg-white hover:bg-cyan-50/40 p-5 rounded-2xl border border-slate-200/80 hover:border-cyan-400 transition-all duration-300 shadow-sm hover:shadow-md">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="w-10 h-10 rounded-xl bg-cyan-50 border border-cyan-100 flex items-center justify-center text-cyan-600 group-hover:scale-110 transition-transform">
+                            <i class="fas fa-hand-holding-usd text-lg"></i>
+                        </div>
+                        <span class="text-[10px] font-bold text-cyan-700 bg-cyan-50 px-2 py-0.5 rounded-full border border-cyan-100">Leads</span>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900 group-hover:text-cyan-600 transition">Dossiers Financement</h3>
+                    <p class="text-slate-500 text-xs mt-1">Demandes de crédit auto et dossiers clients à valider.</p>
+                </a>
+            </div>
+        </div>
+
+        <!-- Section 2 : Grille des Pôles Métiers (Light Cards) -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- Pôle 1 : Operations, Planning & RDV -->
+            <div class="bg-white rounded-3xl border border-slate-200/80 p-6 space-y-4 shadow-sm hover:shadow-md transition">
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600">
+                            <i class="fas fa-calendar-check text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-slate-900 text-base">Agenda & Clientèle</h3>
+                            <p class="text-slate-500 text-xs">Gestion du flux client et interventions</p>
+                        </div>
+                    </div>
+                    <div class="space-y-2 pt-2">
+                        <a href="{% url 'directeur_app:rendez-vous-list' %}" class="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-blue-50/60 border border-slate-200/60 hover:border-blue-200 transition text-xs font-medium text-slate-700 hover:text-blue-700">
+                            <span class="flex items-center gap-2"><i class="fas fa-calendar-alt text-blue-600"></i> Planning des Rendez-vous</span>
+                            <i class="fas fa-chevron-right text-[10px] text-slate-400"></i>
+                        </a>
+                        <a href="{% url 'leads_app:documents-list' %}" class="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-blue-50/60 border border-slate-200/60 hover:border-blue-200 transition text-xs font-medium text-slate-700 hover:text-blue-700">
+                            <span class="flex items-center gap-2"><i class="fas fa-folder-open text-blue-600"></i> GED / Documents Client</span>
+                            <i class="fas fa-chevron-right text-[10px] text-slate-400"></i>
+                        </a>
+                        <a href="{% url 'commercial_app:maintenance-list' %}" class="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-blue-50/60 border border-slate-200/60 hover:border-blue-200 transition text-xs font-medium text-slate-700 hover:text-blue-700">
+                            <span class="flex items-center gap-2"><i class="fas fa-tools text-blue-600"></i> Suivi des Maintenances</span>
+                            <i class="fas fa-chevron-right text-[10px] text-slate-400"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pôle 2 : Gestion du Parc Automobile -->
+            <div class="bg-white rounded-3xl border border-slate-200/80 p-6 space-y-4 shadow-sm hover:shadow-md transition">
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600">
+                            <i class="fas fa-car text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-slate-900 text-base">Parc & Flotte Auto</h3>
+                            <p class="text-slate-500 text-xs">Inventaire des véhicules en vente et réparation</p>
+                        </div>
+                    </div>
+                    <div class="space-y-2 pt-2">
+                        <a href="{% url 'vehicul_app:list-vehicul' %}" class="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-emerald-50/60 border border-slate-200/60 hover:border-emerald-200 transition text-xs font-medium text-slate-700 hover:text-emerald-700">
+                            <span class="flex items-center gap-2"><i class="fas fa-car-side text-emerald-600"></i> Catalogue Véhicules</span>
+                            <i class="fas fa-chevron-right text-[10px] text-slate-400"></i>
+                        </a>
+                        <a href="{% url 'vehicul_app:list-marque' %}" class="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-emerald-50/60 border border-slate-200/60 hover:border-emerald-200 transition text-xs font-medium text-slate-700 hover:text-emerald-700">
+                            <span class="flex items-center gap-2"><i class="fas fa-trademark text-emerald-600"></i> Marques Constructeurs</span>
+                            <i class="fas fa-chevron-right text-[10px] text-slate-400"></i>
+                        </a>
+                        <a href="{% url 'vehicul_app:type-vehicul-list' %}" class="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-emerald-50/60 border border-slate-200/60 hover:border-emerald-200 transition text-xs font-medium text-slate-700 hover:text-emerald-700">
+                            <span class="flex items-center gap-2"><i class="fas fa-layer-group text-emerald-600"></i> Types de Véhicules</span>
+                            <i class="fas fa-chevron-right text-[10px] text-slate-400"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pôle 3 : Catalogue Produits & Services -->
+            <div class="bg-white rounded-3xl border border-slate-200/80 p-6 space-y-4 shadow-sm hover:shadow-md transition">
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600">
+                            <i class="fas fa-boxes text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-slate-900 text-base">Offre & Services</h3>
+                            <p class="text-slate-500 text-xs">Pièces détachées, prestations & tarifs</p>
+                        </div>
+                    </div>
+                    <div class="space-y-2 pt-2">
+                        <a href="{% url 'products_app:products-list' %}" class="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-amber-50/60 border border-slate-200/60 hover:border-amber-200 transition text-xs font-medium text-slate-700 hover:text-amber-700">
+                            <span class="flex items-center gap-2"><i class="fas fa-box text-amber-600"></i> Liste des Produits</span>
+                            <i class="fas fa-chevron-right text-[10px] text-slate-400"></i>
+                        </a>
+                        <a href="{% url 'products_app:categorie-products-list' %}" class="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-amber-50/60 border border-slate-200/60 hover:border-amber-200 transition text-xs font-medium text-slate-700 hover:text-amber-700">
+                            <span class="flex items-center gap-2"><i class="fas fa-tags text-amber-600"></i> Catégories Produits</span>
+                            <i class="fas fa-chevron-right text-[10px] text-slate-400"></i>
+                        </a>
+                        <a href="{% url 'services_app:services-list' %}" class="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-amber-50/60 border border-slate-200/60 hover:border-amber-200 transition text-xs font-medium text-slate-700 hover:text-amber-700">
+                            <span class="flex items-center gap-2"><i class="fas fa-wrench text-amber-600"></i> Catalogue des Services</span>
+                            <i class="fas fa-chevron-right text-[10px] text-slate-400"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Section 3 : Communication & Avis Clients -->
+        <div class="bg-white rounded-3xl border border-slate-200/80 p-6 space-y-4 shadow-sm">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600">
+                        <i class="fas fa-bullhorn text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-900 text-base">Communication & Reputation Digital</h3>
+                        <p class="text-slate-500 text-xs">Avis, témoignages clients et publications du site</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-2">
+                <a href="{% url 'home_app:actualites-list' %}" class="p-4 rounded-2xl bg-slate-50 hover:bg-rose-50/50 border border-slate-200/60 hover:border-rose-200 transition flex items-center justify-between text-xs font-semibold text-slate-700 hover:text-rose-700">
+                    <span class="flex items-center gap-2.5"><i class="fas fa-newspaper text-rose-600 text-base"></i> Actualités Site</span>
+                    <i class="fas fa-arrow-up-right-from-square text-[10px] text-slate-400"></i>
+                </a>
+                <a href="{% url 'home_app:avis-reseau-list' %}" class="p-4 rounded-2xl bg-slate-50 hover:bg-rose-50/50 border border-slate-200/60 hover:border-rose-200 transition flex items-center justify-between text-xs font-semibold text-slate-700 hover:text-rose-700">
+                    <span class="flex items-center gap-2.5"><i class="fas fa-comment-dots text-rose-600 text-base"></i> Avis Réseaux</span>
+                    <i class="fas fa-arrow-up-right-from-square text-[10px] text-slate-400"></i>
+                </a>
+                <a href="{% url 'home_app:video-temoignages-list' %}" class="p-4 rounded-2xl bg-slate-50 hover:bg-rose-50/50 border border-slate-200/60 hover:border-rose-200 transition flex items-center justify-between text-xs font-semibold text-slate-700 hover:text-rose-700">
+                    <span class="flex items-center gap-2.5"><i class="fas fa-video text-rose-600 text-base"></i> Témoignages Vidéo</span>
+                    <i class="fas fa-arrow-up-right-from-square text-[10px] text-slate-400"></i>
+                </a>
+                <a href="{% url 'home_app:temoignages-textuel-list' %}" class="p-4 rounded-2xl bg-slate-50 hover:bg-rose-50/50 border border-slate-200/60 hover:border-rose-200 transition flex items-center justify-between text-xs font-semibold text-slate-700 hover:text-rose-700">
+                    <span class="flex items-center gap-2.5"><i class="fas fa-quote-left text-rose-600 text-base"></i> Avis Textuels</span>
+                    <i class="fas fa-arrow-up-right-from-square text-[10px] text-slate-400"></i>
+                </a>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Inclusions des Modales -->
+    {% include 'modals/auth/change_password.html' %}
+    {% include 'modals/auth/userregister.html' %}
+    {% include 'modals/vehicul/aj_marque.html' %}
+    {% include 'modals/vehicul/aj_vehicul.html' %}
+    {% include 'modals/vehicul/aj_type_vehicul.html' %}
+    {% include 'modals/services/aj_services.html' %}
+    {% include 'modals/services/aj_type_services.html' %}
+    {% include 'modals/products/create_categorie_product.html' %}
+    {% include 'modals/products/create_products.html' %}
+    {% include 'modals/products/create_product_unite.html' %}
+    {% include 'modals/products/create_marque_product.html' %}
+    {% include 'modals/home/avis_reseau_form.html' %}
+    {% include 'modals/home/video_temoignage_form.html' %}
+    {% include 'modals/actualite/actualite_form.html' %}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var trigger = document.getElementById('quickActionsTrigger');
+            var menu = document.getElementById('quickActionsMenu');
+            if (!trigger || !menu) {
+                return;
+            }
+
+            function closeMenu() {
+                menu.classList.add('hidden', 'invisible', 'opacity-0');
+                menu.classList.remove('block', 'visible', 'opacity-100');
+                trigger.setAttribute('aria-expanded', 'false');
+            }
+
+            function openMenu() {
+                menu.classList.remove('hidden', 'invisible', 'opacity-0');
+                menu.classList.add('block', 'visible', 'opacity-100');
+                trigger.setAttribute('aria-expanded', 'true');
+            }
+
+            trigger.addEventListener('click', function (event) {
+                event.stopPropagation();
+                if (menu.classList.contains('hidden')) {
+                    openMenu();
+                } else {
+                    closeMenu();
+                }
+            });
+
+            menu.addEventListener('click', function (event) {
+                event.stopPropagation();
+            });
+
+            document.addEventListener('click', function () {
+                closeMenu();
+            });
+        });
+    </script>
+
+    <!-- Footer Cockpit (Light Style) -->
+    <footer class="bg-white border-t border-slate-200/80 py-8 mt-16 text-slate-500 text-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <span class="font-bold text-slate-900">KOZ SERVICES</span>
+                <span>— System Executive v1.0</span>
+            </div>
+            <p>&copy; {% now "Y" %} KOZ Services. Tous droits réservés.</p>
+            <p class="font-medium text-slate-700">Conçu par <strong>SPIRIT-DIGIT Agency</strong></p>
+        </div>
+    </footer>
+
+</body>
+</html>

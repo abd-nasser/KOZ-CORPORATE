@@ -1,0 +1,134 @@
+{% load humanize %}
+
+<div id="offre-list">
+    <div class="grid grid-cols-1 gap-5">
+        {% for offre in offres %}
+        <div class="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden">
+            <div class="p-5">
+                <div class="flex flex-wrap justify-between items-start gap-4">
+                    <div class="flex-1">
+                        <!-- ===== EN-TÊTE ===== -->
+                        <div class="flex items-center gap-3 mb-3 flex-wrap">
+                            <h3 class="font-bold text-lg text-gray-800">
+                                <i class="fas fa-file-signature text-blue-500 mr-1"></i> Offre #{{ offre.id }}
+                            </h3>
+                            
+                            <!-- Badge type d'offre -->
+                            <span class="badge px-3 py-1 rounded-full text-xs font-semibold
+                                {% if offre.type_offre == 'simple' %}bg-purple-100 text-purple-700
+                                {% else %}bg-blue-100 text-blue-700{% endif %}">
+                                <i class="fas fa-{% if offre.type_offre == 'simple' %}file-invoice{% else %}chart-line{% endif %} mr-1"></i>
+                                {{ offre.get_type_offre_display }}
+                            </span>
+                            
+                            <!-- Badge statut -->
+                            <span class="badge px-3 py-1 rounded-full text-xs font-semibold
+                                {% if offre.statut == 'acceptee' %}bg-green-100 text-green-700
+                                {% elif offre.statut == 'refusee' or offre.statut == 'expiree' %}bg-red-100 text-red-700
+                                {% elif offre.statut == 'envoyee' %}bg-yellow-100 text-yellow-700
+                                {% elif offre.statut == 'en_attente_document' %}bg-amber-100 text-amber-700
+                                {% else %}bg-gray-100 text-gray-700{% endif %}">
+                                <i class="fas fa-{% if offre.statut == 'acceptee' %}check-circle{% elif offre.statut == 'refusee' %}times-circle{% elif offre.statut == 'expiree' %}hourglass-end{% elif offre.statut == 'envoyee' %}paper-plane{% elif offre.statut == 'en_attente_document' %}clock{% else %}info-circle{% endif %} mr-1"></i>
+                                {{ offre.get_statut_display }}
+                            </span>
+                            
+                            {% if offre.statut == 'envoyee' %}
+                            <span class="text-xs text-yellow-600 flex items-center gap-1">
+                                <i class="fas fa-hourglass-half"></i> Expire le {{ offre.date_expiration|date:"d/m/Y" }}
+                            </span>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- ===== INFOS CLIENT ===== -->
+                        <div class="flex flex-wrap items-center gap-3 text-sm text-gray-600 mb-2">
+                            {% if user.role == "client" %}
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-user text-blue-500 w-5"></i>
+                                    <span><strong>Votre offre personnelle</strong></span>
+                                </div>
+                            {% else %}
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-user text-blue-500 w-5"></i>
+                                    <span><strong>Client :</strong> {{ offre.client.nom_complet }}</span>
+                                </div>
+                            {% endif %}
+                            
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-car text-blue-500 w-5"></i>
+                                <span><strong>Véhicule :</strong> {{ offre.vehicule_propose.marque.nom }} {{ offre.vehicule_propose.modele }}</span>
+                            </div>
+                        </div>
+                        
+                        <!-- ===== INFOS SPÉCIFIQUES SELON LE TYPE ===== -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                            
+                            <!-- ✅ CAS 1 : OFFRE DE FINANCEMENT -->
+                            {% if offre.type_offre == "offre_financement" %}
+                            
+                            <div class="flex items-center gap-2 text-gray-600">
+                                <i class="fas fa-money-bill-wave text-green-600 w-5"></i>
+                                <span><strong>Montant financé :</strong> <span class="text-green-700">{{ offre.montant_finance|intcomma }} FCFA</span></span>
+                            </div>
+                            <div class="flex items-center gap-2 text-gray-600">
+                                <i class="fas fa-coins text-blue-500 w-5"></i>
+                                <span><strong>Mensualité :</strong> {{ offre.mensualite|intcomma }} FCFA</span>
+                            </div>
+                            <div class="flex items-center gap-2 text-gray-600">
+                                <i class="fas fa-calendar-alt text-blue-500 w-5"></i>
+                                <span><strong>Durée :</strong> {{ offre.duree_mois }} mois</span>
+                            </div>
+                            <div class="flex items-center gap-2 text-gray-600">
+                                <i class="fas fa-percent text-blue-500 w-5"></i>
+                                <span><strong>Taux :</strong> {{ offre.taux_interet }}%</span>
+                            </div>
+                            
+                            <!-- ✅ CAS 2 : OFFRE SIMPLE -->
+                            {% elif offre.type_offre == "simple" %}
+                            
+                            <div class="flex items-center gap-2 text-gray-600 col-span-2">
+                                <i class="fas fa-tag text-blue-500 w-5"></i>
+                                <span><strong>Montant proposé :</strong> <span class="text-blue-700">{{ offre.montant_propose|intcomma }} FCFA</span></span>
+                            </div>
+                            <div class="flex items-center gap-2 text-gray-600">
+                                <i class="fas fa-calendar-plus text-blue-500 w-5"></i>
+                                <span><strong>Créée le :</strong> {{ offre.date_creation|date:"d/m/Y" }}</span>
+                            </div>
+                            <div class="flex items-center gap-2 text-gray-600">
+                                <i class="fas fa-hourglass-half text-yellow-500 w-5"></i>
+                                <span><strong>Expire le :</strong> {{ offre.date_expiration|date:"d/m/Y" }}</span>
+                            </div>
+                            
+                            <!-- ✅ CAS PAR DÉFAUT (sécurité) -->
+                            {% else %}
+                            
+                            <div class="flex items-center gap-2 text-gray-600 col-span-2">
+                                <i class="fas fa-info-circle text-gray-400 w-5"></i>
+                                <span class="text-gray-400">Type d'offre non reconnu</span>
+                            </div>
+                            
+                            {% endif %}
+                            
+                        </div>
+                    </div>
+                    
+                    <!-- ===== BOUTON DÉTAIL ===== -->
+                    <div class="flex-shrink-0">
+                        <a href="{% url 'commercial_app:offre-detail' offre.id %}" 
+                           class="btn btn-sm btn-outline rounded-full px-5 py-2 border-blue-500 text-blue-600 hover:bg-blue-500 hover:text-white transition">
+                            <i class="fas fa-eye mr-1"></i> Détail
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="bg-white rounded-2xl shadow-md p-10 text-center border border-gray-100">
+            <div class="w-20 h-20 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                <i class="fas fa-file-signature text-3xl text-gray-400"></i>
+            </div>
+            <p class="text-gray-500">Aucune offre trouvée.</p>
+            <p class="text-gray-400 text-sm mt-1">Ajustez vos filtres ou créez une nouvelle offre.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>

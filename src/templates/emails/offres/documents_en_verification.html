@@ -1,0 +1,36 @@
+{% load humanize %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f9ff; margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #1e3a8a, #3b82f6); padding: 24px; text-align: center; }
+        .header h1 { color: white; margin: 0; }
+        .content { padding: 30px; color: #1f2937; }
+        .info { background: #f0f6ff; padding: 16px; border-left: 4px solid #3b82f6; margin: 20px 0; border-radius: 8px; }
+        .footer { background: #f9fafb; padding: 16px; text-align: center; font-size: 12px; color: #6b7280; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>KOZ Services</h1>
+        </div>
+        <div class="content">
+            <h2>📄 Documents en cours de vérification</h2>
+            <p>Bonjour <strong>{{ client.nom_complet }}</strong>,</p>
+            <p>Nous avons bien reçu l'ensemble des documents pour votre offre n°<strong>{{ offre_id }}</strong>.</p>
+            <p>Ils sont actuellement en cours d'analyse par notre équipe.</p>
+            <div class="info">
+                <p><strong>🚗 Véhicule :</strong> {{ vehicule }}</p>
+            </div>
+            <p>Nous vous tiendrons informé dès qu'une décision sera prise.</p>
+        </div>
+        <div class="footer">
+            <p>KOZ Services - Votre concessionnaire de confiance</p>
+        </div>
+    </div>
+</body>
+</html>

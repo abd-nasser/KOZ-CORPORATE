@@ -1,0 +1,273 @@
+{% load static %}
+{% load humanize %}
+{% load tailwind_tags %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    {% tailwind_css %}
+    <script src="{% static 'js/htmx.min.js' %}" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <title>Résultats filtrés - KOZ Services</title>
+    <style>
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .animate-fade-in-up {
+            animation: fadeInUp 0.5s ease-out forwards;
+        }
+        .animate-slide-in-right {
+            animation: slideInRight 0.4s ease-out forwards;
+        }
+        .item-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .item-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -12px rgba(0, 0, 0, 0.15);
+        }
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .badge-success { background: #dcfce7; color: #166534; }
+        .badge-error { background: #fee2e2; color: #991b1b; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-info { background: #dbeafe; color: #1e40af; }
+        .badge-neutral { background: #f3f4f6; color: #374151; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 font-inter">
+
+    <!-- Messages flash -->
+    {% if messages %}
+    <div class="fixed top-20 right-5 z-50 space-y-2">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} shadow-xl rounded-xl animate-slide-in-right">
+            <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% else %}info-circle{% endif %} mr-2"></i>
+            <span>{{ message }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Navbar -->
+    <nav class="glass-nav sticky top-0 z-40 shadow-sm">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl flex items-center justify-center shadow-lg">
+                    <span class="text-white font-bold text-xl">K</span>
+                </div>
+                <span class="text-xl font-bold bg-gradient-to-r from-blue-700 to-indigo-600 bg-clip-text text-transparent">KOZ Services</span>
+                <span class="hidden md:inline-block px-2 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">Résultats filtrés</span>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-4 py-8 max-w-6xl" style="height:80vh;">
+        
+        <!-- En-tête -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 animate-fade-in-up">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-3">
+                    <i class="fas fa-filter text-blue-600"></i>
+                    {{ titre }}
+                </h1>
+                <p class="text-gray-500 text-sm mt-1">
+                    <i class="fas fa-database mr-1"></i>
+                    {% with total=items|length %}
+                        {% if total == 0 %}0 élément trouvé{% else %}{{ total }} éléments trouvés{% endif %}
+                    {% endwith %}
+                </p>
+            </div>
+            <a href="{% url 'dashboard_app:dashboard-view' %}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-200 text-gray-700 hover:bg-gray-300 transition shadow-sm">
+                <i class="fas fa-arrow-left"></i> Retour au tableau de bord
+            </a>
+        </div>
+
+        <!-- Liste des résultats -->
+        <div class="space-y-4 animate-fade-in-up" style="animation-delay: 0.1s">
+            {% for item in items %}
+            <div class="item-card bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden">
+                <div class="p-5">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div class="flex-1">
+                            
+                            <!-- ==================== OFFRE ==================== -->
+                            {% if model_name == 'offres' %}
+                                <div class="flex items-center gap-3 flex-wrap mb-2">
+                                    <span class="font-bold text-lg text-gray-800">
+                                        <i class="fas fa-file-signature text-blue-500 mr-2"></i>Offre #{{ item.id }}
+                                    </span>
+                                    <span class="badge 
+                                        {% if item.statut == 'acceptee' %}badge-success
+                                        {% elif item.statut == 'refusee' %}badge-error
+                                        {% elif item.statut == 'expiree' %}badge-warning
+                                        {% else %}badge-info{% endif %}">
+                                        <i class="fas fa-{% if item.statut == 'acceptee' %}check-circle{% elif item.statut == 'refusee' %}times-circle{% elif item.statut == 'expiree' %}hourglass-end{% else %}info-circle{% endif %} mr-1"></i>
+                                        {{ item.get_statut_display }}
+                                    </span>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+                                    <p class="text-gray-600"><i class="fas fa-user text-blue-500 w-5 mr-1"></i>Client : <strong>{{ item.client.nom_complet }}</strong> ({{ item.client.email }})</p>
+                                    <p class="text-gray-600"><i class="fas fa-car text-blue-500 w-5 mr-1"></i>Véhicule : <strong>{{ item.vehicule_propose }}</strong></p>
+                                    
+                                    {% if item.montant_finance %}
+                                        <p class="text-gray-600"><i class="fas fa-money-bill-wave text-green-600 w-5 mr-1"></i>Montant financé : <strong class="text-green-700">{{ item.montant_finance|intcomma }} FCFA</strong></p>
+                                        {% else %}
+                                         <p class="text-gray-600"><i class="fas fa-money-bill-wave text-green-600 w-5 mr-1"></i>Montant proposé : <strong class="text-green-700">{{ item.montant_propose|intcomma }} FCFA</strong></p>
+                                    {% endif %}
+                                        
+                                   
+                                </div>
+                            
+                            <!-- ==================== DEMANDE ==================== -->
+                            {% elif model_name == 'demande_financement' %}
+                                <div class="flex items-center gap-3 flex-wrap mb-2">
+                                    <span class="font-bold text-lg text-gray-800">
+                                        <i class="fas fa-file-alt text-blue-500 mr-2"></i>Demande #{{ item.id }}
+                                    </span>
+                                    <span class="badge 
+                                        {% if item.etape == 'en_attente' %}badge-warning
+                                        {% elif item.etape == 'en_cours' %}badge-info
+                                        {% elif item.etape == 'demand_refusee' %}badge-error
+                                        {% else %}badge-success{% endif %}">
+                                        <i class="fas fa-{% if item.etape == 'en_attente' %}clock{% elif item.etape == 'en_cours' %}spinner{% elif item.etape == 'demand_refusee' %}times-circle{% else %}check-circle{% endif %} mr-1"></i>
+                                        {{ item.get_etape_display }}
+                                    </span>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+                                    <p class="text-gray-600"><i class="fas fa-user text-blue-500 w-5 mr-1"></i>Client : <strong>{{ item.client.nom_complet }}</strong></p>
+                                    <p class="text-gray-600"><i class="fas fa-car text-blue-500 w-5 mr-1"></i>Véhicule : <strong>{{ item.Vehicul_interested }}</strong></p>
+                                    <p class="text-gray-600"><i class="fas fa-hand-holding-usd text-blue-500 w-5 mr-1"></i>Apport : <strong>{{ item.apport|intcomma }} FCFA</strong> | Durée : <strong>{{ item.duree_mois }} mois</strong></p>
+                                </div>
+                            
+                            <!-- ==================== DOCUMENT ==================== -->
+                            {% elif model_name == 'documents' %}
+                                <div class="flex items-center gap-3 flex-wrap mb-2">
+                                    <span class="font-bold text-lg text-gray-800">
+                                        <i class="fas fa-folder-open text-blue-500 mr-2"></i>Dossier documentaire
+                                    </span>
+                                    <span class="badge 
+                                        {% if item.statut_dossier == 'valide' %}badge-success
+                                        {% elif item.statut_dossier == 'rejete' %}badge-error
+                                        {% else %}badge-warning{% endif %}">
+                                        <i class="fas fa-{% if item.statut_dossier == 'valide' %}check-circle{% elif item.statut_dossier == 'rejete' %}times-circle{% else %}clock{% endif %} mr-1"></i>
+                                        {{ item.get_statut_dossier_display }}
+                                    </span>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+                                    <p class="text-gray-600"><i class="fas fa-user text-blue-500 w-5 mr-1"></i>Client : <strong>{{ item.client.nom_complet }}</strong></p>
+                                    <p class="text-gray-600"><i class="fas fa-calendar-alt text-blue-500 w-5 mr-1"></i>Date upload : <strong>{{ item.date_upload|date:"d/m/Y H:i" }}</strong></p>
+                                </div>
+                            
+                            <!-- ==================== MAINTENANCE ==================== -->
+                            {% elif model_name == 'maintenance' %}
+                                <div class="flex items-center gap-3 flex-wrap mb-2">
+                                    <span class="font-bold text-lg text-gray-800">
+                                        <i class="fas fa-tools text-blue-500 mr-2"></i>Maintenance
+                                    </span>
+                                    <span class="badge 
+                                        {% if item.statut == 'effectuee' %}badge-success
+                                        {% elif item.statut == 'annulee' %}badge-error
+                                        {% else %}badge-warning{% endif %}">
+                                        <i class="fas fa-{% if item.statut == 'effectuee' %}check-circle{% elif item.statut == 'annulee' %}times-circle{% else %}clock{% endif %} mr-1"></i>
+                                        {{ item.get_statut_display }}
+                                    </span>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+                                    <p class="text-gray-600"><i class="fas fa-user text-blue-500 w-5 mr-1"></i>Client : <strong>{{ item.client.nom_complet }}</strong></p>
+                                    <p class="text-gray-600"><i class="fas fa-car text-blue-500 w-5 mr-1"></i>Véhicule : <strong>{{ item.marque }} {{ item.modele }}</strong></p>
+                                    <p class="text-gray-600"><i class="fas fa-wrench text-blue-500 w-5 mr-1"></i>Type : <strong>{{ item.get_type_maintenance_display }}</strong> | Priorité : <strong>{{ item.get_priorite_display }}</strong></p>
+                                </div>
+                            
+                            <!-- ==================== CLIENT ==================== -->
+                            {% elif model_name == 'client' %}
+                                <div class="flex items-center gap-3 flex-wrap mb-2">
+                                    <span class="font-bold text-lg text-gray-800">
+                                        <i class="fas fa-user-circle text-blue-500 mr-2"></i>{{ item.nom_complet }}
+                                    </span>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+                                    <p class="text-gray-600"><i class="fas fa-envelope text-blue-500 w-5 mr-1"></i>Email : <strong>{{ item.email }}</strong></p>
+                                    <p class="text-gray-600"><i class="fas fa-phone text-blue-500 w-5 mr-1"></i>Téléphone : <strong>{{ item.telephone }}</strong></p>
+                                    <p class="text-gray-600"><i class="fas fa-calendar-alt text-blue-500 w-5 mr-1"></i>Date inscription : <strong>{{ item.date_joined|date:"d/m/Y" }}</strong></p>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Bouton détail -->
+                        <div class="flex-shrink-0">
+                            {% if model_name == 'offre' %}
+                                <a href="{% url 'leads_app:offre-detail' item.id %}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition shadow-sm">
+                                    <i class="fas fa-eye"></i> Voir détail
+                                </a>
+                            {% elif model_name == 'demande_financement' %}
+                                <a href="{% url 'leads_app:detail-demande' item.id %}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition shadow-sm">
+                                    <i class="fas fa-eye"></i> Voir détail
+                                </a>
+                            {% elif model_name == 'documents' %}
+                                <a href="{% url 'leads_app:document-detail' item.id %}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition shadow-sm">
+                                    <i class="fas fa-eye"></i> Voir détail
+                                </a>
+                            {% elif model_name == 'maintenance' %}
+                                <a href="{% url 'commercial_app:maintenance-detail' item.id %}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition shadow-sm">
+                                    <i class="fas fa-eye"></i> Voir détail
+                                </a>
+                            {% elif model_name == 'client' %}
+                                <a href="{% url 'client_app:client-detail' item.id %}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition shadow-sm">
+                                    <i class="fas fa-eye"></i> Voir détail
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="bg-white rounded-2xl shadow-md p-12 text-center border border-gray-100">
+                <div class="w-20 h-20 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                    <i class="fas fa-search text-3xl text-gray-400"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-700 mb-2">Aucun résultat</h3>
+                <p class="text-gray-500 mb-4">Aucun élément trouvé pour ce filtre.</p>
+                <a href="{% url 'dashboard_app:dashboard-view' %}" class="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition shadow-sm">
+                    <i class="fas fa-arrow-left"></i> Retour au tableau de bord
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white py-6 mt-12">
+        <div class="container mx-auto px-4 text-center text-sm text-gray-400">
+            <p>&copy; {% now "Y" %} KOZ Services - Tous droits réservés</p>
+            <p class="mt-1 text-xs">Résultats de recherche filtrés</p>
+            <p class="font-medium text-slate-700">Conçu par <strong>SPIRIT-DIGIT Agency</strong></p>
+        </div>
+    </footer>
+
+</body>
+</html>

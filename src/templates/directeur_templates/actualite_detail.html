@@ -1,0 +1,330 @@
+{% load static %}
+{% load tailwind_tags %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    {% tailwind_css %}
+    <script src="{% static 'js/htmx.min.js' %}" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <title>{{ actualite.titre }} - KOZ Services</title>
+    <style>
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-up { animation: fadeInUp 0.5s ease-out forwards; }
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            border: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.5);
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            transform: translateY(-2px);
+            box-shadow: 0 20px 35px -8px rgba(59, 130, 246, 0.7);
+        }
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+            transition: all 0.2s ease;
+        }
+        .btn-danger:hover {
+            background: #dc2626;
+            transform: scale(1.05);
+        }
+        .badge-statut {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 0.2rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.65rem;
+            font-weight: 600;
+        }
+        .badge-statut.publie { background: #dcfce7; color: #166534; }
+        .badge-statut.brouillon { background: #fef3c7; color: #92400e; }
+        .badge-statut.archiver { background: #f3f4f6; color: #374151; }
+        .type-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 0.15rem 0.6rem;
+            border-radius: 9999px;
+            font-size: 0.6rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .image-thumb {
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .image-thumb:hover {
+            border-color: #3b82f6;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-inter">
+
+    <!-- ===== NAVBAR ===== -->
+    <nav class="glass-nav sticky top-0 z-40 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl flex items-center justify-center shadow-lg">
+                    <span class="text-white font-bold text-xl">K</span>
+                </div>
+                <span class="text-xl font-bold bg-gradient-to-r from-blue-700 to-indigo-600 bg-clip-text text-transparent">KOZ Services</span>
+                <span class="hidden md:inline-block px-2 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">Directeur</span>
+            </div>
+            <a href="{% url 'home_app:actualites-list' %}" class="text-gray-600 hover:text-blue-600 transition text-sm flex items-center gap-1">
+                <i class="fas fa-arrow-left"></i> Retour aux actualités
+            </a>
+        </div>
+    </nav>
+
+    <!-- ============================================================ -->
+    <!-- MAIN CONTENT                                                 -->
+    <!-- ============================================================ -->
+    <main class="max-w-5xl mx-auto px-4 py-8">
+
+        <!-- Messages flash -->
+        {% if messages %}
+        <div class="mb-6 space-y-2">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} shadow-xl rounded-xl animate-fade-in-up">
+                <span>{{ message }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- ===== EN-TÊTE ===== -->
+        <div class="flex flex-wrap justify-between items-start gap-4 mb-6 animate-fade-in-up">
+            <div>
+                <div class="flex flex-wrap items-center gap-2 mb-2">
+                    <span class="type-badge" style="background: {{ actualite.type_couleur_hex }}20; color: {{ actualite.type_couleur_hex }};">
+                        <i class="fas {{ actualite.type_icone }}"></i>
+                        {{ actualite.get_type_display }}
+                    </span>
+                    <span class="badge-statut {% if actualite.est_publie %}publie{% else %}brouillon{% endif %}">
+                        <i class="fas fa-{% if actualite.est_publie %}check-circle{% else %}clock{% endif %}"></i>
+                        {% if actualite.est_publie %}Publié{% else %}Brouillon{% endif %}
+                    </span>
+                    {% if actualite.est_vedette %}
+                    <span class="text-xs text-yellow-600 flex items-center gap-1">
+                        <i class="fas fa-star"></i> Vedette
+                    </span>
+                    {% endif %}
+                </div>
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-800">{{ actualite.titre }}</h1>
+                <p class="text-gray-500 text-sm mt-1">
+                    <i class="fas fa-calendar-alt mr-1"></i> {{ actualite.date_evenement|date:"d/m/Y H:i" }}
+                    {% if actualite.date_fin %}
+                    → {{ actualite.date_fin|date:"d/m/Y H:i" }}
+                    {% endif %}
+                </p>
+            </div>
+            <div class="flex gap-2 flex-shrink-0">
+                <button onclick="document.getElementById('update_actualite_modal').showModal()" 
+                        class="btn-primary px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+                    <i class="fas fa-edit"></i> Modifier
+                </button>
+                <form method="post" action="{% url 'home_app:actualites-delete' actualite.id %}" 
+                      onsubmit="return confirm('⚠️ Êtes-vous sûr de vouloir supprimer cette actualité ?');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-danger px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+                        <i class="fas fa-trash-alt"></i> Supprimer
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ===== CONTENU PRINCIPAL ===== -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in-up">
+            
+            <!-- ===== COLONNE GAUCHE : IMAGES ===== -->
+            <div class="lg:col-span-2 space-y-4">
+                
+                <!-- Image principale -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="relative aspect-video bg-gray-200">
+                        {% if actualite.image_principale %}
+                            <img src="{{ actualite.image_principale.url }}" alt="{{ actualite.titre }}" class="w-full h-full object-cover">
+                        {% else %}
+                            <div class="w-full h-full flex items-center justify-center bg-gray-100">
+                                <i class="fas fa-image text-4xl text-gray-300"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Images supplémentaires -->
+                {% if actualite.nb_images > 1 %}
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    {% for image in actualite.images_list %}
+                        {% if forloop.counter0 > 0 %}
+                        <div class="image-thumb aspect-square bg-gray-100 rounded-lg overflow-hidden">
+                            <img src="{{ image.url }}" alt="{{ actualite.titre }}" class="w-full h-full object-cover" onclick="openLightbox('{{ image.url }}')">
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- Vidéo -->
+                {% if actualite.video_file or actualite.video_url %}
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="aspect-video bg-black">
+                        {% if actualite.video_file %}
+                            <video class="w-full h-full" controls>
+                                <source src="{{ actualite.video_file.url }}" type="video/mp4">
+                            </video>
+                        {% elif actualite.video_url %}
+                            <iframe class="w-full h-full" src="{{ actualite.video_url }}" frameborder="0" allowfullscreen></iframe>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+            </div>
+
+            <!-- ===== COLONNE DROITE : INFOS ===== -->
+            <div class="space-y-4">
+                
+                <!-- Description -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+                    <h3 class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                        <i class="fas fa-align-left text-blue-600"></i> Description
+                    </h3>
+                    <p class="text-gray-600 text-sm leading-relaxed">{{ actualite.description }}</p>
+                </div>
+
+                <!-- Description courte -->
+                {% if actualite.description_courte %}
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+                    <h3 class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                        <i class="fas fa-quote-left text-blue-600"></i> Description courte
+                    </h3>
+                    <p class="text-gray-600 text-sm">{{ actualite.description_courte }}</p>
+                </div>
+                {% endif %}
+
+                <!-- Liens -->
+                {% if actualite.lien_interne or actualite.lien_externe %}
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+                    <h3 class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                        <i class="fas fa-link text-blue-600"></i> Liens
+                    </h3>
+                    <div class="space-y-2">
+                        {% if actualite.lien_interne %}
+                        <a href="{{ actualite.lien_interne }}" class="text-blue-600 hover:text-blue-800 text-sm transition flex items-center gap-2">
+                            <i class="fas fa-arrow-right text-xs"></i> {{ actualite.lien_interne }}
+                        </a>
+                        {% endif %}
+                        {% if actualite.lien_externe %}
+                        <a href="{{ actualite.lien_externe }}" target="_blank" class="text-blue-600 hover:text-blue-800 text-sm transition flex items-center gap-2">
+                            <i class="fas fa-external-link-alt text-xs"></i> {{ actualite.lien_externe }}
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Métadonnées -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+                    <h3 class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                        <i class="fas fa-info-circle text-blue-600"></i> Métadonnées
+                    </h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Création</span>
+                            <span class="text-gray-700">{{ actualite.date_creation|date:"d/m/Y H:i" }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Modification</span>
+                            <span class="text-gray-700">{{ actualite.date_modification|date:"d/m/Y H:i" }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Vues</span>
+                            <span class="text-gray-700">{{ actualite.vues }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Ordre</span>
+                            <span class="text-gray-700">{{ actualite.ordre }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions rapides -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+                    <h3 class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                        <i class="fas fa-cog text-blue-600"></i> Actions rapides
+                    </h3>
+                    <div class="flex flex-wrap gap-2">
+                        <a href="{% url 'home_app:home-page'  %}" target="_blank" class="text-blue-600 hover:text-blue-800 text-sm transition flex items-center gap-1">
+                            <i class="fas fa-eye"></i> Voir sur le site
+                        </a>
+                        <span class="text-gray-300">|</span>
+                        <button onclick="document.getElementById('update_actualite_modal').showModal()" class="text-blue-600 hover:text-blue-800 text-sm transition">
+                            <i class="fas fa-edit"></i> Modifier
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ===== LIGHTBOX ===== -->
+    <div id="lightbox" class="fixed inset-0 z-50 bg-black/90 hidden items-center justify-center" onclick="closeLightbox()">
+        <img id="lightbox-img" src="" alt="Agrandissement" class="max-w-4xl max-h-[90vh] object-contain rounded-xl shadow-2xl">
+        <button onclick="closeLightbox()" class="absolute top-5 right-5 text-white text-3xl hover:text-gray-300 transition">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <!-- ===== MODALE ===== -->
+    {% include 'modals/actualite/actualite_update.html' %}
+
+    <footer class="bg-gray-800 text-white py-6 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center text-sm text-gray-400">
+            <p>&copy; {% now "Y" %} KOZ Services — Tous droits réservés</p>
+        </div>
+    </footer>
+
+    <!-- ===== SCRIPTS ===== -->
+    <script>
+        function openLightbox(src) {
+            document.getElementById('lightbox-img').src = src;
+            document.getElementById('lightbox').classList.remove('hidden');
+            document.getElementById('lightbox').classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.add('hidden');
+            document.getElementById('lightbox').classList.remove('flex');
+            document.body.style.overflow = 'auto';
+        }
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeLightbox();
+        });
+    </script>
+
+</body>
+</html>

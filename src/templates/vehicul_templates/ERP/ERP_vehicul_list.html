@@ -1,0 +1,351 @@
+{% load static %}
+{% load tailwind_tags %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    {% tailwind_css %}
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/vehicul/vehicul_list_style.css' %}">
+    <script src="{% static 'js/htmx.min.js' %}" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <title>Catalogue véhicules - KOZ Services</title>
+    <style>
+        /* Layout principal */
+        .catalogue-layout {
+            display: flex;
+            gap: 2rem;
+            min-height: 600px;
+            align-items: flex-start;
+            justify-content: space-around;
+            width: 100%;
+        }
+        
+        /* Colonne gauche : liste scrollable */
+        .vehicules-column {
+            width: 50%;
+            max-height: 70vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-right: 0.5rem;
+            box-sizing: border-box;
+            scrollbar-width: thin;
+            padding-left: 15rem;
+            
+        }
+        
+        /* Colonne droite : hero section */
+        .hero-column {
+            flex:  1 0;
+            min-width: 0;
+            position: sticky;
+            top: 100px;
+            height: 500px;
+            border-radius: 1.5rem;
+            overflow: hidden;
+            background: linear-gradient(135deg, #1e3a8a, #0f172a);
+            transition: all 0.3s ease;
+        }
+        
+        .hero-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            filter: brightness(0.7);
+        }
+        
+        .hero-bg.active {
+            opacity: 1;
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+        }
+        
+        .hero-logo {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+            margin-bottom: 1.5rem;
+            filter: drop-shadow(0 0 20px rgba(0,0,0,0.5));
+        }
+        
+        .hero-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .hero-subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        
+        /* Scrollbar personnalisée */
+        .vehicules-column::-webkit-scrollbar {
+            width: 6px;
+        }
+        .vehicules-column::-webkit-scrollbar-track {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+        .vehicules-column::-webkit-scrollbar-thumb {
+            background: #3b82f6;
+            border-radius: 10px;
+        }
+        
+        /* Animation fadeIn */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-up {
+            animation: fadeInUp 0.5s ease-out forwards;
+        }
+
+        @media (max-width: 640px) {
+            .catalogue-layout {
+                flex-direction: column;
+                gap: 1.5rem;
+                align-items: stretch;
+            }
+            .vehicules-column {
+                width: 100%;
+                max-width: 100%;
+                padding-left: 0;
+                padding-right: 0.5rem;
+                max-height: 70vh;
+                overflow-y: auto;
+                overflow-x: hidden;
+            }
+            .hero-column {
+                width: 100%;
+                min-height: 320px;
+                position: relative;
+                top: auto;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200">
+
+    <!-- Navbar -->
+    <nav class="bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-white/20 shadow-sm">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl flex items-center justify-center shadow-lg">
+                    <span class="text-white font-bold text-xl">K</span>
+                </div>
+                <span class="text-xl font-bold bg-gradient-to-r from-blue-700 to-indigo-600 bg-clip-text text-transparent hidden sm:inline">KOZ Services</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Messages flash -->
+    {% if messages %}
+    <div class="fixed top-20 right-5 z-50 space-y-2">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} shadow-xl rounded-xl">
+            <span>{{ message }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <header class="pt-8 pb-4">
+        <div class="container mx-auto px-4">
+            <div class="text-center animate-fade-in-up">
+                <h1 class="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-blue-700 to-indigo-600 bg-clip-text text-transparent">
+                    Catalogue véhicules
+                </h1>
+                <p class="text-gray-500 mt-2">Découvrez notre sélection premium</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="container mx-auto px-4 mb-6">
+        <div class="flex justify-center">
+            {% if user.role == 'directeur' %}
+                <a href="{% url 'directeur_app:directeur-view' %}" class="btn btn-outline btn-primary">
+                    Retour au dashboard directeur
+                </a>
+            {% elif user.role == 'commercial' %}
+                <a href="{% url 'commercial_app:commercial-view' %}" class="btn btn-outline btn-primary">
+                    Retour au dashboard commercial
+                </a>
+            {% elif user.role == 'client' %}
+                <a href="{% url 'client_app:client-view' %}" class="btn btn-outline btn-primary">
+                    Retour au dashboard client
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <main class="container mx-auto px-4 py-6">
+        
+        <!-- Filtres -->
+        <div class="bg-white/70 filter-container backdrop-blur-sm rounded-2xl p-5 mb-6 shadow-sm border border-white/50 animate-fade-in-up">
+            <div class="flex items-center gap-2 mb-3">
+                <i class="fas fa-sliders-h text-blue-500"></i>
+                <span class="font-medium text-gray-700">Filtres</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <input type="text" name="q" placeholder="🔍 Rechercher..." 
+                       class="input input-bordered w-full focus:ring-2 focus:ring-blue-500"
+                       hx-get="{% url 'vehicul_app:list-vehicul' %}"
+                       hx-target="#vehicules-list"
+                       hx-trigger="keyup changed delay:300ms"
+                       hx-include="[name='marque'], [name='carburant']"
+                       value="{{ request.GET.q }}">
+
+                <select name="marque" class="select select-bordered w-full"
+                        hx-get="{% url 'vehicul_app:list-vehicul' %}"
+                        hx-target="#vehicules-list"
+                        hx-trigger="change"
+                        hx-include="[name='q'], [name='carburant']">
+                    <option value="">📌 Toutes les marques</option>
+                    {% for marque in marques %}
+                    <option value="{{ marque.nom }}">{{ marque.nom }}</option>
+                    {% endfor %}
+                </select>
+
+                <select name="carburant" class="select select-bordered w-full"
+                        hx-get="{% url 'vehicul_app:list-vehicul' %}"
+                        hx-target="#vehicules-list"
+                        hx-trigger="change"
+                        hx-include="[name='q'], [name='marque']">
+                    <option value="">⛽ Tous carburants</option>
+                    {% for value, label in TYPES_CARBURANT %}
+                    <option value="{{ value }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="text-center mt-4">
+                <a href="{% url 'vehicul_app:list-vehicul' %}" 
+                   class="text-sm text-gray-500 hover:text-blue-600 transition"
+                   hx-get="{% url 'vehicul_app:list-vehicul' %}"
+                   hx-target="#vehicules-list">
+                    <i class="fas fa-undo-alt mr-1"></i> Réinitialiser
+                </a>
+            </div>
+        </div>
+
+        <!-- Layout à 2 colonnes -->
+        <div class="catalogue-layout">
+            
+            <!-- Colonne gauche : liste des véhicules (scrollable) -->
+            <div class="vehicules-column" id="vehicules-list">
+                {% include 'partials/vehiculs/ERP_partials_vehicul_list.html' %}
+            </div>
+
+            <!-- Colonne droite : hero section dynamique -->
+            <div class="hero-column" id="hero-section">
+                <div class="hero-bg" id="hero-bg"></div>
+                <div class="hero-content">
+                    <img id="hero-logo" class="hero-logo" src="" alt="Logo marque">
+                    <h2 id="hero-title" class="hero-title">KOZ Services</h2>
+                    <p id="hero-subtitle" class="hero-subtitle">Sélectionnez un véhicule pour découvrir la marque</p>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <footer class="bg-gray-900 text-white py-6 mt-12">
+        <div class="container mx-auto px-4 text-center text-sm text-gray-400">
+            <p>&copy; {% now "Y" %} KOZ Services - Tous droits réservés</p>
+            <p class="font-medium text-slate-700">Conçu par <strong>SPIRIT-DIGIT Agency</strong></p>
+        </div>
+    </footer>
+
+    <script>
+        // GSAP et gestion du survol des cartes
+        document.addEventListener('DOMContentLoaded', function() {
+            const heroBg = document.getElementById('hero-bg');
+            const heroLogo = document.getElementById('hero-logo');
+            const heroTitle = document.getElementById('hero-title');
+            const heroSubtitle = document.getElementById('hero-subtitle');
+            
+            let tl = gsap.timeline();
+            
+            // Fonction pour mettre à jour la section hero
+            window.updateHero = function(marqueNom, marqueLogo, vehiculeCount) {
+                // Mise à jour du contenu
+                heroTitle.textContent = marqueNom;
+                heroSubtitle.textContent = `${vehiculeCount} véhicule(s) disponible(s)`;
+                heroLogo.src = marqueLogo;
+                heroLogo.style.display = marqueLogo ? 'block' : 'none';
+                
+                // Mise à jour du background
+                if (marqueLogo) {
+                    heroBg.style.backgroundImage = `url(${marqueLogo})`;
+                    heroBg.style.backgroundSize = 'cover';
+                    heroBg.style.backgroundPosition = 'center';
+                }
+                
+                // Animation GSAP
+                tl.kill();
+                tl = gsap.timeline();
+                
+                tl.fromTo(heroTitle, 
+                    { opacity: 0, y: 20, scale: 0.9 },
+                    { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "back.out(0.5)" }
+                ).fromTo(heroSubtitle,
+                    { opacity: 0, y: 10 },
+                    { opacity: 1, y: 0, duration: 0.3 },
+                    "-=0.2"
+                ).fromTo(heroLogo,
+                    { opacity: 0, scale: 0.8, rotation: -5 },
+                    { opacity: 1, scale: 1, rotation: 0, duration: 0.4 },
+                    "-=0.3"
+                );
+                
+                // Animation du background
+                gsap.to(heroBg, {
+                    opacity: 1,
+                    duration: 0.5,
+                    ease: "power2.inOut"
+                });
+            };
+            
+            // Fonction pour réinitialiser la hero
+            window.resetHero = function() {
+                tl.kill();
+                heroTitle.textContent = "KOZ Services";
+                heroSubtitle.textContent = "Sélectionnez un véhicule pour découvrir la marque";
+                heroLogo.style.display = 'none';
+                heroBg.style.backgroundImage = '';
+                heroBg.style.opacity = '0';
+                
+                gsap.fromTo(heroTitle, 
+                    { opacity: 0, y: 10 },
+                    { opacity: 1, y: 0, duration: 0.3 }
+                );
+            };
+        });
+    </script>
+
+    <script src="{% static 'js/vehicule/vehicule_script.js' %}"></script>
+</body>
+</html>

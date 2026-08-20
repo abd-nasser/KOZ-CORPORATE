@@ -1,0 +1,110 @@
+{% load static %}
+<dialog id="gestion_dmd_modal" class="modal">
+    <div class="modal-box w-full max-w-md p-0 overflow-hidden rounded-2xl bg-gradient-to-br from-white to-gray-50 shadow-2xl">
+        
+        <!-- Header avec dégradé -->
+        <div class="bg-gradient-to-r from-blue-700 to-indigo-800 px-6 py-4">
+            <div class="flex justify-between items-center">
+                <h3 class="text-xl font-bold text-white">
+                    <i class="fas fa-exchange-alt mr-2"></i>Gérer la demande
+                </h3>
+                <button type="button" class="text-white/80 hover:text-white text-2xl leading-none transition" 
+                        onclick="document.getElementById('gestion_dmd_modal').close()">&times;</button>
+            </div>
+            <p class="text-blue-100 text-sm mt-1">Changer l'état de cette demande de financement</p>
+        </div>
+
+        <!-- Corps du modal -->
+        <div id="dmd-gest-message-zone"></div>
+        <div class="p-6 space-y-4">
+            
+            <!-- Action : Demande de documents -->
+            <button hx-post="{% url 'leads_app:attente-document' demande.pk %}"
+                hx-target="#dmd-gest-message-zone"
+                hx-indicator="#gest-dmd-indic"
+                class="flex items-center gap-4 p-4 rounded-xl w-full bg-blue-50 border border-blue-200 hover:bg-blue-100 transition group"
+                hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                type='button'>
+                <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center group-hover:bg-blue-200 transition">
+                    <i class="fas fa-file-alt text-blue-700 text-xl"></i>
+                </div>
+                <div class="flex-1">
+                    <p class="font-semibold text-gray-800">Demande de documents</p>
+                    <p class="text-sm text-gray-500">Demander des pièces justificatives au client</p>
+                </div>
+                <i class="fas fa-chevron-right text-gray-400 group-hover:text-blue-600 transition"></i>
+            </button>
+
+            <!-- Action : Accorder la demande -->
+
+            <div id="gest-dmd-indic" class="htmx-indicator absolute inset-0 bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center z-50 rounded-2xl transition-all">
+                        <div class="p-6 text-center flex flex-col items-center">
+                            <img src="{% static 'images/Loading_animation.svg' %}" class="w-16 h-16 mb-3 object-contain animate-pulse" alt="Chargement...">
+                            <p class="text-sm font-bold text-slate-800"> Traitement cours...</p>
+                        </div>
+                </div>
+
+            <!-- Action : Refuser la demande -->
+            <button hx-post="{% url 'leads_app:refuser-demande' demande.pk %}" 
+                hx-target="#dmd-gest-message-zone"
+                hx-indicator="#gest-dmd-indic"
+                class="flex items-center gap-4 p-4 rounded-xl w-full bg-red-50 border border-red-200 hover:bg-red-100 transition group"
+                hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                type='button'>
+                <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center group-hover:bg-red-200 transition">
+                    <i class="fas fa-times-circle text-red-700 text-xl"></i>
+                </div>
+                <div class="flex-1">
+                    <p class="font-semibold text-gray-800">Refuser la demande</p>
+                    <p class="text-sm text-gray-500">Rejeter définitivement le financement</p>
+                </div>
+                <i class="fas fa-chevron-right text-gray-400 group-hover:text-red-600 transition"></i>
+            </button>
+
+        </div>
+
+        <!-- Footer avec bouton de fermeture -->
+        <div class="bg-gray-50 px-6 py-4 flex justify-end">
+            <button type="button" class="btn btn-ghost" onclick="document.getElementById('gestion_dmd_modal').close()">
+                <i class="fas fa-times mr-2"></i>Fermer
+            </button>
+        </div>
+
+    </div>
+</dialog>
+
+<!-- Script pour réouvrir le modal en cas d'erreur -->
+<script>
+    document.body.addEventListener('closeDmdGestionModal', function() {
+    document.getElementById('gestion_dmd_modal').close();
+});
+</script>
+
+<style>
+    /* Style supplémentaire pour les boutons inline si besoin */
+    .btn-glow {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        color: white;
+        border: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.5);
+    }
+    .btn-glow:hover {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        transform: translateY(-2px);
+        box-shadow: 0 20px 35px -8px rgba(59, 130, 246, 0.7);
+    }
+
+    
+#indicator {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+#indicator .htmx-request {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+</style>

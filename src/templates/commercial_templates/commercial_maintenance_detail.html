@@ -1,0 +1,401 @@
+{% load static %}
+{% load tailwind_tags %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="fr" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    {% tailwind_css %}
+    <script src="{% static 'js/htmx.min.js' %}" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/commercial/maintenance_detail_style.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lenis@1.3.25/dist/lenis.min.js"></script> 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script src="https://unpkg.com/splitting/dist/splitting.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/splitting/dist/splitting.css">
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+    <title>Maintenance #{{ maintenance.id }} - KOZ Services</title>
+</head>
+<div id="result-toast-container" ></div>
+<body class="min-h-full font-['Plus_Jakarta_Sans',sans-serif] text-slate-800 flex flex-col antialiased selection:bg-blue-500 selection:text-white">
+
+    <!-- Flash Messages Floating -->
+    {% if messages %}
+    <div class="fixed top-5 right-5 z-50 space-y-3 max-w-md w-full px-4 pointer-events-none">
+        {% for message in messages %}
+        <div class="pointer-events-auto p-4 rounded-xl shadow-xl border bg-white flex items-center justify-between gap-3 animate-fade-in
+            {% if message.tags == 'error' or message.tags == 'danger' %}border-rose-200 text-rose-700 bg-rose-50/90
+            {% elif message.tags == 'success' %}border-emerald-200 text-emerald-700 bg-emerald-50/90
+            {% else %}border-blue-200 text-blue-700 bg-blue-50/90{% endif %}">
+            <div class="flex items-center gap-3">
+                <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %} text-lg"></i>
+                <span class="text-sm font-medium">{{ message }}</span>
+            </div>
+            <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-600 transition">&times;</button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Top Navigation Glassmorphism -->
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-30 border-b border-slate-200/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Fil d'Ariane & Retour -->
+                <div class="flex items-center gap-4">
+                    <a href="{% url 'commercial_app:maintenance-list' %}" 
+                       class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-blue-600 transition-all group"
+                       title="Retour à la liste">
+                        <i class="fas fa-arrow-left text-sm group-hover:-translate-x-0.5 transition-transform"></i>
+                    </a>
+                    <div class="flex flex-col">
+                        <div class="flex items-center gap-2 text-xs text-slate-400 font-medium">
+                            <a href="{% url 'commercial_app:maintenance-list' %}" class="hover:text-slate-600">Maintenances</a>
+                            <i class="fas fa-chevron-right text-[10px]"></i>
+                            <span>Détail dossier</span>
+                        </div>
+                        <h1 class="text-base font-bold text-slate-900 tracking-tight">Fiche Maintenance #{{ maintenance.id }}</h1>
+                    </div>
+                </div>
+
+                <!-- Logo Brand Badging -->
+                <div class="flex items-center gap-3">
+                    <div class="hidden sm:flex flex-col items-end text-right">
+                        <span class="text-xs font-bold text-slate-900">KOZ SERVICES</span>
+                        <span class="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Gestion Flotte</span>
+                    </div>
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center shadow-md shadow-blue-500/20">
+                        <span class="text-white font-black text-xl tracking-tighter">K</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Content Area -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Main Card Wrapper -->
+        <div class="space-y-6">
+
+            <!-- Hero Header Banner -->
+            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-700 via-blue-400 to-indigo-700 p-6 sm:p-8 text-white shadow-xl shadow-slate-900/10">
+                <!-- Motif de fond filigrane -->
+                <div class="absolute -right-12 -bottom-12 opacity-10 pointer-events-none">
+                    <i class="fas fa-wrench text-[220px]"></i>
+                </div>
+
+                <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div class="space-y-3">
+                        <div class="flex flex-wrap items-center gap-2.5">
+                            <!-- Badge Statut Modernisé -->
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold tracking-wide border shadow-sm
+                                {% if maintenance.statut == 'effectuee' %}bg-emerald-500/10 text-emerald-300 border-emerald-500/30
+                                {% elif maintenance.statut == 'annulee' or maintenance.statut == 'depassee' %}bg-rose-500/10 text-rose-300 border-rose-500/30
+                                {% elif maintenance.statut == 'confirmee' %}bg-blue-500/10 text-blue-300 border-blue-500/30
+                                {% elif maintenance.statut == 'en_cours' %}bg-amber-500/10 text-amber-300 border-amber-500/30
+                                {% else %}bg-slate-500/10 text-slate-300 border-slate-500/30{% endif %}">
+                                <span class="w-2 h-2 rounded-full 
+                                    {% if maintenance.statut == 'effectuee' %}bg-emerald-400
+                                    {% elif maintenance.statut == 'annulee' or maintenance.statut == 'depassee' %}bg-rose-400
+                                    {% elif maintenance.statut == 'confirmee' %}bg-blue-400
+                                    {% elif maintenance.statut == 'en_cours' %}bg-amber-400 animate-pulse
+                                    {% else %}bg-slate-400{% endif %}"></span>
+                                {{ maintenance.get_statut_display }}
+                            </span>
+
+                            <!-- Badge Priorité -->
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold tracking-wide border shadow-sm
+                                {% if maintenance.priorite == 'urgente' %}bg-rose-500/20 text-rose-200 border-rose-500/40
+                                {% elif maintenance.priorite == 'haute' %}bg-orange-500/20 text-orange-200 border-orange-500/40
+                                {% else %}bg-slate-700/50 text-slate-300 border-slate-600/50{% endif %}">
+                                <i class="fas fa-flag text-[10px]"></i>
+                                {{ maintenance.get_priorite_display }}
+                            </span>
+                        </div>
+
+                        <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center gap-3">
+                            <span>🔧 {{ maintenance.get_type_maintenance_display }}</span>
+                        </h2>
+
+                        <p class="text-slate-300 text-sm flex items-center gap-2">
+                            <i class="far fa-calendar-alt text-blue-400"></i>
+                            Intervention planifiée pour le <strong class="text-white">{{ maintenance.date_prochaine|date:"d F Y" }}</strong>
+                        </p>
+                    </div>
+
+                    <!-- Top Quick Action Toolbar -->
+                    <div class="flex flex-wrap items-center gap-3 pt-4 md:pt-0 border-t md:border-t-0 border-slate-800">
+                        <button onclick="document.getElementById('update_maintenanceModal').showModal()" 
+                                class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold backdrop-blur-md border border-white/10 transition-all flex items-center gap-2">
+                            <i class="fas fa-pen text-xs"></i> Modifier
+                        </button>
+                        <button onclick="document.getElementById('gestion_maintenance_modal').showModal()" 
+                                class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-sm font-semibold shadow-lg shadow-blue-600/30 transition-all flex items-center gap-2">
+                            <i class="fas fa-sliders-h text-xs"></i> Gérer le statut
+                        </button>
+                        <button onclick="document.getElementById('delete_maintenance_modal').showModal()" 
+                                class="p-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 hover:text-rose-100 border border-rose-500/20 transition-all"
+                                title="Supprimer le dossier">
+                            <i class="fas fa-trash-alt text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KPIs Summary Strip -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                        <i class="fas fa-tachometer-alt text-lg"></i>
+                    </div>
+                    <div class="overflow-hidden">
+                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider truncate">Km Actuel</p>
+                        <p class="text-lg font-bold text-slate-900 truncate">{{ maintenance.kilometrage_actuel|intcomma }} <span class="text-xs text-slate-500 font-normal">km</span></p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                        <i class="fas fa-road text-lg"></i>
+                    </div>
+                    <div class="overflow-hidden">
+                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider truncate">Prochain Km</p>
+                        <p class="text-lg font-bold text-slate-900 truncate">{{ maintenance.kilometrage_prochain|intcomma }} <span class="text-xs text-slate-500 font-normal">km</span></p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl {% if maintenance.km_restant > 0 %}bg-emerald-50 text-emerald-600{% else %}bg-rose-50 text-rose-600{% endif %} flex items-center justify-center shrink-0">
+                        <i class="fas {% if maintenance.km_restant > 0 %}fa-hourglass-half{% else %}fa-exclamation-triangle{% endif %} text-lg"></i>
+                    </div>
+                    <div class="overflow-hidden">
+                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider truncate">Reste à courir</p>
+                        {% if maintenance.km_restant > 0 %}
+                            <p class="text-lg font-bold text-emerald-600 truncate">{{ maintenance.km_restant|intcomma }} <span class="text-xs font-normal">km</span></p>
+                        {% else %}
+                            <p class="text-lg font-bold text-rose-600 truncate">Dépassé</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                        <i class="fas fa-coins text-lg"></i>
+                    </div>
+                    <div class="overflow-hidden">
+                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider truncate">Coût Estimé</p>
+                        <p class="text-lg font-bold text-slate-900 truncate">{{ maintenance.montant_estime|default:"0"|intcomma }} <span class="text-xs text-slate-500 font-normal">FCFA</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Detailed Information Grid (2 Columns) -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- Left Column (2 Cols): Core Info -->
+                <div class="lg:col-span-2 space-y-6">
+                    
+                    <!-- Client Card -->
+                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                        <div class="px-6 py-4 bg-slate-50/50 border-b border-slate-100 flex justify-between items-center">
+                            <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                                <i class="fas fa-user-circle text-blue-600 text-base"></i> Profil Client
+                            </h3>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-md bg-blue-50 text-blue-700">Client Répertorié</span>
+                        </div>
+                        <div class="p-6 grid grid-cols-1 sm:grid-cols-3 gap-6 text-sm">
+                            <div>
+                                <span class="text-xs font-medium text-slate-400 block mb-1">Nom complet</span>
+                                <strong class="text-slate-800 text-base font-semibold block">{{ maintenance.client.nom_complet }}</strong>
+                            </div>
+                            <div>
+                                <span class="text-xs font-medium text-slate-400 block mb-1">Téléphone</span>
+                                <a href="tel:{{ maintenance.client.telephone }}" class="text-blue-600 font-medium hover:underline flex items-center gap-1.5">
+                                    <i class="fas fa-phone-alt text-xs"></i> {{ maintenance.client.telephone }}
+                                </a>
+                            </div>
+                            <div>
+                                <span class="text-xs font-medium text-slate-400 block mb-1">Adresse e-mail</span>
+                                <a href="mailto:{{ maintenance.client.email }}" class="text-slate-700 font-medium hover:text-blue-600 truncate block">
+                                    {{ maintenance.client.email }}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vehicle Card -->
+                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                        <div class="px-6 py-4 bg-slate-50/50 border-b border-slate-100 flex justify-between items-center">
+                            <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                                <i class="fas fa-car text-blue-600 text-base"></i> Spécifications du Véhicule
+                            </h3>
+                            {% if maintenance.origine == 'koz' %}
+                                <span class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200/60">
+                                    <i class="fas fa-check-circle text-xs"></i> Catalogue KOZ
+                                </span>
+                            {% else %}
+                                <span class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-md bg-slate-100 text-slate-600">
+                                    <i class="fas fa-globe text-xs"></i> Origine Externe
+                                </span>
+                            {% endif %}
+                        </div>
+                        <div class="p-6 grid grid-cols-2 sm:grid-cols-4 gap-6 text-sm">
+                            <div class="space-y-1">
+                                <span class="text-xs font-medium text-slate-400 block">Marque</span>
+                                <span class="font-bold text-slate-800 text-base">{{ maintenance.marque }}</span>
+                            </div>
+                            <div class="space-y-1">
+                                <span class="text-xs font-medium text-slate-400 block">Modèle</span>
+                                <span class="font-bold text-slate-800 text-base">{{ maintenance.modele }}</span>
+                            </div>
+                            <div class="space-y-1">
+                                <span class="text-xs font-medium text-slate-400 block">Année</span>
+                                <span class="font-bold text-slate-800 text-base">{{ maintenance.annee }}</span>
+                            </div>
+                            <div class="space-y-1">
+                                <span class="text-xs font-medium text-slate-400 block">Immatriculation</span>
+                                <span class="inline-block px-2.5 py-0.5 rounded bg-slate-100 border border-slate-200 font-mono font-bold text-slate-800 text-sm tracking-wider">
+                                    {{ maintenance.immatriculation }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notes Section -->
+                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                        <div class="px-6 py-4 bg-slate-50/50 border-b border-slate-100">
+                            <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                                <i class="fas fa-sticky-note text-blue-600 text-base"></i> Remarques & Instructions
+                            </h3>
+                        </div>
+                        <div class="p-6 grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm">
+                            <div class="space-y-2">
+                                <span class="text-xs font-semibold text-slate-500 flex items-center gap-1.5">
+                                    <i class="fas fa-user-tag text-slate-400"></i> Remarques du client
+                                </span>
+                                <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/60 text-slate-700 min-h-[90px] leading-relaxed">
+                                    {{ maintenance.notes_client|default:"Aucune note particulière formulée par le client." }}
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <span class="text-xs font-semibold text-slate-500 flex items-center gap-1.5">
+                                    <i class="fas fa-user-cog text-slate-400"></i> Observations du technicien
+                                </span>
+                                <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/60 text-slate-700 min-h-[90px] leading-relaxed">
+                                    {{ maintenance.notes_technicien|default:"Aucune observation technique consignée." }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Right Column (1 Col): Financials & Timeline -->
+                <div class="space-y-6">
+                    
+                    <!-- Planning Timeline Card -->
+                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                        <div class="px-6 py-4 bg-slate-50/50 border-b border-slate-100">
+                            <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                                <i class="fas fa-calendar-alt text-blue-600 text-base"></i> Calendrier d'Échéance
+                            </h3>
+                        </div>
+                        <div class="p-6 space-y-4">
+                            <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center">
+                                        <i class="fas fa-calendar-check text-xs"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-medium text-slate-400">Prochaine intervention</p>
+                                        <p class="text-sm font-bold text-slate-800">{{ maintenance.date_prochaine|date:"d/m/Y" }}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-slate-200 text-slate-600 flex items-center justify-center">
+                                        <i class="fas fa-history text-xs"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-medium text-slate-400">Dernière révision</p>
+                                        <p class="text-sm font-bold text-slate-800">{{ maintenance.date_derniere|date:"d/m/Y"|default:"—" }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Financial Breakdown Card -->
+                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                        <div class="px-6 py-4 bg-slate-50/50 border-b border-slate-100">
+                            <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                                <i class="fas fa-wallet text-blue-600 text-base"></i> Bilan Financier
+                            </h3>
+                        </div>
+                        <div class="p-6 space-y-4 text-sm">
+                            <div class="flex justify-between items-center pb-3 border-b border-slate-100">
+                                <span class="text-slate-500">Montant Estimé</span>
+                                <span class="font-semibold text-slate-800">{{ maintenance.montant_estime|default:"—"|intcomma }} FCFA</span>
+                            </div>
+                            <div class="flex justify-between items-center pb-3 border-b border-slate-100">
+                                <span class="text-slate-500">Montant Réel Réfacturé</span>
+                                <span class="font-extrabold text-blue-700 text-base">{{ maintenance.montant_reel|default:"—"|intcomma }} FCFA</span>
+                            </div>
+                            <div class="p-3 rounded-xl bg-blue-50/50 border border-blue-100 text-xs text-blue-800 flex items-start gap-2">
+                                <i class="fas fa-info-circle text-blue-600 mt-0.5"></i>
+                                <span>Le montant réel sera définitivement ajusté après validation des travaux par le chef d'atelier.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Included Modals -->
+    {% include 'modals/maintenance/update_maintenance.html' %}
+    {% include 'modals/maintenance/confirm_maintenance_delete.html' %}
+    {% include 'modals/maintenance/gestion_maintenance.html' %}
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200/80 py-6 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-400 font-medium">
+            <p>&copy; {% now "Y" %} KOZ Services — Plateforme de Gestion Automobile & Flottes. Tous droits réservés.</p>
+            <p class="font-medium text-slate-700">Conçu par <strong>SPIRIT-DIGIT Agency</strong></p>
+        </div>
+    </footer>
+
+    <!-- Script de Réouverture des Modales en cas d'erreur -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            {% if open_update_modal %}
+                const updateModal = document.getElementById('update_maintenanceModal');
+                if (updateModal) updateModal.showModal();
+            {% endif %}
+
+            {% if open_gestion_modal %}
+                const gestionModal = document.getElementById('gestion_maintenance_modal');
+                if (gestionModal) gestionModal.showModal();
+            {% endif %}
+
+            {% if open_delete_modal %}
+                const deleteModal = document.getElementById('delete_maintenance_modal');
+                if (deleteModal) deleteModal.showModal();
+            {% endif %}
+        });
+    </script>
+
+</body>
+</html>

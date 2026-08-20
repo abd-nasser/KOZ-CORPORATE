@@ -1,0 +1,52 @@
+{% load humanize %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f9ff; margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 1px solid #e0eefc; }
+        .header { background: linear-gradient(135deg, #1e3a8a, #3b82f6); padding: 24px; text-align: center; }
+        .header h1 { color: white; margin: 0; font-size: 24px; }
+        .content { padding: 30px; color: #1f2937; }
+        .info { background: #f0f6ff; padding: 16px; border-left: 4px solid #3b82f6; margin: 20px 0; border-radius: 8px; }
+        .btn { display: inline-block; background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; padding: 12px 28px; text-decoration: none; border-radius: 8px; margin-top: 16px; }
+        .footer { background: #f9fafb; padding: 16px; text-align: center; font-size: 12px; color: #6b7280; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>KOZ Services</h1>
+        </div>
+        <div class="content">
+            <h2>📄 Documents requis</h2>
+            <p>Bonjour <strong>{{ client.nom_complet }}</strong>,</p>
+            <p>Votre offre de financement n°<strong>{{ offre_id }}</strong> a été acceptée.</p>
+            <p>Pour finaliser votre dossier, veuillez nous fournir les documents suivants :</p>
+            
+            <div class="info">
+                <p><strong>🚗 Véhicule :</strong> {{ vehicule }}</p>
+                <p><strong>💰 Montant financé :</strong> {{ montant_finance|intcomma }} FCFA</p>
+            </div>
+            
+            <p>Liste des documents requis :</p>
+            <ul>
+                <li>🆔 CNI / Passeport</li>
+                <li>🏠 Justificatif de domicile</li>
+                <li>📄 Attestation de non-engagement</li>
+                <li>📄 Contrat de travail</li>
+                <li>📄 Attestation de travail (&lt;3 mois)</li>
+                <li>💰 3 derniers bulletins de paie</li>
+                <li>🏦 Relevé bancaire (12 mois) + RIB</li>
+                <li>✍️ Spécimen de signature</li>
+            </ul>
+            
+            <a href="{{ lien_documents }}" class="btn">📤 Télécharger mes documents</a>
+        </div>
+        <div class="footer">
+            <p>KOZ Services - Votre concessionnaire de confiance</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,263 @@
+{% load static %}
+{% load tailwind_tags %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="fr" class="h-full bg-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% tailwind_css %}
+    <script src="{% static 'js/htmx.min.js' %}" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <title>[ERP] {{ vehicul.marque.nom }} {{ vehicul.modele }} - KOZ Services</title>
+</head>
+<body class="h-full font-inter text-slate-800 antialiased selection:bg-blue-500 selection:text-white">
+
+    <!-- ========== MESSAGES FLASH ========== -->
+    {% if messages %}
+    <div class="fixed top-5 right-5 z-50 space-y-2">
+        {% for message in messages %}
+        <div class="flex items-center gap-3 bg-slate-900 text-white px-4 py-3 rounded-lg shadow-xl border-l-4 border-blue-500 text-sm">
+            <i class="fas fa-info-circle text-blue-400"></i>
+            <span>{{ message }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- ========== TOPBAR ERP / BREADCRUMB ========== -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+            
+            <!-- Breadcrumb & Nav -->
+            <div class="flex items-center gap-3 text-sm">
+                <a href="{% url 'vehicul_app:list-vehicul' %}" class="inline-flex items-center gap-2 text-slate-500 hover:text-slate-900 font-medium transition">
+                    <i class="fas fa-arrow-left text-xs"></i>
+                    <span>Stock Véhicules</span>
+                </a>
+                <span class="text-slate-300">/</span>
+                <span class="text-slate-900 font-semibold truncate max-w-[200px] sm:max-w-none">
+                    {{ vehicul.marque.nom }} {{ vehicul.modele }}
+                </span>
+            </div>
+
+            <!-- Identifiant & Actions d'en-tête -->
+            <div class="flex items-center gap-3">
+                <span class="hidden sm:inline-flex items-center px-2.5 py-1 rounded-md text-xs font-mono font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                    ID: #VEH-{{ vehicul.pk|stringformat:"04d" }}
+                </span>
+
+                {% if vehicul.disponible %}
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                        En Stock
+                    </span>
+                {% else %}
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+                        <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                        Vendu / Indisponible
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <!-- Header Fiche & Actions Opérationnelles -->
+        <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+            <div>
+                <div class="flex items-center gap-3">
+                    <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+                        {{ vehicul.marque.nom }} {{ vehicul.modele }}
+                    </h1>
+                    <span class="text-sm font-semibold px-2.5 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-100">
+                        {{ vehicul.annee }}
+                    </span>
+                </div>
+                <p class="text-sm text-slate-500 mt-1 flex items-center gap-4">
+                    <span><i class="fas fa-gas-pump mr-1.5 text-slate-400"></i>{{ vehicul.get_carburant_display }}</span>
+                    <span>•</span>
+                    <span><i class="fas fa-tachometer-alt mr-1.5 text-slate-400"></i>{{ vehicul.kilometrage|intcomma }} km</span>
+                </p>
+            </div>
+
+            <!-- Actions Métiers -->
+            <div class="flex items-center gap-2 flex-wrap border-t lg:border-t-0 pt-4 lg:pt-0 border-slate-100">
+                {% if user.is_authenticated and not user.is_superuser and user.role != "directeur" %}
+                    <button onclick="document.getElementById('dmd_fin_modal').showModal()" 
+                            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition">
+                        <i class="fas fa-file-invoice-dollar"></i> Demander un financement
+                    </button>
+                {% endif %}
+
+                {% if user.is_authenticated and user.is_superuser or user.role == "directeur" %}
+                    <button onclick="document.getElementById('vehicul_modal').showModal()" 
+                            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 rounded-lg shadow-sm transition">
+                        <i class="fas fa-edit text-slate-500"></i> Modifier
+                    </button>
+                    <button onclick="document.getElementById('delete_vehicul_modal').showModal()" 
+                            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-rose-700 bg-rose-50 border border-rose-200 hover:bg-rose-100 rounded-lg transition">
+                        <i class="fas fa-trash"></i> Supprimer
+                    </button>
+                {% endif %}
+                
+                <button onclick="window.print()" class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition" title="Imprimer la fiche">
+                    <i class="fas fa-print"></i>
+                </button>
+            </div>
+        </div>
+
+        <div id="result-toast-container" class="result-toast-container"></div>
+        <div id="dmd-message-zone"></div>
+
+        <!-- GRILLE DE DÉTAILS (2 Colonnes) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            <!-- COLONNE GAUCHE : Galerie Visuelle ERP (5 cols) -->
+            <div class="lg:col-span-5 space-y-4">
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="relative rounded-lg overflow-hidden bg-slate-900 aspect-video flex items-center justify-center">
+                        {% if image_principal %}
+                            <img id="mainImage" src="{{ image_principal.image.url }}" alt="{{ vehicul.modele }}" class="w-full h-full object-cover">
+                        {% else %}
+                            <img id="mainImage" src="{{ vehicul.image_principale.url }}" alt="{{ vehicul.modele }}" class="w-full h-full object-cover">
+                        {% endif %}
+                        
+                        <a href="{% url 'vehicul_app:vehicul-images-list' vehicul.pk %}" 
+                           class="absolute bottom-3 right-3 bg-slate-900/80 hover:bg-slate-900 text-white text-xs px-3 py-1.5 rounded-md backdrop-blur-sm transition flex items-center gap-2">
+                            <i class="fas fa-images"></i>
+                            Gérer la galerie ({{ images|length|add:1 }})
+                        </a>
+                    </div>
+
+                    <!-- Miniatures -->
+                    <div class="flex gap-2 overflow-x-auto mt-3 pb-1">
+                        <img src="{{ vehicul.display_image.url }}" 
+                             class="thumbnail w-16 h-16 rounded border-2 border-blue-600 object-cover cursor-pointer hover:opacity-80 transition shrink-0"
+                             onclick="changeImage('{{ vehicul.display_image.url }}')">
+                        
+                        {% for image in images %}
+                            {% if not image.est_principale %}
+                            <img src="{{ image.image.url }}" 
+                                 alt="{{ image.alt_text|default:vehicul.modele }}"
+                                 class="thumbnail w-16 h-16 rounded border-2 border-transparent object-cover cursor-pointer hover:border-slate-300 transition shrink-0"
+                                 onclick="changeImage('{{ image.image.url }}')">
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Bloc Synthèse Financière -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                    <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Données Financières</h3>
+                    <div class="flex items-baseline justify-between">
+                        <span class="text-sm font-medium text-slate-600">Prix de vente TTC</span>
+                        <span class="text-2xl font-bold text-blue-700 font-mono">{{ vehicul.prix|intcomma }} FCFA</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COLONNE DROITE : Données techniques et opérationnelles (7 cols) -->
+            <div class="lg:col-span-7 space-y-6">
+
+                <!-- Tableau de Caractéristiques Techniques ERP -->
+                <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+                        <h2 class="font-semibold text-slate-900 text-base flex items-center gap-2">
+                            <i class="fas fa-sliders-h text-blue-600"></i> Fiche Technique
+                        </h2>
+                        <span class="text-xs text-slate-500">Mise à jour système</span>
+                    </div>
+                    
+                    <div class="p-6">
+                        <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+                            <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                                <dt class="text-xs font-medium text-slate-500">Marque</dt>
+                                <dd class="text-sm font-semibold text-slate-900 mt-0.5">{{ vehicul.marque.nom }}</dd>
+                            </div>
+                            <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                                <dt class="text-xs font-medium text-slate-500">Modèle</dt>
+                                <dd class="text-sm font-semibold text-slate-900 mt-0.5">{{ vehicul.modele }}</dd>
+                            </div>
+                            <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                                <dt class="text-xs font-medium text-slate-500">Année de mise en circulation</dt>
+                                <dd class="text-sm font-semibold text-slate-900 mt-0.5">{{ vehicul.annee }}</dd>
+                            </div>
+                            <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                                <dt class="text-xs font-medium text-slate-500">Kilométrage actuel</dt>
+                                <dd class="text-sm font-semibold text-slate-900 mt-0.5 font-mono">{{ vehicul.kilometrage|intcomma }} km</dd>
+                            </div>
+                            <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                                <dt class="text-xs font-medium text-slate-500">Motorisation / Énergie</dt>
+                                <dd class="text-sm font-semibold text-slate-900 mt-0.5">{{ vehicul.get_carburant_display }}</dd>
+                            </div>
+                            <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                                <dt class="text-xs font-medium text-slate-500">Contrôle Technique</dt>
+                                <dd class="text-sm font-semibold text-emerald-700 mt-0.5 flex items-center gap-1">
+                                    <i class="fas fa-check-circle text-xs"></i> Conforme / Inclus
+                                </dd>
+                            </div>
+                        </dl>
+                    </div>
+                </div>
+
+                <!-- Bloc Description / Notes Internes -->
+                <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-3">
+                    <h2 class="font-semibold text-slate-900 text-base flex items-center gap-2">
+                        <i class="fas fa-align-left text-blue-600"></i> Description & Observations
+                    </h2>
+                    <div class="text-sm text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-lg border border-slate-100 min-h-[100px]">
+                        {% if vehicul.description %}
+                            {{ vehicul.description|linebreaks }}
+                        {% else %}
+                            <span class="text-slate-400 italic">Aucune note ou description saisie pour ce véhicule.</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ========== FOOTER ERP ========== -->
+    <footer class="bg-white border-t border-slate-200 py-4 mt-12 text-center text-xs text-slate-500">
+        <p>&copy; {% now "Y" %} KOZ Services — Système d'Information ERP (Module Stock)</p>
+        <p class="font-medium text-slate-700">Conçu par <strong>SPIRIT-DIGIT Agency</strong></p>
+    </footer>
+
+    <!-- ========== MODALES ========== -->
+    {% include 'modals/vehicul/up_vehicul.html' %}
+    {% include 'modals/vehicul/vehicul_confirm_delete.html' %}
+    {% include 'modals/leads/demande_financement.html' %}
+
+    <!-- ========== JAVASCRIPT LÉGER ========== -->
+    <script>
+        // Gestion du changement d'image principale
+        function changeImage(src) {
+            const mainImage = document.getElementById('mainImage');
+            if (mainImage) {
+                mainImage.src = src;
+            }
+        }
+
+        // Surbrillance miniature active
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.thumbnail').forEach(thumb => {
+                thumb.addEventListener('click', function() {
+                    document.querySelectorAll('.thumbnail').forEach(t => {
+                        t.classList.remove('border-blue-600');
+                        t.classList.add('border-transparent');
+                    });
+                    this.classList.remove('border-transparent');
+                    this.classList.add('border-blue-600');
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>

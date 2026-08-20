@@ -1,0 +1,119 @@
+{% load humanize %}
+
+<div id="maintenance-list-container">
+    <div class="grid grid-cols-1 gap-5">
+        {% for maintenance in maintenances %}
+        <div class="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden">
+            <div class="p-5">
+                <div class="flex flex-wrap justify-between items-start gap-4">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-3 mb-3 flex-wrap">
+                            <h3 class="font-bold text-lg text-gray-800">
+                                🔧 {{ maintenance.get_type_maintenance_display }}
+                            </h3>
+                            <span class="badge px-3 py-1 rounded-full text-xs font-semibold
+                                {% if maintenance.statut == 'effectuee' %}bg-green-100 text-green-700
+                                {% elif maintenance.statut == 'annulee' or maintenance.statut == 'depassee' %}bg-red-100 text-red-700
+                                {% elif maintenance.statut == 'confirmee' %}bg-blue-100 text-blue-700
+                                {% else %}bg-yellow-100 text-yellow-700{% endif %}">
+                                {{ maintenance.get_statut_display }}
+                            </span>
+                            <span class="badge px-3 py-1 rounded-full text-xs font-semibold
+                                {% if maintenance.priorite == 'urgente' %}bg-red-100 text-red-700
+                                {% elif maintenance.priorite == 'haute' %}bg-orange-100 text-orange-700
+                                {% else %}bg-gray-100 text-gray-700{% endif %}">
+                                Priorité : {{ maintenance.get_priorite_display }}
+                            </span>
+                        </div>
+                        
+                        <!-- Affichage conditionnel du client (si rôle != client) -->
+                        {% if request.user.role != 'client' %}
+                        <div class="mb-2">
+                            <div class="flex items-center gap-2 text-gray-600">
+                                <i class="fas fa-user text-blue-500 w-5"></i>
+                                <span><strong>Client :</strong> {{ maintenance.client.nom_complet }}</span>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                            <div class="flex items-center gap-2 text-gray-600">
+                                <i class="fas fa-car text-blue-500 w-5"></i>
+                                <span>{{ maintenance.marque }} {{ maintenance.modele }} ({{ maintenance.annee }})</span>
+                            </div>
+                            <div class="flex items-center gap-2 text-gray-600">
+                                <i class="fas fa-id-card text-blue-500 w-5"></i>
+                                <span>{{ maintenance.immatriculation }}</span>
+                            </div>
+                            <div class="flex items-center gap-2 text-gray-600">
+                                <i class="fas fa-calendar-alt text-blue-500 w-5"></i>
+                                <span><strong>Prochaine date :</strong> {{ maintenance.date_prochaine|date:"d/m/Y" }}</span>
+                            </div>
+                            <div class="flex items-center gap-2 text-gray-600">
+                                <i class="fas fa-road text-blue-500 w-5"></i>
+                                <span><strong>Km restants :</strong> 
+                                    {% if maintenance.km_restant > 0 %}
+                                        {{ maintenance.km_restant|intcomma }} km
+                                    {% else %}
+                                        <span class="text-red-500">⚠️ Dépassé</span>
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+
+                        {% if maintenance.est_en_retard %}
+                        <div class="mt-3 text-sm text-red-600 flex items-center gap-1">
+                            <i class="fas fa-exclamation-triangle"></i> Cette maintenance est dépassée
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <a href="{% url 'commercial_app:maintenance-detail' maintenance.id %}" 
+                           class="btn btn-sm btn-outline rounded-full px-5 py-2 border-blue-500 text-blue-600 hover:bg-blue-500 hover:text-white transition">
+                            <i class="fas fa-eye mr-1"></i> Détail
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="bg-white rounded-2xl shadow-md p-10 text-center">
+            <i class="fas fa-tools text-5xl text-gray-300 mb-4"></i>
+            <p class="text-gray-500">Aucune maintenance planifiée.</p>
+            
+            {% if user.role != "client" %}
+                 <button onclick="document.getElementById('maintenanceModal').showModal()" class="btn btn-primary mt-4">
+                <i class="fas fa-plus-circle mr-2"></i>Planifier une maintenance
+            </button>
+            {% endif %}
+                
+           
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <div class="mt-8 flex justify-center">
+        <div class="join">
+            {% if page_obj.has_previous %}
+                <a href="?page=1" class="join-item btn btn-sm"
+                   hx-get="{% url 'commercial_app:maintenance-list' %}?page=1"
+                   hx-target="#maintenance-list-container">«</a>
+                <a href="?page={{ page_obj.previous_page_number }}" class="join-item btn btn-sm"
+                   hx-get="{% url 'commercial_app:maintenance-list' %}?page={{ page_obj.previous_page_number }}"
+                   hx-target="#maintenance-list-container">‹</a>
+            {% endif %}
+            <span class="join-item btn btn-sm btn-disabled">Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="join-item btn btn-sm"
+                   hx-get="{% url 'commercial_app:maintenance-list' %}?page={{ page_obj.next_page_number }}"
+                   hx-target="#maintenance-list-container">›</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}" class="join-item btn btn-sm"
+                   hx-get="{% url 'commercial_app:maintenance-list' %}?page={{ page_obj.paginator.num_pages }}"
+                   hx-target="#maintenance-list-container">»</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>

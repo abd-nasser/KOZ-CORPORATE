@@ -1,0 +1,75 @@
+<dialog id="create_product_modal" class="modal">
+    <div class="modal-box w-full max-w-2xl p-0 max-h-[85vh] overflow-hidden rounded-2xl bg-gradient-to-br from-white to-gray-50 shadow-2xl">
+        
+        <!-- Header avec dégradé -->
+        <div class="bg-gradient-to-r from-blue-700 to-indigo-800 px-6 py-4">
+            <div class="flex justify-between items-center">
+                <h3 class="text-xl font-bold text-white">
+                    <i class="fas fa-box-plus mr-2"></i>Ajouter un produit
+                </h3>
+                <button type="button" class="text-white/80 hover:text-white text-2xl leading-none transition" 
+                        onclick="document.getElementById('create_product_modal').close()">&times;</button>
+            </div>
+            <p class="text-blue-100 text-sm mt-1">Ajoutez un nouveau produit au catalogue</p>
+        </div>
+
+        <!-- Corps du modal avec formulaire -->
+        <form enctype="multipart/form-data" method="post" action="{% url 'products_app:products-create' %}" class="p-6 scrollable-form">
+            {% csrf_token %}
+            <div>
+            <!-- AFFICHAGE DES ERREURS GLOBALES -->
+            {% if create_product_form.non_field_errors %}
+            <div class="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+                {% for error in create_product_form.non_field_errors %}
+                    <p><i class="fas fa-exclamation-circle mr-2"></i>{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <div class="space-y-5">
+                {% for field in create_product_form %}
+                    <div class="form-group">
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">
+                            {{ field.label }}
+                            {% if field.field.required %}
+                                <span class="text-red-500 ml-0.5">*</span>
+                            {% endif %}
+                        </label>
+                        {{ field }}
+                        {% if field.help_text %}
+                            <p class="text-xs text-gray-400 mt-1">{{ field.help_text }}</p>
+                        {% endif %}
+                        {% if field.errors %}
+                            <div class="mt-1 text-red-500 text-xs">
+                                {% for error in field.errors %}
+                                    <p><i class="fas fa-exclamation-circle mr-1"></i>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Actions -->
+            <div class="flex gap-3 justify-end mt-8 pt-4 border-t border-gray-100">
+                <button type="button" class="btn btn-ghost" onclick="document.getElementById('create_product_modal').close()">
+                    <i class="fas fa-times mr-2"></i>Annuler
+                </button>
+                <button type="submit" class="btn-glow px-6 py-2 rounded-xl flex items-center gap-2">
+                    <i class="fas fa-save"></i> Ajouter le produit
+                </button>
+            </div>
+            </div>
+        </form>
+    </div>
+</dialog>
+
+<!-- Script pour rouvrir le modal si formulaire invalide -->
+{% if open_create_product_modal %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('create_product_modal').showModal();
+    });
+</script>
+{% endif %}
+

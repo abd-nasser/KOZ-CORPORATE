@@ -1,0 +1,826 @@
+body {
+    margin: 0;
+    overflow-x: hidden;
+}
+
+.btn-glow {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    border: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.5);
+    
+}
+
+.btn-glow:hover {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    transform: translateY(-2px);
+    box-shadow: 0 20px 35px -8px rgba(59, 130, 246, 0.7);
+}
+
+
+.frame-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    z-index: 0;
+}
+
+.frame-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.hero-section {
+    position: relative;
+    z-index: 1;
+    height: 200vh; /* ← Permet le scroll sur la hero */
+    background: rgba(0, 0, 0, 0.2); /* Overlay pour lisibilité */
+    display: flex;
+    align-items: center;
+    align-items: flex-start;
+    padding-top: 20rem;
+    justify-content: center;
+}
+
+.hero-section .container {
+    position: relative;
+    z-index: 2;
+}
+
+
+
+
+
+/* Le contenu suivant doit être au-dessus */
+.relative.z-10 {
+    position: relative;
+    z-index: 10;
+   
+}
+
+.reveal-text {
+    font-size: 1.25rem;
+    line-height: 1.8;
+}
+
+.reveal-text .char {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(40px) rotateX(-20deg);
+    transition: none;
+}
+
+/* Quand les lettres s'affichent, elles prennent leur place */
+.reveal-text .char.active {
+    opacity: 1;
+    transform: translateY(0) rotateX(0deg);
+}
+
+/* Effet de brillance sur le texte */
+.text-blue-200 {
+    text-shadow: 0 0 30px rgba(59, 130, 246, 0.3);
+}
+
+
+/* Dans home_style.css */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 50;
+    padding: 1rem 0;
+    transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    
+    background: rgba(255, 255, 255, 0);
+    backdrop-filter: blur(0px);
+    box-shadow: none;
+}
+
+.navbar.visible {
+    background: rgba(255, 255, 255, 0.219);
+    backdrop-filter: blur(20px) saturate(180%);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+    padding: 0.5rem 0;
+   
+}
+
+.navbar.scrolled {
+    background: rgba(17, 90, 185, 0.596);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.08);
+    backdrop-filter: blur(20px) saturate(180%);
+   
+}
+
+
+/* ============================================
+   BOXES LATÉRALES (Glassmorphism)
+============================================ */
+.trois_box {
+    position: absolute;
+    top: 45%;
+    left: 0;
+    height: 80vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+    z-index: 20;
+    
+}
+
+.box {
+    pointer-events: auto;
+    width: 50rem;
+    height: 50rem;
+    margin: 2rem;
+    padding: 2rem;
+    background: rgba(10, 93, 201, 0.575);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border-radius: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    color: white;
+    opacity: 1;
+    transform: translateX(-80px);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    
+}
+
+.box-right {
+    transform: translateX(80px);
+    position: relative;
+    top: 15%;
+    right: -12%;
+    
+}
+
+.box-left {
+    position: relative;
+    top: 1%;
+    left: -12%;
+}
+
+.box-bottom {
+    position: relative;
+    top: 20%;
+    min-width: 65%;
+}
+
+.box:hover {
+    transform: translateY(-100px) scale(1.02);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+    
+}
+
+
+
+.box-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.box-title {
+    font-weight: 700;
+    font-size: 2rem;
+    margin-bottom: 0.4rem;
+    color: #fff;
+}
+
+.box-text {
+    font-size: 1.2rem;
+    line-height: 1.6;
+    opacity: 0.85;
+    font-weight: 400;
+    font-style: italic;
+}
+
+/* ============================================================
+   SPLITTING ANIMATION
+   ============================================================ */
+.splitting .char {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.splitting.animated .char {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+
+/* ============================================================
+   SERVICES SECTION – PINNED SCROLL
+   ============================================================ */
+.services-section .text-center{
+     margin-top: -2rem;
+
+}
+
+.services-section{
+    padding-top: 4rem;
+    height: 100vh;
+}
+
+.service-item {
+    height: 45vh !important;
+    min-height: 45vh !important;
+}
+
+.services-contain{
+    display: flex;
+    margin-top: -4rem;
+    align-items: center;
+    justify-content: space-between;
+    height: 100vh;
+}
+
+.services-bg-image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    margin-top: 2rem;
+}
+
+.services-bg-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.8s ease;
+}
+
+.services-content-wrapper {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    padding: 80px 0;
+}
+
+.services-text-content {
+    max-width: 650px;
+    padding: 0 20px;
+}
+
+.services-step {
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+    color: rgba(255,255,255,0.5);
+    text-transform: uppercase;
+}
+
+.services-type-badge {
+    display: inline-block;
+    font-size: 2rem;
+    font-weight: 600;
+    padding: 4px 14px;
+    border-radius: 9999px;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #93c5fd;
+    margin-left: 10px;
+}
+
+.services-title {
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: white;
+    line-height: 1.1;
+}
+
+.services-description {
+    font-size: 1.2rem;
+    color: rgba(255,255,255,0.75);
+    max-width: 500px;
+}
+
+.services-price {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #60a5fa;
+}
+
+.services-link {
+    background: #2563eb;
+    color: white;
+    padding: 12px 28px;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 30px rgba(37, 99, 235, 0.3);
+}
+.services-link:hover {
+    background: #1d4ed8;
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(37, 99, 235, 0.5);
+}
+
+/* Points de progression */
+.services-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 9999px;
+    background: rgba(255,255,255,0.25);
+    transition: all 0.5s ease;
+}
+.services-dot.active {
+    background: #3b82f6;
+    width: 28px;
+}
+
+/* ============================================================
+   TYPES_VEHICUL SECTION – PINNED SCROLL
+   ============================================================ */
+/* Animation subtile des cartes */
+
+.type-contenu {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  visibility: visible;
+  
+  color: #111827;
+  backdrop-filter: blur(2px);
+}
+
+
+/* Positionnement en escalier */
+.type-contain {
+    min-width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    padding: 0;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+/* Chaque carte a une position relative pour l'effet escalier */
+.type-contain .suv {
+    position: relative;
+    top: 0;
+    left: -8rem;
+    z-index: 3;
+    transform: rotate(-5deg);
+}
+
+.type-contain .berline {
+    position: relative;
+    top: -2.5rem;
+    left: 0;
+    z-index: 2;
+    transform: rotate(0deg);
+}
+
+.type-contain .truck {
+    position: relative;
+    left: 8rem;
+    z-index: 1;
+    transform: rotate(5deg);
+}
+
+.type-contain .text-center {
+    position: relative;
+    margin-top: 1rem;
+}
+
+.fleche_anim {
+    position: relative;
+    right: -60%;
+    top:-3rem;
+}
+
+
+/* ============================================================
+   VEHICUL VEDETTE 
+   ============================================================ */
+
+.vehicul_vedette_titre{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+.vedette_gallery{
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 1.5rem;
+}
+ 
+
+.paginator-arrow{
+    position: relative;
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Effet de brillance au survol */
+.group::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: 2;
+}
+.group:hover::before {
+    opacity: 1;
+}
+
+/* ============================================================
+   MISSION & VALEURS
+   ============================================================ */
+.section_mission_valeurs{
+    display: flex;
+    flex-direction: column;
+    }
+.left_and_right-conatiner{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    align-items: center; 
+}
+
+.valeur-container{
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column;
+}
+/* ============================================================
+   STATS – STYLE ANIME
+   ============================================================ */
+.stat-card {
+    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.stat-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    border-color: rgba(59, 130, 246, 0.6);
+    box-shadow: 0 20px 60px rgba(59, 130, 246, 0.15);
+}
+
+.stat-number {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+}
+
+/* Effet de "pulse" sur le fond */
+@keyframes auraPulse {
+    0%, 100% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.05); }
+}
+.aura-pulse {
+    animation: auraPulse 4s ease-in-out infinite;
+}
+
+@keyframes slideIn{
+    from{
+        transform: translateX(200px);
+    }
+    to{
+        transform: translateX(0px);
+    }  
+}
+.vedette_gallery_display img, .v_v_descript, .v_v_icone{
+    animation: slideIn 1s ease-in-out;
+     
+}
+.vedette_gallery_display img{
+height: 40vh;
+width: 50%
+}
+;
+
+
+/* Vérifie que la vidéo n'est pas cachée */
+video {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+
+
+
+.btn-glow {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    border: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.5);
+    }
+
+.btn-glow:hover {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    transform: translateY(-2px);
+    box-shadow: 0 20px 35px -8px rgba(59, 130, 246, 0.7);
+    }
+    
+.scrollable-form {
+    max-height: 65vh;
+    overflow-y: auto;
+    padding-right: 0.75rem;
+    scroll-behavior: smooth;
+    scrollbar-color: rgba(59, 130, 246, 0.5) rgba(15, 23, 42, 0.05);
+    scrollbar-width: thin;
+    }
+
+.scrollable-form::-webkit-scrollbar {
+    width: 10px;
+    }
+
+    .scrollable-form::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.05);
+    border-radius: 9999px;
+    }
+
+.scrollable-form::-webkit-scrollbar-thumb {
+    background: rgba(59, 130, 246, 0.5);
+    border-radius: 9999px;
+    }
+
+.scrollable-form::-webkit-scrollbar-thumb:hover {
+        background: rgba(37, 99, 235, 0.7);
+    }
+
+
+.act-hero{
+    height: 35rem;
+}
+
+
+
+/* -------- Responsive : on empile -------- */
+@media (min-width: 1200px) {
+/* VEHICUL TYPES SECTION */
+    .type-contain .suv,
+    .type-contain .berline,
+    .type-contain .truck {
+        left: 0;
+        top: 0;
+        margin: auto;
+        display: flex;
+       width: 25rem;
+        align-items: center;
+        
+    }
+}
+@media (max-width: 1024px) {
+
+    .hero-section{
+        min-height: 250vh;
+    }
+    
+    .trois_box {
+        bottom: 4%;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        padding: 0 1rem;
+    }
+    .box {
+        width: 50%;
+        transform: translateY(40px);
+        padding: 1rem 1.5rem;
+    }
+    .box-left,
+    .box-right {
+        transform: translateY(40px);
+    }
+    .box-left{
+        top: 10rem;
+    }
+    .box-right{
+        top: 8rem;
+    }
+
+    .services-text-content {
+    max-width: 650px;
+    padding: 0 20px;
+    margin-bottom: 9rem;}
+    
+     .vedette_gallery_display{
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .vedette_gallery img{
+        height: 40vh;
+        width: 50%;
+    }
+    .type-contain .suv,
+    .type-contain .berline,
+    .type-contain .truck {
+        left: 0;
+        top: 0;
+        margin-bottom: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        transform: rotate(0deg);
+        width: 30%;
+        height: 45vh;
+        
+    }
+    .type-contain .suv{
+        transform: rotate(-7deg);
+        margin-right: 2rem;
+    }
+     .type-contain .truck {
+        transform: rotate(7deg);
+        margin-left: 2rem;
+     }
+    .fleche{
+        display: none;
+    }
+    
+}
+
+
+@media (max-width: 768px) {
+    /* HERO SECTION */
+    .hero-section{
+        min-height: 225vh;
+    }
+    .trois_box {
+        top: 40rem;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        padding: 0 1rem;
+    }
+    .box {
+
+        transform: translateY(40px);
+        padding: 1rem 1.5rem;
+    }
+    .box-left,
+    .box-right {
+        transform: translateY(40px);
+    }
+
+    /* VEHICUL TYPES SECTION */
+    .type-contain .suv,
+    .type-contain .berline,
+    .type-contain .truck {
+        left: 0;
+        top: 0;
+        margin: auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        transform: rotate(0deg);
+    }
+    .fleche{
+        display: none;
+    }
+
+
+    /* VEHICUL VEDETTE SECTION */
+    .vedette_gallery_display{
+        display: flex;
+        flex-direction: column;
+    }
+
+    .vedette_gallery_display img {
+    height: 40vh;
+    width: 100%;
+    }
+    .services-title {
+    font-size: 2.7rem;
+    font-weight: 800;
+    color: white;
+    line-height: 1.1;
+    
+}
+ }
+@media (max-width: 480px) {
+    /* HERO SECTION */
+    .hero-section{
+        min-height: 215vh;
+    }
+
+    .trois_box{
+        top: 55rem;
+    }
+
+    .box{
+        min-width: 19rem;
+    }
+
+    .services-title {
+    font-size: 2.7rem;
+    font-weight: 800;
+    color: white;
+    line-height: 1.1;
+}
+   
+}
+
+@media (max-width: 390px) {
+    /* HERO SECTION */
+    .hero-section{
+        min-height: 205vh;
+    }
+    .trois_box{
+        top: 48rem;
+    }
+    .box{
+        min-width: 18rem;
+    }
+   .vedette_gallery_display img {
+    height: 40vh;
+    width: 100%;}
+
+    .services-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: white;
+        line-height: 1.1;
+    }
+    
+}
+
+
+@media (max-width: 375px) , (max-height:667){
+    /* HERO SECTION */
+    .hero-section{
+        min-height: 255vh;
+    }
+    .trois_box{
+        top: 50rem;
+    }
+    .box{
+        min-width: 18rem;
+    }
+
+    .services-title {
+    font-size: 2.4rem;
+    font-weight: 800;
+    color: white;
+    line-height: 1.1;
+}
+        
+}
+
+@media (max-width: 360px){
+    .hero-section{
+        min-height: 274vh;
+    }
+    .trois_box{
+        top: 55rem;
+    }
+    .box{
+        min-width: 16rem;
+    }
+    .vedette_gallery_display img {
+    height: 40vh;
+    width: 100%;
+    }
+
+    .services-title {
+    font-size: 2.4rem;
+    font-weight: 800;
+    color: white;
+    line-height: 1.1;}
+
+   
+
+    
+}
+
+@media (width >= 1rem) {
+    .lg\:aspect-auto {
+        aspect-ratio: auto;
+    }}
+
+
+
+
+ 

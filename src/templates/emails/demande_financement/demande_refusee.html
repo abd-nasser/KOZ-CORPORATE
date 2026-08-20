@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Information concernant votre demande de financement</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; color: #334155;">
+
+    <!-- Preheader (Texte d'aperçu dans la boîte de réception) -->
+    <div style="display: none; max-height: 0px; overflow: hidden;">
+        Mise à jour concernant votre dossier de financement chez KOZ Services.
+    </div>
+
+    <!-- Conteneur Principal -->
+    <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f8fafc; padding: 30px 10px;">
+        <tr>
+            <td align="center">
+                
+                <!-- Carte centrale (Max width 600px) -->
+                <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01); border: 1px solid #e2e8f0;">
+                    
+                    <!-- Header avec Dégradé Bleu KOZ -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 50%, #1e3a8a 100%); padding: 35px 30px; text-align: center;">
+                            <div style="display: inline-block; width: 50px; height: 50px; background-color: rgba(255, 255, 255, 0.15); border-radius: 12px; line-height: 50px; text-align: center; color: #ffffff; font-size: 24px; font-weight: bold; margin-bottom: 12px;">
+                                K
+                            </div>
+                            <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.5px;">KOZ Services</h1>
+                            <p style="color: #bfdbfe; margin: 6px 0 0 0; font-size: 14px; font-weight: 400;">Pôle Financement & Commercial</p>
+                        </td>
+                    </tr>
+
+                    <!-- Corps de l'email -->
+                    <tr>
+                        <td style="padding: 40px 35px;">
+                            
+                            <h2 style="margin: 0 0 16px 0; color: #0f172a; font-size: 20px; font-weight: 600;">
+                                Bonjour {{ client.nom_complet|default:client }},
+                            </h2>
+                            
+                            <p style="margin: 0 0 20px 0; color: #475569; font-size: 15px; line-height: 1.6;">
+                                Nous vous remercions pour l’intérêt que vous portez à <strong>KOZ Services</strong> ainsi que pour le temps accordé à la constitution de votre dossier de financement.
+                            </p>
+
+                            <p style="margin: 0 0 24px 0; color: #475569; font-size: 15px; line-height: 1.6;">
+                                Après une analyse attentive des éléments transmis par nos services financiers, nous avons le regret de vous informer qu'il ne nous est pas possible de donner une suite favorable à votre demande à ce jour.
+                            </p>
+
+                            <!-- Boîte Motif du Refus -->
+                            <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #fff1f2; border-radius: 12px; border-left: 4px solid #e11d48; margin-bottom: 28px;">
+                                <tr>
+                                    <td style="padding: 20px;">
+                                        <p style="margin: 0 0 8px 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: #9f1239; font-weight: 700;">
+                                            Motif principal
+                                        </p>
+                                        <p style="margin: 0; color: #881337; font-size: 14px; line-height: 1.6; font-weight: 500;">
+                                            {{ raison|default:"Les conditions d'éligibilité actuelles ne permettent pas de valider ce dossier." }}
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Invitation à discuter -->
+                            <p style="margin: 0 0 24px 0; color: #475569; font-size: 15px; line-height: 1.6;">
+                                Une décision défavorable n'est pas forcément définitive. D'autres solutions d'accompagnement ou réajustements de votre projet (apport, choix du véhicule) peuvent être envisagés. N'hésitez pas à échanger directement avec nos conseillers .
+                            </p>
+
+                            <!-- Bouton Call-To-Action (CTA) -->
+                            <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 28px;">
+                                <tr>
+                                    <td align="center">
+                                        <a href="{{ lien_chat }}" target="_blank" style="display: inline-block; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: #ffffff; text-decoration: none; font-size: 15px; font-weight: 600; padding: 14px 32px; border-radius: 10px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35); text-align: center;">
+                                            💬 Discuter avec un conseiller
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <p style="margin: 0; color: #64748b; font-size: 14px; line-height: 1.5;">
+                                Si le bouton ci-dessus ne fonctionne pas, vous pouvez copier et coller ce lien dans votre navigateur :<br>
+                                <a href="{{ lien_chat }}" style="color: #2563eb; word-break: break-all; font-size: 13px;">{{ lien_chat }}</a>
+                            </p>
+
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background-color: #f8fafc; padding: 24px 35px; border-top: 1px solid #e2e8f0; text-align: center;">
+                            <p style="margin: 0 0 8px 0; color: #64748b; font-size: 12px; font-weight: 600;">
+                                KOZ Services — Service Commercial & Financement
+                            </p>
+                            <p style="margin: 0; color: #94a3b8; font-size: 11px; line-height: 1.4;">
+                                Cet e-mail est un message automatique concernant le suivi de votre demande.<br>
+                                Pour toute question, nous vous invitons à utiliser l'espace de discussion ci-dessus.
+                            </p>
+                        </td>
+                    </tr>
+
+                </table>
+
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>

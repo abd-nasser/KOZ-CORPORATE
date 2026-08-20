@@ -1,0 +1,418 @@
+{% load static %}
+{% load tailwind_tags %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="fr" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Détail Offre #{{ offre.id }} - KOZ Services</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    {% tailwind_css %}
+    <script src="{% static 'js/htmx.min.js' %}" defer></script>
+    <script src="https://unpkg.com/lenis@1.3.25/dist/lenis.min.js"></script> 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://unpkg.com/splitting/dist/splitting.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/splitting/dist/splitting.css">
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+    <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
+</head>
+<body class="min-h-full font-inter text-slate-800 bg-slate-50 flex flex-col justify-between selection:bg-blue-600 selection:text-white">
+
+    <!-- Header Navigation -->
+    <header class="bg-white/90 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200/80 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <a href="{% url 'commercial_app:offre-list' %}" 
+                   class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all duration-200">
+                    <i class="fas fa-arrow-left text-sm"></i>
+                </a>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-semibold text-blue-600 uppercase tracking-wider">Gestion Commerciale</span>
+                        <span class="text-slate-300">•</span>
+                        <span class="text-xs text-slate-500">Offre #{{ offre.id }}</span>
+                    </div>
+                    <h1 class="text-base font-bold text-slate-900 leading-none mt-0.5">
+                        Détail de l'offre commerciale
+                    </h1>
+                </div>
+            </div>
+
+            <div class="hidden sm:flex items-center gap-3">
+                <span class="px-3 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-xs font-semibold text-blue-700">
+                    <i class="fas fa-file-signature mr-1.5"></i>{{ offre.get_type_offre_display }}
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Messages Flash -->
+    {% if messages %}
+    <div class="fixed top-5 right-5 z-50 space-y-2 max-w-md w-full px-4">
+        {% for message in messages %}
+        <div class="p-4 rounded-xl shadow-xl border text-sm flex items-center justify-between gap-3 backdrop-blur-md transition-all
+                    {% if message.tags == 'error' or message.tags == 'danger' %}bg-rose-50/95 border-rose-200 text-rose-800
+                    {% elif message.tags == 'success' %}bg-emerald-50/95 border-emerald-200 text-emerald-800
+                    {% else %}bg-blue-50/95 border-blue-200 text-blue-800{% endif %}">
+            <div class="flex items-center gap-3">
+                <i class="fas {% if message.tags == 'error' %}fa-circle-xmark{% else %}fa-circle-check{% endif %} text-base"></i>
+                <span class="font-medium">{{ message }}</span>
+            </div>
+            <button onclick="this.parentElement.remove()" class="text-xs opacity-60 hover:opacity-100">
+                <i class="fas fa-xmark"></i>
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div id="result-toast-container" class="result-toast-container"></div>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8 flex-grow w-full">
+
+        <!-- Banner Carte Client & Statut de l'Offre -->
+        <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 mb-8 relative overflow-hidden">
+            <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-sky-500"></div>
+            
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                <div class="flex items-start gap-4">
+                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-600 to-blue-700 text-white flex items-center justify-center font-bold text-xl shadow-lg shadow-indigo-600/20 shrink-0">
+                        {{ offre.client.nom_complet|slice:":1"|upper }}
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-3 flex-wrap">
+                            <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">
+                                {{ offre.client.nom_complet }}
+                            </h2>
+                            <!-- Badge de Statut Offre -->
+                            <span class="px-3.5 py-1 rounded-full text-xs font-bold tracking-wide uppercase shadow-sm
+                                {% if offre.statut == 'acceptee' %}bg-emerald-50 text-emerald-700 border border-emerald-200
+                                {% elif offre.statut == 'refusee' or offre.statut == 'expiree' %}bg-rose-50 text-rose-700 border border-rose-200
+                                {% elif offre.statut == 'envoyee' %}bg-amber-50 text-amber-700 border border-amber-200
+                                {% elif offre.statut == 'en_attente_document' %}bg-sky-50 text-sky-700 border border-sky-200
+                                {% else %}bg-slate-100 text-slate-700 border border-slate-200{% endif %}">
+                                <i class="fas fa-circle text-[8px] mr-1.5 opacity-75"></i>
+                                {{ offre.get_statut_display }}
+                            </span>
+                        </div>
+                        <p class="text-slate-500 text-sm mt-1 flex items-center gap-4 flex-wrap">
+                            <span class="flex items-center gap-1.5"><i class="fas fa-envelope text-slate-400"></i> {{ offre.client.email }}</span>
+                            <span class="flex items-center gap-1.5"><i class="fas fa-tag text-slate-400"></i> Type: {{ offre.get_type_offre_display }}</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Indicateur de Validité si Envoyée -->
+                {% if offre.statut == 'envoyee' %}
+                <div class="bg-amber-50 border border-amber-200/80 rounded-xl p-3.5 flex items-center gap-3 w-full md:w-auto">
+                    <div class="w-10 h-10 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center text-lg shrink-0">
+                        <i class="fas fa-hourglass-half"></i>
+                    </div>
+                    <div>
+                        <span class="text-[11px] font-semibold uppercase tracking-wider text-amber-600 block">Validité Offre</span>
+                        <span class="text-sm font-bold text-amber-900">Jusqu'au {{ offre.date_expiration|date:"d/m/Y" }}</span>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Layout Grille 2 Colonnes -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            <!-- COLONNE GAUCHE : Contenu de l'offre & Détails (Col 8) -->
+            <div class="lg:col-span-8 space-y-8">
+                
+                <!-- Carte du Véhicule Proposé -->
+                <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 hover:border-blue-300 transition-all">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                            <i class="fas fa-car text-blue-600"></i>
+                            Véhicule Sélectionné
+                        </h3>
+                        <a href="{% url 'vehicul_app:detail-vehicul' offre.vehicule_propose.pk %}" 
+                           class="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 transition-colors">
+                            <span>Voir fiche véhicule</span>
+                            <i class="fas fa-arrow-right text-[10px]"></i>
+                        </a>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                        <div class="space-y-1">
+                            <div class="text-lg font-bold text-slate-900">
+                                {{ offre.vehicule_propose.marque.nom }} {{ offre.vehicule_propose.modele }}
+                            </div>
+                            <div class="text-xs text-slate-500 font-medium">
+                                Année : {{ offre.vehicule_propose.annee }}
+                            </div>
+                        </div>
+                        <div class="text-left sm:text-right">
+                            <span class="text-xs font-semibold text-slate-400 block uppercase tracking-wider">Prix Catalogue</span>
+                            <span class="text-lg font-extrabold text-blue-700">
+                                {{ offre.vehicule_propose.prix|intcomma }} <span class="text-xs text-slate-500">FCFA</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============================================================ -->
+                <!-- CAS 1 : OFFRE DE FINANCEMENT -->
+                <!-- ============================================================ -->
+                {% if offre.type_offre == "offre_financement" %}
+
+                <!-- Cards KPI Financement -->
+                <div>
+                    <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-4 flex items-center gap-2">
+                        <i class="fas fa-chart-pie text-blue-600"></i>
+                        Aperçu Financier de l'Offre
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        
+                        <div class="bg-white p-5 rounded-xl border border-slate-200/80 shadow-sm relative overflow-hidden">
+                            <span class="text-xs font-semibold text-slate-500 block mb-1">Montant Financé</span>
+                            <div class="text-xl font-extrabold text-blue-700">
+                                {{ offre.montant_finance|intcomma }} <span class="text-xs font-semibold text-slate-500">FCFA</span>
+                            </div>
+                            <div class="absolute -right-2 -bottom-2 text-slate-100 text-5xl font-black pointer-events-none">
+                                <i class="fas fa-hand-holding-usd"></i>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-5 rounded-xl border border-slate-200/80 shadow-sm relative overflow-hidden">
+                            <span class="text-xs font-semibold text-slate-500 block mb-1">Mensualité Fixée</span>
+                            <div class="text-xl font-extrabold text-emerald-600">
+                                {{ offre.mensualite|intcomma }} <span class="text-xs font-semibold text-slate-500">FCFA</span>
+                            </div>
+                            <div class="text-[11px] text-slate-400 mt-1">Sur {{ offre.duree_mois }} mois</div>
+                        </div>
+
+                        <div class="bg-white p-5 rounded-xl border border-slate-200/80 shadow-sm relative overflow-hidden">
+                            <span class="text-xs font-semibold text-slate-500 block mb-1">Apport Exigé</span>
+                            <div class="text-xl font-extrabold text-slate-900">
+                                {{ offre.apport_demande|intcomma }} <span class="text-xs font-semibold text-slate-500">FCFA</span>
+                            </div>
+                        </div>
+
+                        
+                        {% if offre.vente.statut == "conclue_par_acceptation_offre_financement" %}
+                            <div class="bg-white p-5 rounded-xl border border-slate-200/80 shadow-sm relative overflow-hidden">
+                            <span class="text-xs font-semibold text-slate-500 block mb-1">Reste à payer</span>
+                            <div class="text-xl font-extrabold text-red-400">
+                                {{ offre.vente.reste_a_payer|floatformat:0|intcomma }} <span class="text-xs font-semibold text-slate-500">FCFA</span>
+                            </div>
+                        </div>
+                        {% endif %}
+                            
+
+                    </div>
+                </div>
+
+                <!-- Détails approfondis du plan de financement -->
+                <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 space-y-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-100 pb-4 gap-3">
+                        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                            <i class="fas fa-calculator text-blue-600"></i>
+                            Structure du Montage Financier
+                        </h3>
+                        
+                        <!-- Financement Type Badge -->
+                        <div>
+                            {% if offre.financement_type == 'maison' %}
+                                <span class="px-3 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200 text-xs font-semibold flex items-center gap-1.5">
+                                    <i class="fas fa-building text-blue-500"></i> Financement interne (KOZ SERVICES)
+                                </span>
+                            {% elif offre.financement_type == 'externe' %}
+                                <span class="px-3 py-1 rounded-full bg-purple-50 text-purple-700 border border-purple-200 text-xs font-semibold flex items-center gap-1.5">
+                                    <i class="fas fa-handshake text-purple-500"></i> Financement Externe
+                                    {% if offre.financement_par %}
+                                        ({{ offre.get_financement_par_display }})
+                                    {% endif %}
+                                </span>
+                            {% else %}
+                                <span class="px-3 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200 text-xs font-semibold">
+                                    Non défini
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+                        
+                        <div class="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-1">
+                            <span class="text-xs font-medium text-slate-500">Taux d'intérêt</span>
+                            <div class="text-base font-bold text-slate-900">
+                                {{ offre.taux_interet }} %
+                            </div>
+                        </div>
+
+                        <div class="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-1">
+                            <span class="text-xs font-medium text-slate-500">Frais de dossier</span>
+                            <div class="text-base font-bold text-slate-900">
+                                {{ offre.frais_dossier|intcomma }} FCFA
+                            </div>
+                        </div>
+
+                        <div class="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-1">
+                            <span class="text-xs font-medium text-slate-500">Frais de garantie</span>
+                            <div class="text-base font-bold text-slate-900">
+                                {{ offre.frais_garantie|intcomma }} FCFA
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Total dû récapitulatif -->
+                    <div class="p-5 rounded-xl bg-gradient-to-br from-slate-900 to-indigo-950 text-white flex justify-between items-center shadow-md">
+                        <div>
+                            <span class="text-xs font-semibold text-slate-300 uppercase tracking-wider block">Total Dû Engagement Client</span>
+                            <span class="text-xs text-slate-400">Inclut le capital, les intérêts et frais annexes</span>
+                        </div>
+                        <div class="text-2xl font-extrabold text-blue-400">
+                            {{ offre.total_du|intcomma }} <span class="text-xs font-normal text-slate-300">FCFA</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============================================================ -->
+                <!-- CAS 2 : OFFRE SIMPLE -->
+                <!-- ============================================================ -->
+                {% elif offre.type_offre == "simple" %}
+
+                <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 space-y-6">
+                    <h3 class="text-base font-bold text-slate-900 border-b border-slate-100 pb-4 flex items-center gap-2">
+                        <i class="fas fa-file-invoice-dollar text-blue-600"></i>
+                        Détails de l'Offre Simple
+                    </h3>
+
+                    <div class="p-6 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50/50 border border-blue-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div>
+                            <span class="text-xs font-semibold uppercase tracking-wider text-blue-600 block mb-1">Montant Commercial Proposé</span>
+                            <p class="text-xs text-slate-500">Prix direct proposé au client pour l'acquisition du véhicule.</p>
+                        </div>
+                        <div class="text-2xl font-extrabold text-blue-700">
+                            {{ offre.montant_propose|intcomma }} <span class="text-xs font-semibold text-slate-500">FCFA</span>
+                        </div>
+                    </div>
+                </div>
+
+                {% endif %}
+
+                <!-- Section Dates & Validité -->
+                <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 space-y-4">
+                    <h3 class="text-base font-bold text-slate-900 border-b border-slate-100 pb-4 flex items-center gap-2">
+                        <i class="fas fa-calendar-check text-blue-600"></i>
+                        Traçabilité & Validité Juridique
+                    </h3>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                        <div class="p-4 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
+                            <span class="text-xs font-medium text-slate-500">Date de Création :</span>
+                            <span class="font-bold text-slate-800">{{ offre.date_creation|date:"d/m/Y H:i" }}</span>
+                        </div>
+
+                        <div class="p-4 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
+                            <span class="text-xs font-medium text-slate-500">Date d'Expiration :</span>
+                            <span class="font-bold {% if offre.statut == 'expiree' %}text-rose-600{% else %}text-slate-800{% endif %}">
+                                {{ offre.date_expiration|date:"d/m/Y" }}
+                            </span>
+                        </div>
+                    </div>
+
+                    {% if offre.signature_client %}
+                    <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 shrink-0">
+                            <i class="fas fa-signature text-sm"></i>
+                        </div>
+                        <div>
+                            <span class="block text-emerald-900 font-bold">Offre Signée par le Client</span>
+                            <span>Cette offre a reçu la validation électronique certifiée du client.</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+            </div>
+
+            <!-- COLONNE DROITE : Panneau d'Actions Commerciales (Col 4) -->
+            <div class="lg:col-span-4 space-y-6 lg:sticky lg:top-24">
+                
+                <div class="bg-white rounded-2xl border border-slate-200/90 shadow-md p-6 space-y-6">
+                    <div class="border-b border-slate-100 pb-4">
+                        <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                            <i class="fas fa-sliders text-blue-600"></i>
+                            Actions sur l'Offre
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-1">Gérez le cycle de vie de cette proposition.</p>
+                    </div>
+
+                    <div class="space-y-3">
+                        
+                        <!-- Bouton Modifier (Si brouillon) -->
+                        {% if offre.statut == "brouillon" and offre.type_offre == 'offre_financement' %}
+                        <button onclick="document.getElementById('update_offre_Modal').showModal()" 
+                                class="w-full py-3.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs tracking-wide transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2.5">
+                            <i class="fas fa-edit"></i>
+                            <span>Modifier l'offre</span>
+                        </button>
+                        {% elif offre.statut == "brouillon" and offre.type_offre == 'simple' %}
+                        <button onclick="document.getElementById('update_simpleoffreModal').showModal()" 
+                                class="w-full py-3.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs tracking-wide transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2.5">
+                            <i class="fas fa-edit"></i>
+                            <span>Modifier l'offre</span>
+                        </button>
+                        {% endif %}
+
+                        <!-- Bouton Voir Fiche Client -->
+                        <a href="{% url 'client_app:client-detail' offre.client.id %}" 
+                           class="w-full py-3.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs tracking-wide transition-all flex items-center justify-center gap-2.5 border border-slate-200">
+                            <i class="fas fa-user-gear text-slate-600"></i>
+                            <span>Consulter fiche client</span>
+                        </a>
+
+                        <!-- Bouton Supprimer -->
+                        <button onclick="document.getElementById('delete_offre_modal').showModal()" 
+                                class="w-full py-3 px-4 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold text-xs tracking-wide transition-all border border-rose-200/80 flex items-center justify-center gap-2.5">
+                            <i class="fas fa-trash-alt"></i>
+                            <span>Supprimer l'offre</span>
+                        </button>
+
+                    </div>
+
+                    <div class="pt-4 border-t border-slate-100 space-y-2.5 text-xs text-slate-500">
+                        <div class="flex items-center justify-between">
+                            <span>ID Référence :</span>
+                            <span class="font-mono font-semibold text-slate-700">#OFF-{{ offre.id }}</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span>Statut Actuel :</span>
+                            <span class="font-semibold text-slate-700">{{ offre.get_statut_display }}</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer Corporate -->
+    <footer class="bg-white border-t border-slate-200/80 py-6 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-slate-500">
+            <p>&copy; {% now "Y" %} KOZ Services • Plateforme ERP Commerciale</p>
+            <p class="font-medium text-slate-700">Conçu par <strong>SPIRIT-DIGIT Agency</strong></p>
+        </div>
+    </footer>
+
+    <!-- Modales -->
+    {% include 'modals/leads/confirm_offre_delete.html' %}
+    {% include 'modals/leads/update_offre.html' %}
+    {% include 'modals/leads/update_offre_simple.html' %}
+
+</body>
+</html>

@@ -1,0 +1,172 @@
+{% load humanize %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔄 Dossier en vérification - KOZ Services</title>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f1f5f9;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e2e8f0;
+        }
+        .header {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            padding: 32px 40px 28px;
+            text-align: center;
+        }
+        .header h1 {
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0 0 6px 0;
+        }
+        .header .subtitle {
+            color: #93bbfc;
+            font-size: 15px;
+            margin: 0;
+        }
+        .body {
+            padding: 32px 40px;
+        }
+        .greeting {
+            font-size: 17px;
+            font-weight: 600;
+            color: #0f172a;
+        }
+        .greeting span { color: #2563eb; }
+        .message {
+            color: #475569;
+            line-height: 1.7;
+            font-size: 15px;
+            margin: 10px 0 20px;
+        }
+        .card {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 18px 22px;
+            margin: 18px 0;
+            border: 1px solid #e2e8f0;
+        }
+        .card-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .card-row:last-child { border-bottom: none; }
+        .card-label { color: #64748b; font-size: 14px; }
+        .card-value { font-weight: 600; color: #0f172a; font-size: 14px; text-align: right; }
+        .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #ffffff !important;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 15px;
+            padding: 12px 32px;
+            border-radius: 9999px;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.3);
+            margin: 4px 0 2px;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(37, 99, 235, 0.4);
+        }
+        .footer {
+            background: #f8fafc;
+            padding: 18px 40px;
+            border-top: 1px solid #e2e8f0;
+            text-align: center;
+            font-size: 13px;
+            color: #94a3b8;
+        }
+        .footer .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 6px;
+        }
+        .footer .social-links a { color: #94a3b8; font-size: 16px; }
+        .footer .social-links a:hover { color: #2563eb; }
+        @media (max-width: 600px) {
+            .header { padding: 24px 20px; }
+            .body { padding: 20px; }
+            .card-row { flex-direction: column; align-items: flex-start; gap: 2px; }
+            .card-value { text-align: left; }
+            .btn { display: block; width: 100%; box-sizing: border-box; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔄 Dossier en vérification</h1>
+            <p class="subtitle">Votre {{ contexte_nom }} est en cours d'analyse</p>
+        </div>
+
+        <div class="body">
+            <p class="greeting">Bonjour <span>{{ client.nom_complet }}</span>,</p>
+
+            <p class="message">
+                Nous vous informons que votre <strong>{{ contexte_nom }}</strong> est actuellement en cours de <strong>vérification</strong> par notre équipe.
+            </p>
+
+            <div class="card">
+                <div class="card-row">
+                    <span class="card-label">📁 Contexte</span>
+                    <span class="card-value">{{ contexte_nom|capfirst }}</span>
+                </div>
+                <div class="card-row">
+                    <span class="card-label">🔢 Référence</span>
+                    <span class="card-value">#{{ contexte_id }}</span>
+                </div>
+                <div class="card-row">
+                    <span class="card-label">🚗 Véhicule</span>
+                    <span class="card-value">{{ vehicule }}</span>
+                </div>
+                <div class="card-row">
+                    <span class="card-label">📅 Dossier n°</span>
+                    <span class="card-value">#{{ dossier_id }}</span>
+                </div>
+            </div>
+
+            <p class="message">
+                Nous vous tiendrons informé dès que le processus de vérification sera terminé.
+                Vous pouvez suivre l'évolution de votre dossier en cliquant sur le bouton ci-dessous.
+            </p>
+
+            <div style="text-align: center; margin: 24px 0 8px;">
+                <a href="{{ lien_suivi }}" class="btn">📂 Suivre mon dossier</a>
+            </div>
+
+            <p style="font-size: 12px; color: #94a3b8; text-align: center; margin-top: 16px;">
+                🔒 Lien sécurisé. Accès réservé à votre compte KOZ Services.
+            </p>
+        </div>
+
+        <div class="footer">
+            <p style="margin: 0; font-size: 13px; font-weight: 500;">KOZ Services — Votre voiture à crédit, vos pièces en ligne</p>
+            <p style="margin: 4px 0 0; font-size: 12px; color: #cbd5e1;">© {% now "Y" %} KOZ Services — Tous droits réservés</p>
+            <div class="social-links">
+                <a href="#"><i class="fab fa-facebook"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-whatsapp"></i></a>
+                <a href="#"><i class="fab fa-youtube"></i></a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

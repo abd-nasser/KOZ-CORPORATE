@@ -1,0 +1,98 @@
+{% load static %}
+<dialog id="gestion_statut_modal" class="modal">
+    <div class="modal-box w-full max-w-md p-0 overflow-hidden rounded-2xl bg-gradient-to-br from-white to-gray-50 shadow-2xl">
+        
+        <!-- Header avec dégradé -->
+        <div class="bg-gradient-to-r from-blue-700 to-indigo-800 px-6 py-4">
+            <div class="flex justify-between items-center">
+                <h3 class="text-xl font-bold text-white">
+                    <i class="fas fa-exchange-alt mr-2"></i>Changer le statut de la vente
+                </h3>
+                <button type="button" class="text-white/80 hover:text-white text-2xl leading-none transition" 
+                        onclick="document.getElementById('gestion_statut_modal').close()">&times;</button>
+            </div>
+            <p class="text-blue-100 text-sm mt-1">Sélectionnez le nouveau statut</p>
+        </div>
+
+        <!-- Corps du modal -->
+        <div id="result-statut-vente" ></div>
+        <form hx-post="{% url 'commercial_app:changer-statut-vente' vente.id %}" 
+              hx-target="#result-statut-vente"
+              hx-indicator="#statut-indic"
+              class="p-6">
+            {% csrf_token %}
+            
+            <div class="space-y-4">
+                <!-- Statut actuel -->
+                <div class="bg-gray-50 rounded-lg p-3 text-center">
+                    <p class="text-xs text-gray-500">Statut actuel</p>
+                    <p class="font-semibold text-gray-800">{{ vente.get_statut_display }}</p>
+                </div>
+                
+                <!-- Nouveau statut -->
+                <div class="form-group">
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">
+                        Nouveau statut <span class="text-red-500">*</span>
+                    </label>
+                    <select name="statut" class="select select-bordered w-full" required>
+                        <option value="">-- Sélectionner --</option>
+                        {% for value, label in STATUT_VENTE %}
+                            {% if value != 'gestion_de_statut' %}
+                                <option value="{{ value }}">{{ label }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <!-- Overlay de chargement HTMX (Loading Indicator) -->
+                    <div id="statut-indic" class="htmx-indicator absolute inset-0 bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center z-50 rounded-2xl transition-all">
+                        <div class="p-6 text-center flex flex-col items-center">
+                            <img src="{% static 'images/Loading_animation.svg' %}" class="w-16 h-16 mb-3 object-contain animate-pulse" alt="Chargement...">
+                            <p class="text-sm font-bold text-slate-800"> En cours de validation...</p>
+                        </div>
+                    </div>
+            <!-- Actions -->
+            <div class="flex gap-3 justify-end mt-6 pt-4 border-t border-gray-100">
+                <button type="button" class="btn btn-ghost" onclick="document.getElementById('gestion_statut_modal').close()">
+                    <i class="fas fa-times mr-2"></i>Annuler
+                </button>
+                <button type="submit" class="btn-glow px-6 py-2 rounded-xl flex items-center gap-2">
+                    <i class="fas fa-save"></i> Mettre à jour
+                </button>
+            </div>
+        </form>
+    </div>
+</dialog>
+
+<script>
+        document.addEventListener('closeStatuGestionModal', function() {
+                document.getElementById('gestion_statut_modal').close();
+            });
+</script>
+<style>
+    .btn-glow {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        color: white;
+        border: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.5);
+    }
+    .btn-glow:hover {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        transform: translateY(-2px);
+        box-shadow: 0 20px 35px -8px rgba(59, 130, 246, 0.7);
+    }
+    
+    select {
+        width: 100%;
+        padding: 10px 14px;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.5rem;
+        background-color: white;
+    }
+    select:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+</style>

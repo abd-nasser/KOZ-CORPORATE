@@ -1,0 +1,98 @@
+{% load static %}
+{% load humanize %}
+
+<div id="vedette_gallery" class="w-full flex flex-col items-center justify-center">
+    
+    {% for vehicule in vehicules_page %}
+    <!-- Carte Principale du Véhicule Vedette -->
+    <div class="group vedette_gallery_display relative w-full max-w-4xl rounded-2xl bg-white p-6 md:p-8 shadow-sm transition-all duration-300 hover:shadow-lg flex flex-col items-center gap-6 overflow-hidden border border-gray-100">
+        
+        <!-- Badge Likes (Positionné en haut à gauche) -->
+        <div class="absolute top-4 left-4 z-10 flex items-center gap-2 rounded-full bg-white/90 backdrop-blur-md px-4 py-1.5 text-sm font-semibold text-gray-700 shadow-sm border border-gray-100">
+            <i class="fas fa-heart text-blue-600"></i>
+            <span>{{ vehicule.nb_favoris }} like{% if vehicule.nb_favoris > 1 %}s{% endif %}</span>
+        </div>
+
+        <!-- Icône Car (Positionnée en haut à droite au survol) -->
+        <div class="v_v_icone absolute top-4 right-4 z-10 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+            <i class="fas fa-car text-blue-600 text-lg"></i>
+        </div>
+
+        <!-- Image Responsive Centrée -->
+        <div class="w-full flex justify-center img-contain items-center py-4 my-auto">
+            <img src="{{ vehicule.display_image.url }}"
+                 alt="{{ vehicule.marque.nom }} {{ vehicule.modele }}"
+                 class="w-full  max-w-2xl aspect-[16/9] object-contain transition duration-700 ease-out group-hover:scale-105">
+        </div>
+
+        <!-- Barre de Détails & CTA (Responsive: empilé sur mobile, aligné sur PC) -->
+        <div class="w-full flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-gray-100">
+            <span class="text-xl sm:text-2xl font-bold tracking-tight text-gray-800 text-center sm:text-left">
+                <span class="text-blue-600">{{ vehicule.marque.nom }}</span> {{ vehicule.modele }}
+            </span>
+
+            <a href="{% url 'vehicul_app:site-vehicul-detail' vehicule.pk %}"
+               class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 shadow-md hover:shadow-blue-200">
+                <span>Voir le véhicule</span>
+                <i class="fas fa-arrow-right text-xs"></i>
+            </a>
+        </div>
+         
+    </div>
+    {% empty %}
+    <div class="w-full max-w-4xl border border-dashed border-gray-200 bg-white rounded-2xl py-12 text-center text-gray-500">
+        Aucun véhicule disponible pour le moment.
+    </div>
+    {% endfor %}
+
+    <!-- ===== PAGINATION ===== -->
+    <div class="paginator-arrow flex flex-wrap items-center justify-center gap-4 md:gap-6 mt-8">
+        
+        <!-- Flèche gauche -->
+        {% if vehicules_page.has_previous %}
+        <button class="prev-btn flex h-12 w-12 items-center justify-center rounded-full border-2 cursor-pointer border-gray-300 transition-all duration-300 group hover:border-blue-500 hover:bg-blue-50"
+                hx-get="{% url 'home_app:vehicules-vedette-partial' %}?page={{ vehicules_page.previous_page_number }}"
+                hx-target="#vedette_gallery"
+                hx-swap="outerHTML">
+            <i class="fas fa-chevron-left text-xl text-gray-400 transition-colors group-hover:text-blue-600"></i>
+        </button>
+        {% else %}
+        <button class="flex h-12 w-12 cursor-not-allowed items-center justify-center rounded-full border-2 border-gray-200" disabled>
+            <i class="fas fa-chevron-left text-xl text-gray-300"></i>
+        </button>
+        {% endif %}
+
+        <!-- Points de pagination -->
+        <div class="paginator-gallery flex gap-3">
+            {% for i in vehicules_page.paginator.page_range %}
+            <span class="dot h-3 w-3 cursor-pointer rounded-full transition-all duration-300 hover:scale-125
+                {% if i == vehicules_page.number %}w-6 bg-blue-600{% else %}bg-gray-300 hover:bg-blue-400{% endif %}"
+                hx-get="{% url 'home_app:vehicules-vedette-partial' %}?page={{ i }}"
+                hx-target="#vedette_gallery"
+                hx-swap="outerHTML">
+            </span>
+            {% endfor %}
+        </div>
+
+        <!-- Flèche droite -->
+        {% if vehicules_page.has_next %}
+        <button class="next-btn flex h-12 w-12 items-center justify-center cursor-pointer rounded-full border-2 border-gray-300 transition-all duration-300 group hover:border-blue-500 hover:bg-blue-50"
+                hx-get="{% url 'home_app:vehicules-vedette-partial' %}?page={{ vehicules_page.next_page_number }}"
+                hx-target="#vedette_gallery"
+                hx-swap="outerHTML">
+            <i class="fas fa-chevron-right text-xl text-gray-400 transition-colors group-hover:text-blue-600"></i>
+        </button>
+        {% else %}
+        <button class="flex h-12 w-12 cursor-not-allowed items-center justify-center rounded-full border-2 border-gray-200" disabled>
+            <i class="fas fa-chevron-right text-xl text-gray-300"></i>
+        </button>
+        {% endif %}
+
+    </div>
+
+    <!-- Indicateur de page -->
+    <div class="mt-4 text-center text-sm font-medium text-gray-400">
+        <span class="current-page">{{ vehicules_page.number }}</span> / <span class="total-pages">{{ vehicules_page.paginator.num_pages }}</span>
+    </div>
+    
+</div>

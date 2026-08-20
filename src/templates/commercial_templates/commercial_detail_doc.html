@@ -1,0 +1,627 @@
+{% load static %}
+{% load tailwind_tags %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="fr" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    {% tailwind_css %}
+    <script src="{% static 'js/htmx.min.js' %}" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://unpkg.com/lenis@1.3.25/dist/lenis.min.js"></script> 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script src="https://unpkg.com/splitting/dist/splitting.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/splitting/dist/splitting.css">
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+    <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
+    <title>Détail dossier - {{ document.client.nom_complet }} | KOZ Services</title>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, h4, .font-heading { font-family: 'Plus Jakarta Sans', sans-serif; }
+        
+        .glass-header {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+        }
+        
+        .btn-glow {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.35);
+        }
+        .btn-glow:hover {
+            background: linear-gradient(135deg, #1d4ed8, #1e40af);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px 0 rgba(37, 99, 235, 0.5);
+        }
+
+        .doc-card {
+            transition: all 0.2s ease;
+        }
+        .doc-card:hover {
+            border-color: #cbd5e1;
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body class="min-h-full flex flex-col antialiased text-slate-800 bg-slate-50/60">
+
+    <!-- Messages flash -->
+    {% if messages %}
+    <div class="fixed top-5 right-5 z-50 space-y-2 max-w-md w-full px-4 pointer-events-none">
+        {% for message in messages %}
+        <div class="pointer-events-auto flex items-center justify-between p-4 rounded-xl bg-white shadow-xl ring-1 ring-slate-900/10 text-sm font-medium animate-slide-in">
+            <div class="flex items-center gap-3">
+                <span class="w-2 h-2 rounded-full {% if message.tags == 'error' %}bg-rose-500{% elif message.tags == 'success' %}bg-emerald-500{% else %}bg-blue-500{% endif %}"></span>
+                <span class="text-slate-700">{{ message }}</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Navbar -->
+    <header class="sticky top-0 z-40 glass-header border-b border-slate-200/80">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <a href="{% url 'leads_app:documents-list' %}" class="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-slate-200 bg-white text-slate-600 hover:text-blue-600 hover:border-blue-200 transition shadow-sm">
+                    <i class="fas fa-arrow-left text-sm"></i>
+                </a>
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 bg-gradient-to-tr from-blue-700 to-indigo-600 rounded-xl flex items-center justify-center shadow-md text-white font-bold text-lg font-heading">
+                        K
+                    </div>
+                    <div>
+                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 block leading-none">KOZ Services</span>
+                        <span class="text-sm font-bold text-slate-900">Gestion des Dossiers</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <a href="{% url 'leads_app:documents-list' %}" class="hidden sm:inline-flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200/80 px-3.5 py-2 rounded-lg transition">
+                    <i class="fas fa-list text-slate-400"></i> Tous les dossiers
+                </a>
+                <button onclick="document.getElementById('gestion_doc_modal').showModal()" class="btn-glow text-white text-xs font-semibold px-4 py-2 rounded-lg flex items-center gap-2">
+                    <i class="fas fa-sliders"></i> Gérer le dossier
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Content Area -->
+    <main class="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-7xl">
+        <div id="result-toast-container" class="result-toast-container"></div>
+
+        <!-- Banner Header -->
+        <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-2xl p-6 sm:p-8 text-white shadow-xl mb-8 relative overflow-hidden border border-slate-800">
+            <div class="absolute -right-10 -bottom-10 w-60 h-60 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
+            
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+                <div class="space-y-3">
+                    <div class="flex items-center flex-wrap gap-2.5">
+                        <!-- ===== BADGE TYPE ===== -->
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ring-1 ring-inset
+                            {% if document.demande_financement %}bg-blue-500/10 text-blue-300 ring-blue-400/30
+                            {% elif document.offre_financement %}bg-purple-500/10 text-purple-300 ring-purple-400/30
+                            {% else %}bg-slate-500/10 text-slate-300 ring-slate-400/30{% endif %}">
+                            <i class="fas fa-{% if document.demande_financement %}file-alt{% elif document.offre_financement %}file-signature{% else %}folder{% endif %} text-xs"></i>
+                            {% if document.demande_financement %}
+                                Demande n°{{ document.demande_financement.id }}
+                            {% elif document.offre_financement %}
+                                Offre n°{{ document.offre_financement.id }}
+                            {% else %}
+                                Dossier indépendant
+                            {% endif %}
+                        </span>
+
+                        <span class="text-slate-400 text-xs flex items-center gap-1">
+                            <i class="far fa-calendar-alt"></i> Créé le {{ document.date_upload|date:"d/m/Y" }}
+                        </span>
+                    </div>
+
+                    <h1 class="text-2xl sm:text-3xl font-extrabold font-heading text-white tracking-tight">
+                        Dossier de {{ document.client.nom_complet }}
+                    </h1>
+                </div>
+
+                <!-- BADGE STATUT DOSSIER -->
+                <div class="flex items-center gap-3">
+                    <div class="px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 shadow-sm border
+                        {% if document.statut_dossier == 'valide' %}bg-emerald-500/10 border-emerald-500/30 text-emerald-300
+                        {% elif document.statut_dossier == 'rejete' %}bg-rose-500/10 border-rose-500/30 text-rose-300
+                        {% elif document.statut_dossier == 'verification' %}bg-blue-500/10 border-blue-500/30 text-blue-300
+                        {% else %}bg-amber-500/10 border-amber-500/30 text-amber-300{% endif %}">
+                        <span class="w-2.5 h-2.5 rounded-full 
+                            {% if document.statut_dossier == 'valide' %}bg-emerald-400
+                            {% elif document.statut_dossier == 'rejete' %}bg-rose-400
+                            {% elif document.statut_dossier == 'verification' %}bg-blue-400
+                            {% else %}bg-amber-400{% endif %} animate-pulse"></span>
+                        <span>{{ document.get_statut_dossier_display }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Motif de rejet alert si applicable -->
+            {% if document.statut_dossier == 'rejete' and document.commentaire_rejet %}
+            <div class="mt-6 p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-200 text-sm flex items-start gap-3">
+                <i class="fas fa-triangle-exclamation text-rose-400 text-base mt-0.5"></i>
+                <div>
+                    <strong class="font-semibold text-rose-300 block mb-0.5">Motif du rejet du dossier :</strong>
+                    <p class="text-rose-100/90 leading-relaxed">{{ document.commentaire_rejet }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Main Dashboard Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+            <!-- SIDEBAR : Infos Client & Entités Liées (4 columns) -->
+            <div class="lg:col-span-4 space-y-6">
+
+                <!-- Client Info Card -->
+                <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm space-y-5">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                        <h2 class="text-base font-bold font-heading text-slate-900 flex items-center gap-2">
+                            <i class="fas fa-user-circle text-blue-600"></i> Informations Client
+                        </h2>
+                        <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600">Client</span>
+                    </div>
+
+                    <div class="space-y-4 text-sm">
+                        <div class="flex items-start gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                                <i class="fas fa-user text-xs"></i>
+                            </div>
+                            <div class="overflow-hidden">
+                                <p class="text-xs text-slate-500 font-medium">Nom complet</p>
+                                <p class="font-semibold text-slate-900 truncate">{{ document.client.nom_complet }}</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                                <i class="fas fa-envelope text-xs"></i>
+                            </div>
+                            <div class="overflow-hidden">
+                                <p class="text-xs text-slate-500 font-medium">Adresse email</p>
+                                <a href="mailto:{{ document.client.email }}" class="font-semibold text-blue-600 hover:underline truncate block">
+                                    {{ document.client.email }}
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                                <i class="fas fa-phone text-xs"></i>
+                            </div>
+                            <div class="overflow-hidden">
+                                <p class="text-xs text-slate-500 font-medium">Téléphone</p>
+                                <a href="tel:{{ document.client.telephone }}" class="font-semibold text-slate-900 hover:text-blue-600 transition">
+                                    {{ document.client.telephone }}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION DEMANDE OU OFFRE ASSOCIÉE -->
+                {% if document.demande_financement %}
+                <div class="bg-white rounded-2xl p-6 border border-blue-100 bg-gradient-to-b from-blue-50/40 to-white shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b border-blue-100 pb-3">
+                        <h3 class="text-sm font-bold font-heading text-slate-900 flex items-center gap-2">
+                            <i class="fas fa-file-alt text-blue-600"></i> Demande associée
+                        </h3>
+                        <span class="text-xs font-bold text-blue-700 bg-blue-100 px-2.5 py-0.5 rounded-full">#{{ document.demande_financement.id }}</span>
+                    </div>
+
+                    <div class="space-y-3 text-xs">
+                        <div class="flex justify-between py-1 border-b border-slate-100">
+                            <span class="text-slate-500">Véhicule :</span>
+                            <span class="font-semibold text-slate-900 text-right">
+                                {% if document.demande_financement.Vehicul_interested %}
+                                    {{ document.demande_financement.Vehicul_interested.marque.nom }} {{ document.demande_financement.Vehicul_interested.modele }}
+                                {% else %}
+                                    {{ document.demande_financement.other_Vehicul_interested|default:"—" }}
+                                {% endif %}
+                            </span>
+                        </div>
+
+                        <div class="flex justify-between py-1 border-b border-slate-100">
+                            <span class="text-slate-500">Statut :</span>
+                            <span class="font-semibold 
+                                {% if document.demande_financement.etape == 'demande_accordee_fidelis' or document.demande_financement.etape == 'demande_accordee_alios' or document.demande_financement.etape == 'demande_accordee_maison' %}text-emerald-600
+                                {% elif document.demande_financement.etape == 'demande_refusee' %}text-rose-600
+                                {% else %}text-amber-600{% endif %}">
+                                {{ document.demande_financement.get_etape_display }}
+                            </span>
+                        </div>
+
+                        <div class="flex justify-between py-1 border-b border-slate-100">
+                            <span class="text-slate-500">Type financement :</span>
+                            <span class="font-semibold text-slate-900">
+                                {% if document.demande_financement.financement_type == 'maison' %}
+                                    Interne (KOZ SERVICES)
+                                {% else %}
+                                    {{ document.demande_financement.get_financement_par_display|default:document.demande_financement.get_financement_type_display }}
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+
+                    <a href="{% url 'leads_app:detail-demande' document.demande_financement.id %}" class="w-full mt-2 inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold text-xs rounded-xl transition border border-blue-200/60">
+                        <i class="fas fa-external-link-alt text-2xs"></i> Voir la demande complète
+                    </a>
+                </div>
+                {% endif %}
+
+                {% if document.offre_financement %}
+                <div class="bg-white rounded-2xl p-6 border border-purple-100 bg-gradient-to-b from-purple-50/40 to-white shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b border-purple-100 pb-3">
+                        <h3 class="text-sm font-bold font-heading text-slate-900 flex items-center gap-2">
+                            <i class="fas fa-file-signature text-purple-600"></i> Offre associée
+                        </h3>
+                        <span class="text-xs font-bold text-purple-700 bg-purple-100 px-2.5 py-0.5 rounded-full">#{{ document.offre_financement.id }}</span>
+                    </div>
+
+                    <div class="space-y-3 text-xs">
+                        <div class="flex justify-between py-1 border-b border-slate-100">
+                            <span class="text-slate-500">Véhicule proposé :</span>
+                            <span class="font-semibold text-slate-900 text-right">
+                                {{ document.offre_financement.vehicule_propose.marque.nom }} {{ document.offre_financement.vehicule_propose.modele }}
+                            </span>
+                        </div>
+
+                        <div class="flex justify-between py-1 border-b border-slate-100">
+                            <span class="text-slate-500">Type offre :</span>
+                            <span class="font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded">
+                                {{ document.offre_financement.get_type_offre_display }}
+                            </span>
+                        </div>
+
+                        <div class="flex justify-between py-1 border-b border-slate-100">
+                            <span class="text-slate-500">Statut :</span>
+                            <span class="font-semibold 
+                                {% if document.offre_financement.statut == 'offre_financement_fidelis' or document.offre_financement.statut == 'offre_financement_alios' or document.offre_financement.statut == 'offre_financement_maison' %}text-emerald-600
+                                {% elif document.offre_financement.statut == 'refusee' or document.offre_financement.statut == 'expiree' %}text-rose-600
+                                {% else %}text-amber-600{% endif %}">
+                                {{ document.offre_financement.get_statut_display }}
+                            </span>
+                        </div>
+
+                        <div class="flex justify-between py-1 border-b border-slate-100">
+                            <span class="text-slate-500">Montant :</span>
+                            <span class="font-bold text-emerald-600 text-sm">
+                                {% if document.offre_financement.type_offre == 'offre_financement' %}
+                                    {{ document.offre_financement.montant_finance|intcomma }} FCFA
+                                {% else %}
+                                    {{ document.offre_financement.montant_propose|intcomma }} FCFA
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+
+                    <a href="{% url 'commercial_app:offre-detail' document.offre_financement.id %}" class="w-full mt-2 inline-flex items-center justify-center gap-2 px-4 py-2 bg-purple-50 hover:bg-purple-100 text-purple-700 font-semibold text-xs rounded-xl transition border border-purple-200/60">
+                        <i class="fas fa-external-link-alt text-2xs"></i> Consulter l'offre
+                    </a>
+                </div>
+                {% endif %}
+
+                <!-- Actions Card -->
+                <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm space-y-3">
+                    <button onclick="document.getElementById('gestion_doc_modal').showModal()" 
+                            class="w-full btn-glow text-white font-semibold py-3 px-4 rounded-xl flex items-center justify-center gap-2 text-sm">
+                        <i class="fas fa-cog"></i> Gérer le dossier
+                    </button>
+                    <a href="{% url 'leads_app:documents-list' %}" 
+                       class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 px-4 rounded-xl transition flex items-center justify-center gap-2 text-sm">
+                        <i class="fas fa-arrow-left text-xs"></i> Retour à la liste
+                    </a>
+                </div>
+
+            </div>
+
+            <!-- MAIN COLUMN : Documents Checklist & Files (8 columns) -->
+            <div class="lg:col-span-8 space-y-6">
+
+                <!-- SECTION 1: Identité & Résidence -->
+                <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                    <div class="px-6 py-4 bg-slate-50/80 border-b border-slate-200/80 flex items-center justify-between">
+                        <h3 class="font-bold font-heading text-slate-900 text-base flex items-center gap-2.5">
+                            <div class="w-7 h-7 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-xs">
+                                <i class="fas fa-id-card"></i>
+                            </div>
+                            Identité & Résidence
+                        </h3>
+                        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Justificatifs requis</span>
+                    </div>
+
+                    <div class="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- CNI / Passeport -->
+                        <div class="doc-card p-4 rounded-xl border border-slate-200 bg-white flex items-center justify-between">
+                            <div class="space-y-1">
+                                <p class="text-sm font-bold text-slate-800">CNI / Passeport</p>
+                                <p class="text-xs text-slate-500">Pièce d'identité officielle</p>
+                            </div>
+                            {% if document.cni_passeport %}
+                                <a href="{{ document.cni_passeport.url }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 font-semibold text-xs transition">
+                                    <i class="fas fa-eye text-2xs"></i> Voir
+                                </a>
+                            {% else %}
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-50 text-rose-600 font-medium text-xs border border-rose-100">
+                                    <i class="fas fa-times-circle text-2xs"></i> Manquant
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        <!-- Justificatif domicile -->
+                        <div class="doc-card p-4 rounded-xl border border-slate-200 bg-white flex items-center justify-between">
+                            <div class="space-y-1">
+                                <p class="text-sm font-bold text-slate-800">Justificatif domicile</p>
+                                <p class="text-xs text-slate-500">Facture eau, électricité, etc.</p>
+                            </div>
+                            {% if document.justificatif_domicile %}
+                                <a href="{{ document.justificatif_domicile.url }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 font-semibold text-xs transition">
+                                    <i class="fas fa-eye text-2xs"></i> Voir
+                                </a>
+                            {% else %}
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-50 text-rose-600 font-medium text-xs border border-rose-100">
+                                    <i class="fas fa-times-circle text-2xs"></i> Manquant
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 2: Emploi & Revenus -->
+                <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                    <div class="px-6 py-4 bg-slate-50/80 border-b border-slate-200/80 flex items-center justify-between">
+                        <h3 class="font-bold font-heading text-slate-900 text-base flex items-center gap-2.5">
+                            <div class="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs">
+                                <i class="fas fa-briefcase"></i>
+                            </div>
+                            Emploi & Revenus
+                        </h3>
+                        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Situation professionnelle</span>
+                    </div>
+
+                    <div class="p-6 space-y-6">
+                        <!-- Documents généraux emploi -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="doc-card p-4 rounded-xl border border-slate-200 bg-white flex items-center justify-between">
+                                <span class="text-sm font-semibold text-slate-800">Attestation non-engagement</span>
+                                {% if document.attestation_non_engagement %}
+                                    <a href="{{ document.attestation_non_engagement.url }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 font-semibold text-xs transition">
+                                        <i class="fas fa-eye"></i> Voir
+                                    </a>
+                                {% else %}
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-50 text-rose-600 font-medium text-xs border border-rose-100">
+                                        <i class="fas fa-times-circle"></i> Manquant
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                            <div class="doc-card p-4 rounded-xl border border-slate-200 bg-white flex items-center justify-between">
+                                <span class="text-sm font-semibold text-slate-800">Contrat de travail</span>
+                                {% if document.contrat_travail %}
+                                    <a href="{{ document.contrat_travail.url }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 font-semibold text-xs transition">
+                                        <i class="fas fa-eye"></i> Voir
+                                    </a>
+                                {% else %}
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-50 text-rose-600 font-medium text-xs border border-rose-100">
+                                        <i class="fas fa-times-circle"></i> Manquant
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                            <div class="doc-card p-4 rounded-xl border border-slate-200 bg-white flex items-center justify-between">
+                                <div>
+                                    <span class="text-sm font-semibold text-slate-800 block">Attestation de travail</span>
+                                    <span class="text-2xs text-slate-400">Moins de 3 mois</span>
+                                </div>
+                                {% if document.attestation_travail %}
+                                    <a href="{{ document.attestation_travail.url }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 font-semibold text-xs transition">
+                                        <i class="fas fa-eye"></i> Voir
+                                    </a>
+                                {% else %}
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-50 text-rose-600 font-medium text-xs border border-rose-100">
+                                        <i class="fas fa-times-circle"></i> Manquant
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                            <div class="doc-card p-4 rounded-xl border border-slate-200 bg-white flex items-center justify-between">
+                                <span class="text-sm font-semibold text-slate-800">3 derniers bulletins (Groupés)</span>
+                                {% if document.quittance_salaire %}
+                                    <a href="{{ document.quittance_salaire.url }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 font-semibold text-xs transition">
+                                        <i class="fas fa-eye"></i> Voir
+                                    </a>
+                                {% else %}
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-50 text-rose-600 font-medium text-xs border border-rose-100">
+                                        <i class="fas fa-times-circle"></i> Manquant
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Sub-section Bulletins individuels -->
+                        <div class="pt-4 border-t border-slate-100">
+                            <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Détail individuel des 3 bulletins de paie</h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <div class="p-3 rounded-xl border border-slate-200 bg-slate-50/50 flex items-center justify-between">
+                                    <span class="text-xs font-semibold text-slate-700">Mois -3</span>
+                                    {% if document.bulletin_1 %}
+                                        <a href="{{ document.bulletin_1.url }}" target="_blank" class="text-emerald-700 hover:text-emerald-800 font-bold text-xs">
+                                            <i class="fas fa-eye"></i> Voir
+                                        </a>
+                                    {% else %}
+                                        <span class="text-rose-500 text-2xs font-semibold"><i class="fas fa-times"></i> Non fourni</span>
+                                    {% endif %}
+                                </div>
+
+                                <div class="p-3 rounded-xl border border-slate-200 bg-slate-50/50 flex items-center justify-between">
+                                    <span class="text-xs font-semibold text-slate-700">Mois -2</span>
+                                    {% if document.bulletin_2 %}
+                                        <a href="{{ document.bulletin_2.url }}" target="_blank" class="text-emerald-700 hover:text-emerald-800 font-bold text-xs">
+                                            <i class="fas fa-eye"></i> Voir
+                                        </a>
+                                    {% else %}
+                                        <span class="text-rose-500 text-2xs font-semibold"><i class="fas fa-times"></i> Non fourni</span>
+                                    {% endif %}
+                                </div>
+
+                                <div class="p-3 rounded-xl border border-slate-200 bg-slate-50/50 flex items-center justify-between">
+                                    <span class="text-xs font-semibold text-slate-700">Mois -1</span>
+                                    {% if document.bulletin_3 %}
+                                        <a href="{{ document.bulletin_3.url }}" target="_blank" class="text-emerald-700 hover:text-emerald-800 font-bold text-xs">
+                                            <i class="fas fa-eye"></i> Voir
+                                        </a>
+                                    {% else %}
+                                        <span class="text-rose-500 text-2xs font-semibold"><i class="fas fa-times"></i> Non fourni</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- SECTION 3: Banque -->
+                <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                    <div class="px-6 py-4 bg-slate-50/80 border-b border-slate-200/80 flex items-center justify-between">
+                        <h3 class="font-bold font-heading text-slate-900 text-base flex items-center gap-2.5">
+                            <div class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs">
+                                <i class="fas fa-university"></i>
+                            </div>
+                            Relevés & Données Bancaires
+                        </h3>
+                        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Solvabilité</span>
+                    </div>
+
+                    <div class="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="doc-card p-4 rounded-xl border border-slate-200 bg-white flex items-center justify-between">
+                            <div>
+                                <span class="text-sm font-bold text-slate-800 block">Relevé bancaire & RIB</span>
+                                <span class="text-xs text-slate-500">Historique 12 mois</span>
+                            </div>
+                            {% if document.relevé_bancaire %}
+                                <a href="{{ document.relevé_bancaire.url }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 font-semibold text-xs transition">
+                                    <i class="fas fa-eye"></i> Voir
+                                </a>
+                            {% else %}
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-50 text-rose-600 font-medium text-xs border border-rose-100">
+                                    <i class="fas fa-times-circle"></i> Manquant
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        <div class="doc-card p-4 rounded-xl border border-slate-200 bg-white flex items-center justify-between">
+                            <div>
+                                <span class="text-sm font-bold text-slate-800 block">Spécimen de signature</span>
+                                <p class="text-xs text-slate-500">Validation légale</p>
+                            </div>
+                            {% if document.specimen_signature %}
+                                <a href="{{ document.specimen_signature.url }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 font-semibold text-xs transition">
+                                    <i class="fas fa-eye"></i> Voir
+                                </a>
+                            {% else %}
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-50 text-rose-600 font-medium text-xs border border-rose-100">
+                                    <i class="fas fa-times-circle"></i> Manquant
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 4: Autres Justificatifs (Optionnels) -->
+                <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                    <div class="px-6 py-4 bg-slate-50/80 border-b border-slate-200/80 flex items-center justify-between">
+                        <h3 class="font-bold font-heading text-slate-900 text-base flex items-center gap-2.5">
+                            <div class="w-7 h-7 rounded-lg bg-slate-200 text-slate-600 flex items-center justify-center text-xs">
+                                <i class="fas fa-paperclip"></i>
+                            </div>
+                            Autres Justificatifs
+                        </h3>
+                        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Optionnel</span>
+                    </div>
+
+                    <div class="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="p-3.5 rounded-xl border border-slate-200/80 bg-white flex items-center justify-between">
+                            <span class="text-xs font-semibold text-slate-700">Certificat de présence</span>
+                            {% if document.certificat_presence %}
+                                <a href="{{ document.certificat_presence.url }}" target="_blank" class="text-emerald-700 font-semibold text-xs hover:underline">
+                                    <i class="fas fa-eye"></i> Voir
+                                </a>
+                            {% else %}
+                                <span class="text-slate-400 text-2xs italic">Non fourni</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="p-3.5 rounded-xl border border-slate-200/80 bg-white flex items-center justify-between">
+                            <span class="text-xs font-semibold text-slate-700">Plan de géolocalisation</span>
+                            {% if document.geolocalisation %}
+                                <a href="{{ document.geolocalisation.url }}" target="_blank" class="text-emerald-700 font-semibold text-xs hover:underline">
+                                    <i class="fas fa-eye"></i> Voir
+                                </a>
+                            {% else %}
+                                <span class="text-slate-400 text-2xs italic">Non fourni</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="p-3.5 rounded-xl border border-slate-200/80 bg-white flex items-center justify-between">
+                            <span class="text-xs font-semibold text-slate-700">Garanties proposées</span>
+                            {% if document.garanties %}
+                                <a href="{{ document.garanties.url }}" target="_blank" class="text-emerald-700 font-semibold text-xs hover:underline">
+                                    <i class="fas fa-eye"></i> Voir
+                                </a>
+                            {% else %}
+                                <span class="text-slate-400 text-2xs italic">Non fourni</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="p-3.5 rounded-xl border border-slate-200/80 bg-white flex items-center justify-between">
+                            <span class="text-xs font-semibold text-slate-700">Reçu acompte</span>
+                            {% if document.recu_acompte %}
+                                <a href="{{ document.recu_acompte.url }}" target="_blank" class="text-emerald-700 font-semibold text-xs hover:underline">
+                                    <i class="fas fa-eye"></i> Voir
+                                </a>
+                            {% else %}
+                                <span class="text-slate-400 text-2xs italic">Non fourni</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="p-3.5 rounded-xl border border-slate-200/80 bg-white flex items-center justify-between sm:col-span-2">
+                            <span class="text-xs font-semibold text-slate-700">Fiche de demande de financement</span>
+                            {% if document.fiche_demande %}
+                                <a href="{{ document.fiche_demande.url }}" target="_blank" class="text-emerald-700 font-semibold text-xs hover:underline">
+                                    <i class="fas fa-eye"></i> Voir le fichier
+                                </a>
+                            {% else %}
+                                <span class="text-slate-400 text-2xs italic">Non fourni</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 py-6 border-t border-slate-800 mt-auto">
+        <div class="container mx-auto px-4 text-center text-xs space-y-1">
+            <p class="font-medium text-slate-300">&copy; {% now "Y" %} KOZ Services — Platform Manager</p>
+            <p class="text-slate-500">Tous droits réservés. Accès restreint aux utilisateurs autorisés.</p>
+        </div>
+    </footer>
+
+    <!-- Modale de Gestion du dossier -->
+    {% include 'modals/leads/gestion_doc.html' %}
+
+</body>
+</html>

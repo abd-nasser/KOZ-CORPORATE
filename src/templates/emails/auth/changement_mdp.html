@@ -1,0 +1,27 @@
+{% load static %}
+{% load tailwind_tags %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    {% tailwind_css %}
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
+    <table style="max-width: 600px; margin: 0 auto; background: white; border-radius: 8px; overflow: hidden;">
+        <tr style="background: skyblue;">
+            <td style="padding: 20px; text-align: center;">
+                <h1 style="color: white; margin: 0;">KOZ Services</h1>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 30px;">
+                <h2>Bonjour {{ user.nom_complet }},</h2>
+                <p>Votre mot de passe a été modifié avec succès le <strong>{{ date|date:"d/m/Y à H:i" }}</strong>.</p>
+                <p>Si vous n'êtes pas à l'origine de cette modification, veuillez contacter immédiatement votre administrateur.</p>
+                <hr style="margin: 20px 0;">
+                <p style="color: #666; font-size: 12px;">Cordialement,<br>L'équipe KOZ Services</p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

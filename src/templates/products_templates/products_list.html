@@ -1,0 +1,273 @@
+{% load static %}
+{% load tailwind_tags %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    {% tailwind_css %}
+    <script src="{% static 'js/htmx.min.js' %}" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/products/products_list_style.css' %}">
+    <title>Produits - KOZ Services</title>
+    <style>
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .animate-fade-in-up {
+            animation: fadeInUp 0.5s ease-out forwards;
+        }
+        .animate-slide-in-right {
+            animation: slideInRight 0.4s ease-out forwards;
+        }
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .product-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .product-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 25px -12px rgba(0, 0, 0, 0.15);
+        }
+        .btn-glow {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            border: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.5);
+        }
+        .btn-glow:hover {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            transform: translateY(-2px);
+            box-shadow: 0 20px 35px -8px rgba(59, 130, 246, 0.7);
+        }
+        
+    main{
+        min-height:75vh
+    }
+
+    .scrollable-form {
+    max-height: 65vh;
+    overflow-y: auto;
+    padding-right: 0.75rem;
+    scroll-behavior: smooth;
+    scrollbar-color: rgba(59, 130, 246, 0.5) rgba(15, 23, 42, 0.05);
+    scrollbar-width: thin;
+}
+
+.scrollable-form::-webkit-scrollbar {
+    width: 10px;
+}
+
+.scrollable-form::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.05);
+    border-radius: 9999px;
+}
+
+.scrollable-form::-webkit-scrollbar-thumb {
+    background: rgba(59, 130, 246, 0.5);
+    border-radius: 9999px;
+}
+
+.scrollable-form::-webkit-scrollbar-thumb:hover {
+    background: rgba(37, 99, 235, 0.7);
+}
+
+
+/* Style des champs de formulaire */
+input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+select,
+textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+    
+}
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    
+}
+
+/* Checkboxes et radios gardent leur taille naturelle */
+input[type="checkbox"],
+input[type="radio"] {
+    width: auto;
+    margin-right: 8px;
+    transform: scale(1.1);
+    cursor: pointer;
+   
+}
+
+/* Style spécifique pour les champs fichiers */
+input[type="file"], textarea {
+    padding: 8px;
+    width: 100%;
+   
+}
+
+footer {
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: #ebebeb;
+}
+
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 font-inter">
+
+    <!-- Messages flash -->
+    {% if messages %}
+    <div class="fixed top-20 right-5 z-50 space-y-2">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} shadow-xl rounded-xl animate-slide-in-right">
+            <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% else %}info-circle{% endif %} mr-2"></i>
+            <span>{{ message }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Navbar -->
+    <nav class="glass-nav sticky top-0 z-40 shadow-sm">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl flex items-center justify-center shadow-lg">
+                    <span class="text-white font-bold text-xl">K</span>
+                </div>
+                <span class="text-xl font-bold bg-gradient-to-r from-blue-700 to-indigo-600 bg-clip-text text-transparent">KOZ Services</span>
+                <span class="hidden md:inline-block px-2 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">Produits</span>
+            </div>
+            
+            {% if user.role == "directeur" %}
+                <a href="{% url 'directeur_app:directeur-view' %}" class="text-gray-600 hover:text-blue-600 transition text-sm flex items-center gap-1">
+                <i class="fas fa-arrow-left"></i> Retour
+                </a>
+            {% elif user.role == "commercial" %}
+                 <a href="{% url 'commercial_app:commercial-view' %}" class="text-gray-600 hover:text-blue-600 transition text-sm flex items-center gap-1">
+                <i class="fas fa-arrow-left"></i> Retour
+                </a>
+            {% else %}
+            <a href="{% url 'client_app:client-view' %}" class="text-gray-600 hover:text-blue-600 transition text-sm flex items-center gap-1">
+                <i class="fas fa-arrow-left"></i> Retour
+                </a>
+            {% endif %}
+                
+           
+        </div>
+        {% if messages %}
+        <div class="fixed top-20 right-5 z-50 space-y-2">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} shadow-xl rounded-xl animate-slide-in-right">
+                <span>{{ message }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </nav>
+
+    <main class="container mx-auto px-4 py-8 max-w-7xl">
+        
+        <!-- En-tête -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 animate-fade-in-up">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-3">
+                    <i class="fas fa-box text-blue-600"></i>
+                    Catalogue produits
+                </h1>
+                <p class="text-gray-500 text-sm mt-1">Gérez vos pièces et accessoires</p>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="document.getElementById('create_product_modal').showModal()" 
+                        class="btn-glow px-5 py-2 rounded-xl flex items-center gap-2 shadow-md">
+                    <i class="fas fa-plus-circle"></i> Ajouter un produit
+                </button>
+                {% include 'modals/products/create_products.html' %}
+            </div>
+        </div>
+
+        <!-- Grille des produits -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {% for product in products %}
+            <div class="product-card bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden group">
+                <!-- Image -->
+                <div class="relative overflow-hidden h-48 bg-gray-100">
+                    {% if product.image_principale %}
+                        <img src="{{ product.image_principale.url }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                    {% else %}
+                        <div class="w-full h-full flex items-center justify-center text-gray-400">
+                            <i class="fas fa-image text-5xl"></i>
+                        </div>
+                    {% endif %}
+                    <!-- Badge catégorie en overlay -->
+                    <div class="absolute top-3 left-3">
+                        <span class="px-2 py-1 bg-white/90 backdrop-blur-sm text-xs font-semibold text-gray-700 rounded-full shadow-sm">
+                            {{ product.categorie.nom }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Infos produit -->
+                <div class="p-4">
+                    <h3 class="font-bold text-lg text-gray-800 mb-1 line-clamp-1">{{ product.nom }}</h3>
+                    <p class="text-gray-500 text-sm mb-2 flex items-center gap-1">
+                        <i class="fas fa-tag text-blue-400 text-xs"></i>
+                        {{ product.categorie.nom }}
+                    </p>
+                    <p class="text-xl font-bold text-green-600 mb-3">{{ product.prix|intcomma }} FCFA</p>
+                    
+                    <!-- Actions -->
+                    <div class="flex gap-2 mt-2">
+                        <a href="{% url 'products_app:products-detail' product.id %}" 
+                           class="flex-1 inline-flex items-center justify-center gap-1 px-3 py-2 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition text-sm">
+                            <i class="fas fa-eye"></i> Détail
+                        </a>
+                        <button onclick="document.getElementById('delete_product_modal_{{ product.id }}').showModal()" 
+                                class="px-3 py-2 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 transition">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                        {% include 'modals/products/confirm_products_delete.html' with product_id=product.id %}
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-span-full bg-white rounded-2xl shadow-md p-10 text-center">
+                <i class="fas fa-box-open text-5xl text-gray-300 mb-4"></i>
+                <p class="text-gray-500">Aucun produit pour le moment.</p>
+                <button onclick="document.getElementById('create_product_modal').showModal()" 
+                        class="btn-glow mt-4 px-5 py-2 rounded-xl inline-flex items-center gap-2">
+                    <i class="fas fa-plus-circle"></i> Ajouter un produit 
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white py-6 mt-12">
+        <div class="container mx-auto px-4 text-center text-sm text-gray-400">
+            <p>&copy; {% now "Y" %} KOZ Services - Tous droits réservés</p>
+            <p class="mt-1 text-xs">Gestion des produits et accessoires</p>
+        </div>
+    </footer>
+
+</body>
+</html>

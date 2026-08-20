@@ -1,0 +1,400 @@
+{% load static %}
+{% load tailwind_tags %}
+{% load humanize %}
+{% load custom_filters %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    {% tailwind_css %}
+    <script src="{% static 'js/htmx.min.js' %}" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <title>{{ produit.nom }} - KOZ Services</title>
+    <style>
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .animate-fade-in-up { animation: fadeInUp 0.6s ease-out forwards; }
+        .animate-slide-in-right { animation: slideInRight 0.4s ease-out forwards; }
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            border: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.5);
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            transform: translateY(-2px);
+            box-shadow: 0 20px 35px -8px rgba(59, 130, 246, 0.7);
+        }
+        .badge-promo {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 0.15rem 0.75rem;
+            border-radius: 9999px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-block;
+        }
+        .gallery-thumb {
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .gallery-thumb:hover, .gallery-thumb.active {
+            border-color: #3b82f6;
+            transform: scale(1.05);
+        }
+        .price-original {
+            text-decoration: line-through;
+            color: #9ca3af;
+            font-size: 1.1rem;
+        }
+        .spec-card {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s ease;
+        }
+        .spec-card:hover {
+            border-color: #3b82f6;
+            background: #eff6ff;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-inter">
+
+    <!-- ===== NAVBAR ===== -->
+    <nav class="glass-nav sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <a href="{% url 'home_app:home-page' %}" class="font-bold text-2xl text-blue-600">
+                    KOZ Services
+                </a>
+                <a href="{% url 'products_app:products-list' %}" class="text-gray-500 hover:text-blue-600 transition text-sm flex items-center gap-1 ml-4">
+                    <i class="fas fa-arrow-left text-xs"></i> Retour
+                </a>
+            </div>
+            <div class="flex items-center gap-4">
+               <a href="{% url 'order_app:panier' %}" 
+                   class="relative p-2 rounded-lg text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                    <i class="fas fa-shopping-cart text-lg"></i>
+                    {% if user.panier.articles.count > 0 %}
+                    <span class="absolute -top-1 -right-1 bg-blue-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-md ring-2 ring-white">
+                        {{ user.panier.articles.count }}
+                    </span>
+                    {% endif %}
+                </a>
+                {% if user.is_authenticated %}
+                    <span class="text-sm text-gray-600">{{ user.nom_complet }}</span>
+                {% endif %}
+            </div>
+        </div>
+        {% if messages %}
+        <div class="fixed top-20 right-5 z-50 space-y-2">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} shadow-xl rounded-xl animate-slide-in-right">
+                <span>{{ message }}</span>
+            <button onclick="this.parentElement.remove()" class="text-xs opacity-60 hover:opacity-100">
+                <i class="fas fa-xmark"></i>
+            </button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </nav>
+
+    <!-- ============================================================ -->
+    <!-- MAIN CONTENT                                                 -->
+    <!-- ============================================================ -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+
+        <!-- ===== BREADCRUMB ===== -->
+        <nav class="text-sm text-gray-500 mb-6 animate-fade-in-up">
+            <a href="{% url 'home_app:home-page' %}" class="hover:text-blue-600 transition">Accueil</a>
+            <span class="mx-2">/</span>
+            <a href="{% url 'products_app:products-list' %}" class="hover:text-blue-600 transition">Produits</a>
+            <span class="mx-2">/</span>
+            <span class="text-gray-700 font-medium">{{ produit.nom }}</span>
+        </nav>
+
+        <!-- ===== GRILLE PRODUIT ===== -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 animate-fade-in-up">
+            
+            <!-- ===== COLONNE GAUCHE : IMAGES ===== -->
+            <div>
+                <!-- Image principale -->
+                <div class="relative overflow-hidden  bg-gray-100 aspect-square shadow-lg">
+                    <img id="main-image" 
+                         src="{{ produit.image_principale.url }}" 
+                         alt="{{ produit.nom }}"
+                         class="w-full h-full object-contain transition duration-500">
+                    
+                    <!-- Badges -->
+                    <div class="absolute top-4 left-4 flex flex-col gap-2">
+                        {% if produit.est_nouveau %}
+                        <span class="bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
+                            <i class="fas fa-sparkles mr-1"></i> Nouveau
+                        </span>
+                        {% endif %}
+                        {% if produit.est_en_promo %}
+                        <span class="badge-promo px-3 py-1">
+                            <i class="fas fa-tag mr-1"></i> Promo
+                        </span>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Disponibilité -->
+                    <div class="absolute bottom-4 right-4">
+                        {% if produit.est_en_stock %}
+                        <span class="bg-white/90 backdrop-blur-sm text-green-500 text-sm font-semibold px-4 py-2 rounded-full shadow-md flex items-center gap-2">
+                            <i class="fas fa-check-circle"></i> En stock
+                        </span>
+                        {% else %}
+                        <span class="bg-white/90 backdrop-blur-sm text-red-500 text-sm font-semibold px-4 py-2 rounded-full shadow-md flex items-center gap-2">
+                            <i class="fas fa-times-circle"></i> Rupture
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Galerie miniatures -->
+                {% if produit.images.all %}
+                <div class="flex gap-3 mt-4 overflow-x-auto pb-2">
+                    <div class="gallery-thumb active flex-shrink-0" onclick="changeImage('{{ produit.image_principale.url }}')">
+                        <img src="{{ produit.image_principale.url }}" alt="{{ produit.nom }}" class="w-20 h-20 object-cover rounded-lg">
+                    </div>
+                    {% for image in produit.images.all %}
+                    <div class="gallery-thumb flex-shrink-0" onclick="changeImage('{{ image.image.url }}')">
+                        <img src="{{ image.image.url }}" alt="{{ image.alt_text|default:produit.nom }}" class="w-20 h-20 object-cover rounded-lg">
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- ===== COLONNE DROITE : INFOS ===== -->
+            <div class="space-y-6">
+                
+                <!-- Catégorie + Marque -->
+                <div class="flex items-center gap-3 text-sm">
+                    <span class="text-gray-500">{{ produit.categorie.nom }}</span>
+                    {% if produit.marque %}
+                    <span class="text-gray-300">|</span>
+                    <span class="text-gray-500">{{ produit.marque.nom }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Nom -->
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-900">{{ produit.nom }}</h1>
+
+                <!-- Prix -->
+                <div class="flex items-center gap-3">
+                    {% if produit.est_en_promo %}
+                    <span class="text-3xl font-bold text-red-600">{{ produit.prix_promo|intcomma }} FCFA</span>
+                    <span class="text-lg text-gray-400 line-through">{{ produit.prix|intcomma }} FCFA</span>
+                    <span class="bg-red-100 text-red-700 text-xs font-bold px-2 py-1 rounded-full">
+                        -{{ produit.pourcentage_reduction }}%
+                    </span>
+                    {% else %}
+                    <span class="text-3xl font-bold text-blue-600">{{ produit.prix|intcomma }} FCFA</span>
+                    {% endif %}
+                </div>
+
+                <!-- Description courte -->
+                {% if produit.description_courte %}
+                <p class="text-gray-600 text-lg leading-relaxed">{{ produit.description_courte }}</p>
+                {% endif %}
+
+                <!-- Stock -->
+                <div class="flex items-center gap-4 text-sm">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-boxes text-blue-500"></i>
+                        <span class="text-gray-600">Stock :</span>
+                        <span class="font-semibold {% if produit.stock_alerte %}text-amber-600{% else %}text-gray-800{% endif %}">
+                            {{ produit.stock }} unité{{ produit.stock|pluralize }}
+                        </span>
+                        {% if produit.stock_alerte and produit.est_en_stock %}
+                        <span class="text-amber-600 text-xs font-medium">(Plus que {{ produit.stock }})</span>
+                        {% endif %}
+                    </div>
+                    {% if produit.unite %}
+                    <span class="text-gray-400">|</span>
+                    <span class="text-gray-600">Unité : {{ produit.unite.abreviation }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Description complète -->
+                {% if produit.description %}
+                <div class="border-t border-gray-200 pt-4">
+                    <h3 class="font-semibold text-gray-700 mb-2">📝 Description</h3>
+                    <p class="text-gray-600 leading-relaxed">{{ produit.description }}</p>
+                </div>
+                {% endif %}
+
+                <!-- Compatibilité -->
+                {% if produit.compatible_avec %}
+                <div class="border-t border-gray-200 pt-4">
+                    <h3 class="font-semibold text-gray-700 mb-2">🔧 Compatibilité</h3>
+                    <p class="text-gray-600">{{ produit.compatible_avec }}</p>
+                </div>
+                {% endif %}
+
+                <!-- Tags -->
+                {% if produit.tags %}
+                <div class="flex flex-wrap gap-2 pt-2">
+                    {% for tag in produit.tags|split:"," %}
+                    <span class="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full">{{ tag|trim }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- ===== BOUTONS D'ACTION ===== -->
+                <div class="flex flex-wrap gap-3 pt-4 border-t border-gray-200">
+                    <a href="{% url 'order_app:ajouter-article' produit.pk %}" class="btn-primary flex-1 min-w-[200px] py-3 rounded-xl font-semibold flex items-center justify-center gap-2 text-base"
+                            {% if not produit.est_en_stock %}disabled{% endif %}>
+                        <i class="fas fa-shopping-cart"></i>
+                        {% if produit.est_en_stock %}Ajouter au panier{% else %}Indisponible{% endif %}
+                    </a>
+                    <button 
+                    id="fav-btn-{{ produit.pk }}"
+                    hx-post="{% url 'products_app:products-favoris' produit.pk %}"
+                    hx-target="#fav-btn-{{ produit.pk }}"
+                    hx-swap="outerHTML transition:true"
+                    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                    class="px-5 py-3 rounded-xl 
+                    {% if request.user in produit.favoris_de.all %}
+                     bg-rose-50 hover:bg-rose-100 text-rose-600 border-rose-100
+                     {% else %}
+                     bg-gray-100 hover:bg-gray-200 text-gray-700 transition flex items-center gap-2
+                     {% endif %}">
+                    <i class=" 
+                        {% if request.user in produit.favoris_de.all %}
+                        fas text-rose-600 fa-heart 
+                        {% else %} 
+                        bg-gray-100 hover:bg-gray-200 text-gray-700 transition flex items-center gap-2 
+                        {% endif %} ">
+                    </i>
+                    </button>
+                    <button class="px-5 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 transition flex items-center gap-2">
+                        <i class="fas fa-share-alt"></i>
+                    </button>
+                </div>
+
+                <!-- Tags SEO -->
+                {% if produit.tags %}
+                <div class="flex flex-wrap gap-1 pt-2">
+                    {% for tag in produit.tags|split:"," %}
+                    <span class="bg-gray-100 text-gray-600 text-[10px] px-2 py-0.5 rounded-full">#{{ tag|trim }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- SECTION PRODUITS SIMILAIRES                                 -->
+        <!-- ============================================================ -->
+        {% if produits_similaires %}
+        <section class="mt-16">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                    <i class="fas fa-sync-alt text-blue-600"></i> Produits similaires
+                </h2>
+                <a href="#" class="text-sm text-blue-600 hover:text-blue-800 transition">
+                    Voir tout <i class="fas fa-arrow-right text-xs"></i>
+                </a>
+            </div>
+            
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                {% for similaire in produits_similaires|slice:":4" %}
+                <div class="group bg-white rounded-xl shadow-sm hover:shadow-lg transition border border-gray-100 overflow-hidden">
+                    <div class="aspect-square overflow-hidden bg-gray-100">
+                        <img src="{{ similaire.image_principale.url }}" 
+                             alt="{{ similaire.nom }}"
+                             class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                    </div>
+                    <div class="p-3">
+                        <h4 class="font-semibold text-gray-800 text-sm line-clamp-1">{{ similaire.nom }}</h4>
+                        <p class="text-blue-600 font-bold text-sm">{{ similaire.prix|intcomma }} FCFA</p>
+                        <a href="{% url 'products_app:product-detail' slug=similaire.slug %}" 
+                           class="w-full mt-2 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 text-xs font-medium transition text-center block">
+                            Voir
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+    </main>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="bg-gray-800 text-gray-400 py-6 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center text-sm">
+            <p>&copy; {% now "Y" %} KOZ Services — Tous droits réservés</p>
+            <p class="font-medium text-slate-700">Conçu par <strong>SPIRIT-DIGIT Agency</strong></p>
+        </div>
+    </footer>
+
+    <!-- ============================================================ -->
+    <!-- SCRIPTS                                                       -->
+    <!-- ============================================================ -->
+    <script>
+        // ===== GALERIE : Changer l'image principale =====
+        function changeImage(src) {
+            const mainImage = document.getElementById('main-image');
+            if (mainImage) {
+                mainImage.src = src;
+                // Animation de fondu
+                mainImage.style.animation = 'fadeIn 0.3s ease';
+                setTimeout(() => { mainImage.style.animation = ''; }, 300);
+            }
+            
+            // Mettre à jour la miniature active
+            document.querySelectorAll('.gallery-thumb').forEach(thumb => {
+                thumb.classList.remove('active');
+            });
+            // Trouver la miniature correspondante
+            const thumbs = document.querySelectorAll('.gallery-thumb img');
+            thumbs.forEach(img => {
+                if (img.src === src) {
+                    img.closest('.gallery-thumb').classList.add('active');
+                }
+            });
+        }
+
+        // ===== PRIX PROMO CALCUL =====
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animation de compteur pour le prix (optionnel)
+            const priceElement = document.querySelector('.text-3xl.font-bold');
+            if (priceElement) {
+                // Effet simple
+                priceElement.style.transition = 'all 0.5s ease';
+            }
+        });
+    </script>
+
+</body>
+</html>

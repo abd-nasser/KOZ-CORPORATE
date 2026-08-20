@@ -1,0 +1,91 @@
+{% load static %}
+{% load tailwind_tags %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    {% tailwind_css %}
+    <script src="{% static 'js/htmx.min.js' %}" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <title>Unités de produits - KOZ Services</title>
+    <style>
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in-up { animation: fadeInUp 0.5s ease-out forwards; }
+        .glass-nav { background: rgba(255,255,255,0.8); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.3); }
+        .btn-glow { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; border: none; transition: all 0.3s ease; box-shadow: 0 10px 25px -5px rgba(59,130,246,0.5); }
+        .btn-glow:hover { background: linear-gradient(135deg, #2563eb, #1d4ed8); transform: translateY(-2px); box-shadow: 0 20px 35px -8px rgba(59,130,246,0.7); }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 font-inter">
+    <nav class="glass-nav sticky top-0 z-40 shadow-sm">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl flex items-center justify-center shadow-lg">
+                    <span class="text-white font-bold text-xl">K</span>
+                </div>
+                <span class="text-xl font-bold bg-gradient-to-r from-blue-700 to-indigo-600 bg-clip-text text-transparent">KOZ Services</span>
+                <span class="hidden md:inline-block px-2 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">Unités</span>
+            </div>
+            <a href="{% url 'products_app:products-list' %}" class="text-gray-600 hover:text-blue-600 transition text-sm flex items-center gap-1">
+                <i class="fas fa-arrow-left"></i> Produits
+            </a>
+        </div>
+        {% if messages %}
+        <div class="fixed top-20 right-5 z-50 space-y-2">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} shadow-xl rounded-xl animate-slide-in-right">
+                <span>{{ message }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </nav>
+
+    <main class="container mx-auto px-4 py-8 max-w-5xl">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 animate-fade-in-up">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-3">
+                    <i class="fas fa-ruler-combined text-blue-600"></i>
+                    Gestion des unités
+                </h1>
+                <p class="text-gray-500 text-sm mt-1">Définissez les unités de vente de vos produits</p>
+            </div>
+            <a href="{% url 'products_app:unite-produit-create' %}" class="btn-glow px-5 py-2 rounded-xl flex items-center gap-2 shadow-md">
+                <i class="fas fa-plus-circle"></i> Ajouter une unité
+            </a>
+        </div>
+
+        {% if unites %}
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 animate-fade-in-up">
+            {% for unite in unites %}
+            <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-6 hover:shadow-xl transition">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                        <i class="fas fa-balance-scale text-blue-600"></i>
+                    </div>
+                    <span class="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700">Disponible</span>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800">{{ unite.nom }}</h3>
+                <p class="text-sm text-gray-500 mt-2">Abréviation : <span class="font-semibold text-gray-700">{{ unite.abreviation }}</span></p>
+                <div class="mt-6 flex gap-2">
+                    <a href="{% url 'products_app:unite-produit-update' unite.pk %}" class="flex-1 text-center px-3 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700 transition">
+                        <i class="fas fa-edit mr-1"></i> Modifier
+                    </a>
+                    <a href="{% url 'products_app:unite-produit-delete' unite.pk %}" class="flex-1 text-center px-3 py-2 rounded-lg bg-red-600 text-white text-sm hover:bg-red-700 transition">
+                        <i class="fas fa-trash mr-1"></i> Supprimer
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-12 bg-white rounded-2xl shadow-md border border-gray-100">
+            <i class="fas fa-ruler-combined text-5xl text-gray-300 mb-4"></i>
+            <p class="text-gray-500">Aucune unité enregistrée.</p>
+        </div>
+        {% endif %}
+    </main>
+</body>
+</html>

@@ -1,0 +1,163 @@
+{% load static %}
+{% load tailwind_tags %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    {% tailwind_css %}
+    <script src="{% static 'js/htmx.min.js' %}" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/client/client_list_demande_style.css' %}">
+    <script src="https://unpkg.com/lenis@1.3.25/dist/lenis.min.js"></script> 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script src="https://unpkg.com/splitting/dist/splitting.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/splitting/dist/splitting.css">
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+    <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
+    <title>Mes demandes - KOZ Services</title>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 font-inter">
+
+    <!-- Messages flash -->
+    {% if messages %}
+    <div class="fixed top-5 right-5 z-50 space-y-2">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} shadow-lg rounded-xl">
+            <span>{{ message }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Navbar minimaliste -->
+    <nav class="bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-gray-200">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl flex items-center justify-center shadow-md">
+                    <span class="text-white font-bold text-xl">K</span>
+                </div>
+                <a href="{% url 'client_app:client-view' %}" class="text-gray-600 hover:text-blue-600 transition">
+                    <i class="fas fa-arrow-left mr-2"></i>Retour à l'accueil
+                </a>
+            </div>
+            <h1 class="text-lg font-semibold text-gray-800 hidden md:block">Mes demandes de financement</h1>
+            <div class="w-10"></div>
+        </div>
+    </nav>
+<style>
+    main{
+        min-height: 81vh;
+    }
+</style>
+    <main class="container mx-auto px-4 py-8 max-w-5xl">
+        
+        <!-- ========== FILTRES ========== -->
+        <div class="filters-container bg-white rounded-2xl shadow-lg p-5 mb-6 border border-gray-100">
+            <h2 class="text-md font-semibold text-gray-700 mb-4 flex items-center gap-2">
+                <i class="fas fa-filter text-blue-600"></i>Filtrer mes demandes
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Recherche -->
+                <div class="form-control">
+                    <label class="label pb-1">
+                        <span class="label-text text-gray-600 text-sm">🔍 Recherche</span>
+                    </label>
+                    <input type="text" name="q" 
+                           placeholder="Véhicule, étape..."
+                           hx-get="{% url 'leads_app:list-demande-financement' %}"
+                           hx-trigger="keyup changed delay:500ms"
+                           hx-target="#demande-list-container"
+                           hx-include=".filters-container select, .filters-container input"
+                           class="input input-bordered w-full focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <!-- Filtre étape -->
+                <div class="form-control">
+                    <label class="label pb-1">
+                        <span class="label-text text-gray-600 text-sm">📌 Étape</span>
+                    </label>
+                    <select name="etape"
+                            hx-get="{% url 'leads_app:list-demande-financement' %}"
+                            hx-trigger="change"
+                            hx-target="#demande-list-container"
+                            hx-include=".filters-container select, .filters-container input"
+                            class="select select-bordered w-full">
+                        <option value="">Toutes les étapes</option>
+                        {% for value, label in etape %}
+                        <option value="{{ value }}" {% if request.GET.etape == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Filtre type financement -->
+                <div class="form-control">
+                    <label class="label pb-1">
+                        <span class="label-text text-gray-600 text-sm">🏢 Type financement</span>
+                    </label>
+                    <select name="type_entreprise"
+                            hx-get="{% url 'leads_app:list-demande-financement' %}"
+                            hx-trigger="change"
+                            hx-target="#demande-list-container"
+                            hx-include=".filters-container select, .filters-container input"
+                            class="select select-bordered w-full">
+                        <option value="">Tous les types</option>
+                        {% for value, label in type_financement_choices %}
+                        <option value="{{ value }}" {% if request.GET.type_entreprise == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Filtre financement par -->
+                <div class="form-control">
+                    <label class="label pb-1">
+                        <span class="label-text text-gray-600 text-sm">🏦 Financement par</span>
+                    </label>
+                    <select name="financement_par"
+                            hx-get="{% url 'leads_app:list-demande-financement' %}"
+                            hx-trigger="change"
+                            hx-target="#demande-list-container"
+                            hx-include=".filters-container select, .filters-container input"
+                            class="select select-bordered w-full">
+                        <option value="">Tous les partenaires</option>
+                        {% for value, label in financement_par_choices %}
+                        <option value="{{ value }}" {% if request.GET.financement_par == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="text-center mt-4">
+                <a href="{% url 'leads_app:list-demande-financement' %}" 
+                   class="text-sm text-gray-500 hover:text-blue-600 transition"
+                   hx-get="{% url 'leads_app:list-demande-financement' %}"
+                   hx-target="#demande-list-container">
+                    <i class="fas fa-undo-alt mr-1"></i>Réinitialiser les filtres
+                </a>
+            </div>
+        </div>
+
+        <!-- ========== RÉSULTATS ========== -->
+        <div id="demande-list-container" 
+             hx-get="{% url 'leads_app:list-demande-financement' %}"
+             hx-trigger="load"
+             hx-swap="innerHTML">
+            <div class="text-center py-10">
+                <i class="fas fa-spinner fa-spin text-3xl text-blue-500"></i>
+                <p class="text-gray-500 mt-2">Chargement de vos demandes...</p>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white py-6 mt-12">
+        <div class="container mx-auto px-4 text-center text-sm text-gray-400">
+            <p>&copy; {% now "Y" %} KOZ Services - Tous droits réservés</p>
+            <p class="font-medium text-slate-700">Conçu par <strong>SPIRIT-DIGIT Agency</strong></p>
+        </div>
+    </footer>
+
+</body>
+</html>

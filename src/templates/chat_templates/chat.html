@@ -1,0 +1,254 @@
+{% load static %}
+{% load tailwind_tags %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    {% tailwind_css %}
+    <script src="{% static 'js/htmx.min.js' %}" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/chat/chat_style.css' %}">
+    <title>Messagerie - KOZ Services</title>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 font-inter h-screen overflow-hidden">
+
+    <!-- ===== NAVBAR ===== -->
+    <nav class="bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-gray-200 shadow-sm">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl flex items-center justify-center shadow-md">
+                    <span class="text-white font-bold text-xl">K</span>
+                </div>
+                <a href="{% if user.role == 'client' %}{% url 'client_app:client-view' %}{% else %}{% url 'commercial_app:commercial-view' %}{% endif %}" 
+                   class="text-gray-600 hover:text-blue-600 transition duration-200">
+                    <i class="fas fa-arrow-left mr-2"></i>Retour
+                </a>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="text-right">
+                    <p class="text-sm font-semibold text-gray-800">
+                        {% if user.role == "client" %}
+                                {% if destinataire %}{{ destinataire.nom_complet }}{% else %}Commercial{% endif %}
+                            {% else %}
+                                {{ client.nom_complet }}
+                            {% endif %}
+                    </p>
+                    
+                    {% if client and client.est_en_ligne or destinataire and destinataire.est_en_ligne %}
+                         <p class="text-xs text-gray-400 flex items-center justify-end gap-1">
+                        <span class="w-2 h-2 rounded-full bg-green-500 inline-block"></span>
+                        En ligne
+                    </p>
+                    {% else %}
+                        <p class="text-xs text-gray-400 flex items-center justify-end gap-1">
+                            <span class="w-2 h-2 rounded-full bg-gray-400 inline-block"></span>
+                            Hors ligne
+                        </p>
+                    {% endif %}
+
+                   
+                </div>
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white shadow-md">
+                    <i class="fas fa-user text-sm"></i>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ===== MAIN CHAT ===== -->
+    <main class="container mx-auto px-4 py-6 max-w-4xl h-screen flex flex-col" style="height: calc(100vh - 70px);">
+        
+        <!-- ===== MESSAGES ===== -->
+        <div id="messages-container" 
+             class="flex-1 bg-white rounded-2xl shadow-xl p-4 overflow-y-auto space-y-3 mb-4"
+             style="max-height: calc(100vh - 180px);">
+            
+            {% for message in messages %}
+                {% include 'partials/chat/message.html' %}
+            {% empty %}
+                <div class="flex flex-col items-center justify-center h-full text-gray-400">
+                    <i class="fas fa-comment-dots text-5xl mb-3 opacity-40"></i>
+                    <p class="text-lg font-medium">Aucun message</p>
+                    <p class="text-sm">Soyez le premier à envoyer un message</p>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- ===== FORMULAIRE ===== -->
+        <div class="bg-white rounded-2xl shadow-xl p-3 border border-gray-100">
+            {% if user.role == "client" %}
+            <form class="chat-form flex gap-3"
+                  method="post"
+                  hx-post="{% url 'chat_app:client_envoyer_message' %}"
+                  hx-target="#messages-container"
+                  hx-swap="beforeend"
+                  hx-on::after-request="this.reset(); scrollToBottom()">
+                {% csrf_token %}
+                <input type="text" name="contenu" 
+                       placeholder="Votre message..." 
+                       autocomplete="off"
+                       class="flex-1 input input-bordered rounded-full px-5 py-3 focus:ring-2 focus:ring-blue-400 border-gray-300 transition">
+                <button type="submit" class="btn-glow rounded-full px-6 py-3">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </form>
+            {% else %}
+            <form class="chat-form flex gap-3"
+                  method="post"
+                  hx-post="{% url 'chat_app:commercial_envoyer_message' client_id=client.id %}"
+                  hx-target="#messages-container"
+                  hx-swap="beforeend"
+                  hx-on::after-request="this.reset(); scrollToBottom()">
+                {% csrf_token %}
+                <input type="text" name="contenu" 
+                       placeholder="Répondre à {{ client.nom_complet }}..." 
+                       autocomplete="off"
+                       class="flex-1 input input-bordered rounded-full px-5 py-3 focus:ring-2 focus:ring-blue-400 border-gray-300 transition">
+                <button type="submit" class="btn-glow rounded-full px-6 py-3">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </form>
+            {% endif %}
+        </div>
+
+    </main>
+
+    <!-- ===== STYLES ===== -->
+    <style>
+        .btn-glow {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            border: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.5);
+        }
+        .btn-glow:hover {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            transform: translateY(-2px);
+            box-shadow: 0 20px 35px -8px rgba(59, 130, 246, 0.7);
+        }
+
+        .client-message {
+            background: linear-gradient(135deg, #2563eb, #3b82f6);
+            color: white;
+            border-radius: 20px 20px 5px 20px;
+            max-width: 70%;
+            margin-left: auto;
+            padding: 12px 18px;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+            animation: slideInRight 0.3s ease;
+        }
+        .commercial-message {
+            background: #f3f4f6;
+            color: #1f2937;
+            border-radius: 20px 20px 20px 5px;
+            max-width: 70%;
+            margin-right: auto;
+            padding: 12px 18px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            animation: slideInLeft 0.3s ease;
+        }
+
+        .client-message small {
+            color: rgba(255,255,255,0.7);
+        }
+        .commercial-message small {
+            color: #6b7280;
+        }
+
+        .client-message strong {
+            color: white;
+        }
+
+        .message-time {
+            font-size: 10px;
+            opacity: 0.7;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 4px;
+        }
+
+        /* ✅ EFFET "VU" (comme WhatsApp) */
+        .message-status {
+            font-size: 12px;
+            margin-left: 6px;
+            color: #6b7280;
+        }
+        .message-status.lu {
+            color: #3b82f6;
+        }
+        .client-message .message-status.lu {
+            color: #93c5fd;
+        }
+
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* Scroll personnalisé */
+        #messages-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        #messages-container::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 9999px;
+        }
+        #messages-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        /* Avatar dans le message */
+        .avatar-circle {
+            width: 32px;
+            height: 32px;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        .avatar-client {
+            background: linear-gradient(135deg, #2563eb, #3b82f6);
+            color: white;
+        }
+        .avatar-commercial {
+            background: #e5e7eb;
+            color: #1f2937;
+        }
+    </style>
+
+    <!-- ===== SCRIPT ===== -->
+    <script>
+        function scrollToBottom() {
+            const container = document.getElementById('messages-container');
+            if (container) {
+                container.scrollTop = container.scrollHeight;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', scrollToBottom);
+
+        document.body.addEventListener('htmx:afterSwap', function(evt) {
+            if (evt.target.id === 'messages-container') {
+                scrollToBottom();
+            }
+        });
+
+        document.body.addEventListener('htmx:afterRequest', function() {
+            const input = document.querySelector('.chat-form input');
+            if (input) input.focus();
+        });
+    </script>
+
+</body>
+</html>

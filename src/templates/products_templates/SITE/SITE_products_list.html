@@ -1,0 +1,392 @@
+{% load static %}
+{% load tailwind_tags %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    {% tailwind_css %}
+    <script src="{% static 'js/htmx.min.js' %}" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <title>Nos produits - KOZ Services</title>
+    <style>
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-up { animation: fadeInUp 0.5s ease-out forwards; }
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .product-card {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #f1f5f9;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.1);
+            border-color: #3b82f6;
+        }
+        .product-image {
+            height: 200px;
+            overflow: hidden;
+            background: #f1f5f9;
+        }
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        .product-card:hover .product-image img {
+            transform: scale(1.05);
+        }
+        .filter-sidebar {
+            background: white;
+            border-radius: 12px;
+            padding: 1.25rem;
+            border: 1px solid #f1f5f9;
+            position: sticky;
+            top: 80px;
+        }
+        .filter-sidebar label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .filter-sidebar input,
+        .filter-sidebar select {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+        .filter-sidebar input:focus,
+        .filter-sidebar select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            border: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.5);
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            transform: translateY(-2px);
+            box-shadow: 0 20px 35px -8px rgba(59, 130, 246, 0.7);
+        }
+        .badge-promo {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            font-size: 0.6rem;
+            font-weight: 700;
+            padding: 0.1rem 0.6rem;
+            border-radius: 9999px;
+            text-transform: uppercase;
+        }
+        .badge-stock {
+            font-size: 0.6rem;
+            font-weight: 600;
+            padding: 0.1rem 0.6rem;
+            border-radius: 9999px;
+        }
+        .badge-stock.en-stock { background: #dcfce7; color: #166534; }
+        .badge-stock.rupture { background: #fee2e2; color: #991b1b; }
+    </style>
+</head>
+<body class="bg-gray-50 font-inter">
+
+    <!-- ===== NAVBAR ===== -->
+    <nav class="glass-nav sticky top-0 z-40 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <a href="{% url 'home_app:home-page' %}" class="font-bold text-2xl text-blue-600">
+                    KOZ Services
+                </a>
+                <a href="{% url 'home_app:home-page' %}" class="text-gray-500 hover:text-blue-600 transition text-sm flex items-center gap-1 ml-4">
+                    <i class="fas fa-arrow-left text-xs"></i> Accueil
+                </a>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="{% url 'order_app:panier' %}" class="relative text-gray-700 hover:text-blue-600 transition">
+                    <i class="fas fa-shopping-cart text-xl"></i>
+                    <span class="absolute -top-2 -right-3 bg-blue-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-md">
+                        {{ user.panier.articles.count|default:0 }}
+                    </span>
+                </a>
+                {% if user.is_authenticated %}
+                    <span class="text-sm text-gray-600">{{ user.nom_complet }}</span>
+                {% endif %}
+            </div>
+        </div>
+        {% if messages %}
+        <div class="fixed top-20 right-5 z-50 space-y-2">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} shadow-xl rounded-xl animate-slide-in-right">
+                <span>{{ message }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </nav>
+
+    <!-- ============================================================ -->
+    <!-- MAIN CONTENT                                                 -->
+    <!-- ============================================================ -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+
+        <!-- ===== EN-TÊTE ===== -->
+        <div class="mb-8 animate-fade-in-up">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800">
+                <i class="fas fa-box text-blue-600 mr-3"></i>Nos produits
+            </h1>
+            <p class="text-gray-500 mt-1">Découvrez notre gamme de pièces et accessoires</p>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- GRILLE : FILTRES + PRODUITS                                 -->
+        <!-- ============================================================ -->
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            
+            <!-- ===== FILTRES ===== -->
+            <div class="lg:col-span-1">
+                <div class="filter-sidebar">
+                    <form method="get" class="space-y-4">
+                        
+                        <!-- Recherche -->
+                        <div>
+                            <label><i class="fas fa-search mr-1"></i> Recherche</label>
+                            <input type="text" name="q" placeholder="Rechercher..." value="{{ request.GET.q|default:'' }}">
+                        </div>
+
+                        <!-- Catégorie -->
+                        <div>
+                            <label><i class="fas fa-tags mr-1"></i> Catégorie</label>
+                            <select name="categorie">
+                                <option value="">Toutes</option>
+                                {% for cat in categories %}
+                                    <option value="{{ cat.id }}" {% if request.GET.categorie|add:'0' == cat.id %}selected{% endif %}>
+                                        {{ cat.nom }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Marque -->
+                        <div>
+                            <label><i class="fas fa-trademark mr-1"></i> Marque</label>
+                            <select name="marque">
+                                <option value="">Toutes</option>
+                                {% for marque in marques %}
+                                    <option value="{{ marque.id }}" {% if request.GET.marque|add:'0' == marque.id %}selected{% endif %}>
+                                        {{ marque.nom }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Prix min / max -->
+                        <div>
+                            <label><i class="fas fa-money-bill-wave mr-1"></i> Prix</label>
+                            <div class="flex gap-2">
+                                <input type="number" name="prix_min" placeholder="Min" value="{{ request.GET.prix_min|default:'' }}" class="w-1/2">
+                                <input type="number" name="prix_max" placeholder="Max" value="{{ request.GET.prix_max|default:'' }}" class="w-1/2">
+                            </div>
+                        </div>
+
+                        <!-- Stock -->
+                        <div>
+                            <label><i class="fas fa-boxes mr-1"></i> Stock</label>
+                            <select name="stock">
+                                <option value="">Tous</option>
+                                <option value="en_stock" {% if request.GET.stock == 'en_stock' %}selected{% endif %}>En stock</option>
+                                <option value="rupture" {% if request.GET.stock == 'rupture' %}selected{% endif %}>Rupture</option>
+                            </select>
+                        </div>
+
+                        <!-- Promo -->
+                        <div>
+                            <label><i class="fas fa-tag mr-1"></i> Promotions</label>
+                            <select name="promo">
+                                <option value="">Tous</option>
+                                <option value="true" {% if request.GET.promo == 'true' %}selected{% endif %}>En promo</option>
+                            </select>
+                        </div>
+
+                        <!-- Tri -->
+                        <div>
+                            <label><i class="fas fa-sort mr-1"></i> Trier par</label>
+                            <select name="sort">
+                                <option value="">Plus récent</option>
+                                <option value="prix_asc" {% if request.GET.sort == 'prix_asc' %}selected{% endif %}>Prix croissant</option>
+                                <option value="prix_desc" {% if request.GET.sort == 'prix_desc' %}selected{% endif %}>Prix décroissant</option>
+                                <option value="nom_asc" {% if request.GET.sort == 'nom_asc' %}selected{% endif %}>Nom A → Z</option>
+                            </select>
+                        </div>
+
+                        <!-- Boutons -->
+                        <div class="space-y-2 pt-2">
+                            <button type="submit" class="btn-primary w-full py-2 rounded-lg font-semibold text-sm">
+                                <i class="fas fa-filter mr-2"></i> Filtrer
+                            </button>
+                            <a href="{% url 'products_app:products-list' %}" class="block w-full py-2 text-center bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition text-sm">
+                                <i class="fas fa-times mr-2"></i> Réinitialiser
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- ===== PRODUITS ===== -->
+            <div class="lg:col-span-3">
+                
+                <!-- Résultats -->
+                <div class="flex justify-between items-center mb-4 text-sm text-gray-500">
+                    <p>{{ page_obj.paginator.count }} produit{{ page_obj.paginator.count|pluralize }}</p>
+                    <span class="text-xs">Affichage {{ page_obj.start_index }} - {{ page_obj.end_index }}</span>
+                </div>
+
+                <!-- Grille produits -->
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {% for product in products %}
+                    <div class="product-card animate-fade-in-up" style="animation-delay: {{ forloop.counter|add:'1'|stringformat:'s' }}00ms">
+                        
+                        <!-- Image -->
+                        <a href="{% url 'products_app:detail-produit-slug' slug=product.slug %}" class="product-image block">
+                            {% if product.image_principale %}
+                                <img src="{{ product.image_principale.url }}" alt="{{ product.nom }}" class="w-full h-full object-contain">
+                            {% else %}
+                                <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+                                    <i class="fas fa-box text-4xl text-gray-300"></i>
+                                </div>
+                            {% endif %}
+                        </a>
+
+                        <!-- Contenu -->
+                        <div class="p-3">
+                            <!-- Badges -->
+                            <div class="flex flex-wrap gap-1 mb-1">
+                                {% if product.est_en_promo %}
+                                    <span class="badge-promo"><i class="fas fa-tag"></i> Promo</span>
+                                {% endif %}
+                                {% if product.est_nouveau %}
+                                    <span class="bg-blue-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                                        <i class="fas fa-sparkles"></i> Nouveau
+                                    </span>
+                                {% endif %}
+                                {% if product.est_vedette %}
+                                    <span class="bg-yellow-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                                        <i class="fas fa-star"></i> Vedette
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                            <!-- Nom -->
+                            <h4 class="font-semibold text-gray-800 text-sm line-clamp-1">
+                                {{ product.nom }}
+                            </h4>
+                            
+                            <!-- Marque / Catégorie -->
+                            <p class="text-xs text-gray-400">
+                                {% if product.marque %}{{ product.marque.nom }}{% else %}{{ product.categorie.nom }}{% endif %}
+                            </p>
+
+                            <!-- Prix -->
+                            <div class="mt-1 flex items-center gap-2">
+                                {% if product.est_en_promo %}
+                                    <span class="text-sm font-bold text-red-600">{{ product.prix_promo|intcomma }} FCFA</span>
+                                    <span class="text-xs text-gray-400 line-through">{{ product.prix|intcomma }}</span>
+                                {% else %}
+                                    <span class="text-sm font-bold text-blue-600">{{ product.prix|intcomma }} FCFA</span>
+                                {% endif %}
+                            </div>
+
+                            <!-- Stock -->
+                            <div class="mt-1 flex items-center gap-1">
+                                <span class="badge-stock {% if product.est_en_stock %}en-stock{% else %}rupture{% endif %}">
+                                    {% if product.est_en_stock %}
+                                        <i class="fas fa-check-circle"></i> En stock
+                                    {% else %}
+                                        <i class="fas fa-times-circle"></i> Rupture
+                                    {% endif %}
+                                </span>
+                            </div>
+
+                            <!-- Bouton -->
+                            <a href="{% url 'products_app:detail-produit-slug' slug=product.slug %}" 
+                               class="mt-2 w-full py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 text-xs font-semibold transition text-center block">
+                                Voir le produit
+                            </a>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-span-full text-center py-12">
+                        <div class="w-20 h-20 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                            <i class="fas fa-box-open text-3xl text-gray-400"></i>
+                        </div>
+                        <p class="text-gray-500">Aucun produit trouvé.</p>
+                        <p class="text-gray-400 text-sm">Essayez de modifier vos filtres.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- ===== PAGINATION ===== -->
+                {% if is_paginated %}
+                <div class="mt-8 flex justify-center gap-2">
+                    {% if page_obj.has_previous %}
+                        <a href="?page=1{% for key, value in filters.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+                           class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <span class="px-3 py-1.5 bg-blue-600 text-white rounded-lg font-semibold text-sm">{{ num }}</span>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <a href="?page={{ num }}{% for key, value in filters.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+                               class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm">
+                                {{ num }}
+                            </a>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}{% for key, value in filters.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+                           class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="bg-gray-800 text-gray-400 py-6 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center text-sm">
+            <p>&copy; {% now "Y" %} KOZ Services — Tous droits réservés</p>
+            <p class="font-medium text-slate-700">Conçu par <strong>SPIRIT-DIGIT Agency</strong></p>
+        </div>
+    </footer>
+
+</body>
+</html>

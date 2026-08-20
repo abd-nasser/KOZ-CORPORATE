@@ -1,0 +1,56 @@
+
+                        {% for client in clients %}
+                        <tr class="hover:bg-gray-50/80 transition">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-2.5 h-2.5 rounded-full flex-shrink-0
+                                        {% if client.est_en_ligne %} bg-green-500
+                                        {% elif client.est_hors_ligne %} bg-gray-400
+                                        {% else %} bg-red-400 {% endif %}">
+                                    </span>
+                                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+                                        {{ client.nom_complet|slice:":1"|upper }}
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-800 text-sm">{{ client.nom_complet }}</p>
+                                        <p class="text-xs text-gray-500">{{ client.email }}</p>
+                                    </div>
+                                    {% if client.nb_message_non_lus > 0 %}
+                                    <span class="badge bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold ml-1">
+                                        {{ client.nb_message_non_lus }}
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-600 max-w-xs truncate">
+                                {{ client.dernier_message.contenu|default:"—"|truncatechars:40 }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-xs text-gray-500">
+                                {{ client.dernier_message.date_envoi|timesince|default:"—" }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                                <div class="flex items-center justify-center gap-3">
+                                    <!-- Chat -->
+                                    <a href="{% url 'chat_app:chat-view' client.id %}" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Ouvrir le Tchat">
+                                        <i class="fas fa-comment-dots text-base"></i>
+                                    </a>
+                                    <!-- Profil -->
+                                    <a href="{% url 'client_app:client-detail' client.id %}" class="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition" title="Fiche Client">
+                                        <i class="fas fa-user-circle text-base"></i>
+                                    </a>
+                                    <!-- Envoi express Offre / Devis -->
+                                    <a href="#" class="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition" title="Créer & Envoyer un Devis">
+                                        <i class="fas fa-paper-plane text-base"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="px-6 py-12 text-center text-gray-500">
+                                <i class="fas fa-users text-4xl mb-3 opacity-30 text-gray-400"></i>
+                                <p class="text-base font-medium">Aucun client assigné pour le moment.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    

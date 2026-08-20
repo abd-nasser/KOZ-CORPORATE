@@ -1,0 +1,159 @@
+{% load static %}
+{% load tailwind_tags %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    {% tailwind_css %}
+    <script src="{% static 'js/htmx.min.js' %}" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/directeur/directeur_list_doc_style.css' %}">
+    <title>Dossiers documentaires - KOZ Services</title>
+    <style>
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .animate-fade-in-up {
+            animation: fadeInUp 0.5s ease-out forwards;
+        }
+        .animate-slide-in-right {
+            animation: slideInRight 0.4s ease-out forwards;
+        }
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .filters-container {
+            transition: all 0.3s ease;
+        }
+        .filters-container:focus-within {
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 font-inter">
+
+    <!-- Messages flash -->
+    {% if messages %}
+    <div class="fixed top-20 right-5 z-50 space-y-2">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} shadow-xl rounded-xl animate-slide-in-right">
+            <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% else %}info-circle{% endif %} mr-2"></i>
+            <span>{{ message }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Navbar -->
+    <nav class="glass-nav sticky top-0 z-40 shadow-sm">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl flex items-center justify-center shadow-lg">
+                    <span class="text-white font-bold text-xl">K</span>
+                </div>
+                <span class="text-xl font-bold bg-gradient-to-r from-blue-700 to-indigo-600 bg-clip-text text-transparent">KOZ Services</span>
+                <span class="hidden md:inline-block px-2 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">Dossiers</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="{% url 'directeur_app:directeur-view' %}" class="text-gray-600 hover:text-blue-600 transition text-sm flex items-center gap-1">
+                    <i class="fas fa-arrow-left"></i> Retour
+                </a>
+            </div>
+        </div>
+    </nav>
+<style>
+    main{
+        min-height: 81vh;
+    }
+</style>
+    <main class="container mx-auto px-4 py-8 max-w-7xl">
+        
+        <!-- En-tête -->
+        <div class="mb-6 animate-fade-in-up">
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-3">
+                <i class="fas fa-folder-open text-blue-600"></i>
+                Dossiers documentaires
+            </h1>
+            <p class="text-gray-500 text-sm mt-1">Consultez et gérez tous les dossiers clients</p>
+        </div>
+
+        <!-- Filtres premium -->
+        <div class="filters-container bg-white rounded-2xl shadow-lg p-6 mb-6 border border-gray-100 animate-fade-in-up" style="animation-delay: 0.1s">
+            <div class="flex items-center gap-2 mb-4">
+                <i class="fas fa-sliders-h text-blue-500 text-sm"></i>
+                <h2 class="text-sm font-semibold text-gray-700">Filtres de recherche</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Recherche -->
+                <div class="relative">
+                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                    <input type="text" name="q" 
+                           placeholder="Client, type de document..."
+                           class="input input-bordered w-full pl-10 focus:ring-2 focus:ring-blue-500"
+                           hx-get="{% url 'leads_app:documents-list' %}"
+                           hx-target="#document-list-container"
+                           hx-trigger="keyup changed delay:500ms"
+                           hx-include=".filters-container select, .filters-container input"
+                           value="{{ request.GET.q }}">
+                </div>
+
+                <!-- Filtre statut -->
+                <div class="relative">
+                    <i class="fas fa-tag absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                    <select name="statut" 
+                            class="select select-bordered w-full pl-10 focus:ring-2 focus:ring-blue-500"
+                            hx-get="{% url 'leads_app:documents-list' %}"
+                            hx-target="#document-list-container"
+                            hx-trigger="change"
+                            hx-include=".filters-container select, .filters-container input">
+                        <option value="">📌 Tous statuts</option>
+                        {% for value, label in statut_choices %}
+                        <option value="{{ value }}" {% if request.GET.statut == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="text-center mt-5">
+                <a href="{% url 'leads_app:documents-list' %}" 
+                   class="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-blue-600 transition px-4 py-2 rounded-full hover:bg-blue-50"
+                   hx-get="{% url 'leads_app:documents-list' %}"
+                   hx-target="#document-list-container">
+                    <i class="fas fa-undo-alt"></i> Réinitialiser les filtres
+                </a>
+            </div>
+        </div>
+
+        <!-- Liste des documents -->
+        <div id="document-list-container" 
+             class="animate-fade-in-up"
+             style="animation-delay: 0.2s"
+             hx-get="{% url 'leads_app:documents-list' %}"
+             hx-trigger="load"
+             hx-swap="innerHTML">
+            <div class="text-center py-16">
+                <i class="fas fa-spinner fa-spin text-4xl text-blue-500"></i>
+                <p class="text-gray-500 mt-3">Chargement des dossiers...</p>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white py-6 mt-12">
+        <div class="container mx-auto px-4 text-center text-sm text-gray-400">
+            <p>&copy; {% now "Y" %} KOZ Services - Tous droits réservés</p>
+            <p class="mt-1 text-xs">Gestion des dossiers documentaires</p>
+        </div>
+    </footer>
+
+</body>
+</html>

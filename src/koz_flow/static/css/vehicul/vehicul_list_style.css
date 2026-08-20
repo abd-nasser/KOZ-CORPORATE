@@ -1,0 +1,194 @@
+/* ========== PARTICULES ANIMÉES ========== */
+#particles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.particle {
+    position: absolute;
+    background: rgba(96, 165, 250, 0.4);
+    border-radius: 50%;
+    animation: floatParticle linear infinite;
+    filter: blur(1px);
+}
+
+@keyframes floatParticle {
+    0% {
+        transform: translateY(0) translateX(0);
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.6;
+    }
+    90% {
+        opacity: 0.6;
+    }
+    100% {
+        transform: translateY(-100vh) translateX(20px);
+        opacity: 0;
+    }
+}
+/*================================================ */
+
+
+/* =============== VEHICULE CARD ================= */
+.card {
+    width: 100%;
+    height: 380px;
+    perspective: 1000px;
+    overflow: hidden;
+    border-radius: 25px;
+    margin-bottom: 1.5rem;
+}
+
+.card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.15s ease-out;
+    transform-style: preserve-3d;
+    transform-origin: center center;
+    border-radius: 25px;
+}
+
+.content-card {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 25px;
+    overflow: hidden;
+}
+
+.content-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.card-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+    color: white;
+    padding: 20px;
+    border-radius: 0 0 25px 25px;
+    text-align: center;
+}
+
+.card-info h3 {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+.card-info h5{
+    font-size: 1rem;
+    font-style: italic;
+    margin-top: 2px;
+}
+.card-info .prix {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #348cf1;
+}
+
+.card-info .dispo {
+    font-size: 0.8rem;
+    margin: 5px 0;
+}
+
+.card-info a {
+    position: relative;
+    z-index: 20;
+    display: inline-block;
+    background: #3b82f6;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 30px;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+
+.card-info a:hover {
+    background: #2563eb;
+    
+
+}
+
+
+.glow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 25px;
+    background: radial-gradient(circle at 50% 0%, rgb(129, 141, 154), transparent);
+    mix-blend-mode: hard-light;
+    pointer-events: none;
+    transition: background 0.1s ease;
+}
+
+
+main{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    align-items: center;
+   
+    
+}
+
+
+
+
+@media (max-width: 640px) {
+   .catalogue-layout {
+    display: flex;
+    gap: 1.5rem;
+    min-height: auto;
+    align-items: stretch;
+    justify-content: center;
+    width: 100%;
+    flex-direction: column;
+   }
+
+   .hero-column {
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+        min-height: 320px;
+        margin: 0 auto;
+    }
+
+    .card {
+        width: min(100%, 280px);
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
+@media(max-width: 480px){
+    .catalogue-layout {
+        gap: 1rem;
+    }
+
+    .hero-column {
+        min-height: 260px;
+    }
+
+    .card {
+        width: 100%;
+        max-width: 100%;
+    }
+}

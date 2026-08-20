@@ -1,0 +1,283 @@
+{% load static %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ marque.nom }} - Véhicules - KOZ Services</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-up {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            border: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.5);
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            transform: translateY(-2px);
+            box-shadow: 0 20px 35px -8px rgba(59, 130, 246, 0.7);
+        }
+        .vehicle-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        .vehicle-card:hover {
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.12);
+            transform: translateY(-4px);
+            border-color: #3b82f6;
+        }
+        .vehicle-image {
+            height: 220px;
+            overflow: hidden;
+            background: #f3f4f6;
+        }
+        .vehicle-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        .vehicle-card:hover .vehicle-image img {
+            transform: scale(1.05);
+        }
+        .brand-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 3rem;
+            margin-bottom: 2rem;
+        }
+        .brand-logo-area {
+            width: 120px;
+            height: 120px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+        .brand-logo-area img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+        }
+        .brand-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1rem;
+            border: 1px solid #e5e7eb;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .brand-card:hover {
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+        .brand-card-logo {
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.5rem;
+        }
+        .brand-card-logo img {
+            max-width: 80%;
+            max-height: 80%;
+            object-fit: contain;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="glass-nav sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <a href="{% url 'site-marque-list' %}" class="text-gray-700 hover:text-blue-600 transition-colors">
+                    <i class="fas fa-arrow-left mr-2"></i> Retour aux marques
+                </a>
+            </div>
+            <a href="/" class="font-bold text-2xl text-blue-600">
+                KOZ Services
+            </a>
+            <div class="w-20"></div>
+        </div>
+        {% if messages %}
+        <div class="fixed top-20 right-5 z-50 space-y-2">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} shadow-xl rounded-xl animate-slide-in-right">
+                <span>{{ message }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 py-12">
+        <!-- Brand Header -->
+        <div class="brand-header animate-fade-in-up">
+            <div class="flex items-start gap-6">
+                {% if marque.logo %}
+                    <div class="brand-logo-area">
+                        <img src="{{ marque.logo.url }}" alt="{{ marque.nom }}">
+                    </div>
+                {% else %}
+                    <div class="brand-logo-area">
+                        <i class="fas fa-car-side text-4xl opacity-30"></i>
+                    </div>
+                {% endif %}
+                
+                <div class="flex-1">
+                    <h1 class="text-4xl md:text-5xl font-bold mb-4">{{ marque.nom }}</h1>
+                    <div class="flex items-center gap-6 text-sm opacity-90">
+                        <div>
+                            <i class="fas fa-car mr-2"></i>
+                            {{ vehicules.count }} véhicule{{ vehicules.count|pluralize }}
+                        </div>
+                        <div>
+                            <i class="fas fa-check-circle mr-2"></i>
+                            Marque partenaire
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vehicles Section -->
+        <div class="mb-12">
+            <h2 class="text-3xl font-bold text-gray-900 mb-8">
+                <i class="fas fa-car mr-3 text-blue-600"></i>
+                Véhicules {{ marque.nom }} disponibles
+            </h2>
+
+            {% if vehicules %}
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in-up">
+                    {% for vehicule in vehicules %}
+                        <div class="vehicle-card animate-fade-in-up" style="animation-delay: {{ forloop.counter|add:'1'|stringformat:'s' }}00ms">
+                            <!-- Image -->
+                            <a href="{% url 'site-vehicul-detail' vehicule.pk %}" class="vehicle-image block">
+                                {% if vehicule.image_display %}
+                                    <img src="{{ vehicule.image_display.url }}" alt="{{ vehicule.modele }}">
+                                {% else %}
+                                    <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-100 to-indigo-100">
+                                        <i class="fas fa-car text-5xl text-blue-400"></i>
+                                    </div>
+                                {% endif %}
+                            </a>
+
+                            <!-- Content -->
+                            <div class="p-4">
+                                <h3 class="text-lg font-bold text-gray-900 mb-1">
+                                    {{ vehicule.modele }}
+                                </h3>
+                                <p class="text-sm text-gray-500 mb-3">{{ vehicule.annee }}</p>
+
+                                <!-- Price -->
+                                <p class="text-2xl font-bold text-blue-600 mb-3">
+                                    {{ vehicule.prix|floatformat:0 }} €
+                                </p>
+
+                                <!-- Details -->
+                                <div class="space-y-2 text-sm text-gray-600 border-t border-b border-gray-200 py-3 mb-4">
+                                    <div>
+                                        <i class="fas fa-road text-blue-600 mr-2"></i>
+                                        {{ vehicule.kilometrage|intcomma }} km
+                                    </div>
+                                    <div>
+                                        <i class="fas fa-gas-pump text-blue-600 mr-2"></i>
+                                        {{ vehicule.get_carburant_display }}
+                                    </div>
+                                    {% if vehicule.type_vehicule %}
+                                        <div>
+                                            <i class="fas fa-car-side text-blue-600 mr-2"></i>
+                                            {{ vehicule.type_vehicule.nom }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- View Button -->
+                                <a href="{% url 'site-vehicul-detail' vehicule.pk %}" class="btn-primary block w-full py-2 rounded-lg font-semibold text-center">
+                                    <i class="fas fa-eye mr-2"></i> Voir les détails
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <!-- No Vehicles -->
+                <div class="text-center py-12">
+                    <div class="bg-white rounded-lg p-12 border border-gray-200">
+                        <i class="fas fa-inbox text-gray-400 text-5xl mb-4 block"></i>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2">Aucun véhicule disponible</h3>
+                        <p class="text-gray-600 mb-6">
+                            Aucun véhicule de cette marque n'est actuellement disponible.
+                        </p>
+                        <a href="{% url 'site-vehicul-list' %}" class="btn-primary px-6 py-3 rounded-lg font-semibold">
+                            <i class="fas fa-arrow-left mr-2"></i> Voir tous les véhicules
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Other Brands Section -->
+        {% if autres_marques %}
+        <div class="mt-16 pt-12 border-t border-gray-200">
+            <h2 class="text-3xl font-bold text-gray-900 mb-8">
+                <i class="fas fa-star mr-3 text-blue-600"></i>
+                Autres marques
+            </h2>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                {% for autre_marque in autres_marques %}
+                    <a href="{% url 'site-marque-detail' autre_marque.pk %}" class="brand-card">
+                        <div class="brand-card-logo">
+                            {% if autre_marque.logo %}
+                                <img src="{{ autre_marque.logo.url }}" alt="{{ autre_marque.nom }}">
+                            {% else %}
+                                <i class="fas fa-car-side text-3xl text-gray-300"></i>
+                            {% endif %}
+                        </div>
+                        <h4 class="font-bold text-gray-900 text-sm">{{ autre_marque.nom }}</h4>
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-400 py-8 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p>&copy; {% now 'Y' %} KOZ Services - Concessionnaire automobile</p>
+            <p class="font-medium text-slate-700">Conçu par <strong>SPIRIT-DIGIT Agency</strong></p>
+        </div>
+    </footer>
+</body>
+</html>

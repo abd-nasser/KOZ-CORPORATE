@@ -1,0 +1,2063 @@
+{% load static %}
+{% load tailwind_tags %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="google-site-verification" content="8zepDTq803R8qsLctGCJ5kqWdBvS4pCEkoOgm_bwkQo"/>
+    {% tailwind_css %}
+    <title>KOZ Services - Votre voiture à crédit, vos pièces en ligne</title>
+    <link rel="stylesheet" href="{% static 'css/home/home_style.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="alternate" href="https://koz-corporate.pro/" hreflang="fr" />
+    <link rel="alternate" href="https://koz-corporate.pro/" hreflang="x-default" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script src="{% static 'js/htmx.min.js' %}" defer></script>
+    <script src="{% static 'js/vendor/gsap.min.js' %}" defer></script>
+    <script src="{% static 'js/vendor/ScrollTrigger.min.js' %}" defer></script>
+    <script src="{% static 'js/vendor/lenis.min.js' %}" defer></script>
+    <script src="https://cdn.plyr.io/3.7.8/plyr.js" defer></script>
+    <script src="{% static 'js/home/gsap_anim.js' %}" defer></script>
+</head>
+<body>
+
+    <!-- ========== NAVBAR PREMIUM ========== -->
+    <nav class="navbar fixed top-0 z-50 w-full bg-white/90 backdrop-blur-md border-b border-gray-200/50 shadow-sm transition-all duration-300">
+        <div class="container mx-auto px-4 flex justify-between items-center h-16">
+            
+            <!-- ===== LOGO ===== -->
+            <div class="flex items-center gap-3">
+                <a href="{% url 'home_app:home-page' %}" class="flex items-center gap-2 group">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl flex items-center justify-center shadow-md transition-transform duration-300 group-hover:scale-105">
+                        <img src="{% static 'images/Koz_logo_noBack.png' %}" alt="KOZ" class="w-7 h-7 object-contain">
+                    </div>
+                    <span class="text-xl font-bold text-gray-800 hidden sm:inline">KOZ <span class="text-blue-600">Services</span></span>
+                </a>
+            </div>
+        
+            <!-- ===== LIENS CENTRAUX ===== -->
+            <div class="hidden md:flex items-center gap-1 lg:gap-2">
+                <a href="{% url 'home_app:home-page' %}" 
+                class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                    Accueil
+                </a>
+                <a href="{% url 'vehicul_app:site-vehicul-list' %}" 
+                class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                    Catalogue
+                </a>
+                <a href="#financement" 
+                class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                    Financement
+                </a>
+                <a href="#contact" 
+                class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                    Contact
+                </a>
+            </div>
+
+            <!-- ===== ACTIONS ===== -->
+            <div class="flex items-center gap-2 sm:gap-3">
+                {% if user.is_authenticated %}
+                    
+                    
+                    {% if user.role == "client" %}
+                    <a href="{% url 'client_app:client-view' %}" 
+                    class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                        <i class="fas fa-chart-simple text-blue-500"></i>
+                        <span class="hidden lg:inline">Tableau de bord</span>
+                    </a>
+
+                    <!-- Panier -->
+                    <a href="{% url 'order_app:panier' %}" 
+                    class="relative p-2 rounded-lg text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                        <i class="fas fa-shopping-cart text-lg"></i>
+                        {% if user.panier.articles.count > 0 %}
+                        <span class="absolute -top-1 -right-1 bg-blue-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-md ring-2 ring-white">
+                            {{ user.panier.articles.count }}
+                        </span>
+                        {% endif %}
+                    </a>
+                    {% elif user.role == "commercial" %}
+                    <a href="{% url 'commercial_app:commercial-view' %}" 
+                    class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                        <i class="fas fa-chart-simple text-blue-500"></i>
+                        <span class="hidden lg:inline">Tableau de bord</span>
+                    </a>
+                    {% else %}
+                    <a href="{% url 'directeur_app:directeur-view' %}" 
+                    class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                        <i class="fas fa-chart-simple text-blue-500"></i>
+                        <span class="hidden lg:inline">Tableau de bord</span>
+                    </a>
+                    {% endif %}
+                        
+                    
+
+                    <!-- Utilisateur -->
+                    <div class="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-gray-50/50 border border-gray-100">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white text-sm font-bold shadow-sm">
+                            {{ user.nom_complet|slice:":1"|upper }}
+                        </div>
+                        <span class="text-sm font-medium text-gray-700 hidden sm:inline">
+                            {{ user.nom_complet|truncatechars:15 }}
+                        </span>
+                    </div>
+
+                    <!-- Déconnexion -->
+                    <a href="{% url 'auth_app:logout-simple-sur-home-page' %}" 
+                    class="btn btn-error btn-sm text-white hover:bg-red-700 transition shadow-sm flex items-center gap-1.5">
+                        <i class="fas fa-sign-out-alt text-xs"></i>
+                        <span class="hidden sm:inline">Déconnexion</span>
+                    </a>
+
+                {% else %}
+                    
+                    <!-- Connexion -->
+                    <button onclick="document.getElementById('login_simple_modal').showModal()" 
+                            class="btn btn-ghost btn-sm  sm:inline-flex hover:bg-gray-100 transition">
+                        Connexion
+                    </button>
+                    
+                    <!-- Inscription -->
+                    <button onclick="document.getElementById('register_modal').showModal()" 
+                            class="btn btn-sm bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg transition flex items-center gap-2">
+                        <i class="fas fa-user-plus"></i>
+                        <span class="hidden sm:inline">Inscription</span>
+                    </button>
+
+                {% endif %}
+
+                <!-- Burger -->
+                <button id="burgerBtn" class="md:hidden btn btn-ghost btn-sm hover:bg-gray-100 transition">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- ===== MENU MOBILE ===== -->
+        <div id="mobileMenu" class="hidden md:hidden bg-white border-t border-gray-200 p-4 shadow-lg">
+            <div class="flex flex-col gap-2 text-gray-600 text-sm">
+                <a href="{% url 'home_app:home-page' %}" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Accueil</a>
+                <a href="{% url 'vehicul_app:site-vehicul-list' %}" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Catalogue</a>
+                <a href="#financement" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Financement</a>
+                <a href="#contact" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Contact</a>
+                <hr class="my-2">
+                
+                {% if user.is_authenticated %}
+                    <a href="#" class="px-4 py-2.5 rounded-lg text-blue-600 font-medium hover:bg-blue-50 transition">
+                    <i class="fas fa-shopping-cart mr-2"></i> Panier ({{ user.panier.nb_articles|default:0 }})
+                </a>
+                {% endif %}
+                    
+                
+            </div>
+        </div>
+        <!-- Messages flash -->
+            {% if messages %}
+            <div class="fixed top-20 right-5 z-50 space-y-2">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} shadow-xl rounded-xl animate-slide-in-right">
+                    <span>{{ message }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+    </nav>
+
+
+    <!-- ============================================================ -->
+    <!-- ==========     HERO IMMERSIVE (fond fixe)         ========== -->                                
+    <!-- ============================================================ -->
+    <div class="frame-container">
+        <img id="frame" src="{% static 'frames/ECO_SYS_PROJECTKoz_Flowsrckoz_flowstaticframesframe-0001.jpg' %}" alt="">
+    </div>
+    <div id="result-toast-container" class="result-toast-container"></div>
+<section class="hero-section  relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
+        
+        <!-- ===== CONTENU PRINCIPAL ===== -->
+        <div class="container hero_fade mx-auto px-4 text-center text-white relative z-10">
+            <h1 class="text-5xl md:text-7xl font-extrabold leading-tight mb-6">
+                Votre voiture à crédit.<br>
+                <span class="text-blue-200">Vos pièces en ligne.</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-blue-100 max-w-2xl mx-auto mb-8">
+                KOZ Services n'achetez pas une auto, changer votre vie
+            </p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="#section-cta" class="btn btn-white btn-lg text-blue-700 hover:bg-blue-50 shadow-lg">
+                    Découvrir nos offres
+                </a>
+                <a href="#financement" class="btn btn-outline trigger-box btn-lg text-white border-white/50 hover:bg-white/10">
+                    Financer mon auto
+                </a>
+            </div>
+        </div>
+
+        <!-- ===== TROIS BOX LATÉRALES (apparition au scroll) ===== -->
+        
+        <div class="trois_box">
+            
+    <!-- Box 1 : gauche -->
+            <a href="#infos-rdv"  class="box box-left">
+                <div class="box-icon"><i class="fas fa-calendar-check"></i></div>
+                <h1 class="box-title">Prendre un rendez vous</h1>
+                <p class="box-text">
+                    Acheter une voiture est une décision importante. <br>
+                    avec <strong class= "text-indigo-950">KOZ SERVICES</strong>, évitez les mauvaises surprises <br>
+                    grace à notre expertise automobible.
+                </p>
+            
+            </a>
+
+
+            <!-- Box 2 : droite -->
+            <a href="#financement" class="box box-right">
+                <div class="box-icon"><i class='fas fa-hand-holding-usd' style='font-size:36px'></i></div>
+                <h4 class="box-title">Financement Flexible !</h4>
+                <p class="box-text">
+                    <i class="fas fa-check"></i><strong class= "text-indigo-950">Paiement</strong> en plusieurs fois <br>
+                    <i class="fas fa-check"></i>Adapté à votre budget
+                </p>
+                <p class="box-text">
+                    Decouvrez tout sur les <br>
+                <strong><em  class= "text-indigo-950">Demandes</em></strong> et <strong><em  class= "text-indigo-950">offres</em></strong> <br> 
+                de financement
+                </p>
+
+            </a>
+
+        </div>
+        
+
+</section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION ACTUALITÉ – PREMIUM                                  -->
+    <!-- ============================================================ -->
+    <section class="py-16 sm:py-20 relative  actualite_sec  bg-white overflow-hidden">
+        
+        <!-- Dégradé de fond -->
+        <div class="absolute inset-0 pointer-events-none">
+            <div class="absolute top-0 right-0 w-96 h-96 bg-blue-50/30 rounded-full blur-3xl"></div>
+            <div class="absolute bottom-0 left-0 w-96 h-96 bg-indigo-50/30 rounded-full blur-3xl"></div>
+        </div>
+
+        <div class="container mt-0 actualite_fade min-h-auto mx-auto px-4 max-w-7xl relative z-10">
+            
+            <!-- ===== EN-TÊTE ===== -->
+            <div class="text-center informes mb-2">
+                <span class="inline-block text-xs font-semibold text-blue-600 uppercase tracking-[0.2em] bg-blue-50 px-5 py-2 rounded-full mb-4 border border-blue-100">
+                    📰 Actualités
+                </span>
+                <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-800">
+                    Dernières <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">actualités</span>
+                </h2>
+                <p class="text-gray-500  mt-3 max-w-2xl mx-auto text-sm sm:text-base">
+                    Restez informés des dernières nouveautés de KOZ Services
+                </p>
+            </div>
+
+            <!-- ===== GRILLE PRINCIPALE ===== -->
+            {% if actualites %}
+            {% with actu=actualites.0 %}
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+                
+                <!-- ===== COLONNE GAUCHE : HERO (50%) ===== -->
+                <div class="relative actu_video_img act-hero overflow-hidden bg-gray-900 aspect-[6/9] lg:aspect-auto group">
+                    
+                    <!-- VIDÉO OU IMAGE -->
+                    {% if actu.video_file or actu.video_url %}
+                        <!-- Vidéo -->
+                        <div class=" relative w-full h-full">
+                            {% if actu.video_file %}
+                                <video class="w-full  h-full object-cover" controls playsinline preload="metadata">
+                                    <source src="{{ actu.video_file.url }}" type="video/mp4">
+                                </video>
+                            {% elif actu.video_url %}
+                                <iframe class="w-full h-full" src="{{ actu.video_url }}" frameborder="0" allowfullscreen></iframe>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <!-- Image -->
+                        <img src="{{ actu.image_principale.url }}" 
+                            alt="{{ actu.titre }}"
+                            class="w-full h-full actu_video_img object-cover transition duration-700 group-hover:scale-105">
+                        <!-- Overlay -->
+                        
+                    {% endif %}
+                    
+                    <!-- Badges superposés -->
+                    <div class="absolute top-4 left-4 flex flex-wrap gap-2 z-10">
+                        <span class="text-3xl actu_type font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-yellow-800 px-3 py-1"
+                            >
+                            <i class="fas {{ actu.type_icone }} mr-1"></i>
+                            <em>{{ actu.get_type_display }}</em>
+                        </span>
+                        {% if actu.est_vedette %}
+                        <span class="text-xl font-bold actu_vedette  text-yellow-600 px-3 py-1 ">
+                            <i class="fas fa-star mr-1"></i><em>Vedette</em> 
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <div class="absolute bottom-8 left-0 right-0 p-6 z-10 bg-gradient-to-t from-black/90 via-black/50 to-transparent">
+                        <span class="text-xs text-white/60 flex items-center gap-2">
+                            <i class="fas fa-calendar-alt"></i>
+                            {{ actu.date_evenement|date:"d/m Y" }}
+                        </span>
+                        <h3 class="text-xl actu_titre sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-yellow-800 mt-1"><em>{{ actu.titre }}</em></h3>
+                        <p class="text-sm text-white/75 actu_mini_descript mt-1 line-clamp-2">{{ actu.description_courte|default:actu.description|truncatechars:120 }}</p>
+                        
+                    </div>
+                    
+                    
+                    
+                </div>
+
+                <!-- ===== COLONNE DROITE (50%) ===== -->
+                <div class="flex flex-col gap-4">
+                    
+                    <!-- ===== HAUT (60%) : DESCRIPTION AVEC SPLITTING ===== -->
+                    <div class="flex-1 relative bg-gradient-to-br actu_descript from-blue-50/50 to-indigo-50/50 rounded-2xl p-6 border border-blue-100/50 relative overflow-hidden">
+                        <!-- Icône de fond -->
+                        <div class="absolute -top-10 -right-10 text-8xl text-blue-100/20">
+                            <i class="fas fa-quote-right"></i>
+                        </div>
+                        
+                        <span class="text-xs font-semibold text-blue-600 uppercase tracking-wider">
+                            <i class="fas fa-align-left mr-1"></i> À découvrir
+                        </span>
+                        
+                        <!-- Description avec Splitting -->
+                        <div data-splitting class="description-splitting text-leading mt-2">
+                            <p class="text-base sm:text-lg text-gray-700">
+                                {{ actu.description|truncatechars:250 }}
+                            </p>
+                        </div>
+                        
+                        <a href="#" 
+                        class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium text-sm mt-4 group/link">
+                            En savoir plus
+                            <i class="fas fa-arrow-right text-xs group-hover/link:translate-x-1 transition-transform"></i>
+                        </a>
+                    </div>
+
+                    <!-- ===== BAS (40%) : GALERIE D'IMAGES ===== -->
+                    {% if actu.images_list|length > 1 %}
+                    <div class="grid actu-img-galerie grid-cols-2 sm:grid-cols-3 gap-3">
+                        {% for image in actu.images_list %}
+                            {% if forloop.counter0 > 0 and forloop.counter0 < 4 %}
+                            <div class="relative aspect-square rounded-xl overflow-hidden bg-gray-200 group/img cursor-pointer hover:shadow-lg transition"
+                                onclick="openLightbox('{{ image.url }}')">
+                                <img src="{{ image.url }}" 
+                                    alt="{{ actu.titre }}" 
+                                    class="w-full h-full object-cover group-hover/img:scale-110 transition duration-500">
+                                <div class="absolute inset-0 bg-black/20 opacity-0 group-hover/img:opacity-100 transition flex items-center justify-center">
+                                    <i class="fas fa-search-plus text-white text-xl"></i>
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                </div>
+            </div>
+            {% endwith %}
+            {% else %}
+            
+            <!-- ===== AUCUNE ACTUALITÉ ===== -->
+            <div class="text-center py-16">
+                <div class="w-24 h-24 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                    <i class="fas fa-newspaper text-4xl text-gray-400"></i>
+                </div>
+                <p class="text-gray-500 text-lg">Aucune actualité disponible</p>
+                <p class="text-gray-400 text-sm mt-1">Revenez bientôt pour découvrir nos dernières nouvelles</p>
+            </div>
+            
+            {% endif %}
+
+        </div>
+    </section>
+
+
+    <!-- ============================================================ -->
+    <!-- SECTION SERVICES – SCROLL IMMERSIF                           -->
+    <!-- ============================================================ -->
+    <section id="services-section" class="services-section   bg-blue-200 relative overflow-hidden">
+            <div class="text-center serv_fade fade-text relative mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-black">Nos <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">services</span> </h2>
+                <p class="text-gray-700 mt-2">Des solutions adaptées pour entretenir, financer et équiper votre véhicule en toute sérénité.</p>
+            </div>
+            
+            <div class="services-contain serv_fade relative w-full h-[70vh] sm:h-[60vh] md:h-[70vh] lg:h-[80vh] overflow-hidden">
+                
+                <!-- Image de fond (change au scroll) -->
+                <div class="services-bg-image  " id="services-bg-image">
+                    <img id="services-main-image" src="" alt="Service KOZ" class="w-full  aspect-[16/9] object-cover object-center">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
+                </div>
+
+                <!-- Contenu superposé (change au scroll) -->
+                <div class="services-content-wrapper services-pin-wrapper container mx-auto px-4 relative z-10 h-full flex items-center">
+                    <div class="services-text-content max-w-2xl text-white">
+                        
+                        <!-- Étape (ex: 01 / 03) -->
+                        <span class="services-step" id="services-step">01</span>
+                        
+                        <!-- Badge type -->
+                        <span class="services-type-badge" id="services-type-badge">🔧 Maintenance</span>
+                        
+                        <!-- Titre -->
+                        <h2 class="services-title text-4xl md:text-5xl font-bold mt-3 mb-4" id="services-title">
+                            Vidange complète
+                        </h2>
+                        
+                        <!-- Description -->
+                        <p class="services-description text-lg text-white/80 mb-6" id="services-description">
+                            Une vidange complète pour garantir la longévité de votre moteur.
+                        </p>
+                        
+                        <!-- Prix + Bouton -->
+                        <div class="flex items-center gap-6 flex-wrap">
+                            <span class="services-price text-3xl font-bold text-blue-300" id="services-price">
+                                45 000 FCFA
+                            </span>
+                            <a href="#" class="services-link inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-xl transition shadow-lg">
+                                Voir le service
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+
+                        <!-- Indicateur de progression -->
+                        <div class="services-progress mt-8 flex gap-2" id="services-progress">
+                            <span class="services-dot active"></span>
+                            <span class="services-dot"></span>
+                            <span class="services-dot"></span>
+                            <span class="services-dot"></span>
+                            <span class="services-dot"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== TRIGGER DE SCROLL (les services défilent ici) ===== -->
+            <div class="services-trigger">
+                <div class="service-item" data-index="0">
+                    <div class="service-item-content">
+                        <div class="service-item-data"
+                            data-image="{{ services_vedette.0.image_principale.url }}"
+                            data-title="{{ services_vedette.0.nom }}"
+                            data-description="{{ services_vedette.0.description_courte|default:services_vedette.0.description|truncatechars:120 }}"
+                            data-price="{% if services_vedette.0.prix %}{{ services_vedette.0.prix|intcomma }} FCFA{% else %}—{% endif %}"
+                            data-type="{{ services_vedette.0.types.nom|default:'Service' }}"
+                            data-link="{% url 'services_app:service-detail-public' services_vedette.0.pk %}"
+                            >
+                        </div>
+                    </div>
+                </div>
+            {% for service in services_vedette|slice:"1:6" %}
+            <div class="service-item" data-index="{{ forloop.counter }}">
+                <div class="service-item-content">
+                    <div class="service-item-data"
+                        data-image="{% if service.image_principale %}{{ service.image_principale.url }}{% else %}{% static 'images/service-placeholder.jpg' %}{% endif %}"
+                        data-title="{{ service.nom|default:'Service sans nom' }}"
+                        data-description="{{ service.description_courte|default:service.description|default:'Aucune description disponible'|truncatechars:120 }}"
+                        data-price="{% if service.prix %}{{ service.prix|intcomma }} FCFA{% else %}—{% endif %}"
+                        data-type="{{ service.types.nom|default:'Non catégorisé' }}"
+                        data-link="{% url 'services_app:service-detail-public' service.pk %}"
+                    >
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center py-12 text-gray-400">
+                <i class="fas fa-tools text-4xl mb-3 block"></i>
+                <p>Aucun service disponible pour le moment.</p>
+            </div>
+            {% endfor %}
+                </div>
+
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION : TYPES DE VÉHICULES VEDETTE                         -->
+    <!-- ============================================================ -->
+    <section class="py-16 relative section_type_vehicul type-vehicul_et_vedette bg-white overflow-hidden">
+            <div class="fade-section relative z-10">
+                
+                <!-- ===== EN-TÊTE ===== -->
+                <div class="text-center mb-12">
+                    <span class="inline-block text-xs font-semibold text-blue-600 uppercase tracking-widest bg-blue-50 px-4 py-1.5 rounded-full mb-3">
+                        Notre Gamme
+                    </span>
+                    <h2 class="text-4xl md:text-5xl font-bold text-gray-800">
+                        Découvrez nos <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-indigo-600">types de véhicules</span>
+                    </h2>
+                    <p class="text-gray-500 mt-3 max-w-2xl mx-auto">
+                        Des SUV aux berlines, en passant par les breaks, trouvez le véhicule qui correspond à votre style de vie.
+                    </p>
+                </div>
+
+                <!-- ===== CONTENEUR DES CARTES ===== -->
+                <div class="type-contain">
+                    <!-- Carte 1 : SUV -->
+                    <div class="group relative h-80 overflow-hidden bg-gray-200 shadow-sm suv">
+                        {% if types_vehicule.0.image %}
+                            <img src="{{ types_vehicule.0.image.url }}" 
+                                alt="{{ types_vehicule.0.nom }}" 
+                                class="h-80 w-full object-cover transition duration-700 ease-out group-hover:scale-110">
+                        {% else %}
+                            <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+                                <i class="fas {{ types_vehicule.0.icone|default:'fa-car' }} text-6xl text-blue-400/50"></i>
+                            </div>
+                        {% endif %}
+
+                        <div class="absolute inset-0 bg-gradient-to-t from-blue-400 via-white/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity duration-500"></div>
+                        <div class="absolute top-3 right-3 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+                            <i class="fas {{ types_vehicule.0.icone|default:'fa-car' }} text-blue-600 text-lg"></i>
+                        </div>
+
+                        <div class="type-contenu absolute inset-x-0 bottom-0 z-20 p-5 bg-gradient-to-t from-white/95 via-white/85 to-transparent">
+                            <h3 class="text-lg font-bold text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
+                                {{ types_vehicule.0.nom }}
+                            </h3>
+                            {% if types_vehicule.0.description %}
+                                <p class="text-sm text-gray-500 mt-1 line-clamp-2">{{ types_vehicule.0.description|truncatechars:60 }}</p>
+                            {% else %}
+                                <p class="text-sm text-gray-400 mt-1">Découvrez notre gamme</p>
+                            {% endif %}
+                            <a href="{% url 'vehicul_app:site-vehicul-type-list' types_vehicule.0.pk %}" 
+                            class="inline-flex items-center gap-2 mt-4 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all duration-300 shadow-md hover:shadow-lg text-sm font-medium group/btn">
+                                <span>Parcourir</span>
+                                <i class="fas fa-arrow-right text-xs transition-transform duration-300 group-hover/btn:translate-x-1"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Carte 2 : Berline -->
+                    <div class="group relative h-80 overflow-hidden bg-gray-200 shadow-sm berline">
+                        {% if types_vehicule.1.image %}
+                            <img src="{{ types_vehicule.1.image.url }}" 
+                                alt="{{ types_vehicule.1.nom }}" 
+                                class="h-80 w-full object-cover transition duration-700 ease-out group-hover:scale-110">
+                        {% else %}
+                            <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+                                <i class="fas {{ types_vehicule.1.icone|default:'fa-car' }} text-6xl text-blue-400/50"></i>
+                            </div>
+                        {% endif %}
+
+                        <div class="absolute inset-0 bg-gradient-to-t from-blue-400 via-white/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity duration-500"></div>
+                        <div class="absolute top-3 right-3 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+                            <i class="fas {{ types_vehicule.1.icone|default:'fa-car' }} text-blue-600 text-lg"></i>
+                        </div>
+
+                        <div class="type-contenu absolute inset-x-0 bottom-0 z-20 p-5 bg-gradient-to-t from-white/95 via-white/85 to-transparent">
+                            <h3 class="text-lg font-bold text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
+                                {{ types_vehicule.1.nom }}
+                            </h3>
+                            {% if types_vehicule.1.description %}
+                                <p class="text-sm text-gray-500 mt-1 line-clamp-2">{{ types_vehicule.1.description|truncatechars:60 }}</p>
+                            {% else %}
+                                <p class="text-sm text-gray-400 mt-1">Découvrez notre gamme</p>
+                            {% endif %}
+                            <a href="{% url 'vehicul_app:site-vehicul-type-list' types_vehicule.1.pk %}"
+                            class="inline-flex items-center gap-2 mt-4 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all duration-300 shadow-md hover:shadow-lg text-sm font-medium group/btn">
+                                <span>Parcourir</span>
+                                <i class="fas fa-arrow-right text-xs transition-transform duration-300 group-hover/btn:translate-x-1"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Carte 3 : Truck -->
+                    <div class="group relative h-80 overflow-hidden bg-gray-200 shadow-sm truck">
+                        {% if types_vehicule.2.image %}
+                            <img src="{{ types_vehicule.2.image.url }}" 
+                                alt="{{ types_vehicule.2.nom }}" 
+                                class="h-80 w-full object-cover transition duration-700 ease-out group-hover:scale-110">
+                        {% else %}
+                            <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+                                <i class="fas {{ types_vehicule.2.icone|default:'fa-car' }} text-6xl text-blue-400/50"></i>
+                            </div>
+                        {% endif %}
+
+                        <div class="absolute inset-0 bg-gradient-to-t from-blue-400 via-white/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity duration-500"></div>
+                        <div class="absolute top-3 right-3 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+                            <i class="fas {{ types_vehicule.2.icone|default:'fa-car' }} text-blue-600 text-lg"></i>
+                        </div>
+
+                        <div class="type-contenu absolute inset-x-0 bottom-0 z-20 p-5 bg-gradient-to-t from-white/95 via-white/85 to-transparent">
+                            <h3 class="text-lg font-bold text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
+                                {{ types_vehicule.2.nom }}
+                            </h3>
+                            {% if types_vehicule.2.description %}
+                                <p class="text-sm text-gray-500 mt-1 line-clamp-2">{{ types_vehicule.2.description|truncatechars:60 }}</p>
+                            {% else %}
+                                <p class="text-sm text-gray-400 mt-1">Découvrez notre gamme</p>
+                            {% endif %}
+                            <a href="{% url 'vehicul_app:site-vehicul-type-list' types_vehicule.2.pk %}"
+                            class="inline-flex items-center gap-2 mt-4 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all duration-300 shadow-md hover:shadow-lg text-sm font-medium group/btn">
+                                <span>Parcourir</span>
+                                <i class="fas fa-arrow-right text-xs transition-transform duration-300 group-hover/btn:translate-x-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center text-anim mt-10">
+                        <a href="{% url 'vehicul_app:site-vehicul-list' %}" 
+                            class="inline-flex items-center gap-2 px-8 py-3.5 border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white rounded-xl transition-all duration-300 font-medium">
+                            <span>Découvrir toute la gamme</span>
+                        </a>
+                    </div>
+
+                    <div class="fleche_anim">
+                        <i class="fas fa-arrow-right fleche relative inline-flex text-blue-500 text-5xl"></i>
+                    </div>
+
+            </div>
+            </div>
+    </section>
+
+
+    <!-- ============================================================ -->
+    <!-- SECTION :VÉHICULE VEDETTE (avec pagination)                  -->
+    <!-- ============================================================ -->
+    <section class="py-16 relative section_vehicule_vedette bg-white">
+            <div class="container fade-gallery mx-auto px-4">
+                <div class="gallery-contain w-full">
+                    <div class="vehicul_vedette_titre">
+                        <span class="inline-block text-xs font-semibold text-blue-600 uppercase tracking-widest bg-blue-50 px-4 py-1.5 rounded-full mb-3">
+                            Decouvrez votre bonnheur ici
+                        </span>
+                        <h2 class="text-4xl md:text-5xl font-bold text-gray-800">
+                            Parcourez nos <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-indigo-600">véhicules vedette</span>
+                        </h2>
+                        <p class="text-gray-500 mt-3 max-w-2xl mx-auto">
+                            Des SUV aux berlines, en passant par les breaks, trouvez le véhicule qui correspond à votre style de vie.
+                        </p>
+                    </div>
+
+                    
+                        {% include "partials/vehiculs/vehicul_vedette_gallery.html" %}
+                    
+
+            </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION MISSION & VALEURS (Version améliorée)               -->
+    <!-- ============================================================ -->
+    <section class="py-16 relative bg-white overflow-hidden">
+        
+        <!-- Dégradé de fond -->
+        <div class="absolute inset-0 pointer-events-none">
+            <div class="absolute top-0 right-0 w-96 h-96 bg-blue-50 rounded-full blur-3xl opacity-40"></div>
+            <div class="absolute bottom-0 left-0 w-96 h-96 bg-indigo-50 rounded-full blur-3xl opacity-40"></div>
+        </div>
+
+        <div class="container mission_valeur_fade relative z-10 mx-auto px-4 max-w-7xl">
+            
+            <!-- ===== EN-TÊTE ===== -->
+            <div class="text-center mb-12">
+                <span class="inline-block text-xs font-semibold text-blue-600 uppercase tracking-[0.2em] bg-blue-50 px-5 py-2  mb-4 border border-blue-100">
+                    ✦ Notre ADN
+                </span>
+                <h2 class="text-3xl sm:text-4xl font-bold text-gray-800">
+                    Mission & <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Valeurs</span>
+                </h2>
+                <div class="w-20 h-1 bg-gradient-to-r from-blue-500 to-indigo-500 mx-auto mt-4 "></div>
+            </div>
+
+            <!-- ===== GRILLE ===== -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+                
+                <!-- ===== COLONNE GAUCHE : MISSION ===== -->
+                <div class="relative group mission">
+                    <div class="absolute -inset-1 bg-gradient-to-r from-blue-500 to-indigo-500  opacity-0 group-hover:opacity-20 blur-xl transition duration-500"></div>
+                    <div class="relative bg-white  p-6 shadow-lg border border-gray-100 hover:shadow-2xl transition duration-500 h-full">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-12 h-12  bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center shadow-lg shadow-blue-500/25 flex-shrink-0">
+                                <i class="fas fa-flag text-xl text-white"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-800">Notre Mission</h3>
+                                <p class="text-xs text-gray-400">Ce qui nous anime chaque jour</p>
+                            </div>
+                        </div>
+
+                        <p>
+                            <strong class="text-blue-600"> <em> Révolutionner et Démocratiser le secteur de la concession automobile en Afrique</em></strong>
+                        </p>
+                        
+                        <p class="text-gray-600 mt-4 leading-relaxed text-sm"> <em>
+                            Chez <strong class="text-blue-600">KOZ Services</strong>, nous croyons que chaque 
+                            personne mérite de rouler en toute sérénité. Notre mission est de 
+                            <strong class="text-gray-800">rendre l'accession à la voiture plus simple, 
+                            plus transparente et plus humaine</strong>, grâce à des solutions de 
+                            financement flexibles et un accompagnement personnalisé.</em>
+                        </p>
+
+                        <div class="flex items-center mt-4 gap-4 mb-4">
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/25 flex-shrink-0">
+                            <i class=" fas fa-gem text-2xl text-white"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-3xl sm:text-4xl font-bold text-gray-800"> 
+                                <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Vision</span>
+                            </h2>
+                            
+                            <strong class="text-gray-400 leading-relaxed text-xs"><em>Créer un pont entre l’expertise de la Diaspora et la connaissance du marché locale afin de professionnaliser le secteur de la concession automobile en Afrique</em></strong>
+
+                        </div>
+                    </div>
+                        
+                    
+                        
+                        <div class="mt-4 pt-4 border-t border-gray-100 flex flex-wrap items-center gap-3">
+                            <div class="flex items-center gap-1.5 text-xs text-gray-500">
+                                <i class="fas fa-check-circle text-green-500 text-sm"></i>
+                                <span>Accessibilité</span>
+                            </div>
+                            <div class="flex items-center gap-1.5 text-xs text-gray-500">
+                                <i class="fas fa-check-circle text-green-500 text-sm"></i>
+                                <span>Transparence</span>
+                            </div>
+                            <div class="flex items-center gap-1.5 text-xs text-gray-500">
+                                <i class="fas fa-check-circle text-green-500 text-sm"></i>
+                                <span>Proximité</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== COLONNE DROITE : VALEURS ===== -->
+                <div class="bg-white valeur p-6 shadow-lg border border-gray-100 hover:shadow-2xl transition duration-500">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/25 flex-shrink-0">
+                            <i class="fas fa-heart text-xl text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-800">Nos Valeurs</h3>
+                            <p class="text-xs text-gray-400">Ce qui nous guide au quotidien</p>
+                        </div>
+                    </div>
+
+                    <!-- ===== GRILLE DES VALEURS (responsif) ===== -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        
+                        <!-- Valeur 1 -->
+                        <div class="flex items-start gap-3 p-3 v_1 bg-gray-50/50 hover:bg-blue-50/50 transition group border border-transparent hover:border-blue-100">
+                            <div class="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-100 transition">
+                                <i class="fas fa-handshake text-blue-600 text-sm"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-800">1. La Confiance</h4>
+                                    <p class="text-sm text-gray-500 leading-relaxed">Bâtir une relation durable avec nos clients, basée sur la transparence et l'intégrité.</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Valeur 2 -->
+                        <div class="flex items-start gap-3 p-3 v_2 bg-gray-50/50 hover:bg-blue-50/50 transition group border border-transparent hover:border-blue-100">
+                            <div class="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-100 transition">
+                                <i class="fas fa-bolt text-blue-600 text-sm"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-800">2. L'Innovation</h4>
+                                <p class="text-sm text-gray-500 leading-relaxed">Proposer des solutions simples et modernes pour simplifier l'achat automobile.</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Valeur 3 -->
+                        <div class="flex items-start gap-3 p-3 v_3  bg-gray-50/50 hover:bg-blue-50/50 transition group border border-transparent hover:border-blue-100">
+                            <div class="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-100 transition">
+                                <i class="fas fa-users text-blue-600 text-sm"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-800">2. L'Innovation</h4>
+                                <p class="text-sm text-gray-500 leading-relaxed">Proposer des solutions simples et modernes pour simplifier l'achat automobile.</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Valeur 4 -->
+                        <div class="flex items-start gap-3 p-3 v_4 bg-gray-50/50 hover:bg-blue-50/50 transition group border border-transparent hover:border-blue-100">
+                            <div class="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-100 transition">
+                                <i class="fas fa-shield-alt text-blue-600 text-sm"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-800">4. La Sécurité</h4>
+                                <p class="text-sm text-gray-500 leading-relaxed">Garantir des transactions sécurisées et des conseils fiables à nos clients.</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ===== BANDEAU CITATION ===== -->
+            <div class="mt-10 p-6 citation bg-gradient-to-r from-blue-600 to-indigo-600 text-center shadow-xl">
+                <p class="text-white text-base md:text-lg font-medium leading-relaxed max-w-3xl mx-auto">
+                    <i class="fas fa-quote-left text-blue-200/50 mr-2"></i>
+                    KOZ Services, n'achetez pas une auto, changez votre vie
+                    <i class="fas fa-quote-right text-blue-200/50 ml-2"></i>
+                </p>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION PRODUITS VEDETTE (PREMIUM)                           -->
+    <!-- ============================================================ -->
+    <section class="py-16 section_product sm:py-20 relative bg-white overflow-hidden">
+        
+        <!-- Dégradé de fond subtil -->
+        <div class="absolute inset-0 pointer-events-none">
+            <div class="absolute top-0 right-0 w-96 h-96 bg-blue-100/30 rounded-full blur-3xl"></div>
+            <div class="absolute bottom-0 left-0 w-96 h-96 bg-indigo-100/30 rounded-full blur-3xl"></div>
+        </div>
+
+        <div class="container product_fade relative z-10 mx-auto px-4">
+            
+            <!-- ===== EN-TÊTE ===== -->
+            <div class="text-center mb-12">
+                <span class="inline-block text-xs font-semibold text-blue-600 uppercase tracking-[0.2em] bg-blue-50 px-5 py-2 rounded-full mb-4 border border-blue-100">
+                    ⚡ Nos meilleurs produits
+                </span>
+                <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-800">
+                    Pièces & <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Accessoires</span>
+                </h2>
+                <p class="text-gray-500 mt-3 max-w-2xl mx-auto text-sm sm:text-base">
+                    L'équipement qu'il vous faut pour votre véhicule, au meilleur prix.
+                </p>
+            </div>
+
+            <!-- ===== GRILLE PRODUITS ===== -->
+            <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+                {% for produit in produits_vedette %}
+                
+                <div class="group relative bg-white shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1  border-gray-100/50 overflow-hidden">
+                    
+                    <!-- ===== BADGES ===== -->
+                    <div class="absolute top-2 left-2 z-10 flex flex-col gap-1">
+                        {% if produit.est_nouveau %}
+                        <span class="badge bg-gradient-to-r from-blue-500 to-blue-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-md">
+                            <i class="fas fa-sparkles mr-1 text-[8px]"></i> Nouveau
+                        </span>
+                        {% endif %}
+                        
+                        {% if produit.est_en_promo %}
+                        <span class="badge bg-gradient-to-r from-red-500 to-red-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-md animate-pulse">
+                            <i class="fas fa-tag mr-1 text-[8px]"></i> Promo
+                        </span>
+                        {% endif %}
+                        
+                        {% if not produit.est_en_stock %}
+                        <span class="badge bg-gradient-to-r from-gray-500 to-gray-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-md">
+                            <i class="fas fa-times mr-1 text-[8px]"></i> Rupture
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <!-- ===== IMAGE ===== -->
+                    <div class="relative overflow-hidden bg-gray-100 aspect-square">
+                        {% if produit.image_principale %}
+                            <img src="{{ produit.image_principale.url }}" 
+                                alt="{{ produit.nom }}"
+                                class="w-full h-full object-contain transition duration-500 group-hover:scale-110">
+                        {% else %}
+                            <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+                                <i class="fas fa-box text-4xl text-gray-300"></i>
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Overlay au survol -->
+                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center gap-2">
+                            <a href="{% url 'order_app:ajouter-article' produit.pk %}" class="btn btn-sm btn-circle bg-white/90 hover:bg-white text-gray-700 hover:text-blue-600 transition shadow-lg">
+                                <i class="fas fa-shopping-cart text-sm"></i>
+                            </a>
+                            <button class="btn btn-sm btn-circle bg-white/90 hover:bg-white text-gray-700 hover:text-blue-600 transition shadow-lg">
+                                <i class="fas fa-heart text-sm"></i>
+                            </button>
+                            <a href="{% url 'products_app:products-detail' produit.pk %}" class="btn btn-sm btn-circle bg-white/90 hover:bg-white text-gray-700 hover:text-blue-600 transition shadow-lg">
+                                <i class="fas fa-eye text-sm"></i>
+                            </a>
+                        </div>
+                        
+                        <!-- Indicateur de stock (petit) -->
+                        {% if produit.est_en_stock and produit.stock <= produit.stock_min %}
+                        <div class="absolute bottom-2 right-2 bg-amber-500/90 backdrop-blur-sm text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-md">
+                            <i class="fas fa-clock mr-1"></i> Plus que {{ produit.stock }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- ===== CONTENU ===== -->
+                    <div class="p-3 sm:p-4">
+                        
+                        <!-- Marque + Catégorie -->
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-[10px] text-gray-400 font-medium uppercase tracking-wider">
+                                {% if produit.marque %}{{ produit.marque.nom }}{% else %}{{ produit.categorie.nom }}{% endif %}
+                            </span>
+                            {% if produit.est_vedette %}
+                            <span class="text-[9px] text-yellow-500">
+                                <i class="fas fa-star text-yellow-400 mr-0.5"></i> Vedette
+                            </span>
+                            {% endif %}
+                        </div>
+
+                        <!-- Nom -->
+                        <h4 class="font-semibold text-gray-800 text-sm sm:text-base line-clamp-1 group-hover:text-blue-600 transition">
+                            {{ produit.nom }}
+                        </h4>
+
+                        <!-- Description courte -->
+                        {% if produit.description_courte %}
+                        <p class="text-xs text-gray-400 mt-0.5 line-clamp-1">{{ produit.description_courte|truncatechars:40 }}</p>
+                        {% endif %}
+
+                        <!-- PRIX -->
+                        <div class="mt-2 flex items-center gap-2">
+                            {% if produit.est_en_promo %}
+                            <span class="text-lg font-bold text-red-600">{{ produit.prix_promo|intcomma }} FCFA</span>
+                            <span class="text-xs text-gray-400 line-through">{{ produit.prix|intcomma }} FCFA</span>
+                            {% else %}
+                            <span class="text-lg font-bold text-blue-600">{{ produit.prix|intcomma }} FCFA</span>
+                            {% endif %}
+                        </div>
+
+                        <!-- Disponibilité -->
+                        <div class="mt-1.5 flex items-center gap-1.5">
+                            {% if produit.est_en_stock %}
+                            <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                            <span class="text-[10px] text-green-600 font-medium">En stock</span>
+                            {% else %}
+                            <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                            <span class="text-[10px] text-red-500 font-medium">Rupture</span>
+                            {% endif %}
+                        </div>
+
+                        <!-- BOUTON AJOUTER -->
+                        <a href="{% url 'products_app:detail-produit-slug' slug=produit.slug %}" class="w-full mt-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition shadow-md hover:shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                            <i class="fas fa-eye text-xs"></i> 
+                            voir l'article
+                        </a>
+                    </div>
+                </div>
+                
+                {% empty %}
+                <div class="col-span-full text-center py-12">
+                    <div class="w-20 h-20 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-box-open text-3xl text-gray-400"></i>
+                    </div>
+                    <p class="text-gray-500">Aucun produit disponible pour le moment.</p>
+                    <p class="text-gray-400 text-sm mt-1">Revenez bientôt, nous ajoutons régulièrement de nouveaux articles.</p>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- ===== BOUTON VOIR TOUT ===== -->
+            <div class="text-center mt-10">
+                <a href="{% url 'products_app:products-list' %}" class="inline-flex items-center gap-2 px-8 py-3.5 border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white rounded-xl transition-all duration-300 font-medium text-sm">
+                    <span>Voir tous les produits</span>
+                    <i class="fas fa-arrow-right text-xs transition-transform duration-300 group-hover:translate-x-1"></i>
+                </a>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION : POURQUOI CHOISIR KOZ SERVICES                      -->
+    <!-- ============================================================ -->
+    <section class="py-16 section_choisir_koz sm:py-20 relative bg-white overflow-hidden">
+        
+        <!-- Dégradé de fond subtil -->
+        <div class="absolute inset-0 pointer-events-none">
+            <div class="absolute top-0 right-0 w-96 h-96 bg-blue-50/50 rounded-full blur-3xl"></div>
+            <div class="absolute bottom-0 left-0 w-96 h-96 bg-indigo-50/50 rounded-full blur-3xl"></div>
+        </div>
+
+        <div class="container choisir_fade relative z-10 mx-auto px-4 max-w-6xl">
+            
+            <!-- ===== EN-TÊTE ===== -->
+            <div class="text-center mb-12 animate-fade-in-up">
+                <span class="inline-block text-xs font-semibold text-blue-600 uppercase tracking-[0.2em] bg-blue-50 px-5 py-2 rounded-full mb-4 border border-blue-100">
+                    ✦ Pourquoi nous ?
+                </span>
+                <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-800">
+                    Pourquoi choisir <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">KOZ Services</span>
+                </h2>
+                <div class="w-20 h-1 bg-gradient-to-r from-blue-500 to-indigo-500 mx-auto mt-4 rounded-full"></div>
+                <p class="text-gray-500 mt-4 max-w-2xl mx-auto text-sm sm:text-base">
+                    Une expérience automobile unique, transparente et à votre écoute.
+                </p>
+            </div>
+
+            <!-- ===== GRILLE DES RAISONS ===== -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                
+                <!-- Raison 1 : Expertise automobile -->
+                <div class="group bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100/50 hover:border-blue-200">
+                    <div class="flex items-center gap-4 mb-3">
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center shadow-lg shadow-blue-500/25 flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                            <i class="fas fa-wrench text-xl text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-800 text-lg">Expertise automobile</h3>
+                        </div>
+                    </div>
+                    <p class="text-gray-500 text-sm leading-relaxed pl-1">
+                        Une équipe de passionnés avec des années d'expérience dans le secteur automobile. Des conseils avisés pour vous guider vers le meilleur choix.
+                    </p>
+                    <div class="mt-4 flex items-center gap-2 text-blue-600 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <span>En savoir plus</span>
+                        <i class="fas fa-arrow-right text-xs"></i>
+                    </div>
+                </div>
+
+                <!-- Raison 2 : Inspection professionnelle -->
+                <div class="group bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100/50 hover:border-blue-200">
+                    <div class="flex items-center gap-4 mb-3">
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center shadow-lg shadow-emerald-500/25 flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                            <i class="fas fa-search text-xl text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-800 text-lg">Inspection professionnelle</h3>
+                        </div>
+                    </div>
+                    <p class="text-gray-500 text-sm leading-relaxed pl-1">
+                        Chaque véhicule est inspecté par nos experts pour garantir sa fiabilité et sa sécurité. Une transparence totale sur l'état du véhicule.
+                    </p>
+                    <div class="mt-4 flex items-center gap-2 text-emerald-600 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <span>En savoir plus</span>
+                        <i class="fas fa-arrow-right text-xs"></i>
+                    </div>
+                </div>
+
+                <!-- Raison 3 : Véhicule contrôlé -->
+                <div class="group bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100/50 hover:border-blue-200">
+                    <div class="flex items-center gap-4 mb-3">
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center shadow-lg shadow-amber-500/25 flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                            <i class="fas fa-clipboard-check text-xl text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-800 text-lg">Véhicule contrôlé</h3>
+                        </div>
+                    </div>
+                    <p class="text-gray-500 text-sm leading-relaxed pl-1">
+                        Tous nos véhicules passent un contrôle technique rigoureux avant la mise en vente. Vous achetez en toute confiance.
+                    </p>
+                    <div class="mt-4 flex items-center gap-2 text-amber-600 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <span>En savoir plus</span>
+                        <i class="fas fa-arrow-right text-xs"></i>
+                    </div>
+                </div>
+
+                <!-- Raison 4 : Conseils honnêtes -->
+                <div class="group bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100/50 hover:border-blue-200">
+                    <div class="flex items-center gap-4 mb-3">
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center shadow-lg shadow-purple-500/25 flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                            <i class="fas fa-handshake text-xl text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-800 text-lg">Conseils honnêtes</h3>
+                        </div>
+                    </div>
+                    <p class="text-gray-500 text-sm leading-relaxed pl-1">
+                        Pas de vente forcée, pas de mauvaises surprises. Nous vous donnons des conseils sincères pour que vous fassiez le bon choix.
+                    </p>
+                    <div class="mt-4 flex items-center gap-2 text-purple-600 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <span>En savoir plus</span>
+                        <i class="fas fa-arrow-right text-xs"></i>
+                    </div>
+                </div>
+
+                <!-- Raison 5 : Assistance jusqu'à l'achat -->
+                <div class="group bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100/50 hover:border-blue-200">
+                    <div class="flex items-center gap-4 mb-3">
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-500 to-rose-700 flex items-center justify-center shadow-lg shadow-rose-500/25 flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                            <i class="fas fa-headset text-xl text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-800 text-lg">Assistance jusqu'à l'achat</h3>
+                        </div>
+                    </div>
+                    <p class="text-gray-500 text-sm leading-relaxed pl-1">
+                        Nous vous accompagnons à chaque étape : du choix du véhicule à la finalisation de l'achat. Une équipe dédiée à votre service.
+                    </p>
+                    <div class="mt-4 flex items-center gap-2 text-rose-600 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <span>En savoir plus</span>
+                        <i class="fas fa-arrow-right text-xs"></i>
+                    </div>
+                </div>
+
+                <!-- Raison 6 : Clients satisfaits (bonus) -->
+                <div class="group bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100/50 hover:border-blue-200">
+                    <div class="flex items-center gap-4 mb-3">
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-500 to-cyan-700 flex items-center justify-center shadow-lg shadow-cyan-500/25 flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                            <i class="fas fa-smile text-xl text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-800 text-lg">Clients satisfaits</h3>
+                        </div>
+                    </div>
+                    <p class="text-gray-500 text-sm leading-relaxed pl-1">
+                        La satisfaction de nos clients est notre priorité. Rejoignez la communauté des conducteurs KOZ Services.
+                    </p>
+                    <div class="mt-4 flex items-center gap-2 text-cyan-600 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <span>En savoir plus</span>
+                        <i class="fas fa-arrow-right text-xs"></i>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ===== BANDEAU CTA ===== -->
+            <div class="mt-12 p-6 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-800 text-center shadow-xl">
+                <p class="text-white text-base md:text-lg font-medium leading-relaxed max-w-3xl mx-auto">
+                    <i class="fas fa-quote-left text-blue-200/50 mr-2"></i>
+                    Passez Nous rendre visite et trouvez la voiture de vos rêves, avec un service qui vous accompagne à chaque étape.
+                    <i class="fas fa-quote-right text-blue-200/50 ml-2"></i>
+                </p>
+            </div>
+
+        </div>
+    </section>
+
+
+    <!-- ============================================================ -->
+    <!-- SECTION STATS – STYLE ANIME                                  -->
+    <!-- ============================================================ -->
+    <section class="py-20 relative bg-white section-stats overflow-hidden section_stati">
+        
+        <!-- Effet de fond "aura" -->
+        <div class="absolute inset-0 opacity-30">
+            <div class="absolute top-0 left-1/4 w-96 h-96 bg-blue-600 rounded-full blur-3xl"></div>
+            <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-indigo-800 rounded-full blur-3xl"></div>
+        </div>
+
+        <div class="container stats_fade mx-auto px-4 relative z-10">
+            
+            <!-- Titre -->
+            <div class="text-center mb-16">
+                <span class="inline-block text-xs font-semibold text-blue-500 uppercase tracking-widest bg-blue-500/20 px-4 py-1.5 rounded-full mb-3 border border-blue-400/30">
+                    ⚡ KOZ EN CHIFFRES
+                </span>
+                <h2 class="text-4xl md:text-5xl font-bold text-black">
+                    La <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-800">légende</span> en construction
+                </h2>
+                <p class="text-gray-400 mt-3 max-w-2xl mx-auto">
+                    Des chiffres qui parlent d'eux-mêmes. Notre mission : vous accompagner à chaque étape.
+                </p>
+            </div>
+
+            <!-- Grille de stats -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                
+                <!-- Stat 1 : Clients -->
+                <div class="stat-card stat-card_1 group bg-blue-400/8 backdrop-blur-sm  p-6 border border-indigo-800/10 hover:border-blue-400/50 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-500/10">
+                    <div class="text-4xl mb-3 text-black group-hover:scale-110 transition-transform duration-300">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-number text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-800" data-target="15">
+                        0
+                    </div>
+                    <p class="text-sm text-gray-400 mt-2 font-medium">Clients satisfaits</p>
+                    <div class="w-12 h-1 mx-auto mt-3 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full"></div>
+                </div>
+
+                <!-- Stat 2 : Véhicules -->
+                <div class="stat-card stat-card_2 group bg-blue-400/8 backdrop-blur-sm  p-6 border border-indigo-800/10 hover:border-blue-400/50 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-500/10">
+                    <div class="text-4xl mb-3 text-black group-hover:scale-110 transition-transform duration-300">
+                        <i class="fas fa-car"></i>
+                    </div>
+                    <div class="stat-number text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-800" data-target="320">
+                        0
+                    </div>
+                    <p class="text-sm text-gray-400 mt-2 font-medium">Véhicules en stock</p>
+                    <div class="w-12 h-1 mx-auto mt-3 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full"></div>
+                </div>
+
+                <!-- Stat 3 : Financements -->
+                <div class="stat-card stat-card_3 group bg-blue-400/8 backdrop-blur-sm  p-6 border border-indigo-800/10 hover:border-blue-400/50 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-500/10">
+                    <div class="text-4xl mb-3 text-black group-hover:scale-110 transition-transform duration-300">
+                        <i class="fas fa-hand-holding-usd"></i>
+                    </div>
+                    <div class="stat-number text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-800" data-target="850">
+                        0
+                    </div>
+                    <p class="text-sm text-gray-400 mt-2 font-medium">Financements accordés</p>
+                    <div class="w-12 h-1 mx-auto mt-3 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full"></div>
+                </div>
+
+                <!-- Stat 4 : Services -->
+                <div class="stat-card stat-card_4 group bg-blue-400/8 backdrop-blur-sm  p-6 border border-indigo-800/10 hover:border-blue-400/50 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-500/10">
+                    <div class="text-4xl mb-3 text-black group-hover:scale-110 transition-transform duration-300">
+                        <i class="fas fa-wrench"></i>
+                    </div>
+                    <div class="stat-number text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-800" data-target="1200">
+                        0
+                    </div>
+                    <p class="text-sm text-gray-400 mt-2 font-medium">Services réalisés</p>
+                    <div class="w-12 h-1 mx-auto mt-3 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full"></div>
+                </div>
+
+            </div>
+
+            <!-- Ligne d'énergie (style anime) -->
+            <div class="mt-12 flex justify-center">
+                <div class="w-64 h-1 bg-gradient-to-r from-transparent via-blue-400 to-transparent rounded-full animate-pulse"></div>
+            </div>
+
+        </div>
+    </section>
+
+
+    <!-- ============================================================ -->
+    <!-- SECTION 1 : MODÈLES DE FINANCEMENT                            -->
+    <!-- ============================================================ -->
+    <section id="financement" class="py-16 sm:py-20 relative bg-white overflow-hidden">
+        
+        <!-- Effet de fond -->
+        <div class="absolute inset-0 opacity-20">
+            <div class="absolute top-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
+            <div class="absolute bottom-0 right-0 w-96 h-96 bg-blue-200 rounded-full blur-3xl"></div>
+        </div>
+
+        <div class="container financement_fade mx-auto px-4 max-w-7xl relative z-10">
+            
+            <!-- En-tête -->
+            <div class="text-center mb-12">
+                <span class="inline-block text-xs font-semibold text-blue-300 uppercase tracking-[0.2em] bg-blue-500/20 px-5 py-2 rounded-full mb-4 border border-blue-400/30">
+                    💰 Financement
+                </span>
+                <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-black">
+                    Nos modèles de <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-800">financement</span>
+                </h2>
+                <p class="text-gray-400 mt-3 max-w-2xl mx-auto text-sm sm:text-base">
+                    Des solutions flexibles adaptées à votre budget et à vos besoins
+                </p>
+            </div>
+
+            <!-- Grille -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                
+                <!-- Financement KOZ -->
+                <div class="group bg-white/5 backdrop-blur-sm  p-6 border border-white/10 hover:border-blue-400/50 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-500/10">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center shadow-lg shadow-blue-500/25 mb-4">
+                        <i class="fas fa-building text-2xl text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">Financement KOZ</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">
+                        Financement direct par KOZ Services. Pas d'intermédiaire, des conditions avantageuses et un suivi personnalisé.
+                    </p>
+                    <ul class="mt-4 space-y-2 text-sm text-gray-700">
+                        <li class="flex items-center gap-2"><i class="fas fa-check-circle text-blue-700"></i> Taux à partir de 5%</li>
+                        <li class="flex items-center gap-2"><i class="fas fa-check-circle text-blue-700"></i> Durée flexible (12-60 mois)</li>
+                        <li class="flex items-center gap-2"><i class="fas fa-check-circle text-blue-700"></i> Zéro frais de dossier</li>
+                    </ul>
+                    <a href="#" class="inline-flex items-center gap-2 text-blue-700 hover:text-blue-300 font-medium text-sm mt-4 transition group/link">
+                        En savoir plus <i class="fas fa-arrow-right text-xs group-hover/link:translate-x-1 transition-transform"></i>
+                    </a>
+                </div>
+
+                <!-- Fidelis -->
+                <div class="group bg-white/5 backdrop-blur-sm  p-6 border border-white/10 hover:border-blue-400/50 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-500/10">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center shadow-lg shadow-emerald-500/25 mb-4">
+                        <i class="fas fa-handshake text-2xl text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">Fidelis Finance</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">
+                        Partenaire financier de confiance. Des solutions de crédit auto adaptées à votre profil.
+                    </p>
+                    <ul class="mt-4 space-y-2 text-sm text-gray-700">
+                        <li class="flex items-center gap-2"><i class="fas fa-check-circle text-emerald-700"></i> Taux à partir de 6.5%</li>
+                        <li class="flex items-center gap-2"><i class="fas fa-check-circle text-emerald-700"></i> Étude rapide (48h)</li>
+                        <li class="flex items-center gap-2"><i class="fas fa-check-circle text-emerald-700"></i> Accompagnement personnalisé</li>
+                    </ul>
+                    <a href="#" class="inline-flex items-center gap-2 text-emerald-700 hover:text-emerald-300 font-medium text-sm mt-4 transition group/link">
+                        En savoir plus <i class="fas fa-arrow-right text-xs group-hover/link:translate-x-1 transition-transform"></i>
+                    </a>
+                </div>
+
+                <!-- Alios -->
+                <div class="group bg-white/5 backdrop-blur-sm  p-6 border border-white/10 hover:border-blue-400/50 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-500/10">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center shadow-lg shadow-purple-500/25 mb-4">
+                        <i class="fas fa-star text-2xl text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">Alios Finance</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">
+                        Partenaire financier spécialiste du crédit automobile. Des offres sur mesure pour tous les budgets.
+                    </p>
+                    <ul class="mt-4 space-y-2 text-sm text-gray-700">
+                        <li class="flex items-center gap-2"><i class="fas fa-check-circle text-purple-700"></i> Taux à partir de 5.9%</li>
+                        <li class="flex items-center gap-2"><i class="fas fa-check-circle text-purple-700"></i> Financement jusqu'à 80%</li>
+                        <li class="flex items-center gap-2"><i class="fas fa-check-circle text-purple-700"></i> Réponse sous 24h</li>
+                    </ul>
+                    <a href="#" class="inline-flex items-center gap-2 text-purple-700 hover:text-purple-300 font-medium text-sm mt-4 transition group/link">
+                        En savoir plus <i class="fas fa-arrow-right text-xs group-hover/link:translate-x-1 transition-transform"></i>
+                    </a>
+                </div>
+
+            </div>
+
+            <!-- Mention -->
+            <div class="mt-8 text-center text-xs text-gray-500 border-t border-white/5 pt-6">
+                <i class="fas fa-info-circle mr-1"></i> Offres sous conditions. Consultez nos conseillers pour plus d'informations.
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION : TÉMOIGNAGES & RÉSEAUX SOCIAUX                     -->
+    <!-- ============================================================ -->
+    <section class="py-16 sm:py-20 relative bg-gradient-to-br from-gray-50 to-white overflow-hidden temoignage_section">
+        
+        <!-- Dégradé de fond -->
+        <div class="absolute inset-0 pointer-events-none">
+            <div class="absolute top-0 right-0 w-96 h-96 bg-blue-50/30 rounded-full blur-3xl"></div>
+            <div class="absolute bottom-0 left-0 w-96 h-96 bg-indigo-50/30 rounded-full blur-3xl"></div>
+        </div>
+
+        <div class="container relative z-10 mx-auto px-4 max-w-7xl temoignage_fade">
+            
+            <!-- ===== EN-TÊTE ===== -->
+            <div class="text-center mb-12">
+                <span class="inline-block text-xs font-semibold text-blue-600 uppercase tracking-[0.2em] bg-blue-50 px-5 py-2 rounded-full mb-4 border border-blue-100">
+                    💬 Ils parlent de nous
+                </span>
+                <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-800">
+                    Ce que disent nos <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">clients</span>
+                </h2>
+                <p class="text-gray-500 mt-3 max-w-2xl mx-auto text-sm sm:text-base">
+                    Des avis authentiques de clients satisfaits et des retours sur les réseaux sociaux.
+                </p>
+            </div>
+
+            <!-- ===== TÉMOIGNAGES (scroll horizontal) ===== -->
+            <div class="mb-12">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                        <i class="fas fa-star text-yellow-500"></i> Témoignages clients
+                    </h3>
+                    <span class="text-sm text-gray-400">{{ temoignages|length }} avis</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {% for temoignage in temoignages|slice:":6" %}
+                    <div class="bg-white  p-6 shadow-sm hover:shadow-xl transition-all duration-300 ">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
+                                {% if temoignage.photo %}
+                                    <img src="{{ temoignage.photo.url }}" alt="{{ temoignage.prenom }}" class="w-full h-full rounded-full object-cover">
+                                {% else %}
+                                    {{ temoignage.prenom|slice:":1" }}{{ temoignage.nom|slice:":1" }}
+                                {% endif %}
+                            </div>
+                            <div>
+                                <p class="font-semibold text-gray-800">{{ temoignage.prenom }} {{ temoignage.nom }}</p>
+                                <div class="text-yellow-500 text-sm">
+                                    {% for i in "12345"|make_list %}
+                                        {% if forloop.counter <= temoignage.note %}★{% else %}☆{% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <span class="ml-auto text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-full">
+                                {{ temoignage.get_source_display }}
+                            </span>
+                        </div>
+                        <p class="text-gray-600 text-sm leading-relaxed">"{{ temoignage.message|truncatechars:120 }}"</p>
+                    </div>
+                    {% empty %}
+                    <p class="col-span-full text-center text-gray-400">Aucun témoignage pour le moment.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- ===== RÉSEAUX SOCIAUX (grille d'avis) ===== -->
+            <div class="mb-12 socials_fade">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                        <i class="fas fa-share-alt text-blue-500"></i> Sur les réseaux sociaux
+                    </h3>
+                    <span class="text-sm text-gray-400">{{ avis_reseaux|length }} avis</span>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {% for avis in avis_reseaux|slice:":8" %}
+                    <div class="bg-white min-w-150 p-4 shadow-sm hover:shadow-md transition">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-lg">
+                                {% if avis.reseau == 'facebook' %}
+                                    <i class="fab fa-facebook text-blue-600"></i>
+                                {% elif avis.reseau == 'instagram' %}
+                                    <i class="fab fa-instagram text-pink-600"></i>
+                                {% elif avis.reseau == 'google' %}
+                                    <i class="fab fa-google text-red-500"></i>
+                                {% elif avis.reseau == 'whatsapp' %}
+                                    <i class="fab fa-whatsapp text-green-500"></i>
+                                {% elif avis.reseau == 'twitter' %}
+                                    <i class="fab fa-twitter text-blue-400"></i>
+                                    {% elif avis.reseau == 'tiktok' %}
+                                    <i class="fab fa-tiktok text-black"></i>
+                                {% else %}
+                                    <i class="fas fa-share-alt text-gray-500"></i>
+                                {% endif %}
+                            </span>
+                            <span class="text-xs font-medium text-gray-600">{{ avis.nom_utilisateur }}</span>
+                            <span class="ml-auto text-[10px] text-gray-400">{{ avis.date_publication|date:"d/m/Y" }}</span>
+                        </div>
+                        {% if avis.image %}
+                            <img src="{{ avis.image.url }}" alt="Avis" class="w-full h-30 object-contain  mb-2">
+                        {% endif %}
+                        <p class="text-xs text-gray-500 line-clamp-3">{{ avis.message|truncatechars:60 }}</p>
+                        {% if avis.lien %}
+                            <a href="{{ avis.lien }}" target="_blank" class="text-xs text-blue-600 hover:text-blue-800 transition mt-1 inline-flex items-center gap-1">
+                                <i class="fas fa-external-link-alt"></i> Voir le post
+                            </a>
+                            {% endif %}
+                    </div>
+                    {% empty %}
+                    <p class="col-span-full text-center text-gray-400">Aucun avis sur les réseaux sociaux.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+        <!-- ===== VIDÉOS ===== -->
+            <div class="videos_fade">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                        <i class="fas fa-video text-red-500"></i> Vidéos
+                    </h3>
+                    <span class="text-sm text-gray-400">{{ videos|length }} vidéos</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {% for video in videos|slice:":6" %}
+                    <div class="group bg-white  overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300">
+                        <!-- Vidéo -->
+                        <div class="relative aspect-video bg-gray-900 overflow-hidden">
+                            {% if video.video_file %}
+                                <!-- ✅ BALISE CORRECTE (SANS POSTER SI PAS DISPO) -->
+                                <video class="w-full h-full object-cover" controls preload="metadata" playsinline>
+                                    <source src="{{ video.video_file.url }}" type="video/mp4">
+                                    Votre navigateur ne supporte pas la vidéo.
+                                </video>
+                            {% elif video.video_url %}
+                                <iframe class="w-full h-full" src="{{ video.video_url }}" frameborder="0" allowfullscreen></iframe>
+                            {% elif video.embed_code %}
+                                {{ video.embed_code|safe }}
+                            {% else %}
+                                <div class="w-full h-full flex items-center justify-center bg-gray-800">
+                                    <i class="fas fa-video text-4xl text-gray-600"></i>
+                                </div>
+                            {% endif %}
+                            
+                            <!-- Badge durée -->
+                            {% if video.duree %}
+                            <div class="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-md">
+                                {{ video.duree_formatee }}
+                            </div>
+                            {% endif %}
+                            
+                            <!-- Bouton play (overlay) -->
+                            <div class="absolute inset-0 bg-black/30 pointer-events-none flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                <div class="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                    <i class="fas fa-play text-blue-600 text-xl ml-1"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Infos -->
+                        <div class="p-4">
+                            <h4 class="font-semibold text-gray-800 text-sm">{{ video.titre }}</h4>
+                            <p class="text-xs text-gray-500 mt-1 line-clamp-2">{{ video.description|truncatechars:60 }}</p>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="col-span-full text-center text-gray-400">Aucune vidéo disponible.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- ===== BOUTON LAISSER UN TÉMOIGNAGE ===== -->
+            <div class="text-center mt-12">
+                <button onclick="document.getElementById('temoignage_textuel_modal').showModal()" class="btn bg-gradient-to-r from-blue-600 to-indigo-800 btn-lg text-white hover:shadow-blue-300 shadow-lg">
+                    <i class="fas fa-comment-dots"></i> Laisser un témoignage
+                </button>
+            </div>  
+
+        </div>
+    </section>
+    <script>
+        const player = new Plyr('#player');
+    </script>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 3 : À PROPOS DE KOZ SERVICES                          -->
+    <!-- ============================================================ -->
+    <section class="py-16 sm:py-20 relative section_propos bg-gradient-to-br from-gray-50 to-white overflow-hidden">
+        
+        <div class="container propos_fade mx-auto px-4 max-w-7xl">
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                
+                <!-- ===== GAUCHE : TEXTE ===== -->
+                <div>
+                    <span class="inline-block text-xs font-semibold text-blue-600 uppercase tracking-[0.2em] bg-blue-50 px-5 py-2 rounded-full mb-4 border border-blue-100">
+                        ✦ Qui sommes-nous
+                    </span>
+                    <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-800 mb-6">
+                        À propos de <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">KOZ Services</span>
+                    </h2>
+                    <p class="text-gray-600 leading-relaxed text-base mb-4">
+                        <strong>KOZ Services</strong> est un concessionnaire automobile innovant basé au Burkina Faso. 
+                        Notre mission est de rendre l'accession à la voiture <strong>simple, transparente et accessible</strong> à tous.
+                    </p>
+                    <p class="text-gray-600 leading-relaxed text-base mb-6">
+                        Avec des années d'expérience dans le secteur automobile, nous proposons des véhicules de qualité, 
+                        des solutions de financement flexibles et un accompagnement personnalisé à chaque étape de votre projet.
+                    </p>
+                    
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                            <p class="text-2xl font-bold text-blue-600">5+</p>
+                            <p class="text-sm text-gray-500">Années d'expérience</p>
+                        </div>
+                        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                            <p class="text-2xl font-bold text-blue-600">150+</p>
+                            <p class="text-sm text-gray-500">Véhicules vendus</p>
+                        </div>
+                        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                            <p class="text-2xl font-bold text-blue-600">98%</p>
+                            <p class="text-sm text-gray-500">Clients satisfaits</p>
+                        </div>
+                        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                            <p class="text-2xl font-bold text-blue-600">24/7</p>
+                            <p class="text-sm text-gray-500">Support client</p>
+                        </div>
+                    </div>
+
+                    <a href="#" class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition shadow-md hover:shadow-lg">
+                        En savoir plus <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <!-- ===== DROITE : IMAGE/VIDÉO ===== -->
+                <div class="relative">
+                    <div class="relative rounded-2xl overflow-hidden shadow-2xl">
+                        {% if actualites.0 and actualites.0.image_principale %}
+                            <img src="{{ actualites.0.image_principale.url }}" 
+                                alt="KOZ Services" 
+                                class="w-full h-96 object-cover">
+                        {% else %}
+                            <div class="w-full h-96 bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
+                                <i class="fas fa-car text-6xl text-blue-400/50"></i>
+                            </div>
+                        {% endif %}
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                        <div class="absolute bottom-6 left-6 right-6 text-white">
+                            <span class="text-sm font-semibold text-blue-300">KOZ Services</span>
+                            <h3 class="text-2xl font-bold">La confiance en mouvement</h3>
+                            <p class="text-sm text-white/70">Votre partenaire automobile de confiance</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Badge flottant -->
+                    <div class="absolute -bottom-4 -right-4 bg-white rounded-2xl shadow-xl p-4 border border-gray-100">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-full bg-green-500 flex items-center justify-center">
+                                <i class="fas fa-check text-white text-xl"></i>
+                            </div>
+                            <div>
+                                <p class="font-bold text-gray-800">100% fiable</p>
+                                <p class="text-xs text-gray-500">Des véhicules contrôlés</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 2 : NOUS CONTACTER + PRISE DE RENDEZ-VOUS             -->
+    <!-- ============================================================ -->
+    <section id="contact" class="py-16 sm:py-20 section-contact relative bg-white overflow-hidden">
+        
+        <div class="container contact_fade mx-auto px-4 max-w-7xl">
+            
+            <!-- En-tête -->
+            <div class="text-center mb-12">
+                <span class="inline-block text-xs font-semibold text-blue-600 uppercase tracking-[0.2em] bg-blue-50 px-5 py-2 rounded-full mb-4 border border-blue-100">
+                    📞 Contact
+                </span>
+                <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-800">
+                    Nous <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">contacter</span>
+                </h2>
+                <p class="text-gray-500 mt-3 max-w-2xl mx-auto text-sm sm:text-base">
+                    Une question ? Un projet ? N'hésitez pas à nous contacter
+                </p>
+            </div>
+            <div id="contact-message-zone" class="mb-4"></div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- ===== GAUCHE : FORMULAIRE DE CONTACT ===== -->
+                <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 md:p-8">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-paper-plane text-blue-600"></i> Envoyez-nous un message
+                    </h3>
+                    <form hx-post="{% url 'home_app:contact-form' %}"
+                            hx-indicator="#contact-indicator"
+                            hx-target="#contact-message-zone" 
+                            class="space-y-4">
+                        {% csrf_token %}
+                        <div class="space-y-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Nom *</label>
+                                    <input type="text" name="nom" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Votre nom">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                                    <input type="email" name="email" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="votre@email.com">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
+                                <input type="tel" name="telephone" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="70 00 00 00">
+                            </div>
+
+                            <div id="contact-indicator" class="htmx-indicator fixed inset-0  flex items-center justify-center z-50">
+                                <div class="bg-white p-6 items-center justify-center rounded-xl text-center shadow-2xl">
+                                    <img src="{% static 'images/Loading_animation.svg' %}" class="object-cover mt-4 w-35 h-35 mb-3">
+                                    <p class="text-gray-700 font-medium">Envoie en cours...</p>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Sujet *</label>
+                                <select name="sujet" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                                    <option value="">Choisissez un sujet</option>
+                                    <option value="financement">Demande de financement</option>
+                                    <option value="achat">Achat de véhicule</option>
+                                    <option value="service">Service après-vente</option>
+                                    <option value="autre">Autre</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Message *</label>
+                                <textarea name="message" rows="4" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Votre message..."></textarea>
+                            </div>
+                            <button type="submit" class="btn-primary w-full py-3 rounded-xl cursor-pointer font-semibold flex items-center justify-center gap-2">
+                                <i class="fas fa-paper-plane"></i> Envoyer
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- ===== DROITE : INFOS + RDV ===== -->
+                <div id="infos-rdv" class="space-y-6">
+                    
+                    <!-- Coordonnées -->
+                    <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                            <i class="fas fa-phone text-blue-600"></i> Coordonnées
+                        </h3>
+                        <div class="space-y-3 text-sm">
+                            <div class="flex items-center gap-3 text-gray-700">
+                                <i class="fas fa-phone text-blue-600 w-5"></i>
+                                <span>+226-06-59-15-23 / 226 76-20-80-08</span>
+                            </div>
+                            <div class="flex items-center gap-3 text-gray-700">
+                                <i class="fas fa-envelope text-blue-600 w-5"></i>
+                                <span>https://koz.corporate@gmail.com</span>
+                            </div>
+                            <div class="flex items-center gap-3 text-gray-700">
+                                <i class="fas fa-map-marker-alt text-blue-600 w-5"></i>
+                                <span>Ouagadougou, Burkina Faso</span>
+                            </div>
+                            <div class="flex items-center gap-3 text-gray-700">
+                                <i class="fas fa-clock text-blue-600 w-5"></i>
+                                <span>Mardi-Ven : 10h00 - 19h00</span>
+                                <span>Samedi : 10h00 - 15h00</span>
+                            
+                            </div>
+                        </div>
+                        
+                        <!-- Réseaux sociaux -->
+                        <div class="mt-4 pt-4 border-t border-blue-200/50">
+                            <p class="text-sm font-medium text-gray-700 mb-3">Suivez-nous</p>
+                            <div class="flex gap-3">
+                                <a href="https://web.facebook.com/profile.php?id=100069043792971&locale=fr_FR" class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 transition shadow-md hover:shadow-lg hover:-translate-y-1">
+                                    <i class="fab fa-facebook-f"></i>
+                                </a>
+                                <a href="#" class="w-10 h-10 rounded-full bg-pink-600 text-white flex items-center justify-center hover:bg-pink-700 transition shadow-md hover:shadow-lg hover:-translate-y-1">
+                                    <i class="fab fa-instagram"></i>
+                                </a>
+                                <a href="https://call.whatsapp.com/voice/Qrrb7QUzFd5JnRHQwfxEtO" class="w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center hover:bg-green-600 transition shadow-md hover:shadow-lg hover:-translate-y-1">
+                                    <i class="fab fa-whatsapp"></i>
+                                </a>
+                                <a href="https://www.tiktok.com/@kozservices" class="w-10 h-10 rounded-full bg-gray-800 text-white flex items-center justify-center hover:bg-gray-900 transition shadow-md hover:shadow-lg hover:-translate-y-1">
+                                    <i class="fab fa-tiktok"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    
+                    <!-- Prise de rendez-vous -->
+                    <div id="rdv-message-zone" class="mb-4"></div>
+                    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                            <i class="fas fa-calendar-check text-blue-600"></i> Prendre rendez-vous
+                        </h3>
+                        <form hx-post="{% url 'home_app:prise-rdv' %}"
+                            hx-indicator="#rdv-indicator"
+                            hx-target="#rdv-message-zone"
+                            class="space-y-4"> 
+                            {% csrf_token %}
+                            <div class="space-y-3">
+                            
+                            {% if not user.is_authenticated %}
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Nom*</label>
+                                    <input type="text" name="nom" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Prenom *</label>
+                                    <input type="text" name="prenom" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">telephone *</label>
+                                    <input type="text" name="telephone" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                                </div>
+                            {% endif %}
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Date *</label>
+                                    <input type="date" name="date" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Heure *</label>
+                                    <input type="time" name="heure" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                                </div>
+
+                                <div id="rdv-indicator" class="htmx-indicator fixed inset-0 flex items-center justify-center z-50">
+                                    <div class="bg-white p-6 items-center justify-center rounded-xl text-center shadow-2xl">
+                                        <img src="{% static 'images/Loading_animation.svg' %}" class="object-cover mt-4 w-35 h-35 mb-3">
+                                        <p class="text-white font-medium">Envoie en cours...</p>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Motif *</label>
+                                    <select name="motif" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                                        <option value="">Choisissez un motif</option>
+                                        <option value="essai_routier">Essai routier</option>
+                                        <option value="financement">Demande de financement</option>
+                                        <option value="achat">Achat de véhicule</option>
+                                        <option value="service">Service après-vente</option>
+                                    </select>
+                                </div>
+                                <button type="submit"  class="w-full py-2.5 cursor-pointer bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold transition shadow-md hover:shadow-lg flex items-center justify-center gap-2">
+                                    <i class="fas fa-calendar-plus"></i> Prendre rendez-vous
+                                </button>
+                                    
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </section>
+        
+
+    <!-- ============================================================ -->
+    <!-- CTA : PRÊT À ROULER AVEC KOZ ?                               -->
+    <!-- ============================================================ -->
+    <section id="section-cta" class="py-16 sm:py-20 relative section-cta overflow-hidden bg-white ">
+        
+        <!-- Effet de fond animé -->
+        <div class="absolute inset-0 opacity-20">
+            <div class="absolute top-0 left-0 w-96 h-96 bg-blue-400 rounded-full blur-3xl animate-pulse"></div>
+            <div class="absolute bottom-0 right-0 w-96 h-96 bg-purple-400 rounded-full blur-3xl animate-pulse" style="animation-delay: 1s;"></div>
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-400 rounded-full blur-3xl animate-pulse" style="animation-delay: 2s;"></div>
+        </div>
+
+        <!-- Particules (petites étoiles) -->
+        <div class="absolute inset-0 overflow-hidden pointer-events-none">
+            <div class="absolute top-10 left-10 w-1 h-1 bg-indigo-800/30 rounded-full animate-ping"></div>
+            <div class="absolute top-20 right-20 w-1.5 h-1.5 bg-indigo-800/20 rounded-full animate-ping" style="animation-delay: 0.5s;"></div>
+            <div class="absolute bottom-10 left-1/3 w-1 h-1 bg-indigo-800/25 rounded-full animate-ping" style="animation-delay: 1s;"></div>
+            <div class="absolute bottom-20 right-1/4 w-2 h-2 bg-indigo-800/15 rounded-full animate-ping" style="animation-delay: 1.5s;"></div>
+        </div>
+
+        <div class="container mx-auto cta_fade px-4 max-w-6xl relative z-10">
+            
+            <div class="text-center">
+                <!-- Badge -->
+                <span class="inline-block text-xs font-semibold text-gray-700 uppercase tracking-[0.2em] bg-blue-600/20 backdrop-blur-sm px-5 py-2 rounded-full mb-6 border border-white/20 animate-pulse">
+                    <i class="fas fa-rocket mr-2"></i> Rejoignez l'aventure
+                </span>
+                
+                <!-- Titre -->
+                <h2 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-black leading-tight mb-4">
+                    Prêt à rouler avec <span class="text-transparent bg-clip-text bg-gradient-to-br from-blue-600 to-indigo-800">KOZ</span> ?
+                </h2>
+                
+                <!-- Sous-titre -->
+                <p class="text-gray-600 text-base sm:text-lg md:text-xl max-w-2xl mx-auto mb-8">
+                    Créez votre compte en quelques clics et accédez à tous nos services
+                </p>
+
+                <!-- ===== AVANTAGES ===== -->
+                <div class="grid grid-cols-1 avantages sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+                    
+                    <div class="group bg-white/10 backdrop-blur-sm  p-4 border border-blue-600/10 hover:border-blue/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/10">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/25 flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                                <i class="fas fa-car text-white text-sm"></i>
+                            </div>
+                            <div class="text-left">
+                                <h4 class="text-gray-600 font-semibold text-sm">Catalogue premium</h4>
+                                <p class="text-gray-600/60 text-xs">Accès à tous nos véhicules</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="group bg-white/10 backdrop-blur-sm  p-4 border border-blue-600/10 hover:border-blue/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/10">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/25 flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                                <i class="fas fa-hand-holding-usd text-gray-600 text-sm"></i>
+                            </div>
+                            <div class="text-left">
+                                <h4 class="text-gray-600 font-semibold text-sm">Financement flexible</h4>
+                                <p class="text-gray-600/60 text-xs">Jusqu'à 60 mois sans stress</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="group bg-white/10 backdrop-blur-sm  p-4 border border-blue-600/10 hover:border-blue/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/10">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-500/25 flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                                <i class="fas fa-headset text-gray-600 text-sm"></i>
+                            </div>
+                            <div class="text-left">
+                                <h4 class="text-gray-600 font-semibold text-sm">Support 24/7</h4>
+                                <p class="text-gray-600/60 text-xs">Une équipe à votre écoute</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="group bg-white/10 backdrop-blur-sm  p-4 border border-blue-600/10 hover:border-blue/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/10">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-lg shadow-amber-500/25 flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                                <i class="fas fa-gift text-gray-600 text-sm"></i>
+                            </div>
+                            <div class="text-left">
+                                <h4 class="text-gray-600 font-semibold text-sm">Offres exclusives</h4>
+                                <p class="text-gray-600/60 text-xs">Des avantages réservés aux membres</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- ===== BOUTONS ===== -->
+                <div class="flex flex-wrap justify-center gap-4">
+                    <button onclick="document.getElementById('register_modal').showModal()" 
+                            class="group relative overflow-hidden px-8 py-4 bg-white text-blue-700 rounded-xl font-bold text-base shadow-xl transition-all duration-300 hover:scale-105 hover:shadow-2xl">
+                        <span class="relative z-10 flex items-center gap-2">
+                            <i class="fas fa-user-plus"></i> Créer mon compte
+                            <i class="fas fa-arrow-right text-sm group-hover:translate-x-1 transition-transform"></i>
+                        </span>
+                        <span class="absolute inset-0 bg-gradient-to-r from-blue-100 to-indigo-100 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                    </button>
+                    
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'client_app:client-view'%}"
+                            class="px-8 py-4 bg-white/20 backdrop-blur-sm text-gray-600 border border-white/30 rounded-xl font-semibold text-base transition-all duration-300 hover:bg-white/30 hover:scale-105 shadow-lg flex items-center gap-2">
+                        <i class="fas fa-sign-in-alt"></i> J'ai déjà un compte
+                    </a>
+                    {% else %}
+                    <button onclick="document.getElementById('login_simple_modal').showModal()" 
+                            class="px-8 py-4 bg-white/20 backdrop-blur-sm text-gray-600 border border-white/30 rounded-xl font-semibold text-base transition-all duration-300 hover:bg-white/30 hover:scale-105 shadow-lg flex items-center gap-2">
+                        <i class="fas fa-sign-in-alt"></i> J'ai déjà un compte
+                    </button>
+                    {% endif %}          
+                    
+                </div>
+
+                <!-- Mention légère -->
+                <p class="text-white/30 text-xs mt-6">
+                    <i class="fas fa-lock mr-1"></i> Vos données sont sécurisées • Inscription gratuite
+                </p>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- ==================== FOOTER  ========================        -->
+    <!-- ============================================================ -->
+    <footer class="footer sm:footer-horizontal z-1000 relative bg-blue-400 text-neutral-content p-10">
+    <aside>
+        <svg
+        width="50"
+        height="50"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+        fill-rule="evenodd"
+        clip-rule="evenodd"
+        class="fill-current">
+        <path
+            d="M22.672 15.226l-2.432.811.841 2.515c.33 1.019-.209 2.127-1.23 2.456-1.15.325-2.148-.321-2.463-1.226l-.84-2.518-5.013 1.677.84 2.517c.391 1.203-.434 2.542-1.831 2.542-.88 0-1.601-.564-1.86-1.314l-.842-2.516-2.431.809c-1.135.328-2.145-.317-2.463-1.229-.329-1.018.211-2.127 1.231-2.456l2.432-.809-1.621-4.823-2.432.808c-1.355.384-2.558-.59-2.558-1.839 0-.817.509-1.582 1.327-1.846l2.433-.809-.842-2.515c-.33-1.02.211-2.129 1.232-2.458 1.02-.329 2.13.209 2.461 1.229l.842 2.515 5.011-1.677-.839-2.517c-.403-1.238.484-2.553 1.843-2.553.819 0 1.585.509 1.85 1.326l.841 2.517 2.431-.81c1.02-.33 2.131.211 2.461 1.229.332 1.018-.21 2.126-1.23 2.456l-2.433.809 1.622 4.823 2.433-.809c1.242-.401 2.557.484 2.557 1.838 0 .819-.51 1.583-1.328 1.847m-8.992-6.428l-5.01 1.675 1.619 4.828 5.011-1.674-1.62-4.829z"></path>
+        </svg>
+        <p>
+        KOZ Services.
+        <br />
+        Concessionnaire automobile.
+        </p>
+        <p class="font-medium text-slate-700">Conçu par <strong>SPIRIT-DIGIT Agency</strong></p>
+    </aside>
+    <nav>
+        <h6 class="footer-title">Social</h6>
+        <div class="grid grid-flow-col gap-4">
+        <a>
+            <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            class="fill-current">
+            <path
+                d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"></path>
+            </svg>
+        </a>
+        <a>
+            <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            class="fill-current">
+            <path
+                d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"></path>
+            </svg>
+        </a>
+        <a>
+            <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            class="fill-current">
+            <path
+                d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"></path>
+            </svg>
+        </a>
+        <a href="#" aria-label="TikTok" class="transition hover:text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="24" height="24" class="fill-current">
+            <path d="M186.7 64.2c0 10.4-8.4 18.8-18.8 18.8s-18.8-8.4-18.8-18.8V32.7h-31.2v136.6c0 38.2-31 69.2-69.2 69.2S-20 207.5-20 169.3s31-69.2 69.2-69.2c14.2 0 27.3 4.3 38.6 11.7v-35.4c-12.7-8.3-27.6-13.1-43.7-13.1C12.9 63.3-20 96.2-20 136.3s32.9 73 73 73 73-32.9 73-73V32.7h31.2v31.5c9.7-8.2 21.6-13.2 34.8-13.2 30.1 0 54.6 24.5 54.6 54.6z"></path>
+            </svg>
+        </a>
+        <a href="#" aria-label="WhatsApp" class="transition hover:text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="24" height="24" class="fill-current">
+            <path d="M380.9 97.1C339 55.2 283.2 32 224 32 100.3 32 0 132.3 0 256c0 45.1 12.1 89.3 35.1 127.9L0 480l98.5-32.3c36.8 20.1 78.5 30.6 125.5 30.6 123.7 0 224-100.3 224-224 0-59.3-23.2-115.1-65.1-157zM224 400c-36.8 0-71.7-10.2-101.5-29.4l-7.3-4.4-58.4 19.2 19.6-57.1-4.7-7.5C70.4 296.7 60 257.9 60 224 60 141.9 141.9 60 224 60s164 81.9 164 164-81.9 164-164 164zm90.3-124.3c-5-2.5-29.4-14.5-34-16.1-4.6-1.6-8-2.5-11.4 2.5s-13.1 16.1-16.1 19.4c-3 3.3-6 3.7-11 1.2-29.4-14.7-48.7-26.4-68.3-59.6-5.1-8.8 5.1-8.2 14.7-27.2 1.6-3.3.8-6.1-.4-8.5-1.2-2.5-11.4-27.4-15.6-37.6-4.1-9.8-8.3-8.5-11.4-8.7-2.9-.2-6.3-.2-9.6-.2s-8.5 1.2-13 6.1c-4.6 4.8-17.6 17.2-17.6 41.9s18 48.7 20.5 52c2.5 3.3 35.5 54.2 86 76 12 5.1 21.3 8.2 28.6 10.5 12 3.7 22.9 3.2 31.5 1.9 9.6-1.4 29.4-12 33.5-23.6 4.1-11.4 4.1-21.2 2.9-23.6-1.2-2.5-4.6-3.8-9.6-6.3z"></path>
+            </svg>
+        </a>
+        <a href="#" aria-label="Instagram" class="transition hover:text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="24" height="24" class="fill-current">
+            <path d="M224 141c-63.6 0-115 51.4-115 115s51.4 115 115 115 115-51.4 115-115-51.4-115-115-115zm0 190c-41.4 0-75-33.6-75-75s33.6-75 75-75 75 33.6 75 75-33.6 75-75 75zm146.4-194.7c0 14.9-12.1 27-27 27h-27c-14.9 0-27-12.1-27-27v-27c0-14.9 12.1-27 27-27h27c14.9 0 27 12.1 27 27v27zm76.1 27.2c-.6-63.6-16.9-120-92.4-145.4C327.8 2.4 282.3 0 224 0 165.7 0 120.2 2.4 90 18.9 14.5 44.3-1.8 100.7-2.4 164.3-2.9 190.7-2.9 221.3-2.4 247.7c.6 63.6 16.9 120 92.4 145.4 30.2 16.5 75.7 18.9 134 18.9s103.8-2.4 134-18.9c75.5-25.4 91.8-81.8 92.4-145.4.6-26.4.6-57-0-83.4zM398.8 388.3c-16.3 40.8-47.9 72.4-88.7 88.7-61.4 24.6-207.3 19-268.7 0-40.8-16.3-72.4-47.9-88.7-88.7-24.6-61.4-19-207.3 0-268.7 16.3-40.8 47.9-72.4 88.7-88.7C132.7 14 278.6 19.6 340 44.2c40.8 16.3 72.4 47.9 88.7 88.7 24.6 61.4 19 207.3 0 268.7z"></path>
+            </svg>
+        </a>
+        <a href="#" aria-label="LinkedIn" class="transition hover:text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="24" height="24" class="fill-current">
+            <path d="M100.28 448H7.4V148.9h92.88zM53.79 108.1C24.09 108.1 0 83.9 0 54.2 0 24.6 24.2.4 54.1.4s54 24.2 54 53.8c0 29.7-24.1 53.9-54.3 53.9zM447.8 448h-92.7V302.4c0-34.7-12.4-58.4-43.3-58.4-23.6 0-37.7 15.8-43.9 31.1-2.3 5.7-2.8 13.6-2.8 21.5V448h-92.8s1.2-242.9 0-268h92.8v38c12.3-19 34.3-46.1 83.4-46.1 60.8 0 106.4 39.7 106.4 125.1V448z"></path>
+            </svg>
+        </a>
+        </div>
+    </nav>
+    </footer>
+
+
+        <!-- ========== MODALES ========== -->
+        {% include 'modals/home/register.html' %}
+        {% include 'modals/auth/login_simple_modal.html' %}
+        {% include 'modals/home/temoignage_textuel_form.html' %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    gsap.registerPlugin(ScrollTrigger);
+
+    const totalFrames = 76;
+    const basePath = "{% static 'frames/ECO_SYS_PROJECTKoz_Flowsrckoz_flowstaticframesframe-' %}";
+    const frameImg = document.getElementById('frame');
+
+    // ✅ Précharger toutes les images AVANT de créer le ScrollTrigger
+    const images = [];
+    let loadedCount = 0;
+
+    function preloadImages(callback) {
+        for (let i = 1; i <= totalFrames; i++) {
+            const img = new Image();
+            const paddedIndex = String(i).padStart(4, '0');
+            img.src = `${basePath}${paddedIndex}.jpg`;
+            img.onload = () => {
+                loadedCount++;
+                if (loadedCount === totalFrames) callback();
+            };
+            images[i - 1] = img;
+        }
+    }
+
+    preloadImages(() => {
+        // ✅ Le ScrollTrigger ne démarre qu'une fois TOUTES les images en cache navigateur
+        ScrollTrigger.create({
+            trigger: ".hero-section",
+            start: "top top",
+            end: "bottom bottom",
+            scrub: 2.8,
+            onUpdate: (self) => {
+                let frameIndex = Math.floor(self.progress * (totalFrames - 1)) + 1;
+                frameIndex = Math.min(frameIndex, totalFrames);
+                frameImg.src = images[frameIndex - 1].src;  // déjà en cache, changement instantané
+            }
+        });
+    });
+
+    // Initialize a new Lenis instance for smooth scrolling
+        const lenis = new Lenis();
+
+            // Synchronize Lenis scrolling with GSAP's ScrollTrigger plugin
+            lenis.on('scroll', ScrollTrigger.update);
+
+            // Add Lenis's requestAnimationFrame (raf) method to GSAP's ticker
+            // This ensures Lenis's smooth scroll animation updates on each GSAP tick
+            gsap.ticker.add((time) => {
+            lenis.raf(time * 500); // Convert time from seconds to milliseconds
+            });
+
+            // Disable lag smoothing in GSAP to prevent any delay in scroll animations
+            gsap.ticker.lagSmoothing(0);
+});
+
+     
+
+      
+   
+        </script>
+        <script>
+            // Burger menu
+            document.getElementById('burgerBtn')?.addEventListener('click', function() {
+                document.getElementById('mobileMenu').classList.toggle('hidden');
+            });
+        </script>
+
+ 
+</body>
+</html>

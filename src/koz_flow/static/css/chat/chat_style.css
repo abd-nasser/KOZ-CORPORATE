@@ -1,0 +1,59 @@
+/* Partial CSS for chat interface */
+.messages-container { 
+        height: 500px; 
+        overflow-y: auto; 
+        border: 1px solid #ccc; 
+        padding: 10px; margin-bottom: 2
+        0px; background: #f9f9f9; 
+}
+
+.message {
+         margin: 10px; 
+         padding: 10px; 
+         border-radius: 10px; 
+         max-width: 70%; }
+.client-message { 
+        background-color: #dcf8c6;
+         margin-left: auto; 
+         text-align: right; 
+        }
+.commercial-message { 
+        background-color: #fff; 
+        border: 1px solid #ddd; 
+        margin-right: auto; 
+        text-align: left;
+ }
+.message small { 
+        font-size: 10px; 
+        color: gray; 
+        display: block; 
+        margin-top: 5px; 
+}
+
+.chat-form { 
+        display: flex; 
+        gap: 10px; 
+        margin-top: 20px; 
+}
+
+.chat-form input { 
+        flex: 1; 
+        padding: 12px; 
+        border: 1px solid #ccc; 
+        border-radius: 25px; 
+}
+
+.chat-form button { 
+        padding: 12px 24px; 
+        background-color: #007bff; 
+        color: white; 
+        border: none; 
+        border-radius: 25px; 
+        cursor: pointer; 
+}
+
+.chat-header { 
+        margin-bottom: 20px; 
+        padding-bottom: 10px; 
+        border-bottom: 1px solid #eee; 
+}

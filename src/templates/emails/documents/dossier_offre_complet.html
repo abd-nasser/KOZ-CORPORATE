@@ -1,0 +1,289 @@
+{% load humanize %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📄 Dossier d'offre complet - KOZ Services</title>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f1f5f9;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e2e8f0;
+        }
+        .header {
+            background: linear-gradient(135deg, #1e40af, #2563eb);
+            padding: 32px 40px 28px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .header::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -30%;
+            width: 300px;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+        }
+        .header h1 {
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0 0 6px 0;
+            letter-spacing: -0.5px;
+            position: relative;
+            z-index: 1;
+        }
+        .header .subtitle {
+            color: #93bbfc;
+            font-size: 15px;
+            margin: 0;
+            font-weight: 400;
+            position: relative;
+            z-index: 1;
+        }
+        .header .badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(4px);
+            color: #ffffff;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 16px;
+            border-radius: 9999px;
+            margin-top: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            z-index: 1;
+        }
+        .body {
+            padding: 32px 40px 28px;
+        }
+        .greeting {
+            font-size: 17px;
+            font-weight: 600;
+            color: #0f172a;
+            margin: 0 0 4px 0;
+        }
+        .greeting span {
+            color: #2563eb;
+        }
+        .message {
+            color: #475569;
+            line-height: 1.7;
+            font-size: 15px;
+            margin: 10px 0 20px;
+        }
+        .card {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 18px 22px;
+            margin: 18px 0;
+            border: 1px solid #e2e8f0;
+        }
+        .card-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .card-row:last-child {
+            border-bottom: none;
+        }
+        .card-label {
+            color: #64748b;
+            font-size: 14px;
+        }
+        .card-value {
+            font-weight: 600;
+            color: #0f172a;
+            font-size: 14px;
+            text-align: right;
+        }
+        .card-value.blue {
+            color: #2563eb;
+        }
+        .card-value.green {
+            color: #16a34a;
+        }
+        .highlight-box {
+            background: #ecfdf5;
+            border: 1px solid #86efac;
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin: 18px 0;
+            text-align: center;
+        }
+        .highlight-box .big-text {
+            font-size: 18px;
+            font-weight: 700;
+            color: #16a34a;
+        }
+        .highlight-box .big-label {
+            font-size: 13px;
+            color: #166534;
+            margin-top: 2px;
+        }
+        .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #ffffff !important;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 15px;
+            padding: 12px 32px;
+            border-radius: 9999px;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.3);
+            transition: all 0.2s ease;
+            margin: 4px 0 2px;
+        }
+        .btn:hover {
+            background: linear-gradient(135deg, #1d4ed8, #1e40af);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(37, 99, 235, 0.4);
+        }
+        .footer {
+            background: #f8fafc;
+            padding: 18px 40px;
+            border-top: 1px solid #e2e8f0;
+            text-align: center;
+            font-size: 13px;
+            color: #94a3b8;
+        }
+        .footer a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+        .footer .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 6px;
+        }
+        .footer .social-links a {
+            color: #94a3b8;
+            font-size: 16px;
+        }
+        .footer .social-links a:hover {
+            color: #2563eb;
+        }
+        @media (max-width: 600px) {
+            .header { padding: 24px 20px; }
+            .header h1 { font-size: 20px; }
+            .body { padding: 20px; }
+            .card-row { flex-direction: column; align-items: flex-start; gap: 2px; }
+            .card-value { text-align: left; }
+            .btn { display: block; width: 100%; box-sizing: border-box; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+        <!-- ===== HEADER ===== -->
+        <div class="header">
+            <h1>📄 Dossier d'offre complet</h1>
+            <p class="subtitle">Offre de financement KOZ Services</p>
+            <span class="badge">✅ Documents validés</span>
+        </div>
+
+        <!-- ===== BODY ===== -->
+        <div class="body">
+
+            <p class="greeting">Bonjour <span>Équipe commerciale</span>,</p>
+
+            <p class="message">
+                Le client <strong>{{ client.nom_complet }}</strong> a finalisé l'upload de l'ensemble des documents requis pour son <strong>offre de financement</strong>.
+            </p>
+
+            <p class="message" style="margin-top: -12px;">
+                Le dossier est désormais <strong>complet</strong> et en attente de votre validation.
+            </p>
+
+            <!-- ===== CARD INFOS ===== -->
+            <div class="card">
+                <div class="card-row">
+                    <span class="card-label">👤 Client</span>
+                    <span class="card-value">{{ client.nom_complet }}</span>
+                </div>
+                <div class="card-row">
+                    <span class="card-label">📧 Email</span>
+                    <span class="card-value">{{ client.email }}</span>
+                </div>
+                <div class="card-row">
+                    <span class="card-label">📱 Téléphone</span>
+                    <span class="card-value">{{ client.telephone }}</span>
+                </div>
+                <div class="card-row">
+                    <span class="card-label">🚗 Véhicule</span>
+                    <span class="card-value">{{ vehicule }}</span>
+                </div>
+                <div class="card-row">
+                    <span class="card-label">🔢 Offre n°</span>
+                    <span class="card-value blue">#{{ offre_id }}</span>
+                </div>
+                <div class="card-row">
+                    <span class="card-label">📅 Date de soumission</span>
+                    <span class="card-value">{{ date_soumission|date:"d/m/Y H:i"|default:"Aujourd'hui" }}</span>
+                </div>
+            </div>
+
+            <!-- ===== HIGHLIGHT ===== -->
+            <div class="highlight-box">
+                <div class="big-text">✅ Dossier complet</div>
+                <div class="big-label">Tous les documents obligatoires ont été fournis</div>
+            </div>
+
+            <p class="message" style="margin-top: 16px;">
+                Veuillez vous connecter à l'ERP pour <strong>vérifier les documents</strong> et <strong>valider l'offre</strong>.
+            </p>
+
+            <!-- ===== BTN ===== -->
+            <div style="text-align: center; margin: 20px 0 8px;">
+                <a href="{{ lien_offre }}" class="btn">
+                    📂 Voir le dossier de l'offre
+                </a>
+            </div>
+
+            <p style="font-size: 12px; color: #94a3b8; text-align: center; margin-top: 16px;">
+                🔒 Lien sécurisé. Accès réservé au personnel KOZ.
+            </p>
+
+        </div>
+
+        <!-- ===== FOOTER ===== -->
+        <div class="footer">
+            <p style="margin: 0; font-size: 13px; font-weight: 500;">
+                KOZ Services — Votre voiture à crédit, vos pièces en ligne
+            </p>
+            <p style="margin: 4px 0 0; font-size: 12px; color: #cbd5e1;">
+                © {% now "Y" %} KOZ Services — Tous droits réservés
+            </p>
+            <div class="social-links">
+                <a href="#"><i class="fab fa-facebook"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-whatsapp"></i></a>
+                <a href="#"><i class="fab fa-youtube"></i></a>
+            </div>
+            <p style="margin: 10px 0 0; font-size: 11px; color: #cbd5e1;">
+                Cet email est confidentiel. Si vous n'êtes pas le destinataire, merci de le supprimer.
+            </p>
+        </div>
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,462 @@
+{% load static %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Types de Véhicules - KOZ Flow</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="{% static 'js/htmx.min.js' %}" defer></script>
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .animate-fade-in-up {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+        .animate-slide-in-left {
+            animation: slideInLeft 0.4s ease-out forwards;
+        }
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            border: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.5);
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            transform: translateY(-2px);
+            box-shadow: 0 20px 35px -8px rgba(59, 130, 246, 0.7);
+        }
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+            border: none;
+            transition: all 0.3s ease;
+        }
+        .btn-secondary:hover {
+            background: #4b5563;
+            transform: translateY(-2px);
+        }
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+            border: none;
+            transition: all 0.3s ease;
+        }
+        .btn-danger:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+        }
+        .btn-edit {
+            background: #10b981;
+            color: white;
+            border: none;
+            transition: all 0.3s ease;
+        }
+        .btn-edit:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+        .type-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        .type-card:hover {
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.12);
+            transform: translateY(-4px);
+            border-color: #3b82f6;
+        }
+        .badge-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            color: #0369a1;
+            font-size: 32px;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+        .type-card:hover .badge-icon {
+            background: linear-gradient(135deg, #e0f2fe, #cffafe);
+            transform: scale(1.1);
+        }
+        .badge-count {
+            display: inline-block;
+            background: #f3f4f6;
+            color: #374151;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .section-title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .section-title i {
+            color: #3b82f6;
+        }
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: #6b7280;
+            margin-bottom: 2rem;
+        }
+        .breadcrumb a {
+            color: #3b82f6;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+        .breadcrumb a:hover {
+            color: #1d4ed8;
+            text-decoration: underline;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+            border-radius: 12px;
+            border: 2px dashed #d1d5db;
+        }
+        .empty-state i {
+            font-size: 3rem;
+            color: #9ca3af;
+            margin-bottom: 1rem;
+        }
+        .sort-badge {
+            background: #dbeafe;
+            color: #0369a1;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .action-group {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 50;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="glass-nav sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <a href="{% url 'directeur_app:directeur-view' %}" class="text-gray-700 hover:text-blue-600 transition-colors">
+                    <i class="fas fa-arrow-left"></i> Retour
+                </a>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-800">Types de Véhicules</h1>
+            <div class="w-12"></div>
+        </div>
+        {% if messages %}
+        <div class="fixed top-20 right-5 z-50 space-y-2">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} shadow-xl rounded-xl animate-slide-in-right">
+                <span>{{ message }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </nav>
+
+    <!-- Breadcrumb -->
+    <div class="max-w-7xl mx-auto px-4 mt-6">
+        <div class="breadcrumb">
+            <a href="{% url 'directeur_app:directeur-view' %}">
+                <i class="fas fa-home"></i> Accueil
+            </a>
+            <span>/</span>
+            <span class="text-gray-900 font-semibold">Types de Véhicules</span>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 pb-12">
+        <!-- Header Section -->
+        <div class="section-header animate-fade-in-up">
+            <div>
+                <h2 class="section-title">
+                    <i class="fas fa-list"></i> Gestion des Types
+                </h2>
+                <p class="text-gray-600 text-sm mt-2">Gérez tous les types de véhicules disponibles</p>
+            </div>
+            <a href="{% url 'vehicul_app:type-vehicul-create' %}" class="btn-primary px-6 py-3 rounded-lg font-semibold transition-all hover:shadow-lg flex items-center gap-2 whitespace-nowrap">
+                <i class="fas fa-plus"></i> Ajouter un type
+            </a>
+        </div>
+
+        <!-- Stats Bar -->
+        <div class="bg-white rounded-lg p-6 mb-8 border border-gray-200 animate-fade-in-up" style="animation-delay: 0.1s">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="bg-blue-100 p-4 rounded-lg">
+                        <i class="fas fa-car-side text-blue-600 text-2xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 text-sm">Total des types</p>
+                        <p class="text-3xl font-bold text-gray-900">{{ types.count }}</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="bg-green-100 p-4 rounded-lg">
+                        <i class="fas fa-check-circle text-green-600 text-2xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 text-sm">Types actifs</p>
+                        <p class="text-3xl font-bold text-gray-900">{{ types|length }}</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="bg-purple-100 p-4 rounded-lg">
+                        <i class="fas fa-list-check text-purple-600 text-2xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 text-sm">Dernière mise à jour</p>
+                        <p class="text-lg font-semibold text-gray-900">Aujourd'hui</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Types Grid -->
+        {% if types %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in-up" style="animation-delay: 0.2s">
+                {% for type in types %}
+                    <div class="type-card animate-fade-in-up" style="animation-delay: {{ forloop.counter|add:'2'|stringformat:'s' }}00ms">
+                        <!-- Card Header -->
+                        <div class="p-6">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex-1">
+                                    {% if type.icone %}
+                                        <div class="badge-icon">
+                                            <i class="fas {{ type.icone }}"></i>
+                                        </div>
+                                    {% else %}
+                                        <div class="badge-icon">
+                                            <i class="fas fa-car"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <span class="sort-badge">
+                                    <i class="fas fa-hashtag"></i> {{ type.ordre }}
+                                </span>
+                            </div>
+
+                            <!-- Title -->
+                            <h3 class="text-xl font-bold text-gray-900 mb-2">{{ type.nom }}</h3>
+
+                            <!-- Description -->
+                            {% if type.description %}
+                                <p class="text-gray-600 text-sm line-clamp-3 mb-4">
+                                    {{ type.description }}
+                                </p>
+                            {% else %}
+                                <p class="text-gray-400 text-sm italic mb-4">
+                                    Aucune description disponible
+                                </p>
+                            {% endif %}
+
+                            <!-- Vehicle Count -->
+                            <div class="mb-4 flex items-center gap-2">
+                                <span class="badge-count">
+                                    <i class="fas fa-car-side"></i> {{ type.vehicules.count }} véhicule{{ type.vehicules.count|pluralize }}
+                                </span>
+                            </div>
+
+                            <!-- Dates -->
+                            <div class="text-xs text-gray-500 space-y-1 pb-4 border-b border-gray-100">
+                                <p>
+                                    <i class="fas fa-calendar-alt mr-2"></i>
+                                    Créé le {{ type.date_ajout|date:"d/m/Y" }}
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Card Footer - Actions -->
+                        <div class="px-6 py-4 bg-gray-50 flex gap-2 justify-between">
+                            <a href="{% url 'vehicul_app:type-vehicule-detail' type.pk %}" 
+                               class="btn-primary flex-1 px-3 py-2 rounded-lg font-semibold text-sm transition-all hover:shadow-lg flex items-center justify-center gap-2">
+                                <i class="fas fa-eye"></i> Voir
+                            </a>
+                            <a href="{% url 'vehicul_app:type-vehicule-detail' type.pk %}" 
+                               class="btn-edit flex-1 px-3 py-2 rounded-lg font-semibold text-sm transition-all hover:shadow-lg flex items-center justify-center gap-2">
+                                <i class="fas fa-edit"></i> Éditer
+                            </a>
+                            <button onclick="openDeleteModal({{ type.pk }}, '{{ type.nom }}')" 
+                                    class="btn-danger px-3 py-2 rounded-lg font-semibold text-sm transition-all hover:shadow-lg">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <!-- Empty State -->
+            <div class="empty-state animate-fade-in-up">
+                <i class="fas fa-inbox"></i>
+                <h3 class="text-2xl font-bold text-gray-700 mt-4">Aucun type de véhicule</h3>
+                <p class="text-gray-600 mt-2 mb-6">Commencez par ajouter votre premier type de véhicule</p>
+                <a href="{% url 'vehicul_app:type-vehicul-create' %}" class="btn-primary px-6 py-3 rounded-lg font-semibold inline-flex items-center gap-2">
+                    <i class="fas fa-plus"></i> Créer un type
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal-overlay">
+        <div class="modal-content animate-fade-in-up">
+            <div class="flex items-center justify-center mb-4">
+                <div class="bg-red-100 p-4 rounded-full">
+                    <i class="fas fa-exclamation-triangle text-red-600 text-3xl"></i>
+                </div>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-900 text-center mb-2">Confirmer la suppression</h3>
+            <p class="text-gray-600 text-center mb-6">
+                Êtes-vous sûr de vouloir supprimer le type <strong id="deleteTypeName"></strong> ? 
+                Cette action ne peut pas être annulée.
+            </p>
+            <div class="flex gap-3">
+                <button onclick="closeDeleteModal()" class="btn-secondary flex-1 px-4 py-3 rounded-lg font-semibold">
+                    <i class="fas fa-times mr-2"></i> Annuler
+                </button>
+                <button onclick="confirmDelete()" class="btn-danger flex-1 px-4 py-3 rounded-lg font-semibold">
+                    <i class="fas fa-trash mr-2"></i> Supprimer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-400 py-8 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p>&copy; {% now "Y" %} KOZ Flow - Gestion de concessionnaire automobile</p>
+        </div>
+    </footer>
+
+    <script>
+        let deleteTypeId = null;
+
+        function openDeleteModal(typeId, typeName) {
+            deleteTypeId = typeId;
+            document.getElementById('deleteTypeName').textContent = typeName;
+            document.getElementById('deleteModal').classList.add('active');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.remove('active');
+            deleteTypeId = null;
+        }
+
+        function confirmDelete() {
+            if (deleteTypeId) {
+                // Créer un formulaire hidden pour la suppression
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `{% url 'vehicul_app:type-vehicul-delete' 0 %}`.replace('/0/', '/' + deleteTypeId + '/');
+                
+                const csrfToken = document.createElement('input');
+                csrfToken.type = 'hidden';
+                csrfToken.name = 'csrfmiddlewaretoken';
+                csrfToken.value = getCookie('csrftoken');
+                
+                const methodInput = document.createElement('input');
+                methodInput.type = 'hidden';
+                methodInput.name = '_method';
+                methodInput.value = 'DELETE';
+                
+                form.appendChild(csrfToken);
+                form.appendChild(methodInput);
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Fermer le modal en cliquant sur le fond
+        document.getElementById('deleteModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                closeDeleteModal();
+            }
+        });
+    </script>
+</body>
+</html>

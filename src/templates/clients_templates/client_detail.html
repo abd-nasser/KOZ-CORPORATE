@@ -1,0 +1,314 @@
+{% load static %}
+{% load tailwind_tags %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    {% tailwind_css %}
+    <script src="{% static 'js/htmx.min.js' %}" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/client/client_detail_style.css' %}">
+    <title>Détail client - KOZ Services</title>
+</head>
+<body class="bg-slate-50 font-inter text-slate-800 min-h-screen flex flex-col antialiased">
+
+    <!-- Navbar -->
+    <nav class="bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200/80 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                {% if user.role == "directeur" %}
+                    <a href="{% url 'directeur_app:directeur-view' %}" class="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-blue-600 transition">
+                        <i class="fas fa-arrow-left text-xs"></i> Retour au tableau de bord
+                    </a>
+                {% else %}
+                    <a href="{% url 'commercial_app:commercial-view' %}" class="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-blue-600 transition">
+                        <i class="fas fa-arrow-left text-xs"></i> Retour aux clients
+                    </a>
+                {% endif %}
+            </div>
+            
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-semibold px-3 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+                    Fiche Client
+                </span>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8 flex-grow w-full">
+        
+        <!-- Messages flash -->
+        {% if messages %}
+        <div class="fixed top-5 right-5 z-50 space-y-2 max-w-md">
+            {% for message in messages %}
+            <div class="p-4 rounded-xl shadow-lg border bg-white flex items-center gap-3 animate-slide-in-right 
+                        {% if message.tags == 'success' %}border-emerald-200 text-emerald-800{% elif message.tags == 'error' %}border-rose-200 text-rose-800{% else %}border-blue-200 text-blue-800{% endif %}">
+                <i class="fas fa-{% if message.tags == 'success' %}check-circle text-emerald-500{% elif message.tags == 'error' %}exclamation-circle text-rose-500{% else %}info-circle text-blue-500{% endif %} text-lg"></i>
+                <span class="text-sm font-medium">{{ message }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div id="result-toast-container" class="result-toast-container z-1000 "></div>
+
+        <!-- Layout Grille 2 Colonnes -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+
+            <!-- ================= COLONNE GAUCHE : IDENTITÉ & CONTACT (1/3) ================= -->
+            <div class="lg:col-span-1 space-y-6">
+                
+                <!-- Carte Profil -->
+                <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 relative overflow-hidden">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="w-14 h-14 bg-blue-50 border border-blue-100 rounded-2xl flex items-center justify-center text-blue-600 font-bold text-xl shadow-inner">
+                            {{ client.nom_complet|slice:":2"|upper }}
+                        </div>
+                        <span class="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full">
+                            Inscrit le {{ client.date_inscription|date:"d/m/Y" }}
+                        </span>
+                    </div>
+
+                    <h2 class="text-xl font-bold text-slate-900 leading-tight mb-1">
+                        {{ client.nom_complet }}
+                    </h2>
+                    <p class="text-xs text-slate-500 mb-6 flex items-center gap-1.5">
+                        <i class="fas fa-user-tie text-slate-400"></i>
+                        Commercial : <span class="font-semibold text-slate-700">{{ client.assigned_commercial.nom_complet|default:"Non assigné" }}</span>
+                    </p>
+
+                    <!-- Boutons d'action immédiate -->
+                    {% if user.role == "commercial" %}
+                    <div class="space-y-2 pt-2 border-t border-slate-100">
+                        <a href="{% url 'chat_app:chat-view' client.id %}" 
+                           class="w-full btn bg-blue-600 hover:bg-blue-700 text-white border-none rounded-xl text-sm font-medium shadow-sm transition flex items-center justify-center gap-2">
+                            <i class="fas fa-comments"></i> Ouvrir la conversation
+                        </a>
+                    </div>
+                    {% endif %}
+
+                    <!-- Coordonnées -->
+                    <div class="mt-6 pt-6 border-t border-slate-100 space-y-3.5 text-sm">
+                        <div class="flex items-center gap-3 text-slate-700">
+                            <div class="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100">
+                                <i class="fas fa-envelope text-xs"></i>
+                            </div>
+                            <div class="truncate">
+                                <p class="text-[11px] uppercase tracking-wider text-slate-400 font-medium">Email</p>
+                                <a href="mailto:{{ client.email }}" class="font-medium hover:text-blue-600 transition truncate block">{{ client.email }}</a>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3 text-slate-700">
+                            <div class="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100">
+                                <i class="fas fa-phone text-xs"></i>
+                            </div>
+                            <div>
+                                <p class="text-[11px] uppercase tracking-wider text-slate-400 font-medium">Téléphone</p>
+                                {% if client.telephone %}
+                                    <a href="tel:{{ client.telephone }}" class="font-medium hover:text-blue-600 transition">{{ client.telephone }}</a>
+                                {% else %}
+                                    <span class="text-slate-400 italic">Non renseigné</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3 text-slate-700">
+                            <div class="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100 shrink-0 mt-0.5">
+                                <i class="fas fa-location-dot text-xs"></i>
+                            </div>
+                            <div>
+                                <p class="text-[11px] uppercase tracking-wider text-slate-400 font-medium">Adresse</p>
+                                <p class="font-medium">{{ client.adresse|default:"Non renseignée" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ================= COLONNE DROITE : DOSSIERS & OFFRES (2/3) ================= -->
+            <div class="lg:col-span-2 space-y-6">
+
+                <!-- SECTION 1 : OFFRES DU CLIENT -->
+                <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                    <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-slate-50/50">
+                        <div>
+                            <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                                <i class="fas fa-file-signature text-blue-600"></i> Offres & Devis
+                            </h3>
+                            <p class="text-xs text-slate-500">Offres créées pour ce client</p>
+                        </div>
+
+                        <!-- Boutons de création d'offres -->
+                        {% if user.role == "commercial" %}
+                        <div class="flex items-center gap-2 w-full sm:w-auto">
+                            <button onclick="document.getElementById('simpleoffreModal').showModal()" 
+                                    class="btn btn-sm bg-white hover:bg-slate-50 text-slate-700 border-slate-300 rounded-lg text-xs font-medium shadow-2xs">
+                                <i class="fas fa-plus text-slate-400"></i> Debuter Vente simple
+                            </button>
+                            <button onclick="document.getElementById('offre_financement_Modal').showModal()" 
+                                    class="btn btn-sm bg-blue-600 hover:bg-blue-700 text-white border-none rounded-lg text-xs font-medium shadow-2xs">
+                                <i class="fas fa-plus"></i> Offre de Financement
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="p-5">
+                        {% if client.offres.all %}
+                            <div class="space-y-3">
+                                {% for offre in client.offres.all|dictsortreversed:"date_creation" %}
+                                <div class="p-4 rounded-xl border border-slate-200/70 hover:border-blue-300 bg-white transition shadow-2xs flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                                    <div class="space-y-1">
+                                        <div class="flex items-center gap-2">
+                                            <span class="font-semibold text-slate-800 text-sm">{{ offre.vehicule_propose }}</span>
+                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wide uppercase
+                                                {% if offre.type_offre == 'simple' %}bg-purple-50 text-purple-700 border border-purple-200
+                                                {% else %}bg-blue-50 text-blue-700 border border-blue-200{% endif %}">
+                                                {{ offre.get_type_offre_display }}
+                                            </span>
+                                        </div>
+
+                                        {% if offre.type_offre != "simple" %}
+                                        <p class="text-xs text-slate-500 flex items-center gap-3">
+                                            <span><strong class="text-emerald-600 font-semibold">{{ offre.mensualite|intcomma }} FCFA</strong> / mois</span>
+                                            <span>•</span>
+                                            <span>Durée : {{ offre.duree_mois }} mois</span>
+                                        </p>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="flex items-center justify-between sm:justify-end gap-3 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100">
+                                        <!-- Statut -->
+                                        <span class="text-xs font-semibold px-2.5 py-1 rounded-full
+                                            {% if offre.statut == 'acceptee' %}bg-emerald-50 text-emerald-700 border border-emerald-200
+                                            {% elif offre.statut == 'refusee' or offre.statut == 'expiree' %}bg-rose-50 text-rose-700 border border-rose-200
+                                            {% else %}bg-amber-50 text-amber-700 border border-amber-200{% endif %}">
+                                            {{ offre.get_statut_display }}
+                                        </span>
+
+                                        <a href="{% url 'commercial_app:offre-detail' offre.id %}" 
+                                           class="btn btn-xs btn-ghost text-blue-600 hover:bg-blue-50 rounded-lg">
+                                            <i class="fas fa-eye text-xs"></i> Détails
+                                        </a>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-8 bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
+                                <i class="fas fa-file-invoice-dollar text-2xl text-slate-300 mb-2"></i>
+                                <p class="text-xs text-slate-500 font-medium">Aucune offre de financement créée.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- SECTION 2 : DEMANDES DE FINANCEMENT -->
+                <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                    <div class="p-5 border-b border-slate-100 bg-slate-50/50">
+                        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                            <i class="fas fa-file-alt text-blue-600"></i> Demandes de financement
+                        </h3>
+                    </div>
+
+                    <div class="p-5">
+                        {% if client.demande_financement.all %}
+                            <div class="space-y-3">
+                                {% for demande in client.demande_financement.all %}
+                                <div class="flex items-center justify-between p-4 rounded-xl border border-slate-200/70 hover:border-blue-300 bg-white transition">
+                                    <div class="space-y-1">
+                                        <div class="flex items-center gap-2">
+                                            <p class="font-semibold text-slate-800 text-sm">Demande #{{ demande.id }}</p>
+                                            <span class="text-xs text-slate-500">
+                                                • {{ demande.Vehicul_interested|default:demande.other_Vehicul_interested|default:"Véhicule non précisé" }}
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <span class="inline-block text-[11px] font-medium px-2.5 py-0.5 rounded-full
+                                                {% if demande.etape == 'demande_accordee_fidelis' or demande.etape == 'demande_accordee_alios' %}bg-emerald-50 text-emerald-700 border border-emerald-200
+                                                {% elif demande.etape == 'demand_refusee' %}bg-rose-50 text-rose-700 border border-rose-200
+                                                {% else %}bg-amber-50 text-amber-700 border border-amber-200{% endif %}">
+                                                {{ demande.get_etape_display }}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <a href="{% url 'leads_app:detail-demande' demande.id %}" 
+                                       class="btn btn-xs btn-ghost text-blue-600 hover:bg-blue-50 rounded-lg">
+                                        <i class="fas fa-eye text-xs"></i> Voir
+                                    </a>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-8 bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
+                                <i class="fas fa-inbox text-2xl text-slate-300 mb-2"></i>
+                                <p class="text-xs text-slate-500 font-medium">Aucune demande enregistrée.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- SECTION 3 : DOSSIER DOCUMENTAIRE -->
+                <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                    <div class="p-5 border-b border-slate-100 bg-slate-50/50">
+                        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                            <i class="fas fa-folder-open text-blue-600"></i> Dossier documentaire
+                        </h3>
+                    </div>
+
+                    <div class="p-5">
+                        {% if client.documents.all %}
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                {% for doc in client.documents.all %}
+                                <div class="flex items-center justify-between p-3.5 rounded-xl border border-slate-200/70 hover:border-blue-300 bg-white transition">
+                                    <div class="truncate mr-2">
+                                        <p class="text-xs font-semibold text-slate-800 truncate">
+                                            {{ doc.get_type_document_display|default:"Document" }}
+                                        </p>
+                                        <span class="inline-block mt-1 text-[10px] font-medium px-2 py-0.5 rounded-full
+                                            {% if doc.statut_dossier == 'valide' %}bg-emerald-50 text-emerald-700 border border-emerald-200
+                                            {% elif doc.statut_dossier == 'rejete' %}bg-rose-50 text-rose-700 border border-rose-200
+                                            {% else %}bg-amber-50 text-amber-700 border border-amber-200{% endif %}">
+                                            {{ doc.get_statut_dossier_display }}
+                                        </span>
+                                    </div>
+
+                                    <a href="{% url 'leads_app:document-detail' doc.pk %}" 
+                                       class="btn btn-xs btn-ghost text-blue-600 hover:bg-blue-50 rounded-lg shrink-0">
+                                        <i class="fas fa-eye text-xs"></i>
+                                    </a>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-8 bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
+                                <i class="fas fa-folder text-2xl text-slate-300 mb-2"></i>
+                                <p class="text-xs text-slate-500 font-medium">Aucun document soumis pour le moment.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Inclusion des Modals -->
+    {% include "modals/leads/creer_simple_offre.html" %}
+    {% include 'modals/leads/creer_offre_financement.html' %}
+
+    <footer class="bg-white border-t border-slate-200 py-6 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-400">
+            <p>&copy; {% now "Y" %} KOZ Services — Gestion Relation Clientèle</p>
+            <p class="font-medium text-slate-700">Conçu par <strong>SPIRIT-DIGIT Agency</strong></p>
+        </div>
+    </footer>
+
+</body>
+</html>

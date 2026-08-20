@@ -1,0 +1,282 @@
+{% load static %}
+{% load tailwind_tags %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    {% tailwind_css %}
+    <script src="{% static 'js/htmx.min.js' %}" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/products/products_detail_style.css' %}">
+    <title>{{ product.nom }} - KOZ Services</title>
+    <style>
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .animate-fade-in-up {
+            animation: fadeInUp 0.5s ease-out forwards;
+        }
+        .animate-slide-in-right {
+            animation: slideInRight 0.4s ease-out forwards;
+        }
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .info-card {
+            transition: all 0.2s ease;
+        }
+        .info-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .btn-glow {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            border: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.5);
+        }
+        .btn-glow:hover {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            transform: translateY(-2px);
+            box-shadow: 0 20px 35px -8px rgba(59, 130, 246, 0.7);
+        }
+        .action{
+            align-items: center;
+            justify-content: center;
+            padding-left: 4rem
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 font-inter">
+
+    <!-- Messages flash -->
+    {% if messages %}
+    <div class="fixed top-20 right-5 z-50 space-y-2">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} shadow-xl rounded-xl animate-slide-in-right">
+            <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% else %}info-circle{% endif %} mr-2"></i>
+            <span>{{ message }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Navbar -->
+    <nav class="glass-nav sticky top-0 z-40 shadow-sm">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl flex items-center justify-center shadow-lg">
+                    <span class="text-white font-bold text-xl">K</span>
+                </div>
+                <span class="text-xl font-bold bg-gradient-to-r from-blue-700 to-indigo-600 bg-clip-text text-transparent">KOZ Services</span>
+            </div>
+            <a href="{% url 'products_app:products-list' %}" class="text-gray-600 hover:text-blue-600 transition text-sm flex items-center gap-1">
+                <i class="fas fa-arrow-left"></i> Retour aux produits
+            </a>
+        </div>
+        {% if messages %}
+        <div class="fixed top-20 right-5 z-50 space-y-2">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} shadow-xl rounded-xl animate-slide-in-right">
+                <span>{{ message }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </nav>
+
+    <main class="container mx-auto px-4 py-8 max-w-4xl">
+        
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 animate-fade-in-up">
+            
+            <!-- Header gradient -->
+            <div class="bg-gradient-to-r from-blue-700 to-indigo-800 px-6 py-5">
+                <div class="flex justify-between items-center flex-wrap gap-3">
+                    <div>
+                        <h1 class="text-2xl font-bold text-white mb-1">
+                            <i class="fas fa-box mr-2"></i>{{ product.nom }}
+                        </h1>
+                        <p class="text-blue-100 text-sm">
+                            Référence produit • {{ product.categorie.nom }}
+                        </p>
+                    </div>
+                    <div class="badge badge-lg px-4 py-2 rounded-full text-sm font-semibold shadow-sm
+                        {% if product.stock > 0 %}bg-green-500 text-white{% else %}bg-red-500 text-white{% endif %}">
+                        {% if product.stock > 0 %}✅ En stock ({{ product.stock }}){% else %}❌ Rupture{% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-6 space-y-6">
+
+                <!-- Grille d'informations -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    
+                     <div class="image_principale_infos">
+            
+            <!-- ========== GALERIE D'IMAGES ========== -->
+            <div class="space-y-4 image-full">
+                
+                <!-- Image principale (cliquable → galerie) -->
+                <a href="{% url 'products_app:product-images-list' product.pk %}" class="block">
+                    <div class="relative overflow-hidden rounded-2xl shadow-xl bg-white group img_gallery">
+                        
+                        {% if image_principale %}
+                             <img id="mainImage" 
+                             src="{{ image_principale.image.url }}" 
+                             alt="{{ product.categorie.nom }} {{ product.nom }}"
+                             class="w-full h-96 object-cover transition-transform duration-500 group-hover:scale-105">
+                        {% else %}
+                            
+                        <img id="mainImage" 
+                             src="{{ product.image_principale.url }}" 
+                             alt="{{ product.categorie.nom }} {{ product.nom}}"
+                             class="w-full h-96 object-cover transition-transform duration-500 group-hover:scale-105">
+                         {% endif %}
+                        <div class="absolute bottom-4 right-4 bg-black/50 text-white text-xs px-3 py-1.5 rounded-full flex items-center gap-2 backdrop-blur-sm">
+                            <i class="fas fa-images"></i> 
+                            {{ images|length|add:1 }} photos
+                        </div>
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                            <span class="bg-white/90 text-gray-800 px-4 py-2 rounded-xl text-sm font-medium shadow-lg">
+                                <i class="fas fa-expand mr-2"></i>Voir plus d'images
+                            </span>
+                        </div>
+                    </div>
+                </a>
+                
+                <!-- Miniatures (images supplémentaires) -->
+                <div class="flex gap-3 overflow-x-auto pb-2 img_miniatures">
+                    <!-- Image principale en miniature -->
+                    <img src="{{ image_principal.image.url }}" 
+                         class="thumbnail w-20 h-20 rounded-lg object-cover cursor-pointer border-2 border-blue-500 transition"
+                         onclick="changeImage('{{ image_principal.image.url }}')">
+                    
+                    <!-- Images supplémentaires -->
+                    {% for image in images %}
+                        {% if not image.est_principale %}
+                        <img src="{{ image.image.url }}" 
+                             alt="{{ image.alt_text|default:vehicul.modele }}"
+                             class="thumbnail w-20 h-20 rounded-lg object-cover cursor-pointer border-2 border-transparent hover:border-blue-500 transition"
+                             onclick="changeImage('{{ image.image.url }}')">
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+                 <!-- Miniatures (images supplémentaires) -->
+                <div class="flex gap-3 overflow-x-auto pb-2 img_miniatures">
+                    <!-- Image principale en miniature -->
+                    <img src="{{ image_principal.image.url }}" 
+                         class="thumbnail w-20 h-20 rounded-lg object-cover cursor-pointer border-2 border-blue-500 transition"
+                         onclick="changeImage('{{ image_principal.image.url }}')">
+                    
+                    <!-- Images supplémentaires -->
+                    {% for image in images %}
+                        {% if not image.est_principale %}
+                        <img src="{{ image.image.url }}" 
+                             alt="{{ image.alt_text|default:product.nom }}"
+                             class="thumbnail w-20 h-20 rounded-lg object-cover cursor-pointer border-2 border-transparent hover:border-blue-500 transition"
+                             onclick="changeImage('{{ image.image.url }}')">
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                
+            
+            </div>
+                 
+
+                    <!-- Informations produit -->
+                    <div class="space-y-4">
+                        <div class="bg-gray-50 rounded-xl p-4 info-card">
+                            <h3 class="text-md font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                <i class="fas fa-info-circle text-blue-600"></i> Informations générales
+                            </h3>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-tag text-blue-500 w-5"></i>
+                                    <span class="text-gray-600">Catégorie :</span>
+                                    <strong class="text-gray-800">{{ product.categorie.nom }}</strong>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-money-bill-wave text-green-600 w-5"></i>
+                                    <span class="text-gray-600">Prix :</span>
+                                    <strong class="text-green-700 text-lg">{{ product.prix|intcomma }} FCFA</strong>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-boxes text-blue-500 w-5"></i>
+                                    <span class="text-gray-600">Stock :</span>
+                                    <strong class="{% if product.stock > 0 %}text-green-600{% else %}text-red-600{% endif %}">
+                                        {{ product.stock }} unités
+                                    </strong>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-car text-blue-500 w-5"></i>
+                                    <span class="text-gray-600">Compatible avec :</span>
+                                    <strong>{{ product.compatible_avec|default:"Tous véhicules" }}</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dates -->
+                        <div class="bg-gray-50 rounded-xl p-4 info-card">
+                            <h3 class="text-md font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                <i class="fas fa-calendar-alt text-blue-600"></i> Dates
+                            </h3>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-plus-circle text-blue-500 w-5"></i>
+                                    <span class="text-gray-600">Date ajout :</span>
+                                    <strong>{{ product.date_creation|date:"d/m/Y H:i" }}</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex flex-wrap action gap-3 pt-4 border-t border-gray-100">
+                    <button onclick="document.getElementById('update_product_modal').showModal()" 
+                            class="btn-glow px-5 py-2 rounded-xl flex items-center gap-2">
+                        <i class="fas fa-edit"></i> Modifier
+                    </button>
+                    <button onclick="document.getElementById('delete_product_modal').showModal()" 
+                            class="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-xl transition shadow-md flex items-center gap-2">
+                        <i class="fas fa-trash-alt"></i> Supprimer
+                    </button>
+                </div>
+
+                <!-- Bouton retour -->
+                <div class="flex justify-center pt-2">
+                    <a href="{% url 'products_app:products-list' %}" 
+                       class="inline-flex items-center gap-2 text-gray-500 hover:text-blue-600 transition">
+                        <i class="fas fa-arrow-left"></i> Retour à la liste des produits
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Modales -->
+    {% include 'modals/products/update_product.html' %}
+    {% include 'modals/products/confirm_products_delete.html' %}
+
+    <footer class="bg-gray-800 text-white py-6 mt-12">
+        <div class="container mx-auto px-4 text-center text-sm text-gray-400">
+            <p>&copy; {% now "Y" %} KOZ Services - Tous droits réservés</p>
+        </div>
+    </footer>
+
+</body>
+</html>

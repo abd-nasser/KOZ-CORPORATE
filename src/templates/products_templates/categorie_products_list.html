@@ -1,0 +1,176 @@
+{% load static %}
+{% load tailwind_tags %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    {% tailwind_css %}
+    <script src="{% static 'js/htmx.min.js' %}" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/products/categorie_products_list_style.css' %}">
+    <title>Catégories - KOZ Services</title>
+    <style>
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .animate-fade-in-up {
+            animation: fadeInUp 0.5s ease-out forwards;
+        }
+        .animate-slide-in-right {
+            animation: slideInRight 0.4s ease-out forwards;
+        }
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .category-card {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .category-card:hover {
+            transform: translateX(4px);
+            border-left-color: #3b82f6;
+        }
+        .btn-glow {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            border: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.5);
+        }
+        .btn-glow:hover {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            transform: translateY(-2px);
+            box-shadow: 0 20px 35px -8px rgba(59, 130, 246, 0.7);
+        }
+        
+    main{
+        min-height:75vh
+    }
+
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 font-inter">
+
+    <!-- Messages flash -->
+    {% if messages %}
+    <div class="fixed top-20 right-5 z-50 space-y-2">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} shadow-xl rounded-xl animate-slide-in-right">
+            <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% else %}info-circle{% endif %} mr-2"></i>
+            <span>{{ message }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Navbar -->
+    <nav class="glass-nav sticky top-0 z-40 shadow-sm">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl flex items-center justify-center shadow-lg">
+                    <span class="text-white font-bold text-xl">K</span>
+                </div>
+                <span class="text-xl font-bold bg-gradient-to-r from-blue-700 to-indigo-600 bg-clip-text text-transparent">KOZ Services</span>
+                <span class="hidden md:inline-block px-2 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">Catégories</span>
+            </div>
+            <a href="{% url 'products_app:products-list' %}" class="text-gray-600 hover:text-blue-600 transition text-sm flex items-center gap-1">
+                <i class="fas fa-arrow-left"></i> Produits
+            </a>
+        </div>
+        {% if messages %}
+        <div class="fixed top-20 right-5 z-50 space-y-2">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} shadow-xl rounded-xl animate-slide-in-right">
+                <span>{{ message }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </nav>
+
+    <main class="container mx-auto px-4 py-8 max-w-4xl">
+        
+        <!-- En-tête -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 animate-fade-in-up">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-3">
+                    <i class="fas fa-tags text-blue-600"></i>
+                    Gestion des catégories
+                </h1>
+                <p class="text-gray-500 text-sm mt-1">Organisez vos produits par catégorie</p>
+            </div>
+            <button onclick="document.getElementById('create_categorie_modal').showModal()" 
+                    class="btn-glow px-5 py-2 rounded-xl flex items-center gap-2 shadow-md">
+                <i class="fas fa-plus-circle"></i> Ajouter une catégorie
+            </button>
+            {% include 'modals/products/create_categorie_product.html' %}
+        </div>
+
+        <!-- Liste des catégories -->
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 animate-fade-in-up" style="animation-delay: 0.1s">
+            <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
+                <h2 class="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                    <i class="fas fa-list text-blue-600"></i> Toutes les catégories
+                </h2>
+            </div>
+            
+            {% if categories %}
+            <div class="divide-y divide-gray-100">
+                {% for cat in categories %}
+                <div class="category-card flex justify-between items-center px-6 py-4 hover:bg-gray-50 transition border-l-4 border-l-transparent">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                            <i class="fas fa-folder text-blue-600 text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-800">{{ cat.nom }}</p>
+                            <p class="text-xs text-gray-400">ID: {{ cat.id }}</p>
+                        </div>
+                    </div>
+                    <button onclick="document.getElementById('delete_categorie_modal_{{ cat.id }}').showModal()" 
+                            class="px-3 py-2 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 transition flex items-center gap-1 text-sm">
+                        <i class="fas fa-trash-alt"></i> Supprimer
+                    </button>
+                    {% include 'modals/products/confirm_cat_delete.html' with category=cat %}
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-12">
+                <i class="fas fa-folder-open text-5xl text-gray-300 mb-4"></i>
+                <p class="text-gray-500">Aucune catégorie trouvée.</p>
+                <button onclick="document.getElementById('create_categorie_modal').showModal()" 
+                        class="btn-glow mt-4 px-5 py-2 rounded-xl inline-flex items-center gap-2">
+                    <i class="fas fa-plus-circle"></i> Créer la première catégorie
+                </button>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Bouton retour -->
+        <div class="mt-6 text-center">
+            <a href="{% url 'products_app:products-list' %}" 
+               class="inline-flex items-center gap-2 text-gray-500 hover:text-blue-600 transition">
+                <i class="fas fa-arrow-left"></i> Retour à la liste des produits
+            </a>
+        </div>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white py-6 mt-12">
+        <div class="container mx-auto px-4 text-center text-sm text-gray-400">
+            <p>&copy; {% now "Y" %} KOZ Services - Tous droits réservés</p>
+        </div>
+    </footer>
+
+</body>
+</html>

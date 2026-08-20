@@ -1,0 +1,154 @@
+{% load static %}
+<dialog id="gestion_doc_modal" class="modal">
+    <div class="modal-box w-full max-w-md p-0 overflow-hidden rounded-2xl bg-gradient-to-br from-white to-gray-50 shadow-2xl">
+        
+        <!-- Header avec dégradé -->
+        <div class="bg-gradient-to-r from-blue-700 to-indigo-800 px-6 py-4">
+            <div class="flex justify-between items-center">
+                <h3 class="text-xl font-bold text-white">
+                    <i class="fas fa-folder-open mr-2"></i>Gestion du dossier
+                </h3>
+                <button type="button" class="text-white/80 hover:text-white text-2xl leading-none transition" 
+                        onclick="document.getElementById('gestion_doc_modal').close()">&times;</button>
+            </div>
+            <p class="text-blue-100 text-sm mt-1">Actions disponibles pour ce dossier documentaire</p>
+        </div>
+
+        <!-- Corps du modal -->
+        <div id="gest-doc-message-zone"></div>
+        <div class="p-6 space-y-4">
+            
+            <!-- Action : Vérifier -->
+            <button hx-post="{% url 'leads_app:verifier-document' document.pk %}" 
+               hx-target="#gest-doc-message-zone"
+               hx-indicator="#gest-doc-indicator"
+               hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+               class="flex items-center gap-4 p-4 rounded-xl w-full bg-blue-50 border border-blue-200 hover:bg-blue-100 transition group"
+               type="button">
+                <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center group-hover:bg-blue-200 transition">
+                    <i class="fas fa-search text-blue-700 text-xl"></i>
+                </div>
+                <div class="flex-1">
+                    <p class="font-semibold text-gray-800">Vérifier le dossier</p>
+                    <p class="text-sm text-gray-500">Examiner les documents fournis</p>
+                </div>
+                <i class="fas fa-chevron-right text-gray-400 group-hover:text-blue-600 transition"></i>
+            </button>
+
+            <!-- Action : Modifier -->
+            <button hx-post="{% url 'leads_app:modifier-document' document.pk %}" 
+               hx-target="#gest-doc-message-zone"
+               hx-indicator="#gest-doc-indicator"
+               hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+               type="button"
+               class="flex items-center gap-4 p-4 rounded-xl w-full bg-yellow-50 border border-yellow-200 hover:bg-yellow-100 transition group">
+                <div class="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center group-hover:bg-yellow-200 transition">
+                    <i class="fas fa-edit text-yellow-700 text-xl"></i>
+                </div>
+                <div class="flex-1">
+                    <p class="font-semibold text-gray-800">Modifier le dossier</p>
+                    <p class="text-sm text-gray-500">Demander des modifications au client</p>
+                </div>
+                <i class="fas fa-chevron-right text-gray-400 group-hover:text-yellow-600 transition"></i>
+            </button>
+
+            
+
+            <!-- Action : Valider -->
+            <button hx-post="{% url 'leads_app:valider-document' document.pk %}" 
+               hx-target="#gest-doc-message-zone"
+               hx-indicator="#gest-doc-indicator"
+               hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+               type="button"
+               class="flex items-center gap-4 p-4 rounded-xl w-full bg-green-50 border border-green-200 hover:bg-green-100 transition group">
+                <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center group-hover:bg-green-200 transition">
+                    <i class="fas fa-check-circle text-green-700 text-xl"></i>
+                </div>
+                <div class="flex-1">
+                    <p class="font-semibold text-gray-800">Valider le dossier</p>
+                    <p class="text-sm text-gray-500">Approuver définitivement le dossier</p>
+                </div>
+                <i class="fas fa-chevron-right text-gray-400 group-hover:text-green-600 transition"></i>
+            </button>
+
+
+               <div id="gest-doc-indicator" class="htmx-indicator absolute inset-0 bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center z-50 rounded-2xl transition-all">
+                        <div class="p-6 text-center flex flex-col items-center">
+                            <img src="{% static 'images/Loading_animation.svg' %}" class="w-16 h-16 mb-3 object-contain animate-pulse" alt="Chargement...">
+                            <p class="text-sm font-bold text-slate-800"> Envoi de documents cours...</p>
+                        </div>
+                </div>
+
+
+            <!-- Action : Rejeter -->
+            <button 
+               hx-post="{% url 'leads_app:rejeter-document' document.pk %}" 
+               hx-target="#gest-doc-message-zone"
+               hx-indicator="#gest-doc-indicator"
+               hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+               type="button"
+                class="flex items-center gap-4 p-4 w-full rounded-xl bg-red-50 border border-red-200 hover:bg-red-100 transition group">
+                <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center group-hover:bg-red-200 transition">
+                    <i class="fas fa-times-circle text-red-700 text-xl"></i>
+                </div>
+                <div class="flex-1">
+                    <p class="font-semibold text-gray-800">Rejeter le dossier</p>
+                    <p class="text-sm text-gray-500">Refuser définitivement le dossier</p>
+                </div>
+                <i class="fas fa-chevron-right text-gray-400 group-hover:text-red-600 transition"></i>
+            </button>
+
+            <!-- Action : reverification -->
+            <button hx-post="{% url 'leads_app:reverifier-document' document.pk %}" 
+               hx-target="#gest-doc-message-zone"
+               hx-indicator="#gest-doc-indicator"
+               hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+               type="button"
+               class="flex items-center gap-4 p-4 rounded-xl bg-violet-50-50 w-full border border-violet-200 hover:bg-violet-100 transition group">
+                <div class="w-12 h-12 rounded-full bg-violet-100 flex items-center justify-center group-hover:bg-violet-200 transition">
+                    <i class="fas fa-check-circle text-violet-700 text-xl"></i>
+                </div>
+                <div class="flex-1">
+                    <p class="font-semibold text-gray-800">Revérifier</p>
+                    <p class="text-sm text-gray-500">Remettre le dossier en verification</p>
+                </div>
+                <i class="fas fa-chevron-right text-gray-400 group-hover:text-green-600 transition"></i>
+            </button>
+
+        </div>
+
+        <!-- Footer avec bouton de fermeture -->
+        <div class="bg-gray-50 px-6 py-4 flex justify-end">
+            <button type="button" class="btn btn-ghost" onclick="document.getElementById('gestion_doc_modal').close()">
+                <i class="fas fa-times mr-2"></i>Fermer
+            </button>
+        </div>
+
+    </div>
+</dialog>
+
+<!-- Script pour réouvrir le modal en cas d'erreur -->
+<script>
+   
+    document.addEventListener('closeGestionDocModal', function() {
+        document.getElementById('gestion_doc_modal').close();
+    });
+
+</script>
+
+<style>
+    /* Style supplémentaire pour les boutons inline si besoin */
+    .btn-glow {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        color: white;
+        border: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.5);
+    }
+    .btn-glow:hover {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        transform: translateY(-2px);
+        box-shadow: 0 20px 35px -8px rgba(59, 130, 246, 0.7);
+    }
+   
+</style>

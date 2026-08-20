@@ -1,0 +1,150 @@
+{% load static %}
+<!-- Modal pour enregistrer une vente -->
+<dialog id="simple_vente_modal" class="modal modal-bottom sm:modal-middle">
+    <div class="modal-box w-full max-w-lg p-0 overflow-hidden rounded-2xl bg-white shadow-2xl border border-slate-100 relative">
+        
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-blue-700 to-indigo-800 px-6 py-4 flex items-center justify-between text-white">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center border border-white/20 shrink-0">
+                    <i class="fas fa-handshake text-lg"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold">Enregistrer une vente</h3>
+                    <p class="text-blue-100 text-xs">Saisie rapide d'une nouvelle transaction</p>
+                </div>
+            </div>
+            <button type="button" 
+                    class="text-white/80 hover:text-white text-2xl leading-none transition" 
+                    onclick="document.getElementById('simple_vente_modal').close()">&times;</button>
+        </div>
+
+        <!-- Overlay de chargement HTMX -->
+        <div id="simple-vente-indicator" class="htmx-indicator absolute inset-0 bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center z-50 transition-all">
+            <div class="p-6 text-center flex flex-col items-center">
+                <div class="w-12 h-12 mb-3 relative flex items-center justify-center">
+                    <div class="absolute inset-0 rounded-full border-4 border-blue-100 border-t-blue-600 animate-spin"></div>
+                    <i class="fas fa-file-invoice-dollar text-blue-600 text-xs"></i>
+                </div>
+                <p class="text-sm font-bold text-slate-800">Enregistrement en cours...</p>
+                <p class="text-xs text-slate-500 mt-0.5">Veuillez patienter un instant</p>
+            </div>
+        </div>
+
+        <!-- Corps du modal avec formulaire HTMX -->
+        <form hx-post="{% url 'commercial_app:create-simple-vente' %}" 
+              hx-target="#simple-vente-msg-zone"
+              hx-indicator="#simple-vente-indicator"
+              class="flex flex-col">
+            {% csrf_token %}
+
+            <div class="p-6 space-y-4">
+                
+                <!-- Zone de notification dynamique HTMX -->
+                <div id="simple-vente-msg-zone" class="empty:hidden"></div>
+
+                <!-- Erreurs globales -->
+                {% if simple_vente_form.non_field_errors %}
+                    <div class="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 space-y-1">
+                        {% for error in simple_vente_form.non_field_errors %}
+                            <p class="flex items-center gap-1.5"><i class="fas fa-exclamation-circle text-rose-500"></i> {{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <!-- Champ 1 : Client -->
+                <div class="form-group">
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">
+                        <i class="fas fa-user text-slate-400 mr-1"></i> {{ simple_vente_form.client.label }}
+                        {% if simple_vente_form.client.field.required %}<span class="text-rose-500">*</span>{% endif %}
+                    </label>
+                    {{ simple_vente_form.client }}
+                    {% if simple_vente_form.client.errors %}
+                        <p class="mt-1 text-rose-500 text-xs flex items-center gap-1">
+                            <i class="fas fa-exclamation-circle"></i> {{ simple_vente_form.client.errors.0 }}
+                        </p>
+                    {% endif %}
+                </div>
+
+                <!-- Champ 2 : Véhicule -->
+                <div class="form-group">
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">
+                        <i class="fas fa-car text-slate-400 mr-1"></i> {{ simple_vente_form.vehicul.label }}
+                        {% if simple_vente_form.vehicul.field.required %}<span class="text-rose-500">*</span>{% endif %}
+                    </label>
+                    {{ simple_vente_form.vehicul }}
+                    {% if simple_vente_form.vehicul.errors %}
+                        <p class="mt-1 text-rose-500 text-xs flex items-center gap-1">
+                            <i class="fas fa-exclamation-circle"></i> {{ simple_vente_form.vehicul.errors.0 }}
+                        </p>
+                    {% endif %}
+                </div>
+
+                <!-- Champ 3 : Montant -->
+                <div class="form-group">
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">
+                        <i class="fas fa-coins text-slate-400 mr-1"></i> {{ simple_vente_form.montant.label }}
+                        {% if simple_vente_form.montant.field.required %}<span class="text-rose-500">*</span>{% endif %}
+                    </label>
+                    <div class="relative">
+                        {{ simple_vente_form.montant }}
+                    </div>
+                    {% if simple_vente_form.montant.errors %}
+                        <p class="mt-1 text-rose-500 text-xs flex items-center gap-1">
+                            <i class="fas fa-exclamation-circle"></i> {{ simple_vente_form.montant.errors.0 }}
+                        </p>
+                    {% endif %}
+                </div>
+
+            </div>
+
+            <!-- Footer & Actions -->
+            <div class="flex items-center justify-end gap-3 px-6 py-4 bg-slate-50 border-t border-slate-100 rounded-b-2xl">
+                <button type="button" 
+                        class="btn btn-ghost btn-sm text-slate-600 hover:bg-slate-200/60 font-medium rounded-xl px-4" 
+                        onclick="document.getElementById('simple_vente_modal').close()">
+                    <i class="fas fa-times mr-1"></i> Annuler
+                </button>
+                <button type="submit" 
+                        class="btn-glow px-6 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 cursor-pointer">
+                    <i class="fas fa-check"></i> Valider la vente
+                </button>
+            </div>
+        </form>
+    </div>
+</dialog>
+
+<!-- Script de fermeture via évènement personnalisé HTMX -->
+<script>
+    document.addEventListener('closeVenteModal', function() {
+        const modal = document.getElementById('simple_vente_modal');
+        if (modal) modal.close();
+    });
+</script>
+
+<style>
+    .btn-glow {
+        background: linear-gradient(135deg, #1d4ed8, #1e40af);
+        color: white;
+        border: none;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 14px -2px rgba(37, 99, 235, 0.4);
+    }
+    .btn-glow:hover {
+        background: linear-gradient(135deg, #1e40af, #1e3a8a);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 18px -2px rgba(37, 99, 235, 0.5);
+    }
+
+    /* Comportement de l'indicateur HTMX */
+    .htmx-indicator {
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease-in-out;
+    }
+    .htmx-request .htmx-indicator,
+    .htmx-request.htmx-indicator {
+        opacity: 1;
+        pointer-events: auto;
+    }
+</style>

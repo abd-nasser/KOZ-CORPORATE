@@ -1,0 +1,131 @@
+{% load static %}
+{% load tailwind_tags %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    {% tailwind_css %}
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <title>Types de véhicules - KOZ Services</title>
+    <style>
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-up {
+            animation: fadeInUp 0.5s ease-out forwards;
+        }
+        .type-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .type-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 24px 30px -15px rgba(0, 0, 0, 0.15);
+        }
+        .icon-circle {
+            width: 3rem;
+            height: 3rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 9999px;
+            background: rgba(59, 130, 246, 0.15);
+            color: #1d4ed8;
+        }
+        main {
+            min-height: 81vh;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 font-inter">
+
+    <nav class="bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-gray-200 shadow-sm">
+        <div class="container mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl flex items-center justify-center shadow-lg">
+                    <span class="text-white font-bold text-xl">K</span>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">KOZ Services</p>
+                    <h1 class="text-lg font-semibold text-gray-800">Types de véhicules</h1>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <a href="{% url 'vehicul_app:list-vehicul' %}" class="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600 transition">
+                    <i class="fas fa-arrow-left"></i> Catalogue véhicules
+                </a>
+               
+                <a href="{% url 'vehicul_app:type-vehicul-create' %}" class="btn btn-primary btn-sm bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
+                    <i class="fas fa-plus mr-2"></i>Créer un type
+                </a>
+                
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-4 py-10">
+        <div class="text-center mb-10 animate-fade-in-up">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-800">Choisissez la bonne catégorie</h2>
+            <p class="text-gray-500 mt-2">Découvrez les types de véhicules disponibles pour mieux organiser votre stock et vos offres.</p>
+        </div>
+
+        {% if messages %}
+        <div class="fixed top-24 right-5 z-50 space-y-2">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} shadow-xl rounded-xl">
+                <i class="fas fa-info-circle mr-2"></i>
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if types %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+            {% for type in types %}
+            <a href="{% url 'vehicul_app:type-vehicule-detail' type.pk %}" class="type-card group block bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden transition hover:border-blue-200">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-5">
+                        <div class="icon-circle">
+                            <i class="fas {{ type.icone|default:'fa-car' }} text-xl"></i>
+                        </div>
+                        <span class="text-xs font-semibold uppercase tracking-[0.2em] text-blue-600">Type</span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-3">{{ type.nom }}</h3>
+                    <p class="text-sm text-gray-500 leading-relaxed min-h-[4.5rem]">
+                        {{ type.description|default:'Aucune description fournie pour ce type.' }}
+                    </p>
+                </div>
+                <div class="border-t border-gray-100 bg-gray-50 px-6 py-4 flex items-center justify-between">
+                    <span class="text-sm text-gray-500">{{ type.vehicules.count }} véhicule{{ type.vehicules.count|pluralize }}</span>
+                    <span class="text-sm font-semibold text-blue-600">Voir</span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="bg-white rounded-3xl shadow-md border border-gray-200 p-10 text-center">
+            <i class="fas fa-car-side text-4xl text-blue-500 mb-4"></i>
+            <h3 class="text-xl font-semibold text-gray-800 mb-2">Aucun type de véhicule trouvé</h3>
+            <p class="text-gray-500 mb-6">Ajoutez un premier type pour organiser votre catalogue plus facilement.</p>
+          
+            <a href="{% url 'vehicul_app:type-vehicul-create' %}" class="btn btn-primary bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl shadow-sm inline-flex items-center gap-2">
+                <i class="fas fa-plus"></i> Créer un type
+            </a>
+           
+        </div>
+        {% endif %}
+    </main>
+
+    <footer class="bg-gray-800 text-white py-6 mt-12">
+        <div class="container mx-auto px-4 text-center text-sm text-gray-400">
+            <p>&copy; {% now "Y" %}  KOZ Services — Tous droits réservés</p>
+            <p class="font-medium text-slate-700">Conçu par <strong>SPIRIT-DIGIT Agency</strong></p>
+        </div>
+    </footer>
+
+</body>
+</html>

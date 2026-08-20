@@ -1,0 +1,352 @@
+{% load static %}
+{% load humanize %}
+<!-- modals/leads/upload_doc.html -->
+<dialog id="upload_doc_modal" class="modal modal-bottom sm:modal-middle">
+    <div class="modal-box w-full max-w-4xl p-0 overflow-hidden rounded-2xl bg-white shadow-2xl border border-slate-100 relative">
+        
+        <!-- Header -->
+        <div class="bg-slate-900 text-white px-6 py-4 sticky top-0 z-20 flex items-center justify-between border-b border-slate-800">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-blue-600/20 text-blue-400 flex items-center justify-center border border-blue-500/30 shrink-0">
+                    <i class="fas fa-cloud-upload-alt text-lg"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold tracking-tight text-white">
+                        Télécharger mes documents
+                    </h3>
+                    <p class="text-slate-400 text-xs">Veuillez transmettre vos pièces justificatives pour l'étude du dossier</p>
+                </div>
+            </div>
+            <button type="button" 
+                    class="btn btn-sm btn-circle btn-ghost text-slate-400 hover:text-white transition" 
+                    onclick="document.getElementById('upload_doc_modal').close()">
+                <i class="fas fa-times text-base"></i>
+            </button>
+        </div>
+
+        <!-- Zone de message HTMX -->
+        <div id="send-doc-message-zone" class="px-6 pt-4 empty:hidden"></div>
+
+        <!-- Indicator HTMX de chargement -->
+        <div id="send-doc-indicator" class="htmx-indicator absolute inset-0 bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center z-50 transition-all">
+            <div class="p-6 text-center flex flex-col items-center">
+                <div class="w-14 h-14 mb-3 relative flex items-center justify-center">
+                    <div class="absolute inset-0 rounded-full border-4 border-blue-100 border-t-blue-600 animate-spin"></div>
+                    <i class="fas fa-file-upload text-blue-600 text-lg"></i>
+                </div>
+                <p class="text-sm font-bold text-slate-900">Envoi des documents en cours...</p>
+                <p class="text-xs text-slate-500 mt-1">Veuillez patienter sans fermer la fenêtre.</p>
+            </div>
+        </div>
+
+        <!-- Corps du formulaire -->
+        <form 
+            hx-post="{% url 'leads_app:upload-document' demande.pk %}" 
+            hx-target="#send-doc-message-zone"
+            hx-indicator="#send-doc-indicator"
+            enctype="multipart/form-data"  
+            class="flex flex-col">
+            {% csrf_token %}
+            
+            <div class="scrollable-form space-y-5 max-h-[65vh] overflow-y-auto p-6">
+                
+                <!-- 1. IDENTITÉ & RÉSIDENCE -->
+                <div class="bg-slate-50/70 border border-slate-200/80 rounded-xl p-4 transition-colors">
+                    <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-200/60">
+                        <h4 class="font-bold text-slate-800 text-xs tracking-wider uppercase flex items-center gap-2">
+                            <i class="fas fa-id-card text-blue-600"></i> Identité & Résidence
+                        </h4>
+                        <span class="text-[10px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200/60">
+                            Requis
+                        </span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">
+                                {{ upload_doc_form.cni_passeport.label }} <span class="text-rose-500">*</span>
+                            </label>
+                            <div class="custom-file-field">
+                                {{ upload_doc_form.cni_passeport }}
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">
+                                {{ upload_doc_form.justificatif_domicile.label }} <span class="text-rose-500">*</span>
+                            </label>
+                            <div class="custom-file-field">
+                                {{ upload_doc_form.justificatif_domicile }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. EMPLOI & REVENUS -->
+                <div class="bg-slate-50/70 border border-slate-200/80 rounded-xl p-4 transition-colors">
+                    <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-200/60">
+                        <h4 class="font-bold text-slate-800 text-xs tracking-wider uppercase flex items-center gap-2">
+                            <i class="fas fa-briefcase text-blue-600"></i> Emploi & Revenus
+                        </h4>
+                        <span class="text-[10px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200/60">
+                            Requis
+                        </span>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">
+                                {{ upload_doc_form.attestation_non_engagement.label }} <span class="text-rose-500">*</span>
+                            </label>
+                            <div class="custom-file-field">
+                                {{ upload_doc_form.attestation_non_engagement }}
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">
+                                {{ upload_doc_form.contrat_travail.label }} <span class="text-rose-500">*</span>
+                            </label>
+                            <div class="custom-file-field">
+                                {{ upload_doc_form.contrat_travail }}
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">
+                                {{ upload_doc_form.attestation_travail.label }} <span class="text-rose-500">*</span>
+                            </label>
+                            <div class="custom-file-field">
+                                {{ upload_doc_form.attestation_travail }}
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">
+                                {{ upload_doc_form.quittance_salaire.label }} <span class="text-rose-500">*</span>
+                            </label>
+                            <div class="custom-file-field">
+                                {{ upload_doc_form.quittance_salaire }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section Bulletins de paie -->
+                    <div class="pt-3 border-t border-slate-200/60">
+                        <label class="block text-xs font-bold text-slate-700 mb-2 flex items-center gap-1.5">
+                            <i class="fas fa-file-invoice-dollar text-slate-500"></i> 3 derniers bulletins de paie
+                        </label>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div class="bg-white p-2 rounded-lg border border-slate-200">
+                                <span class="block text-[11px] font-medium text-slate-500 mb-1">Mois M</span>
+                                <div class="custom-file-field">{{ upload_doc_form.bulletin_1 }}</div>
+                            </div>
+                            <div class="bg-white p-2 rounded-lg border border-slate-200">
+                                <span class="block text-[11px] font-medium text-slate-500 mb-1">Mois M-1</span>
+                                <div class="custom-file-field">{{ upload_doc_form.bulletin_2 }}</div>
+                            </div>
+                            <div class="bg-white p-2 rounded-lg border border-slate-200">
+                                <span class="block text-[11px] font-medium text-slate-500 mb-1">Mois M-2</span>
+                                <div class="custom-file-field">{{ upload_doc_form.bulletin_3 }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. BANQUE -->
+                <div class="bg-slate-50/70 border border-slate-200/80 rounded-xl p-4 transition-colors">
+                    <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-200/60">
+                        <h4 class="font-bold text-slate-800 text-xs tracking-wider uppercase flex items-center gap-2">
+                            <i class="fas fa-university text-blue-600"></i> Relevés & Justificatifs Bancaires
+                        </h4>
+                        <span class="text-[10px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200/60">
+                            Requis
+                        </span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">
+                                {{ upload_doc_form.relevé_bancaire.label }} <span class="text-rose-500">*</span>
+                            </label>
+                            <div class="custom-file-field">
+                                {{ upload_doc_form.relevé_bancaire }}
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">
+                                {{ upload_doc_form.specimen_signature.label }} <span class="text-rose-500">*</span>
+                            </label>
+                            <div class="custom-file-field">
+                                {{ upload_doc_form.specimen_signature }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. AUTRES (Optionnels) -->
+                <div class="bg-slate-50/70 border border-slate-200/80 rounded-xl p-4 transition-colors">
+                    <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-200/60">
+                        <h4 class="font-bold text-slate-800 text-xs tracking-wider uppercase flex items-center gap-2">
+                            <i class="fas fa-folder-plus text-slate-500"></i> Autres justificatifs
+                        </h4>
+                        <span class="text-[10px] font-medium text-slate-500 bg-slate-200/60 px-2 py-0.5 rounded">
+                            Optionnel
+                        </span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">
+                                {{ upload_doc_form.certificat_presence.label }}
+                            </label>
+                            <div class="custom-file-field">
+                                {{ upload_doc_form.certificat_presence }}
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">
+                                {{ upload_doc_form.geolocalisation.label }}
+                            </label>
+                            <div class="custom-file-field">
+                                {{ upload_doc_form.geolocalisation }}
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">
+                                {{ upload_doc_form.garanties.label }}
+                            </label>
+                            <div class="custom-file-field">
+                                {{ upload_doc_form.garanties }}
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">
+                                {{ upload_doc_form.recu_acompte.label }}
+                            </label>
+                            <div class="custom-file-field">
+                                {{ upload_doc_form.recu_acompte }}
+                            </div>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-medium text-slate-600 mb-1">
+                                {{ upload_doc_form.fiche_demande.label }}
+                            </label>
+                            <div class="custom-file-field">
+                                {{ upload_doc_form.fiche_demande }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Footer fixe avec boutons d'action -->
+            <div class="flex items-center justify-between gap-3 px-6 py-4 bg-slate-50 border-t border-slate-200/80 rounded-b-2xl">
+                <span class="text-xs text-slate-500 hidden sm:inline-flex items-center gap-1.5">
+                    <i class="fas fa-shield-alt text-slate-400"></i> Envoi sécurisé & chiffré
+                </span>
+                <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+                    <button type="button" 
+                            class="btn btn-ghost btn-sm text-slate-600 hover:bg-slate-200/60 font-medium rounded-lg px-4" 
+                            onclick="document.getElementById('upload_doc_modal').close()">
+                        Annuler
+                    </button>
+                    <button type="submit" 
+                            class="btn-glow px-5 py-2.5 rounded-lg text-xs font-semibold flex items-center gap-2 cursor-pointer">
+                        <i class="fas fa-paper-plane"></i> Envoyer les documents
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</dialog>
+
+<!-- Script de fermeture sur événement HTMX -->
+<script>
+    document.body.addEventListener('closeDocModal', function() {
+        const modal = document.getElementById('upload_doc_modal');
+        if (modal) modal.close();
+    });
+</script>
+
+<style>
+    /* Bouton d'action principal */
+    .btn-glow {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: white;
+        border: none;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 12px -2px rgba(37, 99, 235, 0.35);
+    }
+    .btn-glow:hover {
+        background: linear-gradient(135deg, #1d4ed8, #1e40af);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px -2px rgba(37, 99, 235, 0.45);
+    }
+    .btn-glow:active {
+        transform: translateY(0);
+    }
+
+    /* Barre de défilement du formulaire */
+    .scrollable-form {
+        scrollbar-color: #cbd5e1 transparent;
+        scrollbar-width: thin;
+    }
+    .scrollable-form::-webkit-scrollbar {
+        width: 6px;
+    }
+    .scrollable-form::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .scrollable-form::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 9999px;
+    }
+    .scrollable-form::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }
+
+    /* Personnalisation propre des inputs de fichiers Django */
+    .custom-file-field input[type="file"],
+    input[type="file"] {
+        width: 100%;
+        font-size: 0.8125rem; /* 13px */
+        color: #334155;
+        border: 1px solid #cbd5e1;
+        border-radius: 0.5rem;
+        background-color: #ffffff;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .custom-file-field input[type="file"]::file-selector-button,
+    input[type="file"]::-webkit-file-upload-button {
+        margin-right: 0.75rem;
+        padding: 0.375rem 0.75rem;
+        border: none;
+        border-right: 1px solid #cbd5e1;
+        background-color: #f1f5f9;
+        color: #1e293b;
+        font-weight: 600;
+        font-size: 0.75rem;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+
+    .custom-file-field input[type="file"]:hover::file-selector-button,
+    input[type="file"]:hover::-webkit-file-upload-button {
+        background-color: #e2e8f0;
+    }
+
+    .custom-file-field input[type="file"]:focus {
+        outline: none;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    /* Overlay HTMX Spinner */
+    .htmx-indicator {
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease-in-out;
+    }
+    .htmx-request .htmx-indicator,
+    .htmx-request.htmx-indicator {
+        opacity: 1;
+        pointer-events: auto;
+    }
+</style>

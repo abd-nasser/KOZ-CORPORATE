@@ -1,0 +1,140 @@
+"{% url 'commercial_app:update-offre' offre.pk %}"
+update_offre_Modal
+{% load static %}
+<dialog id="update_offre_Modal" class="modal">
+    <div class="modal-box w-full max-w-2xl p-0 overflow-hidden rounded-2xl bg-gradient-to-br from-white to-gray-50 shadow-2xl">
+        
+        <!-- Header avec dégradé -->
+        <div class="bg-gradient-to-r from-blue-700 to-indigo-800 px-6 py-4">
+            <div class="flex justify-between items-center">
+                <h3 class="text-xl font-bold text-white">
+                    <i class="fas fa-edit mr-2"></i>Modifier l'offre de financement
+                </h3>
+                <button type="button" class="text-white/80 hover:text-white text-2xl leading-none transition" 
+                        onclick="document.getElementById('update_offre_Modal').close()">&times;</button>
+            </div>
+            <p class="text-blue-100 text-sm mt-1">Mettez à jour les informations de l'offre</p>
+        </div>
+
+        <!-- Corps du modal avec formulaire -->
+        <div id="upd-offre-message-zone" class="px-6 pt-4 empty:hidden"></div>
+
+         <!-- Indicator HTMX de chargement (corrigé hors de la boucle) -->
+        <div id="upd-offre-indicator" class="htmx-indicator absolute inset-0 bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center z-50 transition-all">
+            <div class="p-6 text-center flex flex-col items-center">
+                <div class="w-14 h-14 mb-3 relative flex items-center justify-center">
+                    <div class="absolute inset-0 rounded-full border-4 border-blue-100 border-t-blue-600 animate-spin"></div>
+                    <i class="fas fa-file-signature text-blue-600 text-lg"></i>
+                </div>
+                <p class="text-sm font-bold text-slate-900">Génération de l'offre en cours...</p>
+                <p class="text-xs text-slate-500 mt-1">Calcul des paramètres financiers...</p>
+            </div>
+        </div>
+        <form 
+        hx-post="{% url 'commercial_app:update-offre' offre.pk %}"
+        enctype="multipart/form-data"  
+        hx-target="#upd-offre-message-zone"
+        hx-indicator="#upd-offre-indicator"
+        class="p-6">
+            {% csrf_token %}
+            
+            <!-- AFFICHAGE DES ERREURS GLOBALES -->
+            {% if update_offre_form.non_field_errors %}
+            <div class="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+                {% for error in update_offre_form.non_field_errors %}
+                    <p><i class="fas fa-exclamation-circle mr-2"></i>{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <div class="scrollable-form max-h-[70vh] overflow-y-auto pr-2 space-y-5">
+                {% for field in update_offre_form %}
+                    <div class="form-group">
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">
+                            {{ field.label }}
+                            {% if field.field.required %}
+                                <span class="text-red-500 ml-0.5">*</span>
+                            {% endif %}
+                        </label>
+                        {{ field }}
+                        {% if field.help_text %}
+                            <p class="text-xs text-gray-400 mt-1">{{ field.help_text }}</p>
+                        {% endif %}
+                        
+                        {% if field.errors %}
+                            <div class="mt-1 text-red-500 text-xs">
+                                {% for error in field.errors %}
+                                    <p><i class="fas fa-exclamation-circle mr-1"></i>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Actions -->
+            <div class="flex gap-3 justify-end mt-6 pt-4 border-t border-gray-100">
+                <button type="button" class="btn btn-ghost" onclick="document.getElementById('update_offre_Modal').close()">
+                    <i class="fas fa-times mr-2"></i>Annuler
+                </button>
+                <button type="submit" class="btn-glow px-6 py-2 rounded-xl flex items-center gap-2">
+                    <i class="fas fa-save"></i> Enregistrer les modifications
+                </button>
+            </div>
+        </form>
+    </div>
+</dialog>
+
+<!-- Script pour rouvrir le modal si formulaire invalide -->
+{% if open_update_offre_modal %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('update_offre_Modal').showModal();
+    });
+</script>
+{% endif %}
+
+<style>
+    .btn-glow {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        color: white;
+        border: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.5);
+    }
+    .btn-glow:hover {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        transform: translateY(-2px);
+        box-shadow: 0 20px 35px -8px rgba(59, 130, 246, 0.7);
+    }
+    
+    /* Style des champs de formulaire */
+    input, select, textarea {
+        width: 100%;
+        padding: 10px 14px;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.5rem;
+        transition: all 0.2s ease;
+        background-color: white;
+    }
+    input:focus, select:focus, textarea:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    
+    /* Scrollbar personnalisée */
+    .scrollable-form::-webkit-scrollbar {
+        width: 6px;
+    }
+    .scrollable-form::-webkit-scrollbar-track {
+        background: #e2e8f0;
+        border-radius: 10px;
+    }
+    .scrollable-form::-webkit-scrollbar-thumb {
+        background: #3b82f6;
+        border-radius: 10px;
+    }
+    
+    /* Typo dans enctype corrigée */
+</style>

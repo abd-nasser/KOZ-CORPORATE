@@ -1,0 +1,211 @@
+{% load static %}
+{% load tailwind_tags %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    {% tailwind_css %}
+    <script src="{% static 'js/htmx.min.js' %}" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <title>Gestion des actualités - KOZ Services</title>
+    <style>
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-up { animation: fadeInUp 0.3s ease-out forwards; }
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .actu-card {
+            transition: all 0.2s ease;
+        }
+        .actu-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
+        }
+        .badge-statut {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 0.2rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.65rem;
+            font-weight: 600;
+        }
+        .badge-statut.publie { background: #dcfce7; color: #166534; }
+        .badge-statut.brouillon { background: #fef3c7; color: #92400e; }
+        .badge-statut.archiver { background: #f3f4f6; color: #374151; }
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            border: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.5);
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            transform: translateY(-2px);
+            box-shadow: 0 20px 35px -8px rgba(59, 130, 246, 0.7);
+        }
+        .btn-delete {
+            background: #ef4444;
+            color: white;
+            transition: all 0.2s ease;
+        }
+        .btn-delete:hover {
+            background: #dc2626;
+            transform: scale(1.05);
+        }
+        .type-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 0.15rem 0.6rem;
+            border-radius: 9999px;
+            font-size: 0.6rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-inter">
+
+    <!-- ===== NAVBAR ===== -->
+    <nav class="glass-nav sticky top-0 z-40 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl flex items-center justify-center shadow-lg">
+                    <span class="text-white font-bold text-xl">K</span>
+                </div>
+                <span class="text-xl font-bold bg-gradient-to-r from-blue-700 to-indigo-600 bg-clip-text text-transparent">KOZ Services</span>
+                <span class="hidden md:inline-block px-2 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">Directeur</span>
+            </div>
+            <a href="{% url 'directeur_app:directeur-view' %}" class="text-gray-600 hover:text-blue-600 transition text-sm flex items-center gap-1">
+                <i class="fas fa-arrow-left"></i> Retour
+            </a>
+        </div>
+    </nav>
+
+    <!-- ===== MAIN ===== -->
+    <main class="max-w-7xl mx-auto px-4 py-8" style="height: 80vh;">
+
+        <!-- Messages flash -->
+        {% if messages %}
+        <div class="mb-6 space-y-2">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} shadow-xl rounded-xl animate-fade-in-up">
+                <span>{{ message }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- En-tête -->
+        <div class="flex flex-wrap justify-between items-center gap-4 mb-6 animate-fade-in-up">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-3">
+                    <i class="fas fa-newspaper text-blue-600"></i>
+                    Gestion des actualités
+                </h1>
+                <p class="text-gray-500 text-sm mt-1">
+                    {{ page_obj.paginator.count }} actualité{{ page_obj.paginator.count|pluralize }} au total
+                </p>
+            </div>
+            <button onclick="document.getElementById('actualite_modal').showModal()" 
+                    class="btn-primary px-5 py-2.5 rounded-lg text-sm font-medium flex items-center gap-2">
+                <i class="fas fa-plus-circle"></i> Nouvelle actualité
+            </button>
+        </div>
+
+        <!-- ===== LISTE ===== -->
+        <div class="space-y-4">
+            {% for actualite in actualites %}
+            <div class="actu-card bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden animate-fade-in-up" style="animation-delay: {{ forloop.counter|add:'1'|stringformat:'s' }}00ms">
+                <div class="flex flex-wrap gap-4 p-4">
+                    <!-- Image -->
+                    <div class="w-32 h-24 md:w-40 md:h-28 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0">
+                        {% if actualite.image_principale %}
+                            <img src="{{ actualite.image_principale.url }}" alt="{{ actualite.titre }}" class="w-full h-full object-cover">
+                        {% else %}
+                            <div class="w-full h-full flex items-center justify-center bg-gray-100">
+                                <i class="fas fa-image text-2xl text-gray-300"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Infos -->
+                    <div class="flex-1 min-w-0">
+                        <div class="flex flex-wrap items-center gap-2 mb-1">
+                            <h3 class="font-semibold text-gray-800 text-sm">{{ actualite.titre }}</h3>
+                            <span class="type-badge" style="background: {{ actualite.type_couleur_hex }}20; color: {{ actualite.type_couleur_hex }};">
+                                <i class="fas {{ actualite.type_icone }}"></i>
+                                {{ actualite.get_type_display }}
+                            </span>
+                            <span class="badge-statut {% if actualite.est_publie %}publie{% else %}brouillon{% endif %}">
+                                <i class="fas fa-{% if actualite.est_publie %}check-circle{% else %}clock{% endif %}"></i>
+                                {% if actualite.est_publie %}Publié{% else %}Brouillon{% endif %}
+                            </span>
+                            {% if actualite.est_vedette %}
+                            <span class="text-xs text-yellow-600 flex items-center gap-1">
+                                <i class="fas fa-star"></i> Vedette
+                            </span>
+                            {% endif %}
+                        </div>
+                        <p class="text-xs text-gray-400">
+                            <i class="fas fa-calendar-alt mr-1"></i> {{ actualite.date_evenement|date:"d/m/Y" }}
+                            {% if actualite.date_fin %}
+                            → {{ actualite.date_fin|date:"d/m/Y" }}
+                            {% endif %}
+                        </p>
+                        <p class="text-sm text-gray-600 mt-1 line-clamp-2">{{ actualite.description_courte|default:actualite.description|truncatechars:100 }}</p>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex flex-col items-end gap-2 flex-shrink-0">
+                        <div class="flex gap-2">
+                            <a href="{% url 'home_app:actualites-detail' actualite.id %}" class="text-blue-600 hover:text-blue-800 text-sm transition">
+                                <i class="fas fa-eye"></i> Voir
+                            </a>
+                            
+                        </div>
+                        <span class="text-xs text-gray-400">{{ actualite.date_creation|date:"d/m/Y H:i" }}</span>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
+                <div class="w-20 h-20 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                    <i class="fas fa-newspaper text-3xl text-gray-400"></i>
+                </div>
+                <p class="text-gray-500">Aucune actualité</p>
+                <p class="text-gray-400 text-sm mt-1">Créez votre première actualité</p>
+            </div>
+            {% endfor %}
+        </div>
+
+    
+
+    </main>
+{% include 'modals/actualite/actualite_form.html' %}
+    <footer class="bg-gray-800 text-white py-6 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center text-sm text-gray-400">
+            <p>&copy; {% now "Y" %} KOZ Services — Tous droits réservés</p>
+        </div>
+    </footer>
+<!-- ===== SCRIPTS ===== -->
+    <script>
+        {% if open_actualite_modal %}
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('actualite_modal').showModal();
+        });
+        {% endif %}
+    </script>
+</body>
+</html>

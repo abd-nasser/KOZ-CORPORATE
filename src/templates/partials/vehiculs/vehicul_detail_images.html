@@ -1,0 +1,69 @@
+<!-- Fichier : templates/partials/vehiculs/vehicul_detail_images.html -->
+{% load humanize %}
+
+<!-- ===== HERO IMAGE ===== -->
+<!-- Le conteneur parent (#hero-section) impose déjà la hauteur ;      -->
+<!-- ici on se contente de remplir en h-full pour éviter tout          -->
+<!-- décalage de layout au moment du swap HTMX.                        -->
+<div id="hero-image-container" class="absolute transition duration-500 group-hover:scale-110 inset-0 w-full h-full overflow-hidden">
+
+    {% if vehicule_imgs_page %}
+        <div class="hero-slide-{{ direction|default:'right' }} w-full h-full">
+            <img src="{{ vehicule_imgs_page.0.image.url }}"
+                 alt="{{ vehicule_imgs_page.0.alt_text|default:vehicul.modele }}"
+                 class="w-full h-full object-contain">
+            <div class="hero-overlay"></div>
+        </div>
+    {% else %}
+        <div class="hero-slide-{{ direction|default:'right' }} w-full h-full">
+            <img src="{{ vehicul.display_image.url }}"
+                 alt="{{ vehicul.marque.nom }} {{ vehicul.modele }}"
+                 class="w-full h-full object-contain  transition duration-500 group-hover:scale-110">
+            <div class="hero-overlay"></div>
+        </div>
+    {% endif %}
+
+    <!-- ===== PAGINATION ===== -->
+    <!-- Placée en haut du hero (sous la navbar) plutôt qu'en bas :     -->
+    <!-- le bloc titre/prix en bas peut faire 1 à 3 lignes selon       -->
+    <!-- l'écran, donc ancrer la pagination en bas risquait de le      -->
+    <!-- chevaucher. En haut, elle ne rentre jamais en collision.       -->
+    <div class="absolute top-20 sm:top-24 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 sm:gap-3 bg-black/40 backdrop-blur-sm px-3 py-1.5 sm:px-4 sm:py-2 rounded-full border border-white/10">
+
+        <!-- Flèche gauche -->
+        {% if vehicule_imgs_page.has_previous %}
+        <button class="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-full bg-white/10 hover:bg-white/20 text-white transition flex items-center justify-center"
+                hx-get="{% url 'vehicul_app:vehicul-image-partial' vehicul.pk %}?page={{ vehicule_imgs_page.previous_page_number }}&direction=left"
+                hx-target="#hero-image-container"
+                hx-swap="outerHTML transition:true swap:200ms">
+            <i class="fas fa-chevron-left text-xs sm:text-sm"></i>
+        </button>
+        {% else %}
+        <button class="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-full bg-white/5 text-white/30 transition flex items-center justify-center cursor-not-allowed" disabled>
+            <i class="fas fa-chevron-left text-xs sm:text-sm"></i>
+        </button>
+        {% endif %}
+
+        <!-- Indicateur -->
+        <span class="text-white text-[10px] sm:text-xs md:text-sm font-medium">
+            <span class="current-page">{{ vehicule_imgs_page.number }}</span>
+            <span class="text-white/50">/</span>
+            <span class="total-pages">{{ vehicule_imgs_page.paginator.num_pages }}</span>
+        </span>
+
+        <!-- Flèche droite -->
+        {% if vehicule_imgs_page.has_next %}
+        <button class="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-full bg-white/10 hover:bg-white/20 text-white transition flex items-center justify-center"
+                hx-get="{% url 'vehicul_app:vehicul-image-partial' vehicul.pk %}?page={{ vehicule_imgs_page.next_page_number }}&direction=right"
+                hx-target="#hero-image-container"
+                hx-swap="outerHTML transition:true swap:200ms">
+            <i class="fas fa-chevron-right text-xs sm:text-sm"></i>
+        </button>
+        {% else %}
+        <button class="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-full bg-white/5 text-white/30 transition flex items-center justify-center cursor-not-allowed" disabled>
+            <i class="fas fa-chevron-right text-xs sm:text-sm"></i>
+        </button>
+        {% endif %}
+    </div>
+</div>
+

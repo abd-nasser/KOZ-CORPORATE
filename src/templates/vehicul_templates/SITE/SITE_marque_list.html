@@ -1,0 +1,156 @@
+{% load static %}
+{% load humanize %}
+{% load tailwind_tags %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nos Marques - KOZ Services</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    {% tailwind_css %}
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-up {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .brand-card {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        .brand-card:hover {
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.12);
+            transform: translateY(-4px);
+            border-color: #3b82f6;
+        }
+        .logo-area {
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .logo-area img {
+            max-height: 100%;
+            max-width: 100%;
+            object-fit: contain;
+            transition: transform 0.3s ease;
+        }
+        .brand-card:hover .logo-area img {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="glass-nav sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <a href="{% url 'vehicul_app:site-vehicul-list' %}" class="text-gray-700 hover:text-blue-600 transition-colors">
+                    <i class="fas fa-arrow-left mr-2"></i> Retour aux véhicules
+                </a>
+            </div>
+            <a href="{% url 'home_app:home-page' %}" class="font-bold text-2xl text-blue-600">
+                KOZ Services
+            </a>
+            <div class="w-20"></div>
+        </div>
+        {% if messages %}
+        <div class="fixed top-20 right-5 z-50 space-y-2">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} shadow-xl rounded-xl animate-slide-in-right">
+                <span>{{ message }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-12" style="min-height:81vh;">
+        <!-- Page Title -->
+        <div class="mb-12 animate-fade-in-up">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+                <i class="fas fa-trademark mr-3 text-blue-600"></i>
+                Nos Marques
+            </h1>
+            <p class="text-gray-600 text-lg">
+                Découvrez toutes les marques automobiles que nous proposons
+            </p>
+        </div>
+
+        <!-- Brands Grid -->
+        {% if marques %}
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 animate-fade-in-up">
+                {% for marque in marques %}
+                    <a href="{% url 'vehicul_app:site-marque-detail' marque.pk %}" class="brand-card group animate-fade-in-up" style="animation-delay: {{ forloop.counter|add:'1'|stringformat:'s' }}00ms">
+                        <!-- Logo Area -->
+                        <div class="logo-area">
+                            {% if marque.logo %}
+                                <img src="{{ marque.logo.url }}" alt="{{ marque.nom }}" class="px-4 py-4">
+                            {% else %}
+                                <div class="text-center">
+                                    <i class="fas fa-car-side text-5xl text-gray-300 mb-2"></i>
+                                    <p class="text-sm text-gray-400">Logo indisponible</p>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Info -->
+                        <div class="p-6 text-center">
+                            <h3 class="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors mb-2">
+                                {{ marque.nom }}
+                            </h3>
+                            <div class="flex items-center justify-center gap-2 text-sm text-gray-600">
+                                <i class="fas fa-car mr-1"></i>
+                                <span>{{ marque.nombre_vehicules }} véhicule{{ marque.nombre_vehicules|pluralize }}</span>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-200">
+                                <span class="inline-block text-sm font-semibold text-blue-600 group-hover:text-blue-700">
+                                    Voir les véhicules <i class="fas fa-arrow-right ml-1"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <!-- Empty State -->
+            <div class="text-center py-12">
+                <div class="bg-white rounded-lg p-12 border border-gray-200">
+                    <i class="fas fa-trademark text-gray-400 text-5xl mb-4 block"></i>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">Aucune marque disponible</h3>
+                    <p class="text-gray-600">
+                        Revenez bientôt pour découvrir nos marques partenaires.
+                    </p>
+                </div>
+            </div>
+        {% endif %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-400 py-8 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p>&copy; {% now 'Y' %} KOZ Services - Concessionnaire automobile</p>
+            <p class="font-medium text-slate-700">Conçu par <strong>SPIRIT-DIGIT Agency</strong></p>
+        </div>
+    </footer>
+</body>
+</html>

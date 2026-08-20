@@ -1,0 +1,128 @@
+{% load static %}
+{% load tailwind_tags %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    {% tailwind_css %}
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <title>Types de services - KOZ Services</title>
+    <style>
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-up {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+        .type-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .type-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.15);
+        }
+        .type-card:hover .type-icon {
+            transform: scale(1.1) rotate(-5deg);
+        }
+        .type-icon {
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 font-inter">
+
+    <!-- Navbar -->
+    <nav class="bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-gray-200 shadow-sm">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl flex items-center justify-center shadow-lg">
+                    <span class="text-white font-bold text-xl">K</span>
+                </div>
+                <a href="{% url 'directeur_app:directeur-view' %}" class="text-gray-600 hover:text-blue-600 transition text-sm flex items-center gap-1">
+                    <i class="fas fa-arrow-left"></i> Retour
+                </a>
+            </div>
+            <h1 class="text-lg font-semibold text-gray-800 hidden md:block">Types de services</h1>
+            <div class="w-10"></div>
+        </div>
+        {% if messages %}
+        <div class="fixed top-20 right-5 z-50 space-y-2">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} shadow-xl rounded-xl animate-slide-in-right">
+                <span>{{ message }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </nav>
+<style>
+    main{
+        min-height:81vh
+    }
+</style>
+    <main class="container mx-auto px-4 py-10 max-w-5xl">
+        
+        <!-- Header -->
+        <div class="text-center mb-10 animate-fade-in-up">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-800 mb-4">
+                Catégories de <span class="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">services</span>
+            </h1>
+            <p class="text-gray-500 text-lg max-w-2xl mx-auto">
+                Parcourez nos services par catégorie et trouvez ce qu'il vous faut.
+            </p>
+        </div>
+
+        <!-- Grille des types -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for type in types_services_list %}
+            <a href="{% url 'services_app:services-list' %}?type={{ type.id }}" 
+               class="type-card bg-white rounded-2xl shadow-md p-6 border border-gray-100 text-center animate-fade-in-up" 
+               style="animation-delay: {{ forloop.counter|add:'1'|stringformat:'s' }}00ms">
+                
+                <!-- Icône -->
+                <div class="type-icon w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-4"
+                     style="background: {{ type.couleur|default:'#3b82f6' }}15; color: {{ type.couleur|default:'#3b82f6' }}">
+                    <i class="fas {{ type.icone|default:'fa-tag' }} text-3xl"></i>
+                </div>
+                
+                <!-- Nom -->
+                <h3 class="text-xl font-bold text-gray-800 mb-2">{{ type.nom }}</h3>
+                
+                <!-- Description -->
+                <p class="text-gray-500 text-sm mb-4">
+                    {{ type.description|default:"Services dans cette catégorie"|truncatechars:80 }}
+                </p>
+                
+                <!-- Nombre de services -->
+                <span class="inline-block text-xs font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
+                    {{ type.services.count }} service{{ type.services.count|pluralize }}
+                </span>
+            </a>
+            {% empty %}
+            <div class="col-span-full text-center py-12">
+                <div class="w-20 h-20 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                    <i class="fas fa-tags text-3xl text-gray-400"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-700 mb-2">Aucune catégorie disponible</h3>
+                <p class="text-gray-500">Aucune catégorie de service n'est encore créée.</p>
+            </div>
+            {% endfor %}
+        </div>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white py-6 mt-12">
+        <div class="container mx-auto px-4 text-center text-sm text-gray-400">
+            <p>&copy; {% now "Y" %} KOZ Services — Tous droits réservés</p>
+            <p class="mt-1 text-xs">Découvrez nos services par catégorie</p>
+            <p class="font-medium text-slate-700">Conçu par <strong>SPIRIT-DIGIT Agency</strong></p>
+        </div>
+    </footer>
+
+</body>
+</html>

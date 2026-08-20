@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nouveau message concernant votre favori</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; -webkit-font-smoothing: antialiased; color: #334155;">
+
+    <!-- Conteneur principal -->
+    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f8fafc; padding: 30px 10px;">
+        <tr>
+            <td align="center">
+                
+                <!-- Carte Email -->
+                <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); border: 1px solid #e2e8f0;">
+                    
+                    <!-- En-tête / Header -->
+                    <tr>
+                        <td align="center" style="background: linear-gradient(135deg, #1d4ed8, #3b82f6); padding: 32px 24px; text-align: center;">
+                            <div style="background-color: rgba(255, 255, 255, 0.2); width: 56px; height: 56px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+                                <span style="font-size: 28px;">💬</span>
+                            </div>
+                            <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 700; tracking-tight: -0.02em;">
+                                Nouveau message disponible !
+                            </h1>
+                        </td>
+                    </tr>
+
+                    <!-- Corps de l'email -->
+                    <tr>
+                        <td style="padding: 32px 28px;">
+                            <p style="margin: 0 0 16px 0; font-size: 16px; line-height: 1.6; color: #1e293b; font-weight: 600;">
+                                Bonjour {% if client.first_name %}{{ client.first_name }}{% else %}{{ client.username }}{% endif %},
+                            </p>
+                            
+                            <p style="margin: 0 0 24px 0; font-size: 15px; line-height: 1.6; color: #475569;">
+                                Il y a du nouveau concernant le véhicule que vous avez ajouté à vos favoris :
+                            </p>
+
+                            <!-- Encadré du véhicule -->
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f1f5f9; border-radius: 12px; margin-bottom: 28px; border-left: 4px solid #2563eb;">
+                                <tr>
+                                    <td style="padding: 16px 20px;">
+                                        <p style="margin: 0; font-size: 12px; font-weight: 600; text-transform: uppercase; color: #64748b; letter-spacing: 0.05em;">
+                                            Véhicule suivi
+                                        </p>
+                                        <p style="margin: 4px 0 0 0; font-size: 17px; font-weight: 700; color: #1e293b;">
+                                            🚗 {{ vehicule }}
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <p style="margin: 0 0 28px 0; font-size: 15px; line-height: 1.6; color: #475569;">
+                                Un nouveau message a été posté dans la discussion. Cliquez sur le bouton ci-dessous pour lire et répondre directement depuis votre espace :
+                            </p>
+
+                            <!-- Bouton Call to Action -->
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                <tr>
+                                    <td align="center">
+                                        <a href="{{ lien_chat }}" target="_blank" style="display: inline-block; background-color: #2563eb; color: #ffffff; text-decoration: none; font-size: 15px; font-weight: 600; padding: 14px 32px; border-radius: 12px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);">
+                                            Accéder à la discussion &rarr;
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+
+                        </td>
+                    </tr>
+
+                    <!-- Séparateur -->
+                    <tr>
+                        <td style="padding: 0 28px;">
+                            <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 0;">
+                        </td>
+                    </tr>
+
+                    <!-- Pied de page / Footer -->
+                    <tr>
+                        <td style="padding: 24px 28px; text-align: center;">
+                            <p style="margin: 0 0 8px 0; font-size: 12px; color: #94a3b8;">
+                                Vous recevez ce message car vous avez aimé ce véhicule sur notre plateforme.
+                            </p>
+                            <p style="margin: 0; font-size: 12px; color: #cbd5e1;">
+                                &copy; {% now "Y" %} Votre Plateforme Automobile. Tous droits réservés.
+                            </p>
+                        </td>
+                    </tr>
+
+                </table>
+
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>

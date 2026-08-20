@@ -1,0 +1,31 @@
+{% load static %}
+{% load tailwind_tags %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supprimer l’actualité</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    {% tailwind_css %}
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <div class="max-w-xl mx-auto px-4 py-12">
+        <div class="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
+            <h1 class="text-2xl font-bold text-gray-800">Supprimer l’actualité</h1>
+            <p class="text-gray-600 mt-3">
+                Êtes-vous sûr de vouloir supprimer l’actualité <strong>{{ actualite.titre }}</strong> ?
+            </p>
+
+            <form method="post" class="mt-6 flex justify-end gap-3">
+                {% csrf_token %}
+                <a href="{% url 'home_app:actualites-list' %}" class="px-4 py-2 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-100 transition">Annuler</a>
+                <button type="submit" class="px-4 py-2 rounded-xl bg-red-600 text-white hover:bg-red-700 transition">
+                    <i class="fas fa-trash mr-2"></i>Confirmer la suppression
+                </button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

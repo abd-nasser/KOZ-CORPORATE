@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documents requis pour votre demande de financement</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; color: #334155;">
+
+    <!-- Preheader (Texte d'aperçu dans la boîte de réception) -->
+    <div style="display: none; max-height: 0px; overflow: hidden;">
+        Des documents complémentaires sont requis pour finaliser l'étude de votre dossier de financement n° {{ demande_id }}.
+    </div>
+
+    <!-- Conteneur Principal -->
+    <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f8fafc; padding: 30px 10px;">
+        <tr>
+            <td align="center">
+                
+                <!-- Carte centrale (Max width 600px) -->
+                <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01); border: 1px solid #e2e8f0;">
+                    
+                    <!-- Header avec Dégradé Bleu KOZ -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 50%, #1e3a8a 100%); padding: 35px 30px; text-align: center;">
+                            <div style="display: inline-block; width: 50px; height: 50px; background-color: rgba(255, 255, 255, 0.15); border-radius: 12px; line-height: 50px; text-align: center; color: #ffffff; font-size: 24px; font-weight: bold; margin-bottom: 12px;">
+                                K
+                            </div>
+                            <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.5px;">KOZ Services</h1>
+                            <p style="color: #bfdbfe; margin: 6px 0 0 0; font-size: 14px; font-weight: 400;">Pôle Financement & Solutions Automobiles</p>
+                        </td>
+                    </tr>
+
+                    <!-- Corps de l'email -->
+                    <tr>
+                        <td style="padding: 40px 35px;">
+                            
+                            <h2 style="margin: 0 0 16px 0; color: #0f172a; font-size: 20px; font-weight: 600;">
+                                Bonjour {{ client.nom_complet|default:client }},
+                            </h2>
+                            
+                            <p style="margin: 0 0 20px 0; color: #475569; font-size: 15px; line-height: 1.6;">
+                                Nous avons bien pris en compte votre demande de financement enregistrée sous la référence <strong>#{{ demande_id }}</strong>.
+                            </p>
+
+                            <p style="margin: 0 0 24px 0; color: #475569; font-size: 15px; line-height: 1.6;">
+                                Afin de pouvoir étudier votre dossier et vous apporter une réponse dans les plus brefs délais, nous vous invitons à nous transmettre vos pièces justificatives directement via votre espace sécurisé.
+                            </p>
+
+                            <!-- Boîte Récapitulatif / Checklist -->
+                            <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f1f5f9; border-radius: 12px; border-left: 4px solid #2563eb; margin-bottom: 28px;">
+                                <tr>
+                                    <td style="padding: 20px;">
+                                        <p style="margin: 0 0 12px 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; font-weight: 700;">
+                                            📎 Documents généralement demandés :
+                                        </p>
+                                        
+                                        <ul style="margin: 0; padding-left: 20px; color: #334155; font-size: 14px; line-height: 1.8;">
+                                            <li>Pièce d'identité en cours de validité (CNI / Passeport)</li>
+                                            <li>Justificatif de domicile (Moins de 3 mois)</li>
+                                            <li>Derniers bulletins de paie ou justificatifs de revenus</li>
+                                            <li>Relevés d'identité bancaire (RIB)</li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Bouton Call-To-Action (CTA) -->
+                            <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 28px;">
+                                <tr>
+                                    <td align="center">
+                                        <a href="{{ lien_upload }}" target="_blank" style="display: inline-block; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: #ffffff; text-decoration: none; font-size: 15px; font-weight: 600; padding: 14px 32px; border-radius: 10px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35); text-align: center;">
+                                            Déposer mes documents en ligne &rarr;
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Information Sécurité -->
+                            <div style="background-color: #eff6ff; border: 1px solid #dbeafe; border-radius: 10px; padding: 14px 16px; margin-bottom: 24px;">
+                                <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
+                                    <tr>
+                                        <td style="width: 24px; vertical-align: top; padding-right: 10px;">
+                                            <span style="color: #2563eb; font-size: 16px;">🔒</span>
+                                        </td>
+                                        <td style="color: #1e40af; font-size: 13px; line-height: 1.5;">
+                                            <strong>Espace sécurisé :</strong> Vos documents sont transmis de manière chiffrée et traités en toute confidentialité conformément à notre politique de protection des données.
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            <p style="margin: 0; color: #64748b; font-size: 14px; line-height: 1.5;">
+                                Si le bouton ci-dessus ne fonctionne pas, vous pouvez copier/coller ce lien dans votre navigateur :<br>
+                                <a href="{{ lien_upload }}" style="color: #2563eb; word-break: break-all; font-size: 13px;">{{ lien_upload }}</a>
+                            </p>
+
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background-color: #f8fafc; padding: 24px 35px; border-top: 1px solid #e2e8f0; text-align: center;">
+                            <p style="margin: 0 0 8px 0; color: #64748b; font-size: 12px; font-weight: 600;">
+                                KOZ Services — Service Financement & Commercial
+                            </p>
+                            <p style="margin: 0; color: #94a3b8; font-size: 11px; line-height: 1.4;">
+                                Cet e-mail vous a été envoyé concernant votre demande de financement n° {{ demande_id }}.<br>
+                                Si vous n'êtes pas à l'origine de cette demande, veuillez ignorer ce message.
+                            </p>
+                        </td>
+                    </tr>
+
+                </table>
+
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>

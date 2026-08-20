@@ -1,0 +1,339 @@
+{% load static %}
+{% load tailwind_tags %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Détail maintenance - KOZ Services</title>
+    
+    {% tailwind_css %}
+    
+    <!-- CSS Dependencies -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+
+    <!-- JS Dependencies -->
+    <script src="{% static 'js/htmx.min.js' %}"></script>
+    <script src="https://unpkg.com/lenis@1.3.25/dist/lenis.min.js" defer></script> 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+    <script src="https://cdn.plyr.io/3.7.8/plyr.js" defer></script>
+
+  
+</head>
+
+  <style>
+        main { min-height: 80vh; }
+        .btn-glow {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+            border: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.4);
+        }
+        .btn-glow:hover {
+            background: linear-gradient(135deg, #1d4ed8, #1e40af);
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px -5px rgba(37, 99, 235, 0.6);
+        }
+        
+    </style>
+
+<div id="result-toast-container"></div>
+<body class="bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100 font-inter text-gray-800 antialiased min-h-screen">
+
+    <!-- Messages Flash Notification -->
+    {% if messages %}
+    <div class="fixed top-5 right-5 z-50 space-y-2 max-w-md w-full px-4">
+        {% for message in messages %}
+        <div class="alert {% if message.tags == 'error' %}alert-error{% else %}alert-{{ message.tags }}{% endif %} shadow-xl rounded-xl border border-white/20 text-white flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <i class="fas {% if message.tags == 'error' %}fa-circle-exclamation{% else %}fa-check-circle{% endif %}"></i>
+                <span>{{ message }}</span>
+            </div>
+            <button onclick="this.parentElement.remove()" class="btn btn-xs btn-ghost btn-circle">✕</button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Navbar -->
+    <nav class="bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-gray-200/80 shadow-sm">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-800 rounded-xl flex items-center justify-center shadow-md text-white font-bold text-xl">
+                    K
+                </div>
+                <a href="{% url 'commercial_app:maintenance-list' %}" class="text-gray-600 hover:text-blue-600 font-medium transition flex items-center gap-2 text-sm sm:text-base">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Retour à mes maintenances</span>
+                </a>
+            </div>
+            <h1 class="text-lg font-semibold text-gray-800 hidden md:block">Détail de la maintenance</h1>
+            <div class="w-10 md:hidden"></div>
+        </div>
+    </nav>
+
+    <!-- Content -->
+    <main class="container mx-auto px-4 py-8 max-w-4xl">
+        
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+            
+            <!-- Header avec statut -->
+            <div class="bg-gradient-to-r from-blue-700 via-blue-800 to-indigo-900 px-6 py-6 text-white">
+                <div class="flex justify-between items-center flex-wrap gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold flex items-center gap-3">
+                            <span class="p-2 bg-white/10 rounded-lg"><i class="fas fa-wrench text-blue-200"></i></span>
+                            {{ maintenance.get_type_maintenance_display }}
+                        </h2>
+                        <p class="text-blue-100 text-sm mt-2 flex items-center gap-2">
+                            <i class="far fa-calendar-alt"></i>
+                            Programmé le {{ maintenance.date_prochaine|date:"d/m/Y" }}
+                        </p>
+                    </div>
+                    <div>
+                        <span class="badge badge-lg px-4 py-3 rounded-full text-xs font-semibold shadow-inner border-0
+                            {% if maintenance.statut == 'effectuee' %}bg-emerald-500 text-white
+                            {% elif maintenance.statut == 'annulee' or maintenance.statut == 'depassee' %}bg-rose-500 text-white
+                            {% elif maintenance.statut == 'confirmee' %}bg-blue-500 text-white
+                            {% elif maintenance.statut == 'en_cours' %}bg-amber-500 text-white
+                            {% else %}bg-slate-500 text-white{% endif %}">
+                            {{ maintenance.get_statut_display }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-6 space-y-6">
+
+                <!-- Alerte si dépassée -->
+                {% if maintenance.est_en_retard %}
+                <div class="bg-rose-50 border-l-4 border-rose-500 rounded-xl p-4 flex items-start gap-3">
+                    <i class="fas fa-triangle-exclamation text-rose-500 text-xl mt-0.5"></i>
+                    <div>
+                        <p class="text-rose-800 font-semibold">Cette maintenance est dépassée !</p>
+                        <p class="text-sm text-rose-600 mt-0.5">Veuillez contacter rapidement votre conseiller pour replanifier votre passage.</p>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Card: Véhicule -->
+                <div class="bg-slate-50/80 rounded-xl p-5 border border-slate-100">
+                    <h3 class="text-md font-semibold text-gray-800 mb-4 flex items-center gap-2 border-b border-gray-200 pb-2">
+                        <i class="fas fa-car text-blue-600"></i> Véhicule concerné
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <span class="text-gray-500 block text-xs uppercase tracking-wider font-medium">Marque & Modèle</span>
+                            <strong class="text-gray-800 text-base">{{ maintenance.marque }} {{ maintenance.modele }}</strong>
+                        </div>
+                        <div>
+                            <span class="text-gray-500 block text-xs uppercase tracking-wider font-medium">Année</span>
+                            <span class="text-gray-800 font-semibold">{{ maintenance.annee }}</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-500 block text-xs uppercase tracking-wider font-medium">Immatriculation</span>
+                            <span class="font-mono font-semibold text-gray-800 bg-white px-2 py-0.5 rounded border border-gray-200 inline-block mt-0.5">{{ maintenance.immatriculation }}</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-500 block text-xs uppercase tracking-wider font-medium">Kilométrage actuel</span>
+                            <span class="text-gray-800 font-semibold">{{ maintenance.kilometrage_actuel|intcomma }} km</span>
+                        </div>
+                        <div class="sm:col-span-2 pt-1">
+                            <span class="text-gray-500 block text-xs uppercase tracking-wider font-medium">Origine</span>
+                            {% if maintenance.origine == 'koz' %}
+                                <span class="inline-flex items-center gap-1.5 text-emerald-700 font-medium text-xs bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200 mt-1">
+                                    <i class="fas fa-check-circle"></i> Acheté chez KOZ Services
+                                </span>
+                            {% else %}
+                                <span class="inline-flex items-center gap-1.5 text-gray-600 font-medium text-xs bg-gray-200/60 px-2.5 py-1 rounded-md mt-1">
+                                    <i class="fas fa-globe"></i> Véhicule extérieur
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card: Intervention -->
+                <div class="bg-slate-50/80 rounded-xl p-5 border border-slate-100">
+                    <h3 class="text-md font-semibold text-gray-800 mb-4 flex items-center gap-2 border-b border-gray-200 pb-2">
+                        <i class="fas fa-sliders text-blue-600"></i> Détails de l'intervention
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <span class="text-gray-500 block text-xs uppercase tracking-wider font-medium">Type d'opération</span>
+                            <span class="text-gray-800 font-medium">{{ maintenance.get_type_maintenance_display }}</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-500 block text-xs uppercase tracking-wider font-medium">Priorité</span>
+                            <span class="badge badge-sm mt-1 border-0
+                                {% if maintenance.priorite == 'urgente' %}bg-rose-100 text-rose-700 font-semibold
+                                {% elif maintenance.priorite == 'haute' %}bg-orange-100 text-orange-700 font-semibold
+                                {% else %}bg-slate-200 text-slate-700{% endif %}">
+                                {{ maintenance.get_priorite_display }}
+                            </span>
+                        </div>
+                        <div>
+                            <span class="text-gray-500 block text-xs uppercase tracking-wider font-medium">Date prévue</span>
+                            <span class="text-gray-800 font-medium">{{ maintenance.date_prochaine|date:"d/m/Y" }}</span>
+                        </div>
+                        {% if maintenance.date_derniere %}
+                        <div>
+                            <span class="text-gray-500 block text-xs uppercase tracking-wider font-medium">Dernière intervention</span>
+                            <span class="text-gray-800 font-medium">{{ maintenance.date_derniere|date:"d/m/Y" }}</span>
+                        </div>
+                        {% endif %}
+                        <div>
+                            <span class="text-gray-500 block text-xs uppercase tracking-wider font-medium">Prochain Kilométrage cible</span>
+                            <span class="text-gray-800 font-medium">{{ maintenance.kilometrage_prochain|intcomma }} km</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-500 block text-xs uppercase tracking-wider font-medium">Km restants avant échéance</span>
+                            {% if maintenance.km_restant > 0 %}
+                                <span class="text-emerald-600 font-bold">{{ maintenance.km_restant|intcomma }} km</span>
+                            {% else %}
+                                <span class="text-rose-600 font-bold inline-flex items-center gap-1">
+                                    <i class="fas fa-triangle-exclamation"></i> Dépassé
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card: Estimations financières -->
+                {% if maintenance.montant_estime %}
+                <div class="bg-slate-50/80 rounded-xl p-5 border border-slate-100">
+                    <h3 class="text-md font-semibold text-gray-800 mb-3 flex items-center gap-2 border-b border-gray-200 pb-2">
+                        <i class="fas fa-file-invoice-dollar text-blue-600"></i> Estimation des coûts
+                    </h3>
+                    <div class="flex justify-between items-center flex-wrap gap-4 pt-1">
+                        <div>
+                            <span class="text-xs text-gray-500 uppercase tracking-wider block">Montant estimé</span>
+                            <span class="text-lg font-bold text-gray-800">{{ maintenance.montant_estime|intcomma }} FCFA</span>
+                        </div>
+                        {% if maintenance.montant_reel %}
+                        <div class="text-right">
+                            <span class="text-xs text-gray-500 uppercase tracking-wider block">Montant définitif / réel</span>
+                            <span class="text-xl font-black text-blue-700">{{ maintenance.montant_reel|intcomma }} FCFA</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Notes Client / Technicien -->
+                {% if maintenance.notes_client %}
+                <div class="bg-blue-50/50 rounded-xl p-4 border border-blue-100">
+                    <h3 class="text-sm font-semibold text-blue-900 mb-1 flex items-center gap-2">
+                        <i class="fas fa-comment-dots text-blue-600"></i> Vos remarques
+                    </h3>
+                    <p class="text-gray-700 text-sm leading-relaxed">{{ maintenance.notes_client }}</p>
+                </div>
+                {% endif %}
+
+                {% if maintenance.notes_technicien %}
+                <div class="bg-indigo-50/50 rounded-xl p-4 border border-indigo-100">
+                    <h3 class="text-sm font-semibold text-indigo-900 mb-1 flex items-center gap-2">
+                        <i class="fas fa-user-gear text-indigo-600"></i> Notes de l'atelier / technicien
+                    </h3>
+                    <p class="text-gray-700 text-sm leading-relaxed">{{ maintenance.notes_technicien }}</p>
+                </div>
+                {% endif %}
+
+                <!-- Actions contextuelles selon le statut -->
+                <div class="border-t border-gray-200 pt-6">
+                    {% if maintenance.statut == 'planifiee' %}
+                        <div class="space-y-3">
+                            <button onclick="document.getElementById('confirm_or_refuse_maintenance_modal').showModal()" 
+                                    class="btn-glow w-full sm:w-auto px-6 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 cursor-pointer">
+                                <i class="fas fa-sliders-h"></i>
+                                <span>Gérer ma maintenance</span>
+                            </button>
+                            <p class="text-xs text-gray-500 flex items-center gap-1.5">
+                                <i class="fas fa-info-circle text-blue-500"></i>
+                                Veillez confirmer ou demander le report de votre rendez-vous.
+                            </p>
+                        </div>
+                        
+                        <!-- Inclusion de la modale d'action -->
+                       
+
+                    {% elif maintenance.statut == 'confirmee' %}
+                        <div class="bg-blue-50 border-l-4 border-blue-500 rounded-xl p-4">
+                            <p class="text-blue-800 font-semibold flex items-center gap-2">
+                                <i class="fas fa-circle-check text-blue-600"></i> Maintenance confirmée
+                            </p>
+                            <p class="text-sm text-blue-600 mt-1">Votre rendez-vous est calé. Notre équipe vous recontacte si un ajustement d'horaire est nécessaire.</p>
+                        </div>
+
+                    {% elif maintenance.statut == 'en_cours' %}
+                        <div class="bg-amber-50 border-l-4 border-amber-500 rounded-xl p-4">
+                            <p class="text-amber-800 font-semibold flex items-center gap-2">
+                                <i class="fas fa-spinner fa-spin text-amber-600"></i> Intervention en cours
+                            </p>
+                            <p class="text-sm text-amber-700 mt-1">Votre véhicule est actuellement pris en charge par nos techniciens.</p>
+                        </div>
+
+                    {% elif maintenance.statut == 'effectuee' %}
+                        <div class="bg-emerald-50 border-l-4 border-emerald-500 rounded-xl p-4">
+                            <p class="text-emerald-800 font-semibold flex items-center gap-2">
+                                <i class="fas fa-circle-check text-emerald-600"></i> Intervention terminée
+                            </p>
+                            <p class="text-sm text-emerald-700 mt-1">L'opération s'est déroulée avec succès. Merci pour votre confiance !</p>
+                            {% if maintenance.montant_reel %}
+                            <p class="text-sm text-emerald-900 mt-2 font-semibold">Montant réglé : {{ maintenance.montant_reel|intcomma }} FCFA</p>
+                            {% endif %}
+                        </div>
+
+                    {% elif maintenance.statut == 'annulee' %}
+                        <div class="bg-rose-50 border-l-4 border-rose-500 rounded-xl p-4">
+                            <p class="text-rose-800 font-semibold flex items-center gap-2">
+                                <i class="fas fa-circle-xmark text-rose-600"></i> Maintenance annulée
+                            </p>
+                            <p class="text-sm text-rose-600 mt-1">N'hésitez pas à solliciter un nouveau rendez-vous depuis votre espace.</p>
+                        </div>
+
+                    {% elif maintenance.statut == 'depassee' %}
+                        <div class="bg-orange-50 border-l-4 border-orange-500 rounded-xl p-4 space-y-3">
+                            <div>
+                                <p class="text-orange-800 font-semibold flex items-center gap-2">
+                                    <i class="fas fa-clock text-orange-600"></i> Rendez-vous dépassé
+                                </p>
+                                <p class="text-sm text-orange-700 mt-1">La date prévue pour cette maintenance est passée.</p>
+                            </div>
+                            <div>
+                                <a href="{% url 'client_app:renouveler-maintenance' maintenance.id %}" class="btn btn-sm bg-orange-600 hover:bg-orange-700 text-white border-0 rounded-xl px-4 py-2 inline-flex items-center gap-2">
+                                    <i class="fas fa-calendar-plus"></i> Solliciter un nouveau rendez-vous
+                                </a>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Footer Action Back -->
+                <div class="text-center pt-4 border-t border-gray-100">
+                    <a href="{% url 'commercial_app:maintenance-list' %}" class="text-gray-500 hover:text-blue-600 text-sm font-medium transition inline-flex items-center gap-2">
+                        <i class="fas fa-arrow-left"></i> Retour à mes maintenances
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </main>
+{% include 'modals/maintenance/confirm_maintenance.html' %}
+    <!-- Footer Page -->
+    <footer class="bg-slate-900 text-white py-8 mt-12 border-t border-slate-800">
+        <div class="container mx-auto px-4 text-center text-sm text-slate-400 space-y-2">
+            <p>&copy; {% now "Y" %} KOZ Services — Tous droits réservés.</p>
+            <p class="text-xs text-slate-500">Service d'entretien & suivi automobile de précision</p>
+            <p class="font-medium text-slate-700">Conçu par <strong>SPIRIT-DIGIT Agency</strong></p>
+        </div>
+    </footer>
+
+  
+</body>
+</html>

@@ -1,0 +1,84 @@
+{% load static %}
+<dialog id="confirm_or_refuse_maintenance_modal" class="modal modal-bottom sm:modal-middle">
+    <div class="modal-box relative border border-base-200 bg-base-100 p-6 shadow-2xl rounded-2xl">
+        
+        <!-- Bouton Fermer (X) -->
+        <form method="dialog">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-4 top-4 text-base-content/60 hover:text-base-content">✕</button>
+        </form>
+
+        <!-- En-tête du Modal -->
+        <div class="flex items-center gap-4 mb-4">
+            <div class="p-3 bg-primary/10 text-primary rounded-2xl flex items-center justify-center">
+                <i class="fas fa-calendar-check text-2xl"></i>
+            </div>
+            <div>
+                <h3 class="font-bold text-lg text-base-content">Confirmation de rendez-vous</h3>
+                <p class="text-xs text-base-content/60">Dossier Maintenance #{{ maintenance.id }}</p>
+            </div>
+        </div>
+
+        <!-- Carte récapitulative -->
+        <div class="bg-base-200/60 rounded-xl p-4 mb-5 border border-base-200/80 space-y-2 text-sm">
+            <div class="flex justify-between items-center">
+                <span class="text-base-content/70">Véhicule :</span>
+                <span class="font-semibold text-base-content">{{ maintenance.marque }} {{ maintenance.modele }}</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-base-content/70">Service :</span>
+                <span class="font-semibold text-primary">{{ maintenance.get_type_maintenance_display }}</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-base-content/70">Date prévue :</span>
+                <span class="font-bold text-warning">{{ maintenance.date_prochaine|date:"d/m/Y" }}</span>
+            </div>
+        </div>
+        <div id="maintenance-card"></div>
+        <p class="text-xs text-base-content/70 mb-4">
+            Veuillez confirmer votre présence à l'atelier KOZ Services ou nous signaler un besoin de report.
+        </p>
+
+        <!-- Indicateur de chargement HTMX -->
+        <div id="conf-maintenance-spinner" class="htmx-indicator my-3 flex items-center justify-center gap-2 text-primary font-medium text-sm">
+            <span class="loading loading-spinner loading-md"></span> Traitement en cours...
+        </div>
+
+        <!-- Actions -->
+        <div class="modal-action flex flex-col sm:flex-row gap-2 mt-4">
+            
+           <button hx-post="{% url 'commercial_app:refuser-maintenance' maintenance.id %}"
+        hx-target="#maintenance-card"
+        hx-indicator="#conf-maintenance-spinner"
+        class="btn btn-outline btn-error rounded-xl gap-2 flex-1"
+        type='button'
+        hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+        
+        <i class="fas fa-times-circle"></i> Annuler / Reporter
+        </button>
+
+<button hx-post="{% url 'commercial_app:confirmer-maintenance' maintenance.id %}"
+        hx-target="#maintenance-card"
+        hx-indicator="#conf-maintenance-spinner"
+        class="btn btn-success text-white rounded-xl gap-2 flex-1 shadow-md shadow-success/20"
+        hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+        type='button'>
+    <i class="fas fa-check-circle"></i> Confirmer ma venue
+</button>
+        </div>
+    </div>
+
+    <!-- Clic à l'extérieur pour fermer -->
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+</dialog>
+
+
+<script>
+   
+    document.addEventListener('closeGestMaintenanceModal', function() {
+          document.getElementById('confirm_or_refuse_maintenance_modal').close();
+        
+    });
+ 
+</script>

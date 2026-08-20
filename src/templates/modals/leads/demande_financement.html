@@ -1,0 +1,203 @@
+{% load static %}
+{% load humanize %}
+
+<dialog id="dmd_fin_modal" class="modal backdrop:bg-slate-900/60 transition-colors duration-300">
+    <div class="modal-box w-full max-w-3xl p-0 max-h-[90vh] overflow-hidden rounded-xl bg-white shadow-2xl relative flex flex-col">
+        
+        <!-- ========== HEADER MODALE ========== -->
+        <div class="bg-white border-b border-slate-200 px-6 py-4 flex justify-between items-center shrink-0">
+            <div>
+                <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <i class="fas fa-file-invoice-dollar text-blue-600"></i>
+                    Dossier de Financement
+                </h3>
+                <p class="text-slate-500 text-xs mt-1">Simulation et demande d'offre personnalisée</p>
+            </div>
+            <button type="button" 
+                    class="text-slate-400 hover:text-rose-600 hover:bg-rose-50 w-8 h-8 rounded-lg flex items-center justify-center transition" 
+                    onclick="document.getElementById('dmd_fin_modal').close()">
+                <i class="fas fa-times text-lg"></i>
+            </button>
+        </div>
+
+        <!-- Zone d'alerte (Message retour HTMX) -->
+        <div id="dmd-message-zone" class="px-6 empty:hidden mt-4"></div>
+        
+        <!-- ========== FORMULAIRE ========== -->
+        <form hx-post="{% url 'leads_app:demande-financement' vehicul.id %}" 
+              hx-target="#dmd-message-zone"
+              hx-indicator="#dmd-indicator"
+              class="p-6 overflow-y-auto flex-1 relative">
+            {% csrf_token %}
+            
+            <!-- Indicateur de chargement HTMX (Overlay ciblé sur le formulaire) -->
+            <div id="dmd-indicator" class="htmx-indicator absolute inset-0 bg-white/80 backdrop-blur-sm z-50 flex items-center justify-center rounded-b-xl">
+                <div class="bg-white px-6 py-4 rounded-lg shadow-lg border border-slate-200 flex flex-col items-center gap-3">
+                    <i class="fas fa-circle-notch fa-spin text-2xl text-blue-600"></i>
+                    <p class="text-slate-700 text-sm font-medium">Traitement du dossier...</p>
+                </div>
+            </div>
+
+            <!-- Récapitulatif du véhicule -->
+            <div class="bg-slate-50 border border-slate-200 rounded-lg p-4 mb-6 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-white rounded-lg border border-slate-200 flex items-center justify-center text-slate-400">
+                        <i class="fas fa-car text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Véhicule concerné</p>
+                        <p class="font-bold text-slate-900">{{ vehicul.marque.nom }} {{ vehicul.modele }} <span class="text-slate-500 font-normal">({{ vehicul.annee }})</span></p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Prix de base</p>
+                    <p class="font-bold text-blue-700 font-mono text-lg">{{ vehicul.prix|intcomma }} FCFA</p>
+                </div>
+            </div>
+            
+            {{ dmd_fin_form.non_field_errors }}
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Section 1 : Situation financière -->
+                <div class="space-y-4">
+                    <h4 class="text-sm font-semibold text-slate-800 uppercase tracking-wider border-b border-slate-200 pb-2 flex items-center gap-2">
+                        <i class="fas fa-user-tag text-slate-400"></i> Données Client
+                    </h4>
+                    
+                    <div class="space-y-4" id="simulation-fields">
+                        <div class="form-group">
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">
+                                {{ dmd_fin_form.apport.label }}
+                            </label>
+                            <!-- Tes inputs Django générés se mettront ici -->
+                            <div class="mt-1">
+                                {{ dmd_fin_form.apport }}
+                            </div>
+                            <div class="text-rose-500 text-xs mt-1">{{ dmd_fin_form.apport.errors }}</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">
+                                {{ dmd_fin_form.duree_mois.label }}
+                            </label>
+                            <div class="mt-1">
+                                {{ dmd_fin_form.duree_mois }}
+                            </div>
+                            <div class="text-rose-500 text-xs mt-1">{{ dmd_fin_form.duree_mois.errors }}</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">
+                                {{ dmd_fin_form.revenus_mensuel.label }}
+                            </label>
+                            <div class="mt-1">
+                                {{ dmd_fin_form.revenus_mensuel }}
+                            </div>
+                            <div class="text-rose-500 text-xs mt-1">{{ dmd_fin_form.revenus_mensuel.errors }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2 : Simulateur -->
+                <div class="bg-blue-50/50 rounded-xl p-5 border border-blue-100 space-y-4">
+                    <h4 class="text-sm font-semibold text-blue-800 uppercase tracking-wider border-b border-blue-200 pb-2 flex items-center gap-2">
+                        <i class="fas fa-calculator text-blue-600"></i> Paramètres Simulation
+                    </h4>
+                    
+                    <div class="space-y-4">
+                        <div class="form-group">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">
+                                {{ dmd_fin_form.mensualite_souhaitee.label }}
+                            </label>
+                            <div class="mt-1">
+                                {{ dmd_fin_form.mensualite_souhaitee }}
+                            </div>
+                            <div class="text-rose-500 text-xs mt-1">{{ dmd_fin_form.mensualite_souhaitee.errors }}</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">
+                                {{ dmd_fin_form.taux_interet.label }}
+                            </label>
+                            <div class="mt-1">
+                                {{ dmd_fin_form.taux_interet }}
+                            </div>
+                            <div class="text-rose-500 text-xs mt-1">{{ dmd_fin_form.taux_interet.errors }}</div>
+                        </div>
+                    </div>
+
+                    <!-- Résultat dynamique HTMX -->
+                    <div id="resultat-simulation" class="mt-6 p-4 bg-white rounded-lg shadow-sm border border-slate-200 text-center">
+                        <p class="text-xs font-medium text-slate-500 uppercase">Valeur estimée de l'offre</p>
+                        <p class="text-2xl font-bold text-slate-900 font-mono mt-1">
+                            <span id="prix_estime">0</span> FCFA
+                        </p>
+                        <p class="text-[10px] text-slate-400 mt-2">Ce calcul est indicatif et basé sur la mensualité ciblée.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== BOUTONS D'ACTION ========== -->
+            <div class="mt-8 pt-5 border-t border-slate-200 flex justify-end gap-3 shrink-0">
+                <button type="button" 
+                        class="px-5 py-2.5 text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition" 
+                        onclick="document.getElementById('dmd_fin_modal').close()">
+                    Annuler
+                </button>
+                <button type="submit" 
+                        class="px-5 py-2.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition flex items-center gap-2">
+                    <i class="fas fa-check-circle"></i> Valider le dossier
+                </button>
+            </div>
+        </form>
+    </div>
+</dialog>
+
+<style>
+    /* Style spécifique pour limiter l'indicateur à l'intérieur de la modale */
+    #dmd-indicator {
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease-in-out;
+    }
+    #dmd-indicator.htmx-request {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    /* Utilitaires pour les inputs Django (s'ils ne sont pas déjà stylisés par ton CSS global) */
+    .form-group input, 
+    .form-group select {
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        border-radius: 0.5rem;
+        border: 1px solid #e2e8f0;
+        background-color: #f8fafc;
+        font-size: 0.875rem;
+        color: #0f172a;
+        transition: all 0.2s;
+    }
+    .form-group input:focus, 
+    .form-group select:focus {
+        outline: none;
+        border-color: #3b82f6;
+        background-color: #ffffff;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+</style>
+
+<script>
+    document.body.addEventListener('closeFinModal', function() {
+        document.getElementById('dmd_fin_modal').close();
+    });
+
+    // Mise à jour du simulateur HTMX (Déjà géré par ton backend)
+    document.body.addEventListener('htmx:afterSwap', function(evt) {
+        if (evt.target.id === 'resultat-simulation') {
+            // Animation flash subtile pour montrer que la valeur a été mise à jour
+            const resultBox = document.getElementById('resultat-simulation');
+            resultBox.classList.add('bg-blue-50');
+            setTimeout(() => resultBox.classList.remove('bg-blue-50'), 500);
+        }
+    });
+</script>

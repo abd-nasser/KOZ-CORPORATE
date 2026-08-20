@@ -1,0 +1,147 @@
+{% load humanize %}
+
+<div id="ventes-list-container" class="space-y-4">
+    {% for vente in ventes %}
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-200 overflow-hidden group">
+        <div class="p-5">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                
+                <!-- Détails Vente -->
+                <div class="flex-1 space-y-3">
+                    
+                    <!-- Ligne supérieure : Numéro Vente + Badges -->
+                    <div class="flex flex-wrap items-center gap-2.5">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-100 text-slate-800 text-xs font-bold tracking-wide">
+                            <i class="fas fa-receipt text-blue-600"></i>
+                            Vente #{{ vente.id }}
+                        </span>
+
+                        <!-- Badge Statut -->
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold
+                            {% if vente.statut == 'conclue' or vente.statut == 'conclue_par_acceptation_offre_simple' or vente.statut == 'conclue_par_acceptation_offre_financement' or vente.statut == 'conclue_sur_acceptation_demande_financement' %}
+                                bg-emerald-50 text-emerald-700 border border-emerald-200
+                            {% elif vente.statut == 'perdue' or vente.statut == 'perdue_par_offre_refusee' %}
+                                bg-rose-50 text-rose-700 border border-rose-200
+                            {% else %}
+                                bg-amber-50 text-amber-700 border border-amber-200
+                            {% endif %}">
+                            <span class="w-1.5 h-1.5 rounded-full 
+                                {% if vente.statut == 'conclue' or 'conclue' in vente.statut %}bg-emerald-500
+                                {% elif 'perdue' in vente.statut %}bg-rose-500
+                                {% else %}bg-amber-500{% endif %}">
+                            </span>
+                            {{ vente.get_statut_display }}
+                        </span>
+
+                        <!-- Badge Type de vente -->
+                        {% if vente.type_vente %}
+                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-600">
+                            {% if vente.type_vente == 'cash' %}
+                                💰 Comptant
+                            {% elif vente.type_vente == 'maison' %}
+                                🏠 KOZ Finance
+                            {% elif vente.type_vente == 'externe_fidelis' %}
+                                🏦 Fidelis
+                            {% elif vente.type_vente == 'externe_alios' %}
+                                🏦 Alios
+                            {% else %}
+                                {{ vente.type_vente }}
+                            {% endif %}
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Grille d'informations -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1 text-xs text-slate-600">
+                        
+                        <!-- Client -->
+                        <div class="flex items-center gap-2">
+                            <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="truncate">
+                                <span class="text-slate-400 block text-[10px] uppercase font-semibold">Client</span>
+                                <span class="font-bold text-slate-800 truncate block">{{ vente.client.nom_complet }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Montant -->
+                        <div class="flex items-center gap-2">
+                            <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                                <i class="fas fa-coins"></i>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 block text-[10px] uppercase font-semibold">Montant financé</span>
+                                <span class="font-extrabold text-emerald-700 text-sm">{{ vente.montant|intcomma }} <span class="text-[10px]">FCFA</span></span>
+                            </div>
+                        </div>
+
+                        <!-- Date -->
+                        <div class="flex items-center gap-2">
+                            <div class="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center shrink-0">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 block text-[10px] uppercase font-semibold">Date</span>
+                                <span class="font-semibold text-slate-700">{{ vente.date_vente|date:"d/m/Y" }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Origine / Liens -->
+                        <div class="flex items-center gap-2">
+                            <div class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                                <i class="fas fa-link"></i>
+                            </div>
+                            <div class="truncate">
+                                <span class="text-slate-400 block text-[10px] uppercase font-semibold">Origine</span>
+                                {% if vente.demande_financement %}
+                                    <a href="{% url 'leads_app:detail-demande' vente.demande_financement.id %}" 
+                                       class="text-blue-600 hover:underline font-semibold flex items-center gap-1 truncate">
+                                        Demande #{{ vente.demande_financement.id }}
+                                        <i class="fas fa-external-link-alt text-[9px]"></i>
+                                    </a>
+                                {% elif vente.offre %}
+                                    <a href="{% url 'commercial_app:offre-detail' vente.offre.id %}" 
+                                       class="text-blue-600 hover:underline font-semibold flex items-center gap-1 truncate">
+                                        Offre #{{ vente.offre.id }}
+                                        <i class="fas fa-external-link-alt text-[9px]"></i>
+                                    </a>
+                                {% else %}
+                                    <span class="text-slate-500 font-medium">Vente directe</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Bouton d'action -->
+                <div class="flex lg:flex-col justify-end items-center border-t lg:border-t-0 pt-3 lg:pt-0 border-slate-100">
+                    <a href="{% url 'commercial_app:vente-detail' vente.pk %}" 
+                       class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-slate-100 hover:bg-blue-600 text-slate-700 hover:text-white transition-all text-xs font-semibold group/btn">
+                        <span>Voir la fiche</span>
+                        <i class="fas fa-chevron-right text-[10px] group-hover/btn:translate-x-0.5 transition-transform"></i>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <!-- État vide -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 p-12 text-center shadow-sm">
+        <div class="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4 text-slate-400">
+            <i class="fas fa-receipt text-2xl"></i>
+        </div>
+        <h3 class="text-base font-bold text-slate-800 mb-1">Aucune vente trouvée</h3>
+        <p class="text-slate-500 text-xs max-w-sm mx-auto mb-6">
+            Aucun résultat ne correspond à vos critères de recherche. Essayez de réinitialiser vos filtres ou d'enregistrer une nouvelle vente.
+        </p>
+        <button type="button" 
+                class="px-4 py-2 bg-blue-50 text-blue-600 hover:bg-blue-100 font-semibold rounded-xl text-xs transition"
+                onclick="document.getElementById('simple_vente_modal').showModal()">
+            <i class="fas fa-plus-circle mr-1.5"></i> Enregistrer une vente
+        </button>
+    </div>
+    {% endfor %}
+</div>

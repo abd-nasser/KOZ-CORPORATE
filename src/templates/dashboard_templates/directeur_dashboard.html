@@ -1,0 +1,503 @@
+{% load static %}
+{% load tailwind_tags %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    {% tailwind_css %}
+    <script src="{% static 'js/htmx.min.js' %}" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <title>KPI Dashboard - KOZ Services</title>
+    <style>
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .animate-fade-in-up {
+            animation: fadeInUp 0.5s ease-out forwards;
+        }
+        .animate-slide-in-right {
+            animation: slideInRight 0.4s ease-out forwards;
+        }
+        .kpi-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .kpi-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -12px rgba(0, 0, 0, 0.15);
+        }
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .section-title {
+            position: relative;
+            display: inline-block;
+        }
+        .section-title:after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 40px;
+            height: 3px;
+            background: linear-gradient(90deg, #3b82f6, #60a5fa);
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 font-inter">
+
+    <!-- Messages flash -->
+    {% if messages %}
+    <div class="fixed top-20 right-5 z-50 space-y-2">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} shadow-xl rounded-xl animate-slide-in-right">
+            <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% else %}info-circle{% endif %} mr-2"></i>
+            <span>{{ message }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Navbar -->
+    <nav class="glass-nav sticky top-0 z-40 shadow-sm">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl flex items-center justify-center shadow-lg">
+                    <span class="text-white font-bold text-xl">K</span>
+                </div>
+                <span class="text-xl font-bold bg-gradient-to-r from-blue-700 to-indigo-600 bg-clip-text text-transparent">KOZ Services</span>
+                <span class="hidden md:inline-block px-2 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">KPI Dashboard</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="{% url 'directeur_app:directeur-view' %}" class="text-gray-600 hover:text-blue-600 transition text-sm flex items-center gap-1">
+                    <i class="fas fa-arrow-left"></i> Retour
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-4 py-8 max-w-7xl">
+        
+        
+    <!-- GRAPHIQUE CONTAINER -->   
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+
+            <!-- GRAPHIQUE CA  -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="flex flex-wrap items-start justify-between gap-4 mb-6">
+                        <!-- Section titre + icône -->
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 rounded-xl bg-gradient-to-br from-blue-500/10 to-blue-600/10">
+                                <svg style="width:24px; height:24px" fill="none" stroke="currentColor" viewBox="0 0 24 24" class="text-blue-600">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="card-title text-gray-800">Évolution du chiffre d'affaire</h3>
+                                <p class="text-xs text-gray-400 mt-0.5">Dernière période sélectionnée</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Cartes KPI (Total CA + Nb ventes) -->
+                        <div class="flex gap-4">
+                            <div class="bg-gradient-to-br from-emerald-50 to-emerald-100/50 rounded-2xl px-5 py-3 border border-emerald-200/50 shadow-sm">
+                                <p class="text-[11px] font-semibold uppercase tracking-wider text-emerald-600/70 mb-1">Total CA</p>
+                                <p class="text-2xl font-bold text-emerald-700">{{ total_ca|floatformat:0|intcomma }} <span class="text-xs font-medium text-emerald-500">FCFA</span></p>
+                            </div>
+                            <div class="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-2xl px-5 py-3 border border-blue-200/50 shadow-sm">
+                                <p class="text-[11px] font-semibold uppercase tracking-wider text-blue-600/70 mb-1">Ventes conclues</p>
+                                <p class="text-2xl font-bold text-blue-700">{{ nb_ventes|intcomma }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Filtres périodes -->
+                    <div class="flex gap-2 bg-gray-100/80 p-1 rounded-xl mb-6 w-fit">
+                        <a href="?period=1j" class="px-4 py-2 text-sm rounded-lg transition-all duration-200 {% if selected_period == '1j' %}bg-blue-600 text-white shadow-md{% else %}text-gray-600 hover:bg-gray-200/80{% endif %}">1j</a>
+                        <a href="?period=7j" class="px-4 py-2 text-sm rounded-lg transition-all duration-200 {% if selected_period == '7j' %}bg-blue-600 text-white shadow-md{% else %}text-gray-600 hover:bg-gray-200/80{% endif %}">7j</a>
+                        <a href="?period=1m" class="px-4 py-2 text-sm rounded-lg transition-all duration-200 {% if selected_period == '1m' %}bg-blue-600 text-white shadow-md{% else %}text-gray-600 hover:bg-gray-200/80{% endif %}">1m</a>
+                        <a href="?period=1y" class="px-4 py-2 text-sm rounded-lg transition-all duration-200 {% if selected_period == '1y' %}bg-blue-600 text-white shadow-md{% else %}text-gray-600 hover:bg-gray-200/80{% endif %}">1a</a>
+                    </div>
+
+                    <!-- Graphique -->
+                    <div class="chart-container pt-2">
+                        <canvas id="caChart"></canvas>
+                    </div>
+                </div>
+            </div>
+</div>
+
+        <!-- Section Clients -->
+        <div class="mb-8 animate-fade-in-up" style="animation-delay: 0.1s">
+            <h3 class="section-title text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <i class="fas fa-users text-blue-600"></i> Clients
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <a href="{% url 'dashboard_app:liste-filtree' 'client' 'demande_financement__isnull' 'False' %}" 
+                   class="kpi-card bg-white rounded-xl p-5 shadow-md border border-gray-100 hover:border-blue-200">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-gray-500 text-sm">📝 Clients avec demande</p>
+                            <p class="text-2xl font-bold text-gray-800">{{ clients_avec_demande }}</p>
+                            <p class="text-xs text-gray-400 mt-1">{{ nb_clients_mois }} nouveaux ce mois</p>
+                        </div>
+                        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-file-alt text-blue-600"></i>
+                        </div>
+                    </div>
+                </a>
+                <a href="{% url 'dashboard_app:liste-filtree' 'client' 'offres__statut' 'acceptee' %}" 
+                   class="kpi-card bg-white rounded-xl p-5 shadow-md border border-gray-100 hover:border-green-200">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-gray-500 text-sm">✅ Clients avec offre acceptée</p>
+                            <p class="text-2xl font-bold text-green-600">{{ clients_avec_offre }}</p>
+                            <p class="text-xs text-blue-600 mt-1">Taux conversion : {{ taux_conversion|floatformat:1|intcomma }}%</p>
+                        </div>
+                        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-check-circle text-green-600"></i>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Section Demandes -->
+        <div class="mb-8 animate-fade-in-up" style="animation-delay: 0.15s">
+            <h3 class="section-title text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <i class="fas fa-file-alt text-blue-600"></i> Demandes de financement
+            </h3>
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                <a href="{% url 'dashboard_app:liste-filtree' 'demande_financement' 'etape' 'en_attente' %}" 
+                   class="kpi-card bg-yellow-50 rounded-xl p-3 text-center border border-yellow-100 hover:border-yellow-300">
+                    <p class="text-xs text-yellow-700">⏳ En attente</p>
+                    <p class="text-xl font-bold text-yellow-700">{{ demandes_en_attente }}</p>
+                </a>
+                <a href="{% url 'dashboard_app:liste-filtree' 'demande_financement' 'etape' 'en_cours' %}" 
+                   class="kpi-card bg-blue-50 rounded-xl p-3 text-center border border-blue-100 hover:border-blue-300">
+                    <p class="text-xs text-blue-700">🔄 En cours</p>
+                    <p class="text-xl font-bold text-blue-700">{{ demandes_en_cours }}</p>
+                </a>
+                <a href="{% url 'dashboard_app:liste-filtree' 'demande_financement' 'etape' 'demande_refusee' %}" 
+                   class="kpi-card bg-red-50 rounded-xl p-3 text-center border border-red-100 hover:border-red-300">
+                    <p class="text-xs text-red-700">❌ Refusées</p>
+                    <p class="text-xl font-bold text-red-700">{{ demandes_refuser }}</p>
+                </a>
+                <a href="{% url 'dashboard_app:liste-filtree' 'demande_financement' 'financement_par' 'fidelis' %}" 
+                   class="kpi-card bg-blue-50 rounded-xl p-3 text-center border border-blue-100 hover:border-blue-300">
+                    <p class="text-xs text-blue-700">🏦 Fidelis</p>
+                    <p class="text-xl font-bold text-blue-700">{{ demandes_accorder_fidelis }}</p>
+                </a>
+                <a href="{% url 'dashboard_app:liste-filtree' 'demande_financement' 'financement_par' 'alios' %}" 
+                   class="kpi-card bg-purple-50 rounded-xl p-3 text-center border border-purple-100 hover:border-purple-300">
+                    <p class="text-xs text-purple-700">🏦 Alios</p>
+                    <p class="text-xl font-bold text-purple-700">{{ demandes_accorder_alios }}</p>
+                </a>
+                <a href="{% url 'dashboard_app:liste-filtree' 'demande_financement' 'financement_type' 'maison' %}" 
+                   class="kpi-card bg-green-50 rounded-xl p-3 text-center border border-green-100 hover:border-green-300">
+                    <p class="text-xs text-green-700">🏠 KOZ Finance</p>
+                    <p class="text-xl font-bold text-green-700">{{ demandes_accorder_maison }}</p>
+                </a>
+            </div>
+        </div>
+
+        <!-- Section Offres -->
+        <div class="mb-8 animate-fade-in-up" style="animation-delay: 0.2s">
+            <h3 class="section-title text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <i class="fas fa-tags text-blue-600"></i> Offres
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <a href="{% url 'dashboard_app:liste-filtree' 'offres' 'statut' 'acceptee' %}" 
+                   class="kpi-card bg-green-50 rounded-xl p-4 border border-green-100 hover:border-green-300">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-sm text-green-700 font-semibold">✅ Acceptées</p>
+                            <p class="text-2xl font-bold text-green-700">{{ offres_acceptee }}</p>
+                        </div>
+                        <i class="fas fa-check-circle text-3xl text-green-400"></i>
+                    </div>
+                </a>
+                <a href="{% url 'dashboard_app:liste-filtree' 'offres' 'statut' 'refusee' %}" 
+                   class="kpi-card bg-red-50 rounded-xl p-4 border border-red-100 hover:border-red-300">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-sm text-red-700 font-semibold">❌ Refusées</p>
+                            <p class="text-2xl font-bold text-red-700">{{ offres_refusee }}</p>
+                        </div>
+                        <i class="fas fa-times-circle text-3xl text-red-400"></i>
+                    </div>
+                </a>
+                <a href="{% url 'dashboard_app:liste-filtree' 'offres' 'statut' 'expiree' %}" 
+                   class="kpi-card bg-gray-100 rounded-xl p-4 border border-gray-200 hover:border-gray-400">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-sm text-gray-700 font-semibold">⏰ Expirées</p>
+                            <p class="text-2xl font-bold text-gray-700">{{ offres_expiree }}</p>
+                        </div>
+                        <i class="fas fa-hourglass-end text-3xl text-gray-400"></i>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Section Documents -->
+        <div class="mb-8 animate-fade-in-up" style="animation-delay: 0.25s">
+            <h3 class="section-title text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <i class="fas fa-folder-open text-blue-600"></i> Dossiers documentaires
+            </h3>
+            <div class="grid grid-cols-3 sm:grid-cols-6 gap-3">
+                <a href="{% url 'dashboard_app:liste-filtree' 'documents' 'statut_dossier' 'vide' %}" 
+                   class="kpi-card bg-gray-50 rounded-xl p-3 text-center border border-gray-200 hover:border-gray-400">
+                    <p class="text-xs text-gray-500">📭 Vide</p>
+                    <p class="text-lg font-bold text-gray-700">{{ dossier_vide }}</p>
+                </a>
+                <a href="{% url 'dashboard_app:liste-filtree' 'documents' 'statut_dossier' 'incomplet' %}" 
+                   class="kpi-card bg-yellow-50 rounded-xl p-3 text-center border border-yellow-200 hover:border-yellow-400">
+                    <p class="text-xs text-yellow-700">⚠️ Incomplet</p>
+                    <p class="text-lg font-bold text-yellow-700">{{ dossier_incomplet }}</p>
+                </a>
+                <a href="{% url 'dashboard_app:liste-filtree' 'documents' 'statut_dossier' 'complet' %}" 
+                   class="kpi-card bg-blue-50 rounded-xl p-3 text-center border border-blue-200 hover:border-blue-400">
+                    <p class="text-xs text-blue-700">📦 Complet</p>
+                    <p class="text-lg font-bold text-blue-700">{{ dossier_complet }}</p>
+                </a>
+                <a href="{% url 'dashboard_app:liste-filtree' 'documents' 'statut_dossier' 'verification' %}" 
+                   class="kpi-card bg-orange-50 rounded-xl p-3 text-center border border-orange-200 hover:border-orange-400">
+                    <p class="text-xs text-orange-700">🔍 Vérification</p>
+                    <p class="text-lg font-bold text-orange-700">{{ dossier_en_verification }}</p>
+                </a>
+                <a href="{% url 'dashboard_app:liste-filtree' 'documents' 'statut_dossier' 'valide' %}" 
+                   class="kpi-card bg-green-50 rounded-xl p-3 text-center border border-green-200 hover:border-green-400">
+                    <p class="text-xs text-green-700">✅ Validé</p>
+                    <p class="text-lg font-bold text-green-700">{{ dossier_valide }}</p>
+                </a>
+                <a href="{% url 'dashboard_app:liste-filtree' 'documents' 'statut_dossier' 'rejete' %}" 
+                   class="kpi-card bg-red-50 rounded-xl p-3 text-center border border-red-200 hover:border-red-400">
+                    <p class="text-xs text-red-700">❌ Rejeté</p>
+                    <p class="text-lg font-bold text-red-700">{{ dossier_rejete }}</p>
+                </a>
+            </div>
+        </div>
+
+        <!-- Section Maintenances -->
+        <div class="mb-8 animate-fade-in-up" style="animation-delay: 0.3s">
+            <h3 class="section-title text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <i class="fas fa-tools text-blue-600"></i> Maintenances
+            </h3>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                <a href="{% url 'dashboard_app:liste-filtree' 'maintenance' 'statut' 'effectuee' %}" 
+                   class="kpi-card bg-green-50 rounded-xl p-4 border border-green-100 hover:border-green-300">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-sm text-green-700 font-semibold">✅ Effectuées</p>
+                            <p class="text-2xl font-bold text-green-700">{{ maintenances_effectuee }}</p>
+                        </div>
+                        <i class="fas fa-check-circle text-3xl text-green-400"></i>
+                    </div>
+                </a>
+                <a href="{% url 'dashboard_app:liste-filtree' 'maintenance' 'statut' 'planifiee' %}" 
+                   class="kpi-card bg-blue-50 rounded-xl p-4 border border-blue-100 hover:border-blue-300">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-sm text-blue-700 font-semibold">📅 Planifiées</p>
+                            <p class="text-2xl font-bold text-blue-700">{{ maintenances_planifiee }}</p>
+           </html>             </div>
+                        <i class="fas fa-calendar-alt text-3xl text-blue-400"></i>
+                    </div>
+                </a>
+                <a href="{% url 'dashboard_app:liste-filtree' 'maintenance' 'statut' 'en_cours' %}" 
+                   class="kpi-card bg-yellow-50 rounded-xl p-4 border border-yellow-100 hover:border-yellow-300">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-sm text-yellow-700 font-semibold">🔄 En cours</p>
+                            <p class="text-2xl font-bold text-yellow-700">{{ maintenances_en_cours }}</p>
+                        </div>
+                        <i class="fas fa-spinner fa-pulse text-3xl text-yellow-400"></i>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white py-6 mt-12">
+        <div class="container mx-auto px-4 text-center text-sm text-gray-400">
+            <p>&copy; {% now "Y" %} KOZ Services - Tous droits réservés</p>
+            <p class="mt-1 text-xs">Tableau de bord de pilotage</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+   <script>
+  // ============================================================
+// 1. On attend que toute la page HTML soit chargée
+// ============================================================
+document.addEventListener('DOMContentLoaded', function() {
+    // 'DOMContentLoaded' = événement déclenché quand le HTML est entièrement chargé
+    // On met notre code à l'intérieur pour être sûr que le canvas existe
+
+    // ============================================================
+    // 2. On récupère l'élément canvas (là où le graphique va s'afficher)
+    // ============================================================
+    const ctx = document.getElementById('caChart');
+    // document.getElementById('caChart') = cherche l'élément HTML avec id="caChart"
+    // Si trouvé → on le stocke dans la variable 'ctx'
+    
+    // ============================================================
+    // 3. Sécurité : si le canvas n'existe pas, on arrête tout
+    // ============================================================
+    if (!ctx) {
+        console.error("Canvas #caChart non trouvé");
+        // console.error = affiche une erreur dans la console du navigateur
+        return;  // return = on sort de la fonction (on n'exécute pas la suite)
+    }
+
+    // ============================================================
+    // 4. On prépare les données du graphique
+    // ============================================================
+    const chartData = {
+        // Les labels (étiquettes) sur l'axe X (ex: "Jan 2025", "Fév 2025")
+        labels: {{ chart_labels|safe }},
+        // {{ chart_labels|safe }} = variable Django convertie en tableau JavaScript
+        
+        // Les 4 courbes (datasets)
+        datasets: [
+            // ----- Courbe Fidelis (bleue) -----
+            {
+                label: 'Fidelis',           // Nom affiché dans la légende
+                data: {{ chart_fidelis|safe }},  // Les valeurs (ex: [100000, 200000])
+                borderColor: '#3b82f6',     // Couleur de la ligne (bleu)
+                backgroundColor: 'rgba(59,130,246,0.1)', // Couleur sous la ligne (bleu transparent)
+                tension: 0.3,               // Arrondi des courbes (0 = ligne droite, 1 = très courbé)
+                fill: true,                 // Remplir sous la ligne
+                pointBackgroundColor: '#3b82f6', // Couleur des points
+                pointBorderColor: '#fff',   // Couleur du contour des points
+                pointRadius: 4,             // Taille des points (en pixels)
+                pointHoverRadius: 6         // Taille des points au survol
+            },
+            // ----- Courbe Alios (violette) -----
+            {
+                label: 'Alios',
+                data: {{ chart_alios|safe }},
+                borderColor: '#8b5cf6',     // Violet
+                backgroundColor: 'rgba(139,92,246,0.1)',
+                tension: 0.3,
+                fill: true,
+                pointBackgroundColor: '#8b5cf6',
+                pointBorderColor: '#fff',
+                pointRadius: 4,
+                pointHoverRadius: 6
+            },
+            // ----- Courbe KOZ Finance (verte) -----
+            {
+                label: 'KOZ Finance (Maison)',
+                data: {{ chart_maison|safe }},
+                borderColor: '#10b981',     // Vert
+                backgroundColor: 'rgba(16,185,129,0.1)',
+                tension: 0.3,
+                fill: true,
+                pointBackgroundColor: '#10b981',
+                pointBorderColor: '#fff',
+                pointRadius: 4,
+                pointHoverRadius: 6
+            },
+            // ----- Courbe Paiement cash (orange) -----
+            {
+                label: 'Paiement cash',
+                data: {{ chart_cash|safe }},
+                borderColor: '#f59e0b',     // Orange
+                backgroundColor: 'rgba(245,158,11,0.1)',
+                tension: 0.3,
+                fill: true,
+                pointBackgroundColor: '#f59e0b',
+                pointBorderColor: '#fff',
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }
+        ]
+    };
+
+    // ============================================================
+    // 5. On crée le graphique Chart.js
+    // ============================================================
+    new Chart(ctx.getContext('2d'), {
+        // ctx.getContext('2d') = on récupère le contexte 2D du canvas (nécessaire pour dessiner)
+        
+        type: 'line',           // Type de graphique: 'line' = courbe, 'bar' = barres, 'pie' = camembert
+        data: chartData,        // Les données qu'on a préparées juste avant
+        options: {              // Options de personnalisation
+            responsive: true,   // Le graphique s'adapte à la taille de l'écran
+            maintainAspectRatio: true, // Conserve les proportions (hauteur/largeur)
+            
+            // ========================================================
+            // Interaction (survol des points)
+            // ========================================================
+            interaction: { 
+                mode: 'index',      // Affiche les infos de TOUTES les courbes au même index
+                intersect: false    // Pas besoin que la souris soit exactement sur le point
+            },
+            
+            // ========================================================
+            // Plugins (tooltips, légende, etc.)
+            // ========================================================
+            plugins: {
+                // ---- Info-bulle au survol ----
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            // context = l'élément survolé
+                            // context.dataset.label = nom de la courbe (ex: "Fidelis")
+                            // context.raw = valeur du point (ex: 200000)
+                            // .toLocaleString() = formate le nombre (200000 → "200 000")
+                            return context.dataset.label + ': ' + context.raw.toLocaleString() + ' FCFA';
+                        }
+                    }
+                },
+                // ---- Légende en bas du graphique ----
+                legend: {
+                    position: 'bottom',              // Légende en bas
+                    labels: { 
+                        usePointStyle: true,        // Utilise des petits ronds (pas des carrés)
+                        boxWidth: 10                // Taille des petits ronds (10px)
+                    }
+                }
+            },
+            
+            // ========================================================
+            // Axes (X et Y)
+            // ========================================================
+            scales: {
+                // ---- Axe Y (vertical) ----
+                y: {
+                    beginAtZero: true,              // Commence à 0 (pas de négatif)
+                    grid: { color: '#e2e8f0' },    // Lignes de la grille (gris clair)
+                    ticks: {
+                        callback: function(value) {
+                            // Formate les valeurs sur l'axe Y (ex: 200000 → "200 000 FCFA")
+                            return value.toLocaleString() + ' FCFA';
+                        }
+                    }
+                },
+                // ---- Axe X (horizontal) ----
+                x: {
+                    grid: { display: false }        // Pas de lignes verticales (plus propre)
+                }
+            }
+        }
+    });
+});
+   </script>
+
+</body>

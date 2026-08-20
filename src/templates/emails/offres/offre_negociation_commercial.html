@@ -1,0 +1,43 @@
+{% load humanize %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #fffbeb; margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .header { background: #f59e0b; padding: 24px; text-align: center; }
+        .header h1 { color: white; margin: 0; }
+        .content { padding: 30px; color: #1f2937; }
+        .info-box { background: #fffbeb; padding: 16px; border-left: 4px solid #f59e0b; margin: 20px 0; border-radius: 8px; }
+        .btn { display: inline-block; background: #f59e0b; color: white; padding: 12px 28px; text-decoration: none; border-radius: 8px; margin-top: 16px; }
+        .footer { background: #f9fafb; padding: 16px; text-align: center; font-size: 12px; color: #6b7280; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>KOZ Services</h1>
+        </div>
+        <div class="content">
+            <h2>🔄 Demande de renégociation</h2>
+            <p>Bonjour,</p>
+            <p>Le client <strong>{{ client.nom_complet }}</strong> souhaite <strong>renégocier son offre</strong> n°{{ offre_id }}.</p>
+            
+            <div class="info-box">
+                <p><strong>🚗 Véhicule :</strong> {{ vehicule }}</p>
+                <p><strong>💰 Montant financé actuel :</strong> {{ montant_finance|intcomma }} FCFA</p>
+                <p><strong>📅 Demande faite le :</strong> {{ date_demande|date:"d/m/Y H:i" }}</p>
+            </div>
+            
+            <p>L'offre a été automatiquement remise en <strong>brouillon</strong>. Vous pouvez la modifier et la renvoyer au client.</p>
+            
+            <a href="{{ lien_offre }}" class="btn">✏️ Modifier l'offre</a>
+            <a href="{{ lien_client }}" class="btn" style="background: #6b7280;">👤 Voir le client</a>
+        </div>
+        <div class="footer">
+            <p>KOZ Services - Votre concessionnaire de confiance</p>
+        </div>
+    </div>
+</body>
+</html>

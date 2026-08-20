@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f9ff; margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 1px solid #e0eefc; }
+        .header { background: linear-gradient(135deg, #1e3a8a, #3b82f6); padding: 24px; text-align: center; }
+        .header h1 { color: white; margin: 0; font-size: 24px; letter-spacing: 1px; }
+        .content { padding: 30px; color: #1f2937; }
+        .info { background: #f0f6ff; padding: 16px; border-left: 4px solid #3b82f6; margin: 20px 0; border-radius: 8px; }
+        .btn { display: inline-block; background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; padding: 12px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; margin-top: 16px; }
+        .footer { background: #f9fafb; padding: 16px; text-align: center; font-size: 12px; color: #6b7280; border-top: 1px solid #e5e7eb; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>KOZ Services</h1>
+        </div>
+        <div class="content">
+            <h2>📋 Nouvelle demande de financement</h2>
+            <p>Bonjour,</p>
+            <p>Un client vient de déposer une <strong>nouvelle demande de financement</strong>.</p>
+            
+            <div class="info">
+                <p><strong>👤 Client :</strong> {{ client.nom_complet }} ({{ client.email }})</p>
+                <p><strong>🚗 Véhicule sélectionné :</strong> {{ vehicule }}</p>
+                <p><strong>💰 Apport :</strong> {{ apport }} FCFA</p>
+                <p><strong>📅 Durée souhaitée :</strong> {{ duree }} mois</p>
+                <p><strong>📊 Revenus mensuels :</strong> {{ revenus }} FCFA</p>
+                <p><strong>📞 Téléphone :</strong> {{ client.telephone }}</p>
+            </div>
+            
+            <p>Connectez-vous à votre espace commercial pour traiter cette demande.</p>
+            
+            <a href='{{ lien_dashboard }}' class="btn">🔗 Accéder à mon espace</a>
+        </div>
+        <div class="footer">
+            <p>KOZ Services - Votre concessionnaire de confiance</p>
+            <p>Cet email est automatique, merci de ne pas y répondre.</p>
+        </div>
+    </div>
+</body>
+</html>

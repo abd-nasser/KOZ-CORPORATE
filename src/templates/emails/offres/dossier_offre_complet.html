@@ -1,0 +1,164 @@
+{% load humanize %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dossier complet - KOZ Services</title>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e2e8f0;
+        }
+        .header {
+            background: linear-gradient(135deg, #1e40af, #3730a3);
+            padding: 32px 40px 28px;
+            text-align: center;
+        }
+        .header h1 {
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0 0 6px 0;
+            letter-spacing: -0.5px;
+        }
+        .header p {
+            color: #bfdbfe;
+            font-size: 15px;
+            margin: 0;
+            font-weight: 400;
+        }
+        .body {
+            padding: 32px 40px;
+        }
+        .badge {
+            display: inline-block;
+            background-color: #dcfce7;
+            color: #15803d;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 14px;
+            border-radius: 9999px;
+            margin-bottom: 20px;
+            letter-spacing: 0.3px;
+        }
+        .infos {
+            background-color: #f8fafc;
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin: 20px 0 24px;
+            border: 1px solid #e2e8f0;
+        }
+        .infos p {
+            margin: 6px 0;
+            font-size: 14px;
+            color: #334155;
+        }
+        .infos strong {
+            color: #0f172a;
+            font-weight: 600;
+        }
+        .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #ffffff !important;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 15px;
+            padding: 12px 32px;
+            border-radius: 9999px;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.3);
+            transition: all 0.2s ease;
+            margin-top: 8px;
+        }
+        .btn:hover {
+            background: linear-gradient(135deg, #1d4ed8, #1e40af);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(37, 99, 235, 0.4);
+        }
+        .footer {
+            background-color: #f8fafc;
+            padding: 20px 40px;
+            border-top: 1px solid #e2e8f0;
+            text-align: center;
+            font-size: 13px;
+            color: #94a3b8;
+        }
+        .footer a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+        @media (max-width: 600px) {
+            .header { padding: 24px 20px; }
+            .body { padding: 20px; }
+            .infos { padding: 16px; }
+            .btn { display: block; width: 100%; box-sizing: border-box; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <div class="header">
+            <h1>📄 Dossier complet</h1>
+            <p>Offre de financement KOZ Services</p>
+        </div>
+
+        <!-- BODY -->
+        <div class="body">
+            <div class="badge">✅ Nouveau dossier complet</div>
+
+            <p style="font-size: 16px; color: #0f172a; margin-top: 0;">
+                Bonjour <strong>Équipe commerciale</strong>,
+            </p>
+            <p style="color: #475569; line-height: 1.6; margin-top: 4px;">
+                Le client <strong>{{ client.nom_complet }}</strong> a finalisé l'upload de l'ensemble des documents requis pour son offre de financement.
+            </p>
+
+            <div class="infos">
+                <p><strong>👤 Client :</strong> {{ client.nom_complet }}</p>
+                <p><strong>📧 Email :</strong> {{ client.email }}</p>
+                <p><strong>📱 Téléphone :</strong> {{ client.telephone }}</p>
+                <p><strong>🚗 Véhicule :</strong> {{ vehicule }}</p>
+                <p><strong>🔢 Offre n° :</strong> {{ offre_id }}</p>
+            </div>
+
+            <p style="color: #475569; line-height: 1.6;">
+                Le dossier est désormais en attente de validation. Veuillez vous connecter à l'ERP pour vérifier les documents et traiter l'offre.
+            </p>
+
+            <div style="text-align: center; margin: 28px 0 12px;">
+                <a href="{{ lien_offre }}" class="btn">
+                    <i class="fas fa-folder-open" style="margin-right: 10px;"></i> Voir le dossier
+                </a>
+            </div>
+
+            <p style="font-size: 13px; color: #94a3b8; text-align: center; margin-top: 24px;">
+                🔒 Cet email est confidentiel. Merci de ne pas le partager.
+            </p>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            <p style="margin: 0; font-size: 13px;">
+                KOZ Services — Votre voiture à crédit, vos pièces en ligne
+            </p>
+            <p style="margin: 4px 0 0; font-size: 12px; color: #cbd5e1;">
+                © {% now "Y" %} Tous droits réservés
+            </p>
+        </div>
+    </div>
+</body>
+</html>

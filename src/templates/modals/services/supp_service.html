@@ -1,0 +1,24 @@
+<!-- Modal Supprimer -->
+    <dialog id="delete_service_modal" class="modal">
+        <div class="modal-box bg-white rounded-2xl shadow-2xl max-w-md">
+            <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+                <i class="fas fa-exclamation-triangle text-red-600"></i>
+                Confirmer la suppression
+            </h3>
+            <p class="text-gray-600 mt-4">
+                Êtes-vous sûr de vouloir supprimer le service <strong>"{{ service.nom }}"</strong> ?
+                <br><span class="text-sm text-red-500">Cette action est irréversible.</span>
+            </p>
+            <div class="modal-action flex gap-3">
+                <form method="post" action="{% url 'services_app:service-delete' service.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-xl transition">
+                        <i class="fas fa-trash-alt mr-2"></i> Supprimer
+                    </button>
+                </form>
+                <button type="button" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-2 rounded-xl transition" onclick="document.getElementById('delete_service_modal').close()">
+                    Annuler
+                </button>
+            </div>
+        </div>
+    </dialog>

@@ -1,0 +1,618 @@
+{% load static %}
+{% load tailwind_tags %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    {% tailwind_css %}
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/splitting/dist/splitting.css">
+    <script src="{% static 'js/htmx.min.js' %}" defer></script>
+    <title>{{ service.nom }} - KOZ Services</title>
+    <style>
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-60px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(60px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
+            50% { box-shadow: 0 0 40px rgba(59, 130, 246, 0.6); }
+        }
+        .animate-fade-in-up { animation: fadeInUp 0.8s ease-out forwards; }
+        .animate-fade-in-scale { animation: fadeInScale 0.6s ease-out forwards; }
+        .animate-slide-left { animation: slideInLeft 0.7s ease-out forwards; }
+        .animate-slide-right { animation: slideInRight 0.7s ease-out forwards; }
+        .animate-float { animation: float 3s ease-in-out infinite; }
+        .animate-pulse-glow { animation: pulseGlow 2s ease-in-out infinite; }
+
+        /* ===== HERO SECTION ===== */
+        .service-hero {
+            position: relative;
+            height: 80vh;
+            min-height: 500px;
+            overflow: hidden;
+        }
+        .service-hero .hero-bg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scale(1.1);
+            transition: transform 8s ease;
+        }
+        .service-hero:hover .hero-bg {
+            transform: scale(1);
+        }
+        .service-hero .hero-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.6) 100%);
+        }
+        .service-hero .hero-content {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            height: 100%;
+            padding: 0 20px;
+        }
+
+        /* ===== GALERIE ===== */
+        .gallery-thumb {
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 3px solid transparent;
+        }
+        .gallery-thumb:hover, .gallery-thumb.active {
+            border-color: #3b82f6;
+            transform: scale(1.05);
+        }
+
+        /* ===== CARTE PRIX ===== */
+        .price-card {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border-radius: 24px;
+            padding: 32px;
+            position: relative;
+            overflow: hidden;
+        }
+        .price-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 70%);
+        }
+
+        /* ===== AVIS ===== */
+        .avis-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        .avis-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.1);
+        }
+        .stars {
+            color: #f59e0b;
+            letter-spacing: 2px;
+        }
+
+        /* ===== SPLITTING ===== */
+        .splitting .char {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        .splitting.animated .char {
+            opacity: 1;
+            transform: translateY(0);
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+       
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .service-hero { height: 60vh; min-height: 400px; }
+            .service-hero .hero-content h1 { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-inter">
+
+    <!-- ===== NAVBAR ===== -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200/50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="{% url 'home_app:home-page' %}" class="flex items-center gap-2">
+                <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl flex items-center justify-center shadow-md">
+                    <span class="text-white font-bold text-xl">K</span>
+                </div>
+                <span class="text-xl font-bold text-gray-800 hidden sm:inline">KOZ Services</span>
+            </a>
+            <a href="{% url 'home_app:home-page' %}" class="text-gray-600 hover:text-blue-600 transition flex items-center gap-2">
+                <i class="fas fa-arrow-left"></i> Retour
+            </a>
+        </div>
+        {% if messages %}
+        <div class="fixed top-20 right-5 z-50 space-y-2">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} shadow-xl rounded-xl animate-slide-in-right">
+                <span>{{ message }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </nav>
+
+    <!-- ============================================================ -->
+    <!-- HERO SECTION                                                 -->
+    <!-- ============================================================ -->
+    <section class="service-hero mt-16">
+        <!-- Image de fond -->
+        <div class="hero-bg">
+            <img src="{% if service.image_principale %}{{ service.image_principale.url }}{% else %}https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=1200{% endif %}" 
+                 alt="{{ service.nom }}" 
+                 class="w-full h-full object-cover">
+        </div>
+        <div class="hero-overlay"></div>
+
+        <!-- Contenu -->
+        <div class="hero-content container mx-auto">
+            <div class="max-w-3xl text-white">
+                <!-- Badge type -->
+                <span class="inline-block bg-blue-600/30 backdrop-blur-sm text-blue-200 text-sm font-semibold px-4 py-1.5 rounded-full mb-4 border border-blue-400/30 animate-fade-in-up">
+                    <i class="fas fa-tag mr-2"></i> {{ service.types.nom }}
+                </span>
+                
+                <!-- Titre (avec splitting) -->
+                <h1 id="service-title" class="text-5xl md:text-7xl font-black leading-tight mb-4 splitting" data-splitting>
+                    {{ service.nom }}
+                </h1>
+                
+                <!-- Description -->
+                <p class="text-xl text-white/80 max-w-2xl leading-relaxed animate-fade-in-up" style="animation-delay: 0.3s">
+                    {{ service.description_courte|default:service.description|truncatechars:150 }}
+                </p>
+                
+                <!-- CTA -->
+                <div class="flex flex-wrap gap-4 mt-8 animate-fade-in-up" style="animation-delay: 0.5s">
+                    
+                    
+                        
+                     {% if user.is_authenticated and user.role == 'client' %}
+                <a href="{% url 'services_app:contacter-service' service.pk %}" 
+                class="btn btn-primary w-full text-center py-3 rounded-xl flex items-center justify-center gap-2">
+                    <i class="fas fa-calendar-check"></i> Réserver ce service
+                </a>
+            {% else %}
+                <button onclick="document.getElementById('contact_modal').showModal()" 
+                        class="btn-glow block text-center mt-8 py-3.5 rounded-xl font-semibold transition hover:scale-105">
+                    <i class="fas fa-envelope"></i> Demander un devis
+                </button>
+                
+            {% endif %}
+                    <a href="#avis" class="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white px-8 py-3.5 rounded-xl font-semibold transition border border-white/20 flex items-center gap-2">
+                        <i class="fas fa-star"></i> Voir les avis
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scroll indicator -->
+        <div class="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 animate-float">
+            <div class="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center">
+                <div class="w-1 h-3 bg-white/60 rounded-full mt-2 animate-bounce"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- MAIN CONTENT                                                 -->
+    <!-- ============================================================ -->
+    <main class="container mx-auto px-4 py-16 max-w-6xl">
+<div id="result-toast-container" class="result-toast-container"></div>
+        <!-- ===== GRID INFO ===== -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
+            
+            <!-- Description détaillée -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-2xl shadow-lg p-8 border border-gray-100" data-animate="fade-up">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-align-left text-blue-600"></i> À propos de ce service
+                    </h2>
+                    <p class="text-gray-600 leading-relaxed">{{ service.description }}</p>
+                    
+                    <!-- Compatibilité -->
+                    {% if service.compatible_vehicules %}
+                    <div class="mt-6 pt-6 border-t border-gray-100">
+                        <h3 class="text-sm font-semibold text-gray-700 mb-2">🚗 Véhicules compatibles</h3>
+                        <p class="text-gray-600">{{ service.compatible_vehicules }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Prix card -->
+            <div id="prix" class="lg:col-span-1">
+                <div class="price-card animate-fade-in-scale" style="animation-delay: 0.2s">
+        <div class="relative z-10 text-white">
+            
+            <!-- ===== TITRE ===== -->
+            <p class="text-sm text-blue-300 font-semibold uppercase tracking-wider">💰 Tarif</p>
+
+            <!-- ===== PRIX OU MESSAGE ===== -->
+            {% if service.prix %}
+                <p class="text-5xl font-black mt-2">
+                    {{ service.prix|intcomma }}
+                    <span class="text-2xl font-medium text-blue-300">FCFA</span>
+                </p>
+                {% if service.prix_promo %}
+                    <p class="text-sm text-red-400 line-through mt-1">{{ service.prix_promo|intcomma }} FCFA</p>
+                {% endif %}
+            {% else %}
+                <p class="text-3xl font-bold mt-2 text-yellow-300">
+                    <i class="fas fa-info-circle mr-2"></i> Sur devis
+                </p>
+              
+            {% endif %}
+
+            <!-- ===== INFORMATIONS COMPLÉMENTAIRES ===== -->
+            <div class="mt-6 space-y-3">
+                
+                {% if service.duree_estimee %}
+                <div class="flex items-center gap-3 text-white/80">
+                    <i class="fas fa-clock text-blue-400 w-5"></i>
+                    <span>Durée estimée : <strong class="text-white">{{ service.duree_estimee }} minutes</strong></span>
+                </div>
+                {% endif %}
+                
+                {% if service.periodicite %}
+                <div class="flex items-center gap-3 text-white/80">
+                    <i class="fas fa-sync-alt text-blue-400 w-5"></i>
+                    <span>Périodicité : <strong class="text-white">{{ service.get_periodicite_display }}</strong></span>
+                </div>
+                {% endif %}
+                
+                <div class="flex items-center gap-3 text-white/80">
+                    <i class="fas fa-check-circle text-blue-400 w-5"></i>
+                    <span>Disponible : <strong class="text-white">{% if service.est_disponible %}✅ Oui{% else %}❌ Non{% endif %}</strong></span>
+                </div>
+            </div>
+
+            <!-- ===== BOUTON ===== -->
+        
+             {% if user.is_authenticated and user.role == 'client' %}
+                <a href="{% url 'services_app:contacter-service' service.pk %}" 
+                class="btn btn-primary w-full text-center py-3 rounded-xl flex items-center justify-center gap-2">
+                    <i class="fas fa-calendar-check"></i> Réserver ce service
+                </a>
+            {% else %}
+                <button onclick="document.getElementById('contact_modal').showModal()" 
+                        class="btn-glow block text-center mt-8 py-3.5 rounded-xl font-semibold transition hover:scale-105">
+                    <i class="fas fa-envelope"></i> Demander un devis
+                </button>
+                
+            {% endif %}
+        </div>
+    </div>
+            </div>
+        </div>
+        {% include 'modals/contact/contact_modal.html' %}
+        <!-- ===== GALERIE ===== -->
+        {% if service.images.all %}
+        <div class="mb-16" data-animate="fade-up">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                <i class="fas fa-images text-blue-600"></i> Galerie
+            </h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {% for image in service.images.all %}
+                <div class="relative overflow-hidden rounded-xl group">
+                    <img src="{{ image.image.url }}" alt="{{ image.alt_text|default:service.nom }}" 
+                         class="w-full h-48 object-cover transition duration-500 group-hover:scale-110 cursor-pointer"
+                         onclick="openLightbox('{{ image.image.url }}')">
+                    <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                        <i class="fas fa-search-plus text-white text-2xl"></i>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- ===== AVIS CLIENTS ===== -->
+        <div id="avis" data-animate="fade-up">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                    <i class="fas fa-star text-yellow-500"></i> Avis clients
+                    <span class="text-sm font-normal text-gray-400">({{ avis_approuve|length }})</span>
+                </h2>
+                
+                {% if user.is_authenticated %}
+                    <button onclick="document.getElementById('avis_modal').showModal()" 
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl transition text-sm font-medium">
+                    <i class="fas fa-pen mr-2"></i> Donner mon avis
+                    </button>
+                    {% else %}
+                    <button onclick="document.getElementById('login_simple_modal').showModal()" 
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl transition text-sm font-medium">
+                    <i class="fas fa-pen mr-2"></i> Donner mon avis
+                    </button>
+                {% endif %}
+                    
+                
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {% for avis in avis_approuve %}
+                <div class="avis-card">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white font-bold">
+                                {{ avis.client.nom_complet|slice:":1"|upper }}
+                            </div>
+                            <div>
+                                <p class="font-semibold text-gray-800">{{ avis.client.nom_complet }}</p>
+                                <p class="text-xs text-gray-400">{{ avis.date_creation|date:"d/m/Y" }}</p>
+                            </div>
+                        </div>
+                        <div class="stars text-sm">
+                            {% for i in "12345"|make_list %}
+                                {% if forloop.counter <= avis.note %}★{% else %}☆{% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <p class="text-gray-600 text-sm leading-relaxed">{{ avis.commentaire }}</p>
+                </div>
+                {% empty %}
+                <div class="col-span-full text-center py-8 text-gray-400">
+                    <i class="fas fa-comment-slash text-4xl mb-3 block"></i>
+                    <p>Aucun avis pour ce service.</p>
+                    <p class="text-sm">Soyez le premier à donner votre avis !</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="bg-gray-800 text-gray-400 py-8 mt-12">
+        <div class="container mx-auto px-4 text-center text-sm">
+            <p>&copy; {% now "Y" %} KOZ Services — Tous droits réservés</p>
+            <p class="font-medium text-slate-700">Conçu par <strong>SPIRIT-DIGIT Agency</strong></p>
+        </div>
+    </footer>
+
+    <!-- ============================================================ -->
+    <!-- MODALE AVIS                                                   -->
+    <!-- ============================================================ -->
+ 
+
+    <!-- ===== MODAL AVIS (PREMIUM) ===== -->
+<dialog id="avis_modal" class="modal modal-bottom sm:modal-middle backdrop-blur-sm transition-all duration-300">
+    <div class="modal-box bg-white/95 backdrop-blur-xl border border-slate-100 rounded-3xl shadow-2xl p-6 sm:p-8 max-w-lg relative overflow-hidden">
+        
+        <!-- Élément décoratif d'arrière-plan (effet Glow premium) -->
+        <div class="absolute -top-24 -right-24 w-48 h-48 bg-amber-400/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <!-- Bouton Fermer (Croix en haut à droite) -->
+        <button type="button" 
+                onclick="document.getElementById('avis_modal').close()" 
+                class="btn btn-sm btn-circle btn-ghost text-slate-400 hover:text-slate-700 hover:bg-slate-100 absolute right-4 top-4 transition-colors">
+            <i class="fas fa-times text-base"></i>
+        </button>
+
+        <!-- EN-TÊTE DE LA MODALE -->
+        <div class="flex items-start gap-4 mb-6">
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 to-blue-300 text-white flex items-center justify-center text-xl shadow-lg shadow-amber-500/30 shrink-0">
+                <i class="fas fa-star"></i>
+            </div>
+            <div>
+                <h3 class="text-xl font-bold text-slate-900 tracking-tight">
+                    Partagez votre expérience
+                </h3>
+                <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
+                    Votre avis aide la communauté à choisir le meilleur service.
+                </p>
+            </div>
+        </div>
+
+        <!-- FORMULAIRE -->
+        <form method="post" action="{% url 'services_app:service-avis-create' service.pk %}" class="space-y-5">
+            {% csrf_token %}
+
+            <!-- SECTION : NOTE AVEC ÉTOILES (DAISYUI RATING) -->
+            <div class="bg-slate-50/80 p-4 rounded-2xl border border-slate-100 flex flex-col items-center justify-center gap-2 text-center">
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    Quelle est votre note globale ?
+                </label>
+                
+                <!-- Système d'étoiles interactif (Option A : si ton champ Django génère un select/input standard, tu peux le styliser ou utiliser la notation radio ci-dessous) -->
+                <div class="rating rating-lg rating-half gap-1">
+                    {{ service_avis_form.note }}
+                </div>
+                
+                <!-- Si tu préfères utiliser directement le champ rendu par Django, décommente la ligne suivante : -->
+                <!-- <div class="w-full max-w-xs mt-1">{{ service_avis_form.note }}</div> -->
+            </div>
+
+            <!-- SECTION : COMMENTAIRE -->
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5 flex justify-between">
+                    <span>Votre commentaire</span>
+                    <span class="text-slate-400 font-normal lowercase">(optionnel)</span>
+                </label>
+                
+                <div class="relative">
+                    {% if service_avis_form.commentaire %}
+                        <!-- Le champ Django personnalisé ou stylisé -->
+                        <div class="[&>textarea]:w-full [&>textarea]:p-3.5 [&>textarea]:bg-slate-50 [&>textarea]:border [&>textarea]:border-slate-200 [&>textarea]:rounded-2xl [&>textarea]:text-sm [&>textarea]:text-slate-800 [&>textarea]:placeholder-slate-400 [&>textarea]:focus:bg-white [&>textarea]:focus:border-blue-500 [&>textarea]:focus:ring-4 [&>textarea]:focus:ring-blue-500/10 [&>textarea]:outline-none [&>textarea]:transition-all [&>textarea]:resize-none [&>textarea]:min-h-[110px]">
+                            {{ service_avis_form.commentaire }}
+                        </div>
+                    {% else %}
+                        <!-- Fallback HTML standard si le champ Django n'est pas personnalisé -->
+                        <textarea name="commentaire" rows="4" 
+                                  placeholder="Racontez-nous ce qui vous a plu ou ce qui peut être amélioré..." 
+                                  class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm text-slate-800 placeholder-slate-400 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all resize-none"></textarea>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- BOUTONS D'ACTION -->
+            <div class="pt-2 flex flex-col-reverse sm:flex-row gap-3">
+                <button type="button" 
+                        onclick="document.getElementById('avis_modal').close()" 
+                        class="w-full sm:w-1/3 py-3 px-4 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors text-center cursor-pointer">
+                    Annuler
+                </button>
+
+                <button type="submit" 
+                        class="w-full sm:w-2/3 py-3 px-6 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/25 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer">
+                    <i class="fas fa-paper-plane text-xs"></i>
+                    <span>Publier mon avis</span>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Fermeture au clic à l'extérieur de la modale (Backdrop DaisyUI) -->
+    <form method="dialog" class="modal-backdrop bg-slate-950/40">
+        <button>Fermer</button>
+    </form>
+</dialog>
+    <!-- ===== LIGHTBOX ===== -->
+    <div id="lightbox" class="fixed inset-0 z-50 bg-black/90 hidden items-center justify-center" onclick="closeLightbox()">
+        <img id="lightbox-img" src="" alt="Agrandissement" class="max-w-5xl max-h-[90vh] object-contain rounded-xl shadow-2xl">
+        <button onclick="closeLightbox()" class="absolute top-5 right-5 text-white text-3xl hover:text-gray-300 transition">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+       
+    {% include 'modals/auth/login_simple_modal.html' %}
+    <!-- ============================================================ -->
+    <!-- SCRIPTS                                                       -->
+    <!-- ============================================================ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://unpkg.com/splitting/dist/splitting.min.js"></script>
+    <script>
+        // ============================================================
+        // 1️⃣ SPLITTING
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', function() {
+            Splitting();
+        });
+
+        // ============================================================
+        // 2️⃣ GSAP ANIMATIONS
+        // ============================================================
+        gsap.registerPlugin(ScrollTrigger);
+
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // Animation des éléments avec data-animate
+            gsap.utils.toArray('[data-animate="fade-up"]').forEach(el => {
+                gsap.from(el, {
+                    opacity: 0,
+                    y: 40,
+                    duration: 0.8,
+                    ease: 'power2.out',
+                    scrollTrigger: {
+                        trigger: el,
+                        start: 'top 85%',
+                        toggleActions: 'play none none reverse'
+                    }
+                });
+            });
+
+            // Animation de la galerie
+            gsap.utils.toArray('.gallery-thumb').forEach((el, i) => {
+                gsap.from(el, {
+                    opacity: 0,
+                    scale: 0.8,
+                    duration: 0.6,
+                    delay: i * 0.1,
+                    scrollTrigger: {
+                        trigger: el,
+                        start: 'top 90%',
+                    }
+                });
+            });
+
+            // Animation des avis
+            gsap.utils.toArray('.avis-card').forEach((el, i) => {
+                gsap.from(el, {
+                    opacity: 0,
+                    x: i % 2 === 0 ? -30 : 30,
+                    duration: 0.6,
+                    delay: i * 0.1,
+                    scrollTrigger: {
+                        trigger: el,
+                        start: 'top 90%',
+                    }
+                });
+            });
+
+            // Animation du titre
+            Splitting();
+            setTimeout(() => {
+                document.querySelector('#service-title')?.classList.add('animated');
+            }, 300);
+        });
+
+        // ============================================================
+        // 3️⃣ LIGHTBOX
+        // ============================================================
+        function openLightbox(src) {
+            const lightbox = document.getElementById('lightbox');
+            const img = document.getElementById('lightbox-img');
+            if (lightbox && img) {
+                img.src = src;
+                lightbox.classList.remove('hidden');
+                lightbox.classList.add('flex');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeLightbox() {
+            const lightbox = document.getElementById('lightbox');
+            if (lightbox) {
+                lightbox.classList.add('hidden');
+                lightbox.classList.remove('flex');
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeLightbox();
+        });
+    </script>
+
+</body>
+</html>

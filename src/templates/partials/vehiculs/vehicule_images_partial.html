@@ -1,0 +1,65 @@
+<!-- vehicule_images_partial.html (corrigé) -->
+
+<!-- Miniatures -->
+<div class="flex gap-3 overflow-x-auto pb-2 img_miniatures" id="thumbnail-container">
+    <!-- Image principale en thumbnail -->
+    <img src="{{ vehicule.image_principale.url }}" 
+         class="thumbnail w-20 h-20 rounded-lg object-cover cursor-pointer border-2 border-transparent hover:border-blue-500 transition"
+         onclick="changeImage('{{ vehicule.image_principale.url }}')">
+
+    <!-- Images supplémentaires -->
+    {% for image in images %}
+        <img src="{{ image.image.url }}" 
+             alt="{{ image.alt_text|default:vehicule.modele }}"
+             class="thumbnail w-20 h-20 rounded-lg object-cover cursor-pointer border-2 border-transparent hover:border-blue-500 transition"
+             onclick="changeImage('{{ image.image.url }}')">
+    {% empty %}
+        <div class="text-gray-400 text-sm flex items-center gap-2">
+            <i class="fas fa-info-circle"></i> Aucune image supplémentaire
+        </div>
+    {% endfor %}
+</div>
+
+<!-- Pagination -->
+<div class="flex justify-center items-center gap-4 mt-3">
+    {% if images.has_previous %}
+    <button hx-get="{% url 'vehicul_app:vehicul-images' vehicule.pk %}?page={{ images.previous_page_number }}"
+            hx-target="#image-gallery-container"
+            hx-swap="outerHTML"
+            class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition text-sm font-medium flex items-center gap-2">
+        <i class="fas fa-chevron-left text-xs"></i> Précédent
+    </button>
+    {% else %}
+    <button
+            class="px-4 py-2 bg-gray-100 text-gray-400 rounded-lg text-sm font-medium cursor-not-allowed" disabled>
+        <i class="fas fa-chevron-left text-xs"></i> Précédent
+    </button>
+    {% endif %}
+
+    <span class="text-sm text-gray-600 font-medium">
+        {{ images.number }} / {{ images.paginator.num_pages }}
+    </span>
+
+    {% if images.has_next %}
+    <button hx-get="{% url 'vehicul_app:vehicul-images' vehicule.pk %}?page={{ images.next_page_number }}"
+            hx-target="#image-gallery-container"
+            hx-swap="outerHTML"
+            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition text-sm font-medium flex items-center gap-2">
+        Suivant <i class="fas fa-chevron-right text-xs"></i>
+    </button>
+    {% else %}
+    <button class="px-4 py-2 bg-gray-100 text-gray-400 rounded-lg text-sm font-medium cursor-not-allowed" disabled>
+        Suivant <i class="fas fa-chevron-right text-xs"></i>
+    </button>
+    {% endif %}
+</div>
+
+
+<!-- Lightbox -->
+<div id="lightbox" class="fixed inset-0 z-50 bg-black/90 hidden items-center justify-center" onclick="closeLightbox()">
+    <img id="lightbox-img" src="" alt="Agrandissement" class="max-w-5xl max-h-[90vh] object-contain rounded-xl shadow-2xl">
+    <button onclick="closeLightbox()" class="absolute top-5 right-5 text-white text-3xl hover:text-gray-300 transition">
+        <i class="fas fa-times"></i>
+    </button>
+</div>
+

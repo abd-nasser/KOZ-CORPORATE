@@ -1,0 +1,150 @@
+
+{% load humanize %}<!-- ============================================================ -->
+<!-- PARTIAL PANIER CONTAINER                                     -->
+<!-- ============================================================ -->
+
+<div id="panier-container" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+    <!-- ===== COLONNE GAUCHE : ARTICLES ===== -->
+    <div class="lg:col-span-2 space-y-4">
+
+        <!-- ===== CAS 1 : PANIER MODIFIABLE ===== -->
+        {% if not commande or commande.statut not in "validee,payee,livraison,terminee," %}
+
+            {% for article in panier.articles.all %}
+            <div class="cart-item flex items-center justify-between gap-4 bg-white p-4 rounded-xl shadow-sm">
+                <!-- Image -->
+                <div class="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                    <img src="{{ article.products.image_principale.url }}" 
+                         alt="{{ article.products.nom }}"
+                         class="w-full h-full object-cover">
+                </div>
+
+                <!-- Infos -->
+                <div class="flex-1 min-w-0">
+                    <h4 class="font-semibold text-gray-800 text-sm">{{ article.products.nom }}</h4>
+                    <p class="text-xs text-gray-400">{{ article.products.categorie.nom }}</p>
+                    <p class="text-sm font-bold text-blue-600">{{ article.products.prix_actuel|intcomma }} FCFA</p>
+                </div>
+                <div class="flex items-center gap-2 flex-shrink-0">
+                    <button class="quantity-btn"
+                            hx-post="{% url 'order_app:modifier-panier' article.id %}"
+                            hx-vals='{"quantite": "{{ article.quantite|add:'-1' }}"}'
+                            hx-target="#panier-container"
+                            hx-swap="outerHTML"
+                            {% if article.quantite <= 1 %}disabled{% endif %}
+                            hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+                        <i class="fas fa-minus text-xs"></i>
+                    </button>
+                    <span class="w-8 text-center font-semibold text-gray-700">{{ article.quantite }}</span>
+                    <button class="quantity-btn"
+                            hx-post="{% url 'order_app:modifier-panier' article.id %}"
+                            hx-vals='{"quantite": "{{ article.quantite|add:'1' }}"}'
+                            hx-target="#panier-container"
+                            hx-swap="outerHTML"
+                            hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+                        <i class="fas fa-plus text-xs"></i>
+                    </button>
+                </div>
+
+                <!-- Sous-total + Supprimer -->
+                <div class="flex items-center gap-3 flex-shrink-0">
+                    <span class="text-sm font-bold text-gray-800 min-w-[70px] text-right">
+                        {{ article.sous_total|intcomma }} FCFA
+                    </span>
+                    <button class="text-red-400 hover:text-red-600 transition"
+                            hx-delete="{% url 'order_app:retirer-panier' article.id %}"
+                            hx-target="#bd"
+                            hx-swap="outerHTML"
+                            hx-confirm="Supprimer cet article du panier ?"
+                            hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+                        <i class="fas fa-trash-alt text-sm"></i>
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+
+            <!-- Vider le panier -->
+            <div class="flex justify-end">
+                <button class="text-sm text-red-500 hover:text-red-700 transition flex items-center gap-2"
+                        hx-delete="{% url 'order_app:vider-panier' %}"
+                        hx-target="#bd"
+                        hx-swap="outerHTML"
+                        hx-confirm="Vider tout le panier ?"
+                        hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+                    <i class="fas fa-trash-alt"></i> Vider le panier
+                </button>
+            </div>
+
+        <!-- ===== CAS 2 : PANIER VERROUILLÉ ===== -->
+        {% else %}
+
+            <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-6 text-center">
+                <i class="fas fa-lock text-yellow-600 text-3xl mb-3 block"></i>
+                <p class="text-yellow-700 font-medium text-lg">
+                    Cette commande est déjà <strong>{{ commande.get_statut_display }}</strong>.
+                </p>
+                <p class="text-yellow-600 text-sm mt-1">
+                    Vous ne pouvez plus modifier le panier.
+                </p>
+                <a href="{% url 'order_app:detail-commande' commande.pk %}"
+                   class="inline-block mt-3 text-sm text-blue-600 hover:text-blue-800 transition">
+                    <i class="fas fa-eye mr-1"></i> Voir ma commande
+                </a>
+            </div>
+
+        {% endif %}
+
+    </div>
+
+    <!-- ===== COLONNE DROITE : RÉSUMÉ ===== -->
+    <div class="lg:col-span-1">
+        <div class="summary-card sticky top-24">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">Résumé du panier</h3>
+
+            <div class="summary-row">
+                <span class="text-gray-600">Sous-total</span>
+                <span class="font-semibold text-gray-800">{{ panier.total_panier|intcomma }} FCFA</span>
+            </div>
+
+            <div class="summary-row">
+                <span class="text-gray-600">Livraison</span>
+                <span class="font-semibold text-gray-800">À calculer</span>
+            </div>
+
+            <div class="summary-row">
+                <span class="text-gray-600">Taxes (18%)</span>
+                <span class="font-semibold text-gray-800">{{ panier.total_panier|floatformat:0|intcomma }} FCFA</span>
+            </div>
+
+            <div class="summary-row border-t-2 border-gray-200 mt-2 pt-3">
+                <span class="text-lg font-bold text-gray-800">Total</span>
+                <span class="text-xl font-bold text-blue-600">{{ panier.total_panier|floatformat:0|intcomma }} FCFA</span>
+            </div>
+
+            <!-- ===== BOUTON VALIDER ===== -->
+            <div class="mt-6 space-y-3">
+                {% if not commande or commande.statut not in "validee,payee,livraison,terminee" %}
+                    <a href="{% url 'order_app:valider-commande' %}"
+                       class="btn btn-success w-full py-3 rounded-xl font-semibold flex items-center justify-center gap-2">
+                        <i class="fas fa-check-circle"></i> Valider la commande
+                    </a>
+                {% else %}
+                    <div class="bg-gray-100 rounded-xl p-3 text-center text-gray-500 text-sm">
+                        <i class="fas fa-check-circle text-green-500 mr-1"></i>
+                        Commande déjà validée
+                    </div>
+                    <a href="{% url 'order_app:annuler-commande' commande.pk %}"
+                       class="btn btn-error w-full py-3 rounded-xl font-semibold flex items-center justify-center gap-2">
+                        <i class="fas fa-times-circle"></i> Annuler la commande
+                    </a>
+                {% endif %}
+                <a href="{% url 'products_app:products-list' %}" 
+                   class="block w-full text-center py-2 text-sm text-gray-500 hover:text-blue-600 transition">
+                    <i class="fas fa-arrow-left mr-1"></i> Continuer mes achats
+                </a>
+            </div>
+        </div>
+    </div>
+
+</div>

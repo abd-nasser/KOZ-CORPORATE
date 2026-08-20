@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f9ff;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border: 1px solid #e0eefc;
+        }
+        .header {
+            background: #3b82f6; /* Bleu clair KOZ */
+            padding: 24px;
+            text-align: center;
+        }
+        .header h1 {
+            color: white;
+            margin: 0;
+            font-size: 24px;
+            letter-spacing: 1px;
+        }
+        .content {
+            padding: 30px;
+            color: #1f2937; /* Noir/gris foncé */
+        }
+        .info-box {
+            background: #f0f6ff;
+            padding: 16px;
+            border-left: 4px solid #3b82f6;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .btn {
+            display: inline-block;
+            background: #3b82f6;
+            color: white;
+            padding: 12px 28px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            margin-top: 16px;
+        }
+        .footer {
+            background: #f9fafb;
+            padding: 16px;
+            text-align: center;
+            font-size: 12px;
+            color: #6b7280;
+            border-top: 1px solid #e5e7eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>KOZ Services</h1>
+        </div>
+        <div class="content">
+            <h2>📄 Nouveau dossier complet</h2>
+            <p>Bonjour,</p>
+            <p>Le client <strong>{{ client.nom_complet }}</strong> a complété son dossier documentaire pour sa demande de financement.</p>
+            
+            <div class="info-box">
+                <p><strong>🚗 Véhicule :</strong> {{ vehicule }}</p>
+                <p><strong>📋 Demande N° :</strong> {{ demande_id }}</p>
+            </div>
+            
+            <p>Vous pouvez maintenant étudier ce dossier et valider ou non le financement.</p>
+            
+            <a href="{{ lien_demande }}" class="btn">📂 Étudier le dossier</a>
+        </div>
+        <div class="footer">
+            <p>KOZ Services - Votre concessionnaire de confiance</p>
+            <p>Cet email est automatique, merci de ne pas y répondre.</p>
+        </div>
+    </div>
+</body>
+</html>

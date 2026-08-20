@@ -1,0 +1,72 @@
+<dialog id="delete_product_image_modal" class="modal">
+    <div class="modal-box w-full max-w-md p-0 overflow-hidden rounded-2xl bg-gradient-to-br from-white to-gray-50 shadow-2xl">
+        
+        <!-- Header avec dégradé rouge (danger) -->
+        <div class="bg-gradient-to-r from-red-700 to-red-600 px-6 py-4">
+            <div class="flex justify-between items-center">
+                <h3 class="text-xl font-bold text-white">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>Confirmation de suppression
+                </h3>
+                <button type="button" class="text-white/80 hover:text-white text-2xl leading-none transition" 
+                        onclick="document.getElementById('delete_product_image_modal').close()">&times;</button>
+            </div>
+            <p class="text-red-100 text-sm mt-1">Cette action est irréversible</p>
+        </div>
+
+        <!-- Corps du modal -->
+        <div class="p-6">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center">
+                    <i class="fas fa-trash-alt text-red-600 text-2xl"></i>
+                </div>
+                <div>
+                    <p class="font-semibold text-white">Supprimer cette image  ?</p>
+                   
+                </div>
+            </div>
+            
+            <p class="text-white text-sm mb-6">
+                Êtes-vous sûr de vouloir supprimer définitivement cette image? 
+                Cette action est <strong class="text-red-600">irréversible</strong>.
+            </p>
+        </div>
+
+        <!-- Footer avec actions -->
+        <div class="bg-gray-50 px-6 py-4 flex justify-end gap-3">
+            <button type="button" class="btn btn-ghost" onclick="document.getElementById('delete_product_image_modal').close()">
+                <i class="fas fa-times mr-2"></i>Annuler
+            </button>
+            <form method="post" action="{% url 'products_app:delete-product-image' image.pk %}" class="inline">
+                {% csrf_token %}
+                <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-xl transition shadow-md flex items-center gap-2">
+                    <i class="fas fa-trash-alt"></i> Supprimer définitivement
+                </button>
+            </form>
+        </div>
+
+    </div>
+</dialog>
+
+<!-- Script pour rouvrir le modal en cas d'erreur -->
+{% if open_delete_product_image_modal %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('delete_product_image_modal').showModal();
+    });
+</script>
+{% endif %}
+
+<style>
+    .btn-glow {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        color: white;
+        border: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.5);
+    }
+    .btn-glow:hover {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        transform: translateY(-2px);
+        box-shadow: 0 20px 35px -8px rgba(59, 130, 246, 0.7);
+    }
+</style>

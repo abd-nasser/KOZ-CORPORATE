@@ -1,0 +1,196 @@
+{% load static %}
+{% load tailwind_tags %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    {% tailwind_css %}
+    <script src="{% static 'js/htmx.min.js' %}" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <title>Mon panier - KOZ Services</title>
+    <style>
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .animate-fade-in-up { animation: fadeInUp 0.5s ease-out forwards; }
+        .animate-slide-in-right { animation: slideInRight 0.4s ease-out forwards; }
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .cart-item {
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #f1f5f9;
+        }
+        .cart-item:hover {
+            background: #f8fafc;
+            transform: translateX(4px);
+        }
+        .quantity-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #e2e8f0;
+            background: white;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .quantity-btn:hover {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+        .quantity-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .summary-card {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid #e2e8f0;
+        }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #eef2f6;
+        }
+        .summary-row:last-child {
+            border-bottom: none;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            border: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.5);
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            transform: translateY(-2px);
+            box-shadow: 0 20px 35px -8px rgba(59, 130, 246, 0.7);
+        }
+        .empty-cart {
+            border: 2px dashed #e2e8f0;
+            border-radius: 16px;
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body id="bd" class="bg-gray-50 font-inter">
+
+    <!-- ===== NAVBAR ===== -->
+    <nav class="glass-nav sticky top-0 z-40 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <a href="{% url 'home_app:home-page' %}" class="font-bold text-2xl text-blue-600">
+                    KOZ Services
+                </a>
+                <a href="{% url 'products_app:products-list' %}" class="text-gray-500 hover:text-blue-600 transition text-sm flex items-center gap-1 ml-4">
+                    <i class="fas fa-arrow-left text-xs"></i> Continuer mes achats
+                </a>
+            </div>
+            <div class="flex items-center gap-4">
+                <span class="text-sm text-gray-500">
+                    <i class="fas fa-shopping-cart text-blue-600 mr-1"></i>
+                    {{ panier.articles.count }} article{{ panier.articles.count|pluralize }}
+                </span>
+                {% if user.is_authenticated %}
+                    <span class="text-sm text-gray-600">{{ user.nom_complet }}</span>
+                {% endif %}
+            </div>
+        </div>
+        <!-- Messages flash -->
+        {% if messages %}
+        <div class="fixed top-20 right-5 z-50 space-y-2">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} shadow-xl rounded-xl animate-slide-in-right">
+                <span>{{ message }}</span>
+            <button onclick="this.parentElement.remove()" class="text-xs opacity-60 hover:opacity-100">
+                <i class="fas fa-xmark"></i>
+            </button>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </nav>
+
+    <!-- ============================================================ -->
+    <!-- MAIN CONTENT                                                 -->
+    <!-- ============================================================ -->
+    <main class="max-w-7xl mx-auto px-4 py-8" style="min-height:80vh">
+
+        <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-8 animate-fade-in-up">
+            <i class="fas fa-shopping-cart text-blue-600 mr-3"></i>Mon panier
+        </h1>
+
+        <!-- ============================================================ -->
+        <!-- PANIER VIDE                                                  -->
+        <!-- ============================================================ -->
+        {% if not panier.articles.all %}
+        <div class="empty-cart animate-fade-in-up">
+            <div class="text-center">
+                <div class="w-24 h-24 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                    <i class="fas fa-shopping-bag text-4xl text-gray-400"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-700 mb-2">Votre panier est vide</h2>
+                <p class="text-gray-500 mb-6">Explorez nos produits et trouvez ce qu'il vous faut.</p>
+                <a href="{% url 'products_app:products-list' %}" class="btn-primary px-6 py-3 rounded-xl font-semibold inline-flex items-center gap-2">
+                    <i class="fas fa-arrow-left"></i> Découvrir les produits
+                </a>
+            </div>
+        </div>
+        {% else %}
+        <!-- ============================================================ -->
+        <!-- PANIER NON VIDE (avec conteneur HTMX)                       -->
+        <!-- ============================================================ -->
+            {% include 'partials/order/panier_container.html' %}
+        {% endif %}
+
+    </main>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="bg-gray-800 text-gray-400 py-6 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center text-sm">
+            <p>&copy; {% now "Y" %} KOZ Services — Tous droits réservés</p>
+            <p class="font-medium text-slate-700">Conçu par <strong>SPIRIT-DIGIT Agency</strong></p>
+        </div>
+    </footer>
+
+    <!-- ============================================================ -->
+    <!-- SCRIPTS                                                       -->
+    <!-- ============================================================ -->
+    <script>
+        // HTMX : Mise à jour automatique du compteur du panier
+        document.addEventListener('htmx:afterSwap', function(evt) {
+            if (evt.target.id === 'panier-container') {
+                // Mettre à jour le compteur dans la navbar
+                const count = document.querySelectorAll('#panier-container .cart-item').length || 0;
+                const badge = document.querySelector('.navbar .badge');
+                if (badge) {
+                    badge.textContent = count;
+                }
+            }
+        });
+    </script>
+
+</body>
+</html>

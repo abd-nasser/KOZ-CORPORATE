@@ -1,0 +1,196 @@
+@keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .animate-fade-in-up { animation: fadeInUp 0.5s ease-out forwards; }
+        .animate-slide-in-right { animation: slideInRight 0.4s ease-out forwards; }
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .section-header {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #6b7280;
+            padding: 6px 12px;
+            background: #f3f4f6;
+            border-radius: 9999px;
+            display: inline-block;
+        }
+        .action-card {
+            transition: all 0.2s ease;
+        }
+        .action-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px -8px rgba(0, 0, 0, 0.15);
+        }
+        .btn-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 12px 16px;
+            background: #fafafa;
+            border-radius: 16px;
+            border: 1px solid #f1f1f1;
+        }
+        .btn-section-label {
+            width: 100%;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #9ca3af;
+            margin-bottom: 2px;
+        }
+        .quick-access-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 8px;
+        }
+        .quick-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            background: #f8fafc;
+            border-radius: 10px;
+            border: 1px solid #eef2f6;
+            font-size: 0.8rem;
+            color: #374151;
+            transition: all 0.2s ease;
+        }
+        .quick-link:hover {
+            background: #eff6ff;
+            border-color: #93c5fd;
+            color: #1d4ed8;
+        }
+        .quick-link i {
+            width: 18px;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+        .quick-link .badge-count {
+            margin-left: auto;
+            background: #e5e7eb;
+            padding: 0 8px;
+            border-radius: 9999px;
+            font-size: 0.65rem;
+            color: #6b7280;
+        }
+        .quick-link:hover .badge-count {
+            background: #bfdbfe;
+            color: #1e40af;
+        }
+        .section-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #6b7280;
+            margin: 16px 0 8px 0;
+            padding-bottom: 4px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .section-title:first-of-type {
+            margin-top: 0;
+        }
+ 
+
+
+
+.btn-glow {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    border: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.5);
+    }
+
+.btn-glow:hover {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    transform: translateY(-2px);
+    box-shadow: 0 20px 35px -8px rgba(59, 130, 246, 0.7);
+    }
+    
+.scrollable-form {
+    max-height: 65vh;
+    overflow-y: auto;
+    padding-right: 0.75rem;
+    scroll-behavior: smooth;
+    scrollbar-color: rgba(59, 130, 246, 0.5) rgba(15, 23, 42, 0.05);
+    scrollbar-width: thin;
+    }
+
+.scrollable-form::-webkit-scrollbar {
+    width: 10px;
+    }
+
+    .scrollable-form::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.05);
+    border-radius: 9999px;
+    }
+
+.scrollable-form::-webkit-scrollbar-thumb {
+    background: rgba(59, 130, 246, 0.5);
+    border-radius: 9999px;
+    }
+
+.scrollable-form::-webkit-scrollbar-thumb:hover {
+        background: rgba(37, 99, 235, 0.7);
+    }
+
+
+
+/* Style des champs de formulaire */
+input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+select,
+textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+    background-color: white;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Checkboxes et radios gardent leur taille naturelle */
+input[type="checkbox"],
+input[type="radio"] {
+    width: auto;
+    margin-right: 8px;
+    transform: scale(1.1);
+    cursor: pointer;
+}
+
+/* Style spécifique pour les champs fichiers */
+input[type="file"] {
+    padding: 8px;
+    background-color: #f9fafb;
+    width: 100%;
+}
+
+/* Style spécifique pour les champs password */
+input[type="password"] {
+    letter-spacing: 0.3em;
+    }
+    
+input[type="password"]::placeholder {
+    letter-spacing: normal;
+}
+
+

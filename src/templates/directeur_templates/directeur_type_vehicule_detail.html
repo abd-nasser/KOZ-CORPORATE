@@ -1,0 +1,443 @@
+{% load static %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ type_vehicule.nom }} - KOZ Flow</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="{% static 'js/htmx.min.js' %}" defer></script>
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .animate-fade-in-up {
+            animation: fadeInUp 0.5s ease-out forwards;
+        }
+        .animate-slide-in-right {
+            animation: slideInRight 0.4s ease-out forwards;
+        }
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            border: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.5);
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            transform: translateY(-2px);
+            box-shadow: 0 20px 35px -8px rgba(59, 130, 246, 0.7);
+        }
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+            border: none;
+            transition: all 0.3s ease;
+        }
+        .btn-secondary:hover {
+            background: #4b5563;
+            transform: translateY(-2px);
+        }
+        .card-box {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+        .card-box:hover {
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.12);
+            transform: translateY(-2px);
+        }
+        .badge-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #f0f9ff;
+            color: #0369a1;
+            font-size: 24px;
+            margin-bottom: 12px;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s ease;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .info-item {
+            background: #f9fafb;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid #3b82f6;
+        }
+        .info-item-label {
+            font-size: 0.85rem;
+            color: #6b7280;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+        .info-item-value {
+            font-size: 1.25rem;
+            color: #1f2937;
+            font-weight: 700;
+        }
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: #6b7280;
+            margin-bottom: 2rem;
+        }
+        .breadcrumb a {
+            color: #3b82f6;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+        .breadcrumb a:hover {
+            color: #1d4ed8;
+            text-decoration: underline;
+        }
+        .section-header {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        .section-header i {
+            color: #3b82f6;
+            font-size: 1.75rem;
+        }
+        .alert-box {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .alert-success {
+            background: #d1fae5;
+            border: 1px solid #6ee7b7;
+            color: #047857;
+        }
+        .alert-error {
+            background: #fee2e2;
+            border: 1px solid #fca5a5;
+            color: #991b1b;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="glass-nav sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <a href="{% url 'directeur_app:directeur-view' %}" class="text-gray-700 hover:text-blue-600 transition-colors">
+                    <i class="fas fa-arrow-left"></i> Retour
+                </a>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-800">Types de Véhicules</h1>
+            <div class="w-12"></div>
+        </div>
+        {% if messages %}
+        <div class="fixed top-20 right-5 z-50 space-y-2">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} shadow-xl rounded-xl animate-slide-in-right">
+                <span>{{ message }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </nav>
+
+    <!-- Breadcrumb -->
+    <div class="max-w-6xl mx-auto px-4 mt-6">
+        <div class="breadcrumb">
+            <a href="{% url 'directeur_app:directeur-view' %}">
+                <i class="fas fa-home"></i> Accueil
+            </a>
+            <span>/</span>
+            <a href="{% url 'vehicul_app:type-vehicul-list' %}">Types de Véhicules</a>
+            <span>/</span>
+            <span class="text-gray-900 font-semibold">{{ type_vehicule.nom }}</span>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-6xl mx-auto px-4 pb-12">
+        <!-- Header Section -->
+        <div class="card-box p-8 mb-8 animate-fade-in-up">
+            <div class="flex items-start justify-between mb-6">
+                <div class="flex items-start gap-4">
+                    {% if type_vehicule.icone %}
+                        <div class="badge-icon">
+                            <i class="fas {{ type_vehicule.icone }}"></i>
+                        </div>
+                    {% else %}
+                        <div class="badge-icon">
+                            <i class="fas fa-car"></i>
+                        </div>
+                    {% endif %}
+                    <div>
+                        <h1 class="text-4xl font-bold text-gray-900 mb-2">{{ type_vehicule.nom }}</h1>
+                        <p class="text-gray-600">
+                            <i class="fas fa-calendar-alt mr-2"></i>
+                            Créé le {{ type_vehicule.date_ajout|date:"d/m/Y à H:i" }}
+                        </p>
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <a href="{% url 'vehicul_app:type-vehicul-list' %}" class="btn-secondary px-4 py-2 rounded-lg text-sm font-semibold transition-all hover:shadow-lg">
+                        <i class="fas fa-list mr-2"></i> Liste
+                    </a>
+                </div>
+            </div>
+
+            <!-- Info Grid -->
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-item-label">
+                        <i class="fas fa-hashtag mr-2"></i> Ordre d'affichage
+                    </div>
+                    <div class="info-item-value">{{ type_vehicule.ordre }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-item-label">
+                        <i class="fas fa-icons mr-2"></i> Icône
+                    </div>
+                    <div class="info-item-value font-mono text-lg">
+                        {% if type_vehicule.icone %}
+                            {{ type_vehicule.icone }}
+                        {% else %}
+                            <span class="text-gray-400">Non définie</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Description -->
+            {% if type_vehicule.description %}
+                <div class="mt-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">
+                        <i class="fas fa-align-left mr-2 text-blue-600"></i> Description
+                    </h3>
+                    <div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-600">
+                        <p class="text-gray-700 whitespace-pre-wrap">{{ type_vehicule.description }}</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Edit Form Section -->
+        {% if update_type_vehicul_form %}
+            <div class="card-box p-8 animate-fade-in-up">
+                <div class="section-header">
+                    <i class="fas fa-edit"></i> Modifier le type de véhicule
+                </div>
+
+                <form method="post" action="{% url 'vehicul_app:type-vehicul-update' type_vehicule.pk %}" class="space-y-6">
+                    {% csrf_token %}
+
+                    <!-- Form Errors -->
+                    {% if update_type_vehicul_form.non_field_errors %}
+                        <div class="alert-box alert-error">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <div>
+                                {% for error in update_type_vehicul_form.non_field_errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <!-- Form Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Nom Field -->
+                        <div class="form-group md:col-span-2">
+                            <label for="{{ update_type_vehicul_form.nom.id_for_label }}">
+                                <i class="fas fa-heading mr-2 text-blue-600"></i> {{ update_type_vehicul_form.nom.label }}
+                            </label>
+                            {{ update_type_vehicul_form.nom }}
+                            {% if update_type_vehicul_form.nom.errors %}
+                                <div class="mt-2 text-red-600 text-sm">
+                                    {% for error in update_type_vehicul_form.nom.errors %}
+                                        <p><i class="fas fa-times-circle mr-1"></i>{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Description Field -->
+                        <div class="form-group md:col-span-2">
+                            <label for="{{ update_type_vehicul_form.description.id_for_label }}">
+                                <i class="fas fa-align-left mr-2 text-blue-600"></i> {{ update_type_vehicul_form.description.label }}
+                            </label>
+                            {{ update_type_vehicul_form.description }}
+                            {% if update_type_vehicul_form.description.errors %}
+                                <div class="mt-2 text-red-600 text-sm">
+                                    {% for error in update_type_vehicul_form.description.errors %}
+                                        <p><i class="fas fa-times-circle mr-1"></i>{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Icone Field -->
+                        <div class="form-group">
+                            <label for="{{ update_type_vehicul_form.icone.id_for_label }}">
+                                <i class="fas fa-icons mr-2 text-blue-600"></i> {{ update_type_vehicul_form.icone.label }}
+                            </label>
+                            {{ update_type_vehicul_form.icone }}
+                            <small class="text-gray-500 mt-2 block">
+                                Ex: fa-car, fa-truck, fa-van, fa-bus
+                                <a href="https://fontawesome.com/icons" target="_blank" class="text-blue-600 hover:underline">
+                                    Voir les icônes disponibles <i class="fas fa-external-link-alt"></i>
+                                </a>
+                            </small>
+                            {% if update_type_vehicul_form.icone.errors %}
+                                <div class="mt-2 text-red-600 text-sm">
+                                    {% for error in update_type_vehicul_form.icone.errors %}
+                                        <p><i class="fas fa-times-circle mr-1"></i>{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Ordre Field -->
+                        <div class="form-group">
+                            <label for="{{ update_type_vehicul_form.ordre.id_for_label }}">
+                                <i class="fas fa-sort-numeric-up mr-2 text-blue-600"></i> {{ update_type_vehicul_form.ordre.label }}
+                            </label>
+                            {{ update_type_vehicul_form.ordre }}
+                            <small class="text-gray-500 mt-2 block">Ordre d'affichage (0 = premier)</small>
+                            {% if update_type_vehicul_form.ordre.errors %}
+                                <div class="mt-2 text-red-600 text-sm">
+                                    {% for error in update_type_vehicul_form.ordre.errors %}
+                                        <p><i class="fas fa-times-circle mr-1"></i>{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="flex gap-4 pt-6 border-t border-gray-200 mt-8">
+                        <button type="submit" class="btn-primary px-6 py-3 rounded-lg font-semibold transition-all hover:shadow-lg flex items-center gap-2">
+                            <i class="fas fa-check"></i> Mettre à jour
+                        </button>
+                        <a href="{% url 'vehicul_app:type-vehicul-list' %}" class="btn-secondary px-6 py-3 rounded-lg font-semibold transition-all hover:shadow-lg flex items-center gap-2">
+                            <i class="fas fa-times"></i> Annuler
+                        </a>
+                    </div>
+                </form>
+            </div>
+        {% endif %}
+
+        <!-- Related Vehicles Section -->
+        <div class="mt-8">
+            <div class="card-box p-8 animate-fade-in-up">
+                <div class="section-header">
+                    <i class="fas fa-car"></i> Véhicules de ce type
+                </div>
+
+                {% if type_vehicule.vehicules.all %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {% for vehicule in type_vehicule.vehicules.all %}
+                            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 hover:border-blue-600 hover:shadow-md transition-all">
+                                <div class="flex items-start justify-between mb-3">
+                                    <div>
+                                        <h4 class="font-semibold text-gray-900">{{ vehicule.marque }} {{ vehicule.modele }}</h4>
+                                        <p class="text-sm text-gray-600">{{ vehicule.annee }}</p>
+                                    </div>
+                                    {% if vehicule.disponible %}
+                                        <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-semibold">
+                                            <i class="fas fa-check-circle mr-1"></i> Disponible
+                                        </span>
+                                    {% else %}
+                                        <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs font-semibold">
+                                            <i class="fas fa-times-circle mr-1"></i> Indisponible
+                                        </span>
+                                    {% endif %}
+                                </div>
+                                <p class="text-sm text-gray-600 mb-3">{{ vehicule.prix|floatformat:0 }} €</p>
+                                <a href="{% url 'vehicul_app:detail-vehicul' vehicule.pk %}" class="text-blue-600 hover:text-blue-800 text-sm font-semibold">
+                                    Voir les détails <i class="fas fa-arrow-right"></i>
+                                </a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="bg-gray-50 p-8 rounded-lg text-center">
+                        <i class="fas fa-inbox text-gray-400 text-3xl mb-3 block"></i>
+                        <p class="text-gray-600">Aucun véhicule de ce type pour le moment.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-400 py-8 mt-12">
+        <div class="max-w-6xl mx-auto px-4 text-center">
+            <p>&copy; 2024 KOZ Flow - Gestion de concessionnaire automobile</p>
+        </div>
+    </footer>
+</body>
+</html>

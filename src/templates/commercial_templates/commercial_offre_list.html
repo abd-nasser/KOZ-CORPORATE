@@ -1,0 +1,338 @@
+{% load static %}
+{% load tailwind_tags %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    {% tailwind_css %}
+    <script src="{% static 'js/htmx.min.js' %}" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://unpkg.com/lenis@1.3.25/dist/lenis.min.js"></script> 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://unpkg.com/splitting/dist/splitting.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/splitting/dist/splitting.css">
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+    <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
+    <title>Offres - KOZ Services</title>
+    <style>
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .animate-fade-in-up { animation: fadeInUp 0.5s ease-out forwards; }
+        .animate-slide-in-right { animation: slideInRight 0.4s ease-out forwards; }
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .offre-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .offre-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -12px rgba(0, 0, 0, 0.15);
+        }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        .badge-success { background: #dcfce7; color: #166534; }
+        .badge-error { background: #fee2e2; color: #991b1b; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-info { background: #dbeafe; color: #1e40af; }
+        .badge-neutral { background: #f3f4f6; color: #374151; }
+        .badge-amber { background: #fde68a; color: #92400e; }
+        .badge-purple { background: #e9d5ff; color: #6b21a8; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 font-inter">
+
+    <!-- Messages flash -->
+    {% if messages %}
+    <div class="fixed top-20 right-5 z-50 space-y-2">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} shadow-xl rounded-xl animate-slide-in-right">
+            <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% else %}info-circle{% endif %} mr-2"></i>
+            <span>{{ message }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Navbar -->
+    <nav class="glass-nav sticky top-0 z-40 shadow-sm">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl flex items-center justify-center shadow-lg">
+                    <span class="text-white font-bold text-xl">K</span>
+                </div>
+                <a href="{% url 'commercial_app:commercial-view' %}" class="text-gray-600 hover:text-blue-600 transition flex items-center gap-1 text-sm">
+                    <i class="fas fa-arrow-left"></i> Retour
+                </a>
+            </div>
+            <h1 class="text-lg font-semibold text-gray-800 hidden md:block">📋 Offres</h1>
+            <div class="w-10"></div>
+        </div>
+    </nav>
+<style>
+    main{
+        min-height: 81vh;
+    }
+</style>
+    <main class="container mx-auto px-4 py-8 max-w-6xl">
+        
+        <!-- ========== FILTRES ========== -->
+        <div class="bg-white rounded-2xl shadow-lg p-5 mb-6 border border-gray-100 animate-fade-in-up">
+            <div class="flex flex-wrap items-center justify-between gap-4">
+                <h2 class="text-md font-semibold text-gray-700 flex items-center gap-2">
+                    <i class="fas fa-filter text-blue-600"></i>Filtrer les offres
+                </h2>
+                <span class="text-sm text-gray-500">
+                    <i class="fas fa-file-signature mr-1"></i>
+                    {% with total=page_obj.paginator.count %}
+                        {{ total }} offre{% if total > 1 %}s{% endif %} trouvée{% if total > 1 %}s{% endif %}
+                    {% endwith %}
+                </span>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
+                <!-- Recherche -->
+                <div class="form-control">
+                    <label class="label pb-1 text-gray-600 text-sm">🔍 Recherche</label>
+                    <input type="text" name="q" 
+                           placeholder="Client, véhicule..."
+                           hx-get="{% url 'commercial_app:offre-list' %}"
+                           hx-trigger="keyup changed delay:500ms"
+                           hx-target="#offre-list"
+                           hx-include=".filters-container select, .filters-container input"
+                           class="input input-bordered w-full focus:ring-2 focus:ring-blue-500 text-sm">
+                </div>
+
+                <!-- Filtre type -->
+                <div class="form-control">
+                    <label class="label pb-1 text-gray-600 text-sm">📂 Type</label>
+                    <select name="type_offre"
+                            hx-get="{% url 'commercial_app:offre-list' %}"
+                            hx-trigger="change"
+                            hx-target="#offre-list"
+                            hx-include=".filters-container select, .filters-container input"
+                            class="select select-bordered w-full text-sm">
+                        <option value="">Tous les types</option>
+                        {% for value, label in TYPE_OFFRE %}
+                        <option value="{{ value }}" {% if request.GET.type_offre == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Filtre statut -->
+                <div class="form-control">
+                    <label class="label pb-1 text-gray-600 text-sm">📊 Statut</label>
+                    <select name="statut"
+                            hx-get="{% url 'commercial_app:offre-list' %}"
+                            hx-trigger="change"
+                            hx-target="#offre-list"
+                            hx-include=".filters-container select, .filters-container input"
+                            class="select select-bordered w-full text-sm">
+                        <option value="">Tous les statuts</option>
+                        {% for value, label in STATUTS_OFFRE %}
+                        <option value="{{ value }}" {% if request.GET.statut == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Filtre client -->
+                <div class="form-control">
+                    <label class="label pb-1 text-gray-600 text-sm">👤 Client</label>
+                    <select name="client"
+                            hx-get="{% url 'commercial_app:offre-list' %}"
+                            hx-trigger="change"
+                            hx-target="#offre-list"
+                            hx-include=".filters-container select, .filters-container input"
+                            class="select select-bordered w-full text-sm">
+                        <option value="">Tous les clients</option>
+                        {% for client in clients %}
+                        <option value="{{ client.id }}" {% if request.GET.client == client.id|stringformat:"s" %}selected{% endif %}>
+                            {{ client.nom_complet }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap justify-between items-center mt-4">
+                <a href="{% url 'commercial_app:offre-list' %}" 
+                   hx-get="{% url 'commercial_app:offre-list' %}"
+                   hx-target="#offre-list"
+                   class="text-sm text-gray-500 hover:text-blue-600 transition">
+                    <i class="fas fa-undo-alt mr-1"></i>Réinitialiser
+                </a>
+               
+            </div>
+        </div>
+
+        <!-- ========== LISTE DES OFFRES ========== -->
+        <div id="offre-list" 
+             hx-get="{% url 'commercial_app:offre-list' %}"
+             hx-trigger="load"
+             hx-swap="innerHTML">
+            
+            <div class="space-y-4">
+                {% for offre in offres %}
+                <a href="{% url 'commercial_app:offre-detail' offre.pk %}" class="block offre-card bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden">
+                    <div class="p-5">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                            <div class="flex-1">
+                                <!-- En-tête -->
+                                <div class="flex items-center gap-3 flex-wrap mb-2">
+                                    <span class="font-bold text-lg text-gray-800">
+                                        <i class="fas fa-file-signature text-blue-500 mr-2"></i>Offre #{{ offre.id }}
+                                    </span>
+                                    <!-- Badge type -->
+                                    <span class="badge badge-purple">
+                                        <i class="fas fa-{% if offre.type_offre == 'simple' %}file-invoice{% else %}chart-line{% endif %} mr-1"></i>
+                                        {{ offre.get_type_offre_display }}
+                                    </span>
+                                    <!-- Badge statut -->
+                                    <span class="badge 
+                                        {% if offre.statut == 'acceptee' %}badge-success
+                                        {% elif offre.statut == 'refusee' %}badge-error
+                                        {% elif offre.statut == 'expiree' %}badge-warning
+                                        {% elif offre.statut == 'envoyee' %}badge-info
+                                        {% elif offre.statut == 'en_attente_document' %}badge-amber
+                                        {% else %}badge-neutral{% endif %}">
+                                        <i class="fas fa-{% if offre.statut == 'acceptee' %}check-circle{% elif offre.statut == 'refusee' %}times-circle{% elif offre.statut == 'expiree' %}hourglass-end{% elif offre.statut == 'envoyee' %}paper-plane{% elif offre.statut == 'en_attente_document' %}clock{% else %}info-circle{% endif %} mr-1"></i>
+                                        {{ offre.get_statut_display }}
+                                    </span>
+                                     <p class="ml-60">
+                                        <i class="fas fa-building text-purple-500 w-4"></i>
+                                        <strong>Financement :</strong>
+                                        {% if offre.financement_type == 'maison' %}
+                                            <span class="badge bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs font-semibold">
+                                                <i class="fas fa-home mr-1"></i> Financement interne (KOZ SERVICES)
+                                            </span>
+                                        {% elif offre.financement_type == 'externe' %}
+                                            <span class="badge bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full text-xs font-semibold">
+                                                <i class="fas fa-handshake mr-1"></i> Externe
+                                                {% if offre.financement_par %}
+                                                    <span class="ml-1">
+                                                        ({{ offre.get_financement_par_display }})
+                                                    </span>
+                                                {% endif %}
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full text-xs font-semibold">
+                                                <i class="fas fa-question-circle mr-1"></i> Non défini
+                                            </span>
+                                        {% endif %}
+                                    </p>
+                                   
+                                </div>
+
+                                <!-- Infos client -->
+                                <div class="flex flex-wrap items-center gap-4 text-sm text-gray-600">
+                                    <p><i class="fas fa-user text-blue-500 w-4"></i> {{ offre.client.nom_complet }}</p>
+                                    <p><i class="fas fa-envelope text-blue-500 w-4"></i> {{ offre.client.email }}</p>
+                                    <p><i class="fas fa-car text-blue-500 w-4"></i> {{ offre.vehicule_propose.marque.nom }} {{ offre.vehicule_propose.modele }}</p>
+                                </div>
+
+                                <!-- Infos spécifiques -->
+                                <div class="flex flex-wrap items-center gap-4 text-sm text-gray-600 mt-2">
+                                    {% if offre.type_offre == "offre_financement" %}
+                                    
+                                        <p><i class="fas fa-money-bill-wave text-green-600 w-4"></i> <strong class="text-green-700">{{ offre.montant_finance|intcomma }} FCFA</strong></p>
+                                        <p><i class="fas fa-coins text-blue-500 w-4"></i> Mensualité : <strong>{{ offre.mensualite|intcomma }} FCFA</strong></p>
+                                        <p><i class="fas fa-calendar-alt text-blue-500 w-4"></i> {{ offre.duree_mois }} mois</p>
+                                    {% else %}
+                                        <p><i class="fas fa-tag text-blue-500 w-4"></i> Montant : <strong>{{ offre.montant_propose|intcomma }} FCFA</strong></p>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Date -->
+                            <div class="text-right text-sm text-gray-500 flex-shrink-0">
+                                <p><i class="fas fa-calendar-alt mr-1"></i> {{ offre.date_creation|date:"d/m/Y" }}</p>
+                                <p class="text-xs {% if offre.statut == 'expiree' %}text-red-500{% endif %}">
+                                    <i class="fas fa-hourglass-half mr-1"></i> 
+                                    {% if offre.statut == 'expiree' %}
+                                        Expirée
+                                    {% else %}
+                                        Expire le {{ offre.date_expiration|date:"d/m/Y" }}
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                {% empty %}
+                <div class="bg-white rounded-2xl shadow-md p-12 text-center border border-gray-100">
+                    <div class="w-20 h-20 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-file-signature text-3xl text-gray-400"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-700 mb-2">Aucune offre</h3>
+                    <p class="text-gray-500 mb-4">Aucune offre trouvée pour les filtres sélectionnés.</p>
+                    
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- ========== PAGINATION ========== -->
+            {% if page_obj.paginator.num_pages > 1 %}
+            <div class="flex justify-center items-center gap-3 mt-8">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}" 
+                   hx-get="?page={{ page_obj.previous_page_number }}"
+                   hx-target="#offre-list"
+                   class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-xl transition flex items-center gap-2 text-sm font-medium">
+                    <i class="fas fa-chevron-left"></i> Précédent
+                </a>
+                {% else %}
+                <span class="px-4 py-2 bg-gray-100 text-gray-400 rounded-xl text-sm font-medium cursor-not-allowed">
+                    <i class="fas fa-chevron-left"></i> Précédent
+                </span>
+                {% endif %}
+
+                <span class="text-sm text-gray-600 font-medium">
+                    Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+                </span>
+
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" 
+                   hx-get="?page={{ page_obj.next_page_number }}"
+                   hx-target="#offre-list"
+                   class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition flex items-center gap-2 text-sm font-medium shadow-md hover:shadow-lg">
+                    Suivant <i class="fas fa-chevron-right"></i>
+                </a>
+                {% else %}
+                <span class="px-4 py-2 bg-gray-100 text-gray-400 rounded-xl text-sm font-medium cursor-not-allowed">
+                    Suivant <i class="fas fa-chevron-right"></i>
+                </span>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white py-6 mt-12">
+        <div class="container mx-auto px-4 text-center text-sm text-gray-400">
+            <p>&copy; {% now "Y" %} KOZ Services - Tous droits réservés</p>
+        </div>
+    </footer>
+
+</body>
+</html>

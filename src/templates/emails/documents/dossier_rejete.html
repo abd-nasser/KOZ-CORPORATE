@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f9ff; margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .header { background: #3b82f6; padding: 24px; text-align: center; }
+        .header h1 { color: white; margin: 0; }
+        .content { padding: 30px; color: #1f2937; }
+        .info-box { background: #f0f6ff; padding: 16px; border-left: 4px solid #3b82f6; margin: 20px 0; border-radius: 8px; }
+        .btn { display: inline-block; background: #3b82f6; color: white; padding: 12px 28px; text-decoration: none; border-radius: 8px; margin-top: 16px; }
+        .footer { background: #f9fafb; padding: 16px; text-align: center; font-size: 12px; color: #6b7280; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>KOZ Services</h1>
+        </div>
+        <div class="content">
+            <h2>❌ Dossier rejeté</h2>
+            <p>Bonjour <strong>{{ client.nom_complet }}</strong>,</p>
+            <p>Votre commercial <strong>{{ commercial.nom_complet }}</strong> a <strong>rejeté</strong> votre dossier</p>
+            
+            <div class="info-box">
+                <p><strong>📝 Motif du rejet :</strong></p>
+                <p>{{ motif_rejet }}</p>
+            </div>
+            
+            <p>Pour toute question, nous vous invitons à contacter votre commercial via la messagerie de votre espace client.</p>
+            
+            <a href="{{ lien_chat }}" class="btn">💬 Contacter mon commercial</a>
+        </div>
+        <div class="footer">
+            <p>KOZ Services - Votre concessionnaire de confiance</p>
+        </div>
+    </div>
+</body>
+</html>

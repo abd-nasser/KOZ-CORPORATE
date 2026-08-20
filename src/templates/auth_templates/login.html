@@ -1,0 +1,251 @@
+{% load static %}
+{% load tailwind_tags %}
+<!DOCTYPE html>
+<html lang="fr" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lenis@1.3.25/dist/lenis.min.js"></script> 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script src="https://unpkg.com/splitting/dist/splitting.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/splitting/dist/splitting.css">
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+    <title>KOZ Services - Portail d'Accès ERP</title>
+    
+    <!-- FontAwesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    {% tailwind_css %}
+    <script src="{% static 'js/htmx.min.js' %}" defer></script>
+
+    <!-- Animation Keyframe infinie pour le bouton Visiter le site -->
+    <style>
+        @keyframes pulseGlow {
+            0%, 100% {
+                box-shadow: 0 0 12px rgba(37, 99, 235, 0.35), 0 0 25px rgba(59, 130, 246, 0.15);
+                transform: scale(1);
+            }
+            50% {
+                box-shadow: 0 0 22px rgba(37, 99, 235, 0.65), 0 0 35px rgba(59, 130, 246, 0.35);
+                transform: scale(1.015);
+            }
+        }
+        .btn-visit-animated {
+            animation: pulseGlow 2.5s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="h-full font-inter text-slate-800 flex flex-col justify-between bg-slate-50/50 overflow-x-hidden selection:bg-blue-600 selection:text-white">
+
+    <!-- Modale de connexion -->
+    {% include 'modals/auth/login_simple_modal.html' %}
+
+    <!-- Halos lumineux d'arrière-plan (Eclairage subtil pour fond clair) -->
+    <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <div class="absolute -top-40 -left-40 w-96 h-96 bg-blue-100/60 rounded-full blur-3xl opacity-70"></div>
+        <div class="absolute top-1/2 -right-40 w-96 h-96 bg-indigo-100/50 rounded-full blur-3xl opacity-60"></div>
+        <div class="absolute -bottom-40 left-1/3 w-96 h-96 bg-sky-100/40 rounded-full blur-3xl opacity-50"></div>
+    </div>
+
+    <!-- Top Navigation Bar (Blanc Épuré) -->
+    <header class="relative z-10 border-b border-slate-200/80 bg-white/80 backdrop-blur-md shadow-sm">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <!-- Logo KOZ Services -->
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 bg-gradient-to-tr from-blue-700 via-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-md shadow-blue-600/20 border border-blue-500/20">
+                    <span class="text-white font-black text-2xl tracking-wider">K</span>
+                </div>
+                <div>
+                    <span class="text-lg font-extrabold tracking-tight text-slate-900 block leading-none">KOZ SERVICES</span>
+                    <span class="text-[10px] font-semibold tracking-widest text-blue-600 uppercase">Enterprise ERP v1.0</span>
+                </div>
+            </div>
+
+            <!-- Bouton Header + Badge Statut Système -->
+            <div class="flex items-center gap-3">
+                <a href="{% url 'home_app:home-page' %}" 
+                   class="btn-visit-animated hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold text-xs tracking-wide transition-all duration-200 hover:brightness-110">
+                    <i class="fas fa-globe text-sm"></i>
+                    <span>Visiter le site</span>
+                </a>
+
+                <div class="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-xs font-medium text-slate-700">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>Système Opérationnel</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Section Principale (Split-Screen / Clean Light Mode) -->
+    <div id="result-toast-container"></div>
+    <main class="relative z-10 max-w-7xl mx-auto px-6 py-10 lg:py-16 flex-grow flex items-center justify-center w-full">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center w-full">
+            
+            <!-- PANNEAU GAUCHE : Branding & Arguments Entreprise (Col 7) -->
+            <div class="lg:col-span-7 space-y-8 text-left">
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-blue-50 border border-blue-200/80 text-blue-700 text-xs font-semibold uppercase tracking-wider shadow-sm">
+                    <i class="fas fa-shield-halved text-blue-600"></i>
+                    Plateforme de Gestion Automobile Sécurisée
+                </div>
+
+                <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 leading-tight">
+                    Optimisez la gestion de vos <span class="bg-gradient-to-r from-blue-700 via-indigo-600 to-blue-600 bg-clip-text text-transparent">Financements & Flottes</span>
+                </h1>
+
+                <p class="text-slate-600 text-base sm:text-lg max-w-2xl font-normal leading-relaxed">
+                    Espace centralisé KOZ Services pour le pilotage des demandes de crédit auto, le suivi des pièces détachées, la gestion client et la planification des maintenances.
+                </p>
+
+                <!-- Grille de fonctionnalités ERP -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+                    <div class="p-5 rounded-xl bg-white border border-slate-200/80 shadow-sm hover:shadow-md hover:border-blue-300 transition-all">
+                        <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center mb-3 text-lg">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                        </div>
+                        <h3 class="text-sm font-bold text-slate-900">Financement Auto</h3>
+                        <p class="text-xs text-slate-500 mt-1 leading-normal">Instruction et validation de crédits en direct.</p>
+                    </div>
+
+                    <div class="p-5 rounded-xl bg-white border border-slate-200/80 shadow-sm hover:shadow-md hover:border-indigo-300 transition-all">
+                        <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center justify-center mb-3 text-lg">
+                            <i class="fas fa-cubes"></i>
+                        </div>
+                        <h3 class="text-sm font-bold text-slate-900">Stock & Pièces</h3>
+                        <p class="text-xs text-slate-500 mt-1 leading-normal">Catalogue et commandes en ligne instantanées.</p>
+                    </div>
+
+                    <div class="p-5 rounded-xl bg-white border border-slate-200/80 shadow-sm hover:shadow-md hover:border-sky-300 transition-all">
+                        <div class="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 border border-sky-100 flex items-center justify-center mb-3 text-lg">
+                            <i class="fas fa-wrench"></i>
+                        </div>
+                        <h3 class="text-sm font-bold text-slate-900">Maintenance</h3>
+                        <p class="text-xs text-slate-500 mt-1 leading-normal">Planification et historique d'entretien.</p>
+                    </div>
+                </div>
+
+                <!-- Citation de marque -->
+                <div class="pt-4 border-t border-slate-200/80 flex items-center gap-4">
+                    <div class="text-3xl text-blue-600 font-serif font-bold leading-none">“</div>
+                    <p class="text-sm font-medium text-slate-700 italic">
+                        N'achetez pas une auto, changez votre vie.
+                    </p>
+                </div>
+            </div>
+
+            <!-- PANNEAU DROIT : Carte d'Accès Sécurisé Blanche (Col 5) -->
+            <div class="lg:col-span-5 w-full max-w-md mx-auto">
+                <div class="p-8 rounded-2xl bg-white border border-slate-200/90 shadow-xl shadow-slate-200/60 relative overflow-hidden">
+                    
+                    <!-- Top accent line -->
+                    <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-700 via-indigo-600 to-sky-500"></div>
+                    {% if not user.is_authenticated %}
+                        <div class="text-center mb-8">
+                            <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 text-2xl shadow-inner">
+                                <i class="fas fa-lock"></i>
+                            </div>
+                            
+                            <h2 class="text-2xl font-bold text-slate-900">Authentification</h2>
+                            <p class="text-xs text-slate-500 mt-1">Accédez à votre console de gestion KOZ Services</p>
+                        </div>
+                    {% else %}
+                        <div class="text-center mb-8">
+                            <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 text-2xl shadow-inner">
+                                <i class="fas fa-unlock"></i>
+                            </div>
+                            
+                            <h2 class="text-2xl font-bold text-slate-900">Bienvenue, {{ user.nom_complet }}</h2>
+                            <p class="text-xs text-slate-500 mt-1">Accédez à votre console de gestion KOZ Services</p>
+                        </div>
+                    {% endif %}
+
+                    <!-- Action d'ouverture de la Modale & Redirection -->
+                    <div class="space-y-4">
+                        
+                        {% if user.is_authenticated and user.role == "directeur" %}
+                            <a href="{% url 'directeur_app:directeur-view' %}" 
+                               class="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-blue-700 to-indigo-600 hover:from-blue-800 hover:to-indigo-700 text-white font-semibold shadow-lg shadow-blue-600/25 transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-3 text-base">
+                                <i class="fas fa-right-to-bracket text-lg"></i>
+                                <span>Mon espace</span>
+                            </a>
+                        {% elif user.is_authenticated and user.role == "commercial" %}
+                            <a href="{% url 'commercial_app:commercial-view' %}" 
+                               class="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-blue-700 to-indigo-600 hover:from-blue-800 hover:to-indigo-700 text-white font-semibold shadow-lg shadow-blue-600/25 transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-3 text-base">
+                                <i class="fas fa-right-to-bracket text-lg"></i>
+                                <span>Mon espace</span>
+                            </a>
+                        {% elif user.is_authenticated and user.role == "client" %}
+                            <a href="{% url 'client_app:client-view' %}" 
+                               class="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-blue-700 to-indigo-600 hover:from-blue-800 hover:to-indigo-700 text-white font-semibold shadow-lg shadow-blue-600/25 transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-3 text-base">
+                                <i class="fas fa-right-to-bracket text-lg"></i>
+                                <span>Mon espace</span>
+                            </a>
+                        {% else %}
+                            <button onclick="document.getElementById('login_simple_modal').showModal()" 
+                               class="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-blue-700 to-indigo-600 hover:from-blue-800 hover:to-indigo-700 text-white font-semibold shadow-lg shadow-blue-600/25 transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-3 text-base">
+                                <i class="fas fa-right-to-bracket text-lg"></i>
+                                <span>Se connecter à l'espace</span>
+                            </button>
+                        {% endif %}
+
+                        <!-- BOUTON ANIMÉ INFINI : Visiter le site -->
+                        <a href="{% url 'home_app:home-page' %}" 
+                           class="btn-visit-animated w-full py-3.5 px-6 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-3 text-sm border border-blue-500/30">
+                            <i class="fas fa-globe text-blue-400"></i>
+                            <span>Visiter le site</span>
+                            <i class="fas fa-arrow-right text-xs text-blue-400"></i>
+                        </a>
+
+                        <p class="text-[11px] text-center text-slate-400 pt-1">
+                            Réservé au personnel autorisé et aux clients identifiés.
+                        </p>
+                    </div>
+
+                    <!-- Séparateur -->
+                    <div class="my-6 border-t border-slate-100"></div>
+
+                    <!-- Badges de sécurité -->
+                    <div class="grid grid-cols-2 gap-3 text-xs text-slate-600">
+                        <div class="flex items-center gap-2 p-2.5 rounded-lg bg-slate-50 border border-slate-200/80">
+                            <i class="fas fa-shield-check text-emerald-600 text-sm"></i>
+                            <span class="font-medium">Chiffrement SSL</span>
+                        </div>
+                        <div class="flex items-center gap-2 p-2.5 rounded-lg bg-slate-50 border border-slate-200/80">
+                            <i class="fas fa-user-shield text-blue-600 text-sm"></i>
+                            <span class="font-medium">Accès Sécurisé</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer Corporate ERP Blanc -->
+    <footer class="relative z-10 border-t border-slate-200/80 bg-white py-6">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500">
+            <div class="flex items-center gap-2">
+                <span class="font-semibold text-slate-700">KOZ Services</span>
+                <span>&copy; {% now "Y" %} Tous droits réservés.</span>
+            </div>
+
+            <div class="flex items-center gap-6">
+                <span class="flex items-center gap-1.5">
+                    <i class="fas fa-clock text-slate-400"></i>
+                    {% now "d/m/Y - H:i" %}
+                </span>
+                <span class="text-slate-300">|</span>
+                <span class="text-slate-500 font-medium">
+                    Conçu par <strong class="text-slate-800">SPIRIT-DIGIT Agency</strong>
+                </span>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

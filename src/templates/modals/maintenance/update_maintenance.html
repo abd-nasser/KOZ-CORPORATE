@@ -1,0 +1,130 @@
+{% load static %}
+<!-- Modal de modification de maintenance -->
+<dialog id="update_maintenanceModal" class="modal backdrop-blur-sm">
+    <div class="modal-box w-full max-w-2xl p-0 overflow-hidden rounded-2xl bg-white shadow-2xl max-h-[90vh] flex flex-col">
+        
+        <!-- Header (Fixe) -->
+        <div class="bg-gradient-to-r from-blue-700 to-indigo-800 px-6 py-4 flex-none">
+            <div class="flex justify-between items-center">
+                <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                    <i class="fas fa-edit"></i>
+                    <span>Modification</span>
+                </h3>
+                <button type="button" 
+                        class="text-white/80 hover:text-white text-2xl font-bold leading-none transition cursor-pointer" 
+                        onclick="document.getElementById('update_maintenanceModal').close()">&times;</button>
+            </div>
+            <p class="text-blue-100 text-sm mt-1">Modifier la maintenance</p>
+        </div>
+
+        <!-- Indicateur de chargement HTMX (Placé correctement en overlay) -->
+        <div id="upd-maintenance-indicator" class="htmx-indicator fixed inset-0 flex items-center justify-center bg-black/20 backdrop-blur-xs z-50">
+            <div class="bg-white p-6 rounded-xl flex flex-col items-center justify-center text-center shadow-2xl">
+                <img src="{% static 'images/Loading_animation.svg' %}" class="object-cover w-16 h-16 mb-3" alt="Chargement...">
+                <p class="text-gray-700 font-medium text-sm">Modification en cours...</p>
+            </div>
+        </div>
+
+        <!-- Structure Formulaire avec corps scrollable et boutons fixes -->
+        <form hx-post="{% url 'commercial_app:maintenance-update' maintenance.pk %}"
+              hx-target="#upd-msg-maintenance-zone"
+              hx-indicator="#upd-maintenance-indicator" 
+              enctype="multipart/form-data" 
+              class="flex flex-col flex-1 overflow-hidden">
+            {% csrf_token %}
+            
+            <!-- Zone cible pour messages HTMX -->
+            <div id="upd-msg-maintenance-zone" class="px-6 pt-4 empty:hidden"></div>
+
+            <!-- Corps du formulaire (Scrollable) -->
+            <div class="p-6 overflow-y-auto flex-1 scrollable-form">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    {% for field in update_maintenance_form %}
+                        <div class="{% if field.name == 'notes_client' or field.name == 'notes_technicien' or field.name == 'description' or field.name == 'observation' %}md:col-span-2{% else %}col-span-1{% endif %}">
+                            <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1.5">
+                                {{ field.label }}
+                                {% if field.field.required %}
+                                    <span class="text-rose-500 font-bold ml-0.5">*</span>
+                                {% endif %}
+                            </label>
+
+                            {{ field }}
+
+                            {% if field.help_text %}
+                                <p class="text-xs text-gray-400 mt-1">{{ field.help_text }}</p>
+                            {% endif %}
+
+                            {% if field.errors %}
+                                <div class="mt-1 text-rose-500 text-xs space-y-0.5">
+                                    {% for error in field.errors %}
+                                        <p class="flex items-center gap-1">
+                                            <i class="fas fa-exclamation-circle"></i>
+                                            <span>{{ error }}</span>
+                                        </p>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Footer d'actions (Fixe au bas de la modale) -->
+            <div class="px-6 py-4 bg-slate-50 border-t border-gray-100 flex gap-3 justify-end items-center flex-none">
+                <button type="button" class="btn btn-ghost hover:bg-gray-200 text-gray-600 rounded-xl" onclick="document.getElementById('update_maintenanceModal').close()">
+                    <i class="fas fa-times mr-1.5"></i>Annuler
+                </button>
+                <button type="submit" class="btn-glow px-6 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 cursor-pointer">
+                    <i class="fas fa-save"></i> Enregistrer les modifications
+                </button>
+            </div>
+        </form>
+    </div>
+</dialog>
+
+<!-- Script pour fermer la modale via événement HTMX -->
+<script>
+    document.addEventListener('closeMaintenanceModal', function() {
+     document.getElementById('update_maintenanceModal').close();
+        
+    });
+</script>
+
+<style>
+    .btn-glow {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: white;
+        border: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.4);
+    }
+    .btn-glow:hover {
+        background: linear-gradient(135deg, #1d4ed8, #1e40af);
+        transform: translateY(-2px);
+        box-shadow: 0 15px 30px -5px rgba(37, 99, 235, 0.6);
+    }
+
+    .scrollable-form {
+        scroll-behavior: smooth;
+        scrollbar-color: rgba(59, 130, 246, 0.4) rgba(241, 245, 249, 1);
+        scrollbar-width: thin;
+    }
+
+    .scrollable-form::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .scrollable-form::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 9999px;
+    }
+
+    .scrollable-form::-webkit-scrollbar-thumb {
+        background: rgba(59, 130, 246, 0.5);
+        border-radius: 9999px;
+    }
+
+    .scrollable-form::-webkit-scrollbar-thumb:hover {
+        background: rgba(37, 99, 235, 0.8);
+    }
+</style>

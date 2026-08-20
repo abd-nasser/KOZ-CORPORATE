@@ -1,0 +1,102 @@
+
+.modal-box{
+    background: rgba(255, 255, 255, 0);
+    -webkit-backdrop-filter:blur(8rem);
+    backdrop-filter: blur(8rem);
+
+}
+
+.modal-box .input, select{
+    background: rgba(7, 95, 226, 0.003);
+    -webkit-backdrop-filter:blur(8rem);
+    backdrop-filter: blur(8rem);
+    color: #ffffff;
+}
+
+.modal-box div{
+     background: rgba(7, 95, 226, 0.003);
+    -webkit-backdrop-filter:blur(8rem);
+    backdrop-filter: blur(8rem);
+    color: #ebebeb;
+}
+
+.modal-box label{
+    color: white;
+}
+
+footer {
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: #ebebeb;
+}
+
+.scrollable-form {
+    max-height: 65vh;
+    overflow-y: auto;
+    padding-right: 0.75rem;
+    scroll-behavior: smooth;
+    scrollbar-color: rgba(59, 130, 246, 0.5) rgba(15, 23, 42, 0.05);
+    scrollbar-width: thin;
+}
+
+.scrollable-form::-webkit-scrollbar {
+    width: 10px;
+}
+
+.scrollable-form::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.05);
+    border-radius: 9999px;
+}
+
+.scrollable-form::-webkit-scrollbar-thumb {
+    background: rgba(59, 130, 246, 0.5);
+    border-radius: 9999px;
+}
+
+.scrollable-form::-webkit-scrollbar-thumb:hover {
+    background: rgba(37, 99, 235, 0.7);
+}
+
+
+/* Style des champs de formulaire */
+input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+select,
+textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+    
+}
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    
+}
+
+/* Checkboxes et radios gardent leur taille naturelle */
+input[type="checkbox"],
+input[type="radio"] {
+    width: auto;
+    margin-right: 8px;
+    transform: scale(1.1);
+    cursor: pointer;
+     background: rgba(7, 95, 226, 0.003);
+    -webkit-backdrop-filter:blur(8rem);
+    backdrop-filter: blur(8rem);
+}
+
+/* Style spécifique pour les champs fichiers */
+input[type="file"], textarea {
+    padding: 8px;
+    width: 100%;
+     background: rgba(7, 95, 226, 0.003);
+    -webkit-backdrop-filter:blur(8rem);
+    backdrop-filter: blur(8rem);
+}

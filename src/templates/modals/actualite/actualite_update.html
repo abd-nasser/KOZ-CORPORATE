@@ -1,0 +1,195 @@
+<!-- ============================================================ -->
+<!-- MODAL : AJOUT / MODIFICATION D'ACTUALITÉ                    -->
+<!-- ============================================================ -->
+<dialog id="update_actualite_modal" class="modal">
+    <div class="modal-box bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden p-0">
+        
+        <!-- En-tête -->
+        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4 flex justify-between items-center">
+            <div>
+                <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                    <i class="fas fa-newspaper"></i>
+                    {% if actualite %}Modifier l'actualité{% else %}Ajouter une actualité{% endif %}
+                </h3>
+                <p class="text-blue-100 text-sm mt-0.5">Remplissez les informations ci-dessous</p>
+            </div>
+            <button type="button" class="text-white/80 hover:text-white text-3xl leading-none transition" 
+                    onclick="document.getElementById('update_actualite_modal').close()">×</button>
+        </div>
+
+        <!-- Formulaire -->
+        <div class="p-6 overflow-y-auto" style="max-height: calc(90vh - 80px);">
+            <form method="post" enctype="multipart/form-data" 
+                  action="{% url 'home_app:actualites-update' actualite.pk %}">
+                {% csrf_token %}
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    
+                    <!-- Titre -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Titre *</label>
+                        {{ update_actualite_form.titre }}
+                    </div>
+
+                    <!-- Sous-titre -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Sous-titre</label>
+                        {{ update_actualite_form.sous_titre }}
+                    </div>
+
+                    <!-- Type -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Type *</label>
+                        {{ update_actualite_form.type }}
+                    </div>
+
+                    <!-- Date événement -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Date de l'événement *</label>
+                        {{ update_actualite_form.date_evenement }}
+                    </div>
+
+                    <!-- Date fin -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Date de fin</label>
+                        {{ update_actualite_form.date_fin }}
+                    </div>
+
+                    <!-- Date publication -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Date de publication</label>
+                        {{ update_actualite_form.date_publication }}
+                    </div>
+
+                    <!-- Image principale -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Image principale *</label>
+                        {{ update_actualite_form.image_principale }}
+                        {% if actualite and actualite.image_principale %}
+                            <p class="text-xs text-gray-400 mt-1">Actuelle : {{ actualite.image_principale.name|truncatechars:30 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Ordre -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Ordre d'affichage</label>
+                        {{ update_actualite_form.ordre }}
+                    </div>
+
+                    <!-- Description courte -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Description courte</label>
+                        {{ update_actualite_form.description_courte }}
+                    </div>
+
+                    <!-- Description complète -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Description complète *</label>
+                        {{ update_actualite_form.description }}
+                    </div>
+
+                    <!-- Images supplémentaires -->
+                    <div class="md:col-span-2 border-t border-gray-200 pt-4">
+                        <h4 class="text-sm font-semibold text-gray-700 mb-3">
+                            <i class="fas fa-images text-blue-600 mr-1"></i> Images supplémentaires
+                        </h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="text-xs text-gray-500">Image 2</label>
+                                {{ update_actualite_form.image_1 }}
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-500">Image 3</label>
+                                {{ update_actualite_form.image_2 }}
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-500">Image 4</label>
+                                {{ update_actualite_form.image_3 }}
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-500">Image 5</label>
+                                {{ update_actualite_form.image_4 }}
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-500">Image 6</label>
+                                {{ update_actualite_form.image_5 }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vidéo -->
+                    <div class="md:col-span-2 border-t border-gray-200 pt-4">
+                        <h4 class="text-sm font-semibold text-gray-700 mb-3">
+                            <i class="fas fa-video text-red-500 mr-1"></i> Vidéo
+                        </h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="text-xs text-gray-500">Fichier vidéo</label>
+                                {{ update_actualite_form.video_file }}
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-500">Lien YouTube/Vimeo</label>
+                                {{ update_actualite_form.video_url }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Liens -->
+                    <div class="md:col-span-2 border-t border-gray-200 pt-4">
+                        <h4 class="text-sm font-semibold text-gray-700 mb-3">
+                            <i class="fas fa-link text-blue-600 mr-1"></i> Liens
+                        </h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="text-xs text-gray-500">Lien interne</label>
+                                {{ update_actualite_form.lien_interne }}
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-500">Lien externe</label>
+                                {{ update_actualite_form.lien_externe }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Visibilité -->
+                    <div class="md:col-span-2 border-t border-gray-200 pt-4">
+                        <div class="flex flex-wrap gap-6">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                {{ update_actualite_form.est_publie }}
+                                <span class="text-sm text-gray-700">Publié</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                {{ update_actualite_form.est_vedette }}
+                                <span class="text-sm text-gray-700">Mettre en vedette</span>
+                            </label>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Boutons -->
+                <div class="flex gap-3 mt-6 pt-4 border-t border-gray-100">
+                    <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-xl transition font-semibold flex items-center justify-center gap-2">
+                        <i class="fas fa-save"></i>
+                        {% if actualite %}Modifier{% else %}Ajouter{% endif %}
+                    </button>
+                    <button type="button" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2.5 rounded-xl transition font-semibold"
+                            onclick="document.getElementById('update_actualite_modal').close()">
+                        <i class="fas fa-times mr-2"></i> Annuler
+                    </button>
+                </div>
+
+            </form>
+        </div>
+
+    </div>
+</dialog>
+
+<!-- Script pour rouvrir la modal si formulaire invalide -->
+{% if open_update_actualite_modal %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('update_actualite_modal').showModal();
+    });
+</script>
+{% endif %}

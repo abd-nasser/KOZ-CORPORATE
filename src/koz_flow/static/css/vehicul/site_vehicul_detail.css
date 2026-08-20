@@ -1,0 +1,181 @@
+/* ============================================================
+   ENTRÉE DES CARTES (au chargement de la page)
+   ============================================================ */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes cardSlideInLeft {
+    from { opacity: 0; transform: translateX(-40px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+@keyframes cardSlideInRight {
+    from { opacity: 0; transform: translateX(40px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+@keyframes pulseGlow {
+    0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.2); }
+    50% { box-shadow: 0 0 40px rgba(59, 130, 246, 0.5); }
+}
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
+}
+
+.animate-fade-in-up { animation: fadeInUp 0.8s ease-out forwards; }
+.card-slide-left { animation: cardSlideInLeft 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+.card-slide-right { animation: cardSlideInRight 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+.animate-float { animation: float 3s ease-in-out infinite; }
+.pulse-glow { animation: pulseGlow 2s ease-in-out infinite; }
+
+/* ============================================================
+   HERO OVERLAY (assombrit l'image pour la lisibilité du texte)
+   ============================================================ */
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(15,23,42,0.55) 0%, rgba(30,41,59,0.25) 45%, rgba(15,23,42,0.65) 100%);
+}
+
+/* ============================================================
+   CARTES (fond clair — plus de glassmorphism translucide,
+   qui n'a aucun effet visuel sans arrière-plan sombre derrière)
+   ============================================================ */
+.glass-card {
+    background: rgba(108, 182, 243, 0.103);
+    backdrop-filter: blur(5rem);
+    padding: 20px 22px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05), 0 8px 24px rgba(15, 23, 42, 0.04);
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease, border-color 0.35s ease;
+    position: relative;
+    overflow: hidden;
+}
+.glass-card:hover {
+    transform: translateY(-4px);
+   
+    box-shadow: 0 20px 40px rgba(37, 99, 235, 0.12);
+}
+.glass-card .icon-wrapper {
+    width: 44px;
+    height: 44px;
+    border-radius: 13px;
+    background: rgba(37, 99, 235, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: #2563eb;
+    transition: all 0.3s ease;
+}
+.glass-card:hover .icon-wrapper {
+    background: rgba(37, 99, 235, 0.16);
+    transform: scale(1.08);
+}
+
+/* Ligne de connexion décorative sous chaque carte */
+.connection-line {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 32px;
+    height: 3px;
+  
+    background: linear-gradient(to right, transparent, rgba(37,130,246,0.35), transparent);
+}
+
+/* Badge prix */
+.price-badge {
+    display: inline-block;
+    padding: 8px 24px;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: white;
+    font-weight: 700;
+    box-shadow: 0 10px 30px rgba(37, 99, 235, 0.3);
+}
+
+/* ============================================================
+   HERO — SLIDE DIRECTIONNEL (pagination des images du véhicule)
+   ============================================================ */
+@keyframes slideInRight {
+    from { opacity: 0; transform: translateX(40px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+@keyframes slideInLeft {
+    from { opacity: 0; transform: translateX(-40px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+@keyframes slideOutLeft {
+    from { opacity: 1; transform: translateX(0); }
+    to { opacity: 0; transform: translateX(-40px); }
+}
+@keyframes slideOutRight {
+    from { opacity: 1; transform: translateX(0); }
+    to { opacity: 0; transform: translateX(40px); }
+}
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.hero-slide-right { animation: slideInRight 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+.hero-slide-left { animation: slideInLeft 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+.hero-slide-out-right { animation: slideOutRight 0.4s ease-in forwards; }
+.hero-slide-out-left { animation: slideOutLeft 0.4s ease-in forwards; }
+.animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+
+
+
+
+.btn-glow {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    border: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.5);
+    
+}
+
+.btn-glow:hover {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    transform: translateY(-2px);
+    box-shadow: 0 20px 35px -8px rgba(59, 130, 246, 0.7);
+}
+
+
+
+footer {
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: #ebebeb;
+}
+
+.scrollable-form {
+    max-height: 65vh;
+    overflow-y: auto;
+    padding-right: 0.75rem;
+    scroll-behavior: smooth;
+    scrollbar-color: rgba(59, 130, 246, 0.5) rgba(15, 23, 42, 0.05);
+    scrollbar-width: thin;
+}
+
+.scrollable-form::-webkit-scrollbar {
+    width: 10px;
+}
+
+.scrollable-form::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.05);
+    border-radius: 9999px;
+}
+
+.scrollable-form::-webkit-scrollbar-thumb {
+    background: rgba(59, 130, 246, 0.5);
+    border-radius: 9999px;
+}
+
+.scrollable-form::-webkit-scrollbar-thumb:hover {
+    background: rgba(37, 99, 235, 0.7);
+}
+

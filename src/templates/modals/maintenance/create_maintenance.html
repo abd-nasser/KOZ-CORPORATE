@@ -1,0 +1,95 @@
+{% load static %}
+<!-- Modal de création de maintenance -->
+<dialog id="maintenanceModal" class="modal modal-bottom sm:modal-middle">
+    <div class="modal-box w-full max-w-2xl p-0 overflow-hidden rounded-2xl bg-base-100 border border-base-200 shadow-2xl max-h-[90vh] flex flex-col">
+        
+        <!-- Header (Fixe) -->
+        <div class="bg-gradient-to-r from-primary to-indigo-700 px-6 py-4 flex-none text-white">
+            <div class="flex justify-between items-center">
+                <h3 class="text-lg font-bold flex items-center gap-2">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>Nouvelle maintenance</span>
+                </h3>
+                <form method="dialog">
+                    <button class="btn btn-sm btn-circle btn-ghost text-white/80 hover:text-white hover:bg-white/10">✕</button>
+                </form>
+            </div>
+            <p class="text-xs text-white/80 mt-1">Planifiez une intervention pour un client</p>
+        </div>
+
+        <!-- Formulaire HTMX -->
+        <form hx-post="{% url 'commercial_app:maintenance-create' %}"
+              hx-target="#msg-maintenance-zone"
+              hx-indicator="#maintenance-indicator" 
+              enctype="multipart/form-data" 
+              class="flex flex-col flex-1 overflow-hidden">
+            {% csrf_token %}
+            
+            <!-- Zone cible pour messages HTMX (Erreurs globales / Notifications) -->
+            <div id="msg-maintenance-zone" class="px-6 pt-4 empty:hidden"></div>
+
+            <!-- Indicateur de chargement HTMX -->
+            <div id="maintenance-indicator" class="htmx-indicator px-6 pt-3 flex items-center justify-center gap-2 text-primary text-sm font-medium">
+                <span class="loading loading-spinner loading-md"></span> Enregistrement en cours...
+            </div>
+
+            <!-- Corps du formulaire (Scrollable) -->
+            <div class="p-6 overflow-y-auto flex-1 space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {% for field in maintenance_form %}
+                        <!-- Gestion intelligente de la largeur des champs (ex: description sur 2 colonnes) -->
+                        <div class="{% if field.name == 'description' or field.name == 'notes' or field.name == 'observation' %}md:col-span-2{% else %}col-span-1{% endif %}">
+                            <label for="{{ field.id_for_label }}" class="block text-xs font-semibold text-base-content/80 mb-1.5">
+                                {{ field.label }}
+                                {% if field.field.required %}
+                                    <span class="text-error font-bold ml-0.5">*</span>
+                                {% endif %}
+                            </label>
+
+                            {{ field }}
+
+                            {% if field.help_text %}
+                                <p class="text-[11px] text-base-content/50 mt-1">{{ field.help_text }}</p>
+                            {% endif %}
+
+                            {% if field.errors %}
+                                <div class="mt-1 text-error text-xs space-y-0.5">
+                                    {% for error in field.errors %}
+                                        <p class="flex items-center gap-1">
+                                            <i class="fas fa-exclamation-circle text-xs"></i>
+                                            <span>{{ error }}</span>
+                                        </p>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Footer d'actions (Fixe) -->
+            <div class="px-6 py-4 bg-base-200/50 border-t border-base-200 flex gap-3 justify-end items-center flex-none">
+                <button type="button" 
+                        class="btn btn-ghost rounded-xl gap-2 text-base-content/70 hover:text-base-content" 
+                        onclick="document.getElementById('maintenanceModal').close()">
+                    <i class="fas fa-times"></i> Annuler
+                </button>
+                <button type="submit" class="btn btn-primary text-white px-6 rounded-xl gap-2 shadow-md shadow-primary/20">
+                    <i class="fas fa-save"></i> Planifier la maintenance
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Clic à l'extérieur pour fermer -->
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+</dialog>
+
+<!-- Écouteur JS pour fermeture automatique depuis Django via "HX-Trigger: closeMaintenanceModal" -->
+<script>
+    document.addEventListener('closeMaintenanceModal', function() {
+        document.getElementById('maintenanceModal').close();
+    }) 
+</script>

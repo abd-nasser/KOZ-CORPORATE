@@ -1,0 +1,18 @@
+<button 
+    id="fav-btn-{{ produit.pk }}"
+    hx-post="{% url 'products_app:products-favoris' produit.pk %}"
+    hx-target="#fav-btn-{{ produit.pk }}"
+    hx-swap="outerHTML transition:true"
+    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+    class="px-5 py-3 rounded-xl 
+    {% if request.user in produit.favoris_de.all %}
+         bg-rose-50 hover:bg-rose-100 text-rose-600 border-rose-100
+    {% else %}
+         bg-gray-100 hover:bg-gray-200 text-gray-700 transition flex items-center gap-2
+    {% endif %}">
+    <i class=" {% if request.user in produit.favoris_de.all %}
+    fas text-rose-600 fa-heart 
+    {% else %} 
+    fas  fa-heart 
+     {% endif %} "></i>
+</button>

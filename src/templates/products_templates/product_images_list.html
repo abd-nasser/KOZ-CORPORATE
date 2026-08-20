@@ -1,0 +1,185 @@
+{% load static %}
+{% load tailwind_tags %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    {% tailwind_css %}
+    <script src="{% static 'js/htmx.min.js' %}" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/vehicul/vehicul_images_style.css' %}">
+    <title>Images de {{ vehicul.marque.nom }} {{ vehicul.modele }} - KOZ Services</title>
+</head>
+<body class="bg-black font-inter">
+
+    <!-- ========== NAVBAR ========== -->
+    <nav class="bg-black/80 backdrop-blur-md sticky top-0 z-40 border-b border-white/10">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl flex items-center justify-center shadow-md">
+                    <span class="text-white font-bold text-xl">K</span>
+                </div>
+                <a href="{% url 'products_app:products-detail' product.pk %}" class="text-gray-300 hover:text-white transition">
+                    <i class="fas fa-arrow-left mr-2"></i>Retour
+                </a>
+                 {% if user.is_superuser or user.role == "directeur" %}
+                <button onclick="document.getElementById('upload_images_modal').showModal()" 
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl transition mt-4 inline-flex items-center gap-2">
+                    <i class="fas fa-plus-circle"></i> Ajouter une image
+                </button>
+                {% endif %}
+            </div>
+            <div class="text-sm text-gray-400">
+                <i class="fas fa-images mr-1"></i> {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+            </div>
+        </div>
+    </nav>
+   <!-- Messages flash -->
+    {% if messages %}
+    <div class="fixed top-5 right-5 z-50 space-y-2">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} shadow-xl rounded-xl animate-slide-in-right">
+            <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% else %}info-circle{% endif %} mr-2"></i>
+            <span>{{ message }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    <!-- ========== MAIN ========== -->
+    <main class="container mx-auto px-4 py-8 flex flex-col items-center justify-center min-h-[80vh]">
+
+        <!-- En-tête -->
+        <div class="text-center mb-6">
+            <h1 class="text-2xl md:text-3xl font-bold text-white flex items-center justify-center gap-3">
+                <i class="fas fa-image text-blue-500"></i>
+                {{ product.categorie.nom }} {{ product.modele }}
+            </h1>
+            <p class="text-gray-400 text-sm">
+                Image {{ page_obj.number }} sur {{ page_obj.paginator.count }}
+            </p>
+        </div>
+
+        <!-- ========== IMAGE UNIQUE ========== -->
+        <div id="image-container" class="w-full max-w-5xl">
+            {% for image in page_obj %}
+            <div class="relative bg-black rounded-2xl overflow-hidden shadow-2xl">
+                <!-- Image -->
+                <img src="{{ image.image.url }}" 
+                     alt="{{ image.alt_text|default:product.nom }}"
+                     class="w-full max-h-[70vh] object-contain">
+
+                <!-- Badge : image principale -->
+                {% if image.est_principale %}
+                <div class="absolute top-4 left-4 bg-yellow-500 text-black text-xs px-3 py-1 rounded-full flex items-center gap-1 font-medium">
+                    <i class="fas fa-star"></i> Principale
+                </div>
+                {% endif %}
+
+                <!-- Info en bas -->
+                <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                            <p class="text-white text-sm font-medium">{{ product.categorie.nom }} {{product.nom }}</p>
+                            <p class="text-gray-400 text-xs">
+                                <i class="fas fa-clock mr-1"></i> {{ image.date_ajout|date:"d/m/Y" }}
+                            </p>
+                        </div>
+                        <div class="text-gray-400 text-xs">
+                            Ordre : {{ image.ordre }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Overlay actions (survol) -->
+                <div class="absolute inset-0 bg-black/30 opacity-0 hover:opacity-100 transition flex items-center justify-center gap-4">
+                    {% if user.is_superuser or user.role == "directeur" %}
+                    <button onclick="document.getElementById('delete_product_image_modal').showModal()"
+                       class="bg-red-600 hover:bg-red-700 text-white p-3 rounded-full transition"
+                       >
+                        <i class="fas fa-trash"></i>
+                    </button>
+                    {% include 'modals/products/product_image_confirm_delete.html'%}
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center text-gray-400 py-12">
+                <i class="fas fa-image text-6xl mb-4 block opacity-40"></i>
+                <p class="text-lg font-medium">Aucune image</p>
+                <p class="text-sm">Ce produit n'a pas encore d'images</p>
+               
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- ========== PAGINATION (navigation) ========== -->
+        {% if page_obj.paginator.num_pages > 1 %}
+        <div class="flex items-center justify-center gap-4 mt-8 w-full max-w-5xl">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}" 
+               class="flex-1 md:flex-none px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl transition flex items-center justify-center gap-2 font-medium backdrop-blur-sm border border-white/10">
+                <i class="fas fa-chevron-left"></i> Précédent
+            </a>
+            {% else %}
+            <span class="flex-1 md:flex-none px-6 py-3 bg-white/5 text-gray-600 rounded-xl flex items-center justify-center gap-2 font-medium cursor-not-allowed border border-white/5">
+                <i class="fas fa-chevron-left"></i> Précédent
+            </span>
+            {% endif %}
+
+            <!-- Indicateur de progression -->
+            <div class="hidden md:flex items-center gap-2">
+                {% for i in page_obj.paginator.page_range %}
+                    {% if i == page_obj.number %}
+                        <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+                    {% else %}
+                        <span class="w-2 h-2 rounded-full bg-white/20"></span>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            <span class="text-white/70 text-sm font-medium md:hidden">
+                {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+            </span>
+
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" 
+               class="flex-1 md:flex-none px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl transition flex items-center justify-center gap-2 font-medium backdrop-blur-sm border border-white/10">
+                Suivant <i class="fas fa-chevron-right"></i>
+            </a>
+            {% else %}
+            <span class="flex-1 md:flex-none px-6 py-3 bg-white/5 text-gray-600 rounded-xl flex items-center justify-center gap-2 font-medium cursor-not-allowed border border-white/5">
+                Suivant <i class="fas fa-chevron-right"></i>
+            </span>
+            {% endif %}
+        </div>
+        {% endif %}
+
+    </main>
+
+    <!-- ========== MODAL UPLOAD (si directeur) ========== -->
+    {% if user.is_superuser or user.role == "directeur" %}
+    {% include 'modals/products/upload_image_modal.html' %}
+    {% endif %}
+
+    <!-- ========== SCRIPT ========== -->
+    <script>
+        // Navigation au clavier (flèches gauche/droite)
+        document.addEventListener('keydown', function(e) {
+            {% if page_obj.has_previous %}
+            if (e.key === 'ArrowLeft') {
+                window.location.href = '?page={{ page_obj.previous_page_number }}';
+            }
+            {% endif %}
+            {% if page_obj.has_next %}
+            if (e.key === 'ArrowRight') {
+                window.location.href = '?page={{ page_obj.next_page_number }}';
+            }
+            {% endif %}
+        });
+    </script>
+
+</body>
+</html>

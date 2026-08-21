@@ -1,0 +1,121 @@
+{% load static %}
+<!-- Modal de mise à jour / rapport de maintenance -->
+<dialog id="maj_maintenanceModal" class="modal backdrop-blur-sm">
+    <div class="modal-box w-full max-w-lg p-0 overflow-hidden rounded-2xl bg-white shadow-2xl max-h-[90vh] flex flex-col">
+        
+        <!-- Header (Fixe) -->
+        <div class="bg-gradient-to-r from-blue-700 to-indigo-800 px-6 py-4 flex-none">
+            <div class="flex justify-between items-center">
+                <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                    <i class="fas fa-wrench"></i>
+                    <span>Mise à jour de la maintenance</span>
+                </h3>
+                <button type="button" 
+                        class="text-white/80 hover:text-white text-2xl font-bold leading-none transition cursor-pointer" 
+                        onclick="document.getElementById('maj_maintenanceModal').close()">&times;</button>
+            </div>
+            <p class="text-blue-100 text-sm mt-1">Saisie du montant réel et des remarques du technicien</p>
+        </div>
+
+        <!-- Indicator de chargement HTMX -->
+        <div id="maj-maintenance-indicator" class="htmx-indicator fixed inset-0 flex items-center justify-center bg-black/20 backdrop-blur-xs z-50">
+            <div class="bg-white p-6 rounded-xl flex flex-col items-center justify-center text-center shadow-2xl">
+                <span class="loading loading-spinner loading-lg text-blue-600 mb-2"></span>
+                <p class="text-gray-700 font-medium text-sm">Mise à jour en cours...</p>
+            </div>
+        </div>
+
+        <!-- Formulaire HTMX -->
+        <form hx-post="{% url 'commercial_app:maintenance-prix-maj' maintenance.pk %}"
+              hx-target="#maj-msg-maintenance-zone"
+              hx-indicator="#maj-maintenance-indicator" 
+              class="flex flex-col flex-1 overflow-hidden">
+            {% csrf_token %}
+            
+            <!-- Zone cible pour messages HTMX -->
+            <div id="maj-msg-maintenance-zone" class="px-6 pt-4 empty:hidden"></div>
+
+            <!-- Corps du formulaire (Scrollable) -->
+            <div class="p-6 overflow-y-auto flex-1 space-y-4">
+                
+                <!-- Champ Montant Réel -->
+                <div>
+                    <label for="{{ maj_form.montant_reel.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1.5">
+                        {{ maj_form.montant_reel.label }}
+                        {% if maj_form.montant_reel.field.required %}<span class="text-rose-500 font-bold ml-0.5">*</span>{% endif %}
+                    </label>
+                    {{ maj_form.montant_reel }}
+                    
+                    {% if maj_form.montant_reel.help_text %}
+                        <p class="text-xs text-gray-400 mt-1">{{ maj_form.montant_reel.help_text }}</p>
+                    {% endif %}
+                    {% if maj_form.montant_reel.errors %}
+                        <div class="mt-1 text-rose-500 text-xs space-y-0.5">
+                            {% for error in maj_form.montant_reel.errors %}
+                                <p class="flex items-center gap-1"><i class="fas fa-exclamation-circle"></i><span>{{ error }}</span></p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Champ Notes Technicien -->
+                <div>
+                    <label for="{{ maj_form.notes_technicien.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1.5">
+                        {{ maj_form.notes_technicien.label }}
+                        {% if maj_form.notes_technicien.field.required %}<span class="text-rose-500 font-bold ml-0.5">*</span>{% endif %}
+                    </label>
+                    {{ maj_form.notes_technicien }}
+                    
+                    {% if maj_form.notes_technicien.help_text %}
+                        <p class="text-xs text-gray-400 mt-1">{{ maj_form.notes_technicien.help_text }}</p>
+                    {% endif %}
+                    {% if maj_form.notes_technicien.errors %}
+                        <div class="mt-1 text-rose-500 text-xs space-y-0.5">
+                            {% for error in maj_form.notes_technicien.errors %}
+                                <p class="flex items-center gap-1"><i class="fas fa-exclamation-circle"></i><span>{{ error }}</span></p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                <!-- Footer d'actions (Fixe) -->
+                <div class="px-6 py-4 bg-slate-50 border-t border-gray-100 flex gap-3 justify-end items-center flex-none">
+                    <button type="button" 
+                            class="btn btn-ghost hover:bg-gray-200 text-gray-600 rounded-xl" 
+                            onclick="document.getElementById('maj_maintenanceModal').close()">
+                        <i class="fas fa-times mr-1.5"></i>Annuler
+                    </button>
+                    <button type="submit" class="btn-glow px-6 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 cursor-pointer">
+                        <i class="fas fa-check-circle"></i> Enregistrer la MAJ
+                    </button>
+                </div>
+            </div>
+
+            
+        </form>
+    </div>
+</dialog>
+
+<!-- Script de fermeture via event HTMX -->
+<script>
+    document.addEventListener('closeMAJMaintenancePrixModal', function() {
+        const modal = document.getElementById('maj_maintenanceModal');
+        if (modal && typeof modal.close === 'function') {
+            modal.close();
+        }
+    });
+</script>
+
+<style>
+    .btn-glow {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: white;
+        border: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.4);
+    }
+    .btn-glow:hover {
+        background: linear-gradient(135deg, #1d4ed8, #1e40af);
+        transform: translateY(-2px);
+        box-shadow: 0 15px 30px -5px rgba(37, 99, 235, 0.6);
+    }
+</style>

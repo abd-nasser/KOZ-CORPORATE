@@ -270,18 +270,28 @@ class DocumentsUploadForm(forms.ModelForm):
         # ✅ Maintenant on peut valider le type
         content_type = getattr(file, 'content_type', None)
         
-        if content_type and content_type not in ['image/jpeg', 'image/png']:
+        if content_type and content_type not in [
+                'image/jpeg', 
+                'image/png', 
+                'application/pdf', 
+                'image/heic',                      # .heic (iPhone)
+                
+                 # 👇 Documment WORD ET EXEL
+                'application/msword',              # .doc (ancien Word)
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',  # .docx
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']:
             raise forms.ValidationError(
-                f"La CNI/Passeport doit être une image (JPG ou PNG). Type détecté : {content_type}"
+                f"La CNI/Passeport doit être une image (JPG, PNG, PDF). Type détecté : {content_type}"
             )
         
         # Fallback si content_type est None (cas rare)
         if not content_type:
             import os
             ext = os.path.splitext(file.name)[1].lower()
-            if ext not in ['.jpg', '.jpeg', '.png']:
+            if ext not in ['.jpg', '.jpeg', '.png', '.pdf', '.heic', '.xlsx',
+                    '.doc', '.docx',]:
                 raise forms.ValidationError(
-                    "La CNI/Passeport doit être une image (JPG ou PNG)"
+                    "La CNI/Passeport doit être une image (JPG , PNG, pdf)"
                 )
         
         return file

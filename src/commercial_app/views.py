@@ -32,7 +32,7 @@ from home_app.models import RendezVous
 
 from auth_app.forms import UserRegisterForm, ChangePasswordForm
 from leads_app.forms import GestionFinancementForm, DocumentsUploadForm, VenteSimpleForm
-from client_app.forms import MaintenanceForm
+from client_app.forms import ClientMaintenanceForm, MAJmaintenanceForm, MaintenanceForm
 from .forms import OffreFinancementForm, OffreSimpleForm
 
 import logging
@@ -601,6 +601,7 @@ class OffreView(LoginRequiredMixin, UserPassesTestMixin, ListView):
             queryset = Offre.objects.filter(client=self.request.user)
             q = self.request.GET.get("q")
             statut = self.request.GET.get("statut")
+            type_offre = self.request.GET.get("type_offre")
            
             if q:
                 queryset = queryset.filter(
@@ -829,7 +830,7 @@ def changer_statut_vente(request, vente_id):
                     'conclue_sur_acceptation_demande_financement',
                 ]
                 
-                if nouveau_statut in statuts_avec_financement:
+                if nouveau_statut in statuts_avec_financement and vente.type_vente == 'maison':
                     # ✅ Vérifier si les échéances existent déjà
                     if not vente.echeances:
                         # ✅ Générer les échéances
@@ -1215,27 +1216,86 @@ def refuser_maintenance(request, maintenance_id):
     response["HX-Trigger"] = "closeGestMaintenanceModal"
     return response
 
-
 def changer_statut_maintenance(request, maintenance_id, nouveau_statut):
+    time.sleep(1.5)  # Petit délai pour l'expérience UI (HTMX loader)
     maintenance = get_object_or_404(Maintenance, id=maintenance_id)
-    
-    # Vérifier que l'utilisateur est commercial ou directeur
+
+    # 1. Sécurité Rôle
     if request.user.role not in ['commercial', 'directeur']:
-        messages.error(request, "Action non autorisée.")
-        return redirect('commercial_app:maintenance-detail', pk=maintenance.id)
-    
-    statuts_valides = ['en_cours', 'effectuee', 'annulee']
+        response = render(request, "partials/maintenance/_maintenance_result.html", {
+            'success': False,
+            'title': '🚫 Accès refusé',
+            'message': "Vous n'avez pas les droits pour effectuer cette action."
+        })
+        response['HX-Trigger'] = "closeGestMaintenanceModal"
+        return response
+
+    # 2. Statuts que le commercial a le droit d'appliquer
+    statuts_valides = ['planifiee', 'en_cours', 'effectuee', 'annulee']
     if nouveau_statut not in statuts_valides:
-        messages.error(request, "Statut invalide.")
-        return redirect('commercial_app:maintenance-detail', pk=maintenance.id)
-    
-    maintenance.statut = nouveau_statut
+        response = render(request, "partials/maintenance/_maintenance_result.html", {
+            'success': False,
+            'title': '❌ Erreur',
+            'message': "Statut demandé invalide."
+        })
+        response['HX-Trigger'] = "closeGestMaintenanceModal"
+        return response
+
+    # =========================================================================
+    # 🚗 RÈGLE 1 : Passer EN COURS (Exige que la maintenance soit planifiée / confirmée)
+    # =========================================================================
+    if nouveau_statut == "en_cours":
+        # Si la demande est toujours "en_attente", le commercial doit d'abord compléter les infos
+        if maintenance.statut == "en_attente":
+            response = render(request, "partials/maintenance/_maintenance_result.html", {
+                'success': False,
+                'title': '⚠️ Action impossible',
+                'message': "Vous devez d'abord mettre à jour les informations (date, montant estimé, kilométrage) pour planifier la maintenance."
+            })
+            response['HX-Trigger'] = "closeGestMaintenanceModal"
+            return response
+            
+        # Optionnel : Si tu as un statut 'confirmee' côté client
+        if maintenance.statut != "confirmee":
+            response = render(request, "partials/maintenance/_maintenance_result.html", {
+                            'success': False,
+                            'title': '⚠️ Action impossible',
+                            'message': "Vous devez attendre la confirmation du client"
+                        })
+            response['HX-Trigger'] = "closeGestMaintenanceModal"
+            return response
+    # =========================================================================
+    # 💰 RÈGLE 2 : Passer EFFECTUÉE (Exige le montant réel renseigné)
+    # =========================================================================
     if nouveau_statut == 'effectuee':
-        maintenance.date_derniere = timezone.now().date()
-        maintenance.kilometrage_dernier = maintenance.kilometrage_actuel
+        if not maintenance.montant_reel or maintenance.montant_reel <= 0:
+            response = render(request, "partials/maintenance/_maintenance_result.html", {
+                'success': False,
+                'title': '❌ Montant manquant',
+                'message': "Veuillez indiquer le montant réel facturé avant de valider la fin de la maintenance.",
+                'reload_on_close': True,
+            })
+            response['HX-Trigger'] = "closeGestMaintenanceModal"
+            return response
+
+    # =========================================================================
+    # 📝 MISE À JOUR & SAUVEGARDE
+    # =========================================================================
+    ancien_statut = maintenance.statut
+    maintenance.statut = nouveau_statut
+
+    # Si la maintenance se termine, on met à jour la date et le kilométrage
+    if nouveau_statut == 'effectuee':
+        maintenance.date_derniere = timezone.now()
+        if maintenance.kilometrage_actuel:
+            maintenance.kilometrage_dernier = maintenance.kilometrage_actuel
+
     maintenance.save()
-    
-    # ✉️ Email au client
+    logger.info(f"Maintenance #{maintenance.id} : {ancien_statut} → {nouveau_statut} par {request.user.email}")
+
+    # =========================================================================
+    # ✉️ EMAIL CLIENT
+    # =========================================================================
     try:
         context_email = {
             'client': maintenance.client,
@@ -1243,38 +1303,41 @@ def changer_statut_maintenance(request, maintenance_id, nouveau_statut):
             'nouveau_statut': maintenance.get_statut_display(),
             'lien_maintenance': request.build_absolute_uri(maintenance.get_absolute_url()),
         }
-        
+        # Code d'envoi d'email...
         if nouveau_statut == 'en_cours':
-            template = 'emails/maintenance/maintenance_en_cours_client.html'
-            sujet = "🔄 Votre maintenance est en cours - KOZ Services"
+                    template = 'emails/maintenance/maintenance_en_cours_client.html'
+                    sujet = "🔄 Votre maintenance est en cours - KOZ Services"
         elif nouveau_statut == 'effectuee':
-            template = 'emails/maintenance/maintenance_effectuee_client.html'
-            sujet = "✅ Votre maintenance est terminée - KOZ Services"
+                    template = 'emails/maintenance/maintenance_effectuee_client.html'
+                    sujet = "✅ Votre maintenance est terminée - KOZ Services"
         else:
             template = 'emails/maintenance/maintenance_annulee_client.html'
             sujet = "❌ Votre maintenance a été annulée - KOZ Services"
-        
+                
         html_message = render_to_string(template, context_email)
         plain_message = strip_tags(html_message)
-        
+                
         send_mail(
-            subject=sujet,
-            message=plain_message,
-            from_email=settings.EMAIL_HOST_USER,
-            recipient_list=[maintenance.client.email],
-            html_message=html_message,
-            fail_silently=False,
-        )
+                    subject=sujet,
+                    message=plain_message,
+                    from_email=settings.EMAIL_HOST_USER,
+                    recipient_list=[maintenance.client.email],
+                    html_message=html_message,
+                    fail_silently=False,
+                )
     except Exception as e:
-        logger.error(f"Erreur envoi email: {e}")
-    
-    response = render(request, "partials/maintenance/_maintenance_result.html",{'success': True,
-                                                                            'title': '✅ Succès',
-                                                                            'message': f"Maintenance passée en '{maintenance.get_statut_display()}'. Le client a été notifié.",
-                                                                            'reload_on_close': True,
-                                                                                      })
-    response["HX-Trigger"] = "closeGestMaintenanceModal"
+                logger.error(f"Erreur envoi email: {e}")
+
+    # Réponse HTMX Succès
+    response = render(request, "partials/maintenance/_maintenance_result.html", {
+        'success': True,
+        'title': '✅ Statut mis à jour',
+        'message': f"La maintenance est désormais : {maintenance.get_statut_display()}",
+        'reload_on_close': True,
+    })
+    response['HX-Trigger'] = "closeGestMaintenanceModal"
     return response
+
 
 
 #######################################__________________MAINTENANCE_VIEW_______________##################################################
@@ -1297,7 +1360,7 @@ class MaintenanceListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         #Si commercial : Voir maintenances des ses clients
         if self.request.user.role == "commercial" or (self.request.user.is_staff and not self.request.user.is_superuser):
-            queryset = Maintenance.objects.filter(client__assigned_commercial=self.request.user).select_related("client")
+            queryset = Maintenance.objects.all()
             q = self.request.GET.get("q")
             type_maintenance = self.request.GET.get("type_maintenance")
             priorite = self.request.GET.get("priorite")
@@ -1422,11 +1485,14 @@ class MaintenanceListView(LoginRequiredMixin, ListView):
     
     def get_context_data(self, **kwargs):
         context =  super().get_context_data(**kwargs)
-        context["maintenance_form"] = MaintenanceForm()
         context["TYPE_CHOICES"] = Maintenance.TYPE_CHOICES
         context["priorite_choices"] = Maintenance.PRIORITE_CHOICES
         context["origine_choices"] = Maintenance.ORIGINE_CHOICES
         context["STATUT_CHOICES"] = Maintenance.STATUT_CHOICES
+        if 'maintenance_form' not in context:
+            context["maintenance_form"] = MaintenanceForm()
+        if 'client_form' not in context:
+            context['client_form'] = ClientMaintenanceForm()
         return context
     
 class MaintenanceCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
@@ -1495,7 +1561,6 @@ class MaintenanceCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView)
     def form_invalid(self, form):
         return render(self.request, 'partials/_maintenance_form_errors.html', {"maintenance_form": form})
         
-    
 class MaintenanceDetailView(LoginRequiredMixin, DetailView):
     model = Maintenance
     context_object_name = "maintenance"
@@ -1516,7 +1581,9 @@ class MaintenanceDetailView(LoginRequiredMixin, DetailView):
         if self.request.user.role in ['commercial', 'directeur']:
             if  "update_maintenance_form" not in context:
                 context["update_maintenance_form"] = MaintenanceForm(instance=self.object)
-            return context
+
+            if "maj_form" not in context:
+                context["maj_form"] = MAJmaintenanceForm()
         
         return context
 
@@ -1530,8 +1597,14 @@ class MaintenanceUpdateView(LoginRequiredMixin, UserPassesTestMixin,UpdateView):
     
     def form_valid(self, form):
         time.sleep(1.5)
-        maintenance = form.save()
-                
+        maintenance = form.save(commit=False)
+    
+        # Passe à 'planifiee' uniquement si l'état initial était 'en_attente'
+        if maintenance.statut == 'en_attente':
+            maintenance.statut = 'planifiee'
+            
+        maintenance.save()
+        form.save_m2m()  # Si t              
                 # ==========================================
                 # 📧 ENVOI DE L'EMAIL AU CLIENT
                 # ==========================================
@@ -1542,21 +1615,21 @@ class MaintenanceUpdateView(LoginRequiredMixin, UserPassesTestMixin,UpdateView):
                         # Contexte pour le template
                 context_email = {
                             'client': client,
-                            'vehicule': maintenance.vehicul if hasattr(maintenance, 'vehicul') else "Véhicule",
-                            'date_prevue': maintenance.date_prevue if hasattr(maintenance, 'date_prevue') else None,
-                            'type_maintenance': maintenance.type_maintenance if hasattr(maintenance, 'type_maintenance') else "Révision",
-                            'notes_technicien': maintenance.notes_technicien if hasattr(maintenance, 'notes_technicien') else "",
+                            'vehicule': maintenance.vehicul if maintenance.vehicul else f"{maintenance.marque}-{maintenance.modele}",
+                            'date_prevue': maintenance.date_prevue if maintenance else None,
+                            'type_maintenance': maintenance.get_type_maintenance_display if maintenance.type_maintenance else "Révision",
+                            'notes_technicien': maintenance.notes_technicien if maintenance.notes_technicien else "",
                             'commercial': self.request.user,
                             'lien_suivi': self.request.build_absolute_uri(maintenance.get_absolute_url()),
                         }
                         
                         # Rendu du template HTML
-                html_message = render_to_string('emails/maintenance/maintenance_creation_client.html',context_email)
+                html_message = render_to_string('emails/maintenance/maintenance_update_client.html',context_email)
                 plain_message = strip_tags(html_message)
                         
                         # Envoi de l'email
                 send_mail(
-                            subject=f"🛠️ Confirmation de maintenance - {context_email['vehicule']}",
+                            subject=f"🛠️ Mis à jour de votre  maintenance - {context_email['vehicule']}",
                             message=plain_message,
                             from_email=settings.DEFAULT_FROM_EMAIL,
                             recipient_list=[client.email],
@@ -1591,6 +1664,104 @@ class MaintenanceDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView)
         messages.success(request, "Maintenance supprimée.")
         return super().delete(request, *args, **kwargs)
 
+class MajMaintenancePrix(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    def test_func(self):
+        return self.request.user.is_superuser or self.request.user.role in ["directeur", "commercial"]
+    model = Maintenance
+    form_class = MAJmaintenanceForm
+    
+    def form_valid(self, form):
+        time.sleep(1.5)
+        form.save()
+        response = render(self.request, "partials/maintenance/_maintenance_result.html", {
+                        'success': True,
+                        'title': '✅ Succès',
+                        'message': 'Prix réel mis à jour',
+                        'reload_on_close': True,
+        })
+        response["HX-Trigger"] = "closeMAJMaintenancePrixModal"
+        return response
+    
+class ClientCreateMaintenance(LoginRequiredMixin, UserPassesTestMixin, CreateView):
+    model = Maintenance
+    form_class = ClientMaintenanceForm
+    
+    def test_func(self):
+        return self.request.user.role == 'client'
+
+    def form_valid(self, form):
+        # ==========================================
+        # 💾 SAUVEGARDE DE LA MAINTENANCE
+        # ==========================================
+        time.sleep(1.5)
+        maintenance = form.save(commit=False)
+        maintenance.client = self.request.user
+        maintenance.statut = 'en_attente'
+        maintenance.save()
+        form.save()  # Si le formulaire a des ManyToMany
+
+        logger.info(f"Maintenance #{maintenance.id} créée par {self.request.user.email}")
+
+        # ==========================================
+        # 📧 ENVOI DE L'EMAIL À TOUS LES COMMERCIAUX
+        # ==========================================
+        try:
+            commerciaux = kozUser.objects.filter(role='commercial', is_active=True)
+            vehicule = maintenance.vehicule if hasattr(maintenance, 'vehicule') else "Véhicule"
+
+            context_email = {
+                'client': self.request.user,
+                'maintenance': maintenance,
+                'date_prevue': maintenance.date_prevue,
+                'notes_client': maintenance.notes_client if hasattr(maintenance, 'notes_client') else "",
+                'type_maintenance': maintenance.type_maintenance if hasattr(maintenance, 'type_maintenance') else "Révision",
+                'lien_detail': self.request.build_absolute_uri(maintenance.get_absolute_url()),
+                'date_creation': timezone.now(),
+            }
+
+            html_message = render_to_string('emails/maintenance/maintenance_creation_client_commercial.html', context_email)
+            plain_message = strip_tags(html_message)
+
+            recipients = [com.email for com in commerciaux if com.email]
+
+            if recipients:
+                send_mail(
+                    subject=f"🛠️ Nouvelle maintenance demandée par {self.request.user.nom_complet}",
+                    message=plain_message,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=recipients,
+                    html_message=html_message,
+                    fail_silently=False,
+                )
+                logger.info(f"Email maintenance envoyé à {len(recipients)} commerciaux")
+            else:
+                logger.warning("Aucun commercial actif trouvé pour l'envoi de l'email")
+
+        except Exception as e:
+            logger.error(f"Erreur envoi email maintenance aux commerciaux: {e}")
+
+        # ==========================================
+        # ✅ RÉPONSE HTMX AVEC HX-TRIGGER
+        # ==========================================
+        
+        response = render(self.request, "partials/maintenance/_maintenance_result.html", {
+                'success': True,
+                'title': '✅ Demande envoyée',
+                'message': 'Votre demande de maintenance a bien été envoyée. Un commercial vous contactera sous 24h.',
+                'reload_on_close': True,
+            })
+        response["HX-Trigger"] = "closeClientMaintenanceModal"
+        return response
+
+        
+
+    def form_invalid(self, form):
+        """Gestion du formulaire invalide (pour HTMX ou classique)"""
+      
+        return render(self.request, "partials/maintenance/_maintenance_form_errors.html", {
+                'form': form
+            })
+               
 class CommercialRendezVousListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     model = RendezVous
     template_name = 'commercial_templates/rendez_vous_list.html'

@@ -6,12 +6,11 @@ from django.db import transaction
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-
+from django.contrib import messages
 
 
 from django.urls import reverse_lazy, reverse
 
-from django.contrib import messages
 from django.views.generic import ListView, DetailView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
@@ -281,7 +280,7 @@ def demande_financement_view(request, vehicul_id):
         response = render(request, "partials/leads/_dmd_fin_result.html", {
             "success": True,
             "title": "✅ Demande envoyée",
-            "message": "Votre demande a été envoyée. Un commercial vous contactera sous 24h.",
+            "message": "Votre demande a été envoyée. Un commercial vous contactera sous 24 à 48h.",
             "reload_on_close": True,
         })
         response["HX-Trigger"] = "closeFinModal"
@@ -661,7 +660,7 @@ def upload_multiple_documents(request, demande_id):
                             context_email = {
                                                'client': demande,
                                                'demande_id': demande.id,
-                                               'vehicule': str(demande.vehicule_propose) if demande.vehicule_propose else "Non renseigné",
+                                               'vehicule': str(demande.Vehicul_interested) if demande.Vehicul_interested else "Non renseigné",
                                                'lien_offre': request.build_absolute_uri(
                                                    reverse('commercial_app:offre-detail', kwargs={'pk': demande.id})  # ← CORRIGÉ
                                                )
@@ -791,6 +790,7 @@ def upload_offre_documents(request, offre_id):
                             
 @login_required
 def valide_dossier(request, dossier_id):
+    time.sleep(1.5)
     dossier = get_object_or_404(Documents, id=dossier_id)
 
     if dossier.statut_dossier == "incomplet":
@@ -879,7 +879,12 @@ def valide_dossier(request, dossier_id):
             else:
                 nouvelle_etape = "demande_accordee_maison"
                 partenaire = "KOZ Services (financement interne)"
-
+                
+            if demande.financement_type == 'externe':
+                montant_total_paye_initial = demande.Vehicul_interested.prix
+               
+            else:
+                montant_total_paye_initial = demande.apport
             Vente.objects.create(
                 client=demande.client,
                 vehicul=demande.Vehicul_interested,
@@ -889,7 +894,7 @@ def valide_dossier(request, dossier_id):
                 montant_finance=demande.montant_finance,
                 mensualite=demande.mensualite,
                 duree_mois=demande.duree_mois,
-                montant_total_paye=demande.apport,
+                montant_total_paye=montant_total_paye_initial,
             )
 
             demande.etape = nouvelle_etape
@@ -959,7 +964,12 @@ def valide_dossier(request, dossier_id):
                     return response
             else:
                 partenaire = "KOZ Services (financement interne)"
-
+                
+            if offre.financement_type == "externe":
+                montant_total_paye_initial = offre.vehicule_propose.prix
+            else:
+                montant_total_paye_initial = offre.apport_demande
+                
             Vente.objects.create(
                 client=offre.client,
                 vehicul=offre.vehicule_propose,
@@ -969,7 +979,7 @@ def valide_dossier(request, dossier_id):
                 montant_finance=offre.montant_finance,
                 mensualite=offre.mensualite,
                 duree_mois=offre.duree_mois,
-                montant_total_paye=offre.apport_demande,
+                montant_total_paye=montant_total_paye_initial,
                 
             )
             # Pas de offre.save() — statut/type/partenaire restent inchangés, KPI se basent dessus directement
@@ -1027,6 +1037,7 @@ def valide_dossier(request, dossier_id):
 
 @login_required
 def modifier_dossier(request, dossier_id):
+    time.sleep(1.5)
     dossier = get_object_or_404(Documents, id=dossier_id)
     
     # Vérifier que l'utilisateur est commercial ou directeur
@@ -1092,7 +1103,7 @@ def modifier_dossier(request, dossier_id):
             'dossier_id': dossier.id,
             'contexte': contexte_nom,
             'vehicule': vehicule,
-            'lien_chat': request.build_absolute_uri(reverse("chat_app:chat-view", dossier.client.pk)),
+            'lien_chat': f"http://127.0.0.1:8000/chat/{dossier.client.pk}/",
             'lien_dossier': request.build_absolute_uri(
                 reverse("leads_app:document-detail", kwargs={"pk": dossier.pk})
             ),
@@ -1151,6 +1162,7 @@ def modifier_dossier(request, dossier_id):
 
 @login_required
 def rejete_dossier(request, dossier_id):
+    time.sleep(1.5)
     dossier = get_object_or_404(Documents, id=dossier_id)
     
     # Vérifier que l'utilisateur est commercial ou directeur
@@ -1269,7 +1281,7 @@ def rejete_dossier(request, dossier_id):
             'contexte_type': contexte_type,
             'motif_rejet': motif_rejet,
             'commercial': request.user,
-            'lien_chat': request.build_absolute_uri(reverse("chat_app:chat-view", dossier.client.pk)),
+            'lien_chat': f"http://127.0.0.1:8000/chat/{dossier.client.pk}",
         }
         html_message = render_to_string('emails/documents/dossier_rejete.html', context_email)
         plain_message = strip_tags(html_message)
@@ -1308,6 +1320,7 @@ def rejete_dossier(request, dossier_id):
 
 @login_required
 def verifier_dossier(request, dossier_id):
+    time.sleep(1.5)
     dossier = get_object_or_404(Documents, id=dossier_id)
     
     # Vérifier que l'utilisateur est commercial ou directeur

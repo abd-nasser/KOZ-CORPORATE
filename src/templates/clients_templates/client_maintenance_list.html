@@ -11,7 +11,6 @@
     <script src="{% static 'js/htmx.min.js' %}" defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="{% static 'css/client/client_maintenance_list_style.css' %}">
     <script src="https://unpkg.com/lenis@1.3.25/dist/lenis.min.js"></script> 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
@@ -50,6 +49,15 @@
             <div class="w-10"></div>
         </div>
     </nav>
+
+    <div class="container mx-auto px-4 py-8">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">🔧 Suivi des maintenances</h1>
+            <button class="btn-glow px-6 py-2 rounded-xl flex items-center gap-2" onclick="document.getElementById('client_maintenanceModal').showModal()">
+                <i class="fas fa-plus-circle"></i> Planifier une maintenance
+            </button>
+        </div>
+    </div>
 <style>
     main{
         min-height: 81vh;
@@ -135,7 +143,7 @@
         </div>
 
     </main>
-
+    {% include 'modals/maintenance/client_create_maintenance.html' %}
     <footer class="bg-gray-800 text-white py-6 mt-12">
         <div class="container mx-auto px-4 text-center text-sm text-gray-400">
             <p>&copy; {% now "Y" %} KOZ Services - Tous droits réservés</p>

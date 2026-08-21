@@ -3,7 +3,7 @@ from django.db import models
 from django.urls import reverse
 from auth_app.models import kozUser
 from vehicul_app.models import Vehicul
-from datetime import timezone, timedelta, datetime
+from django.utils import timezone
 
 
 class Maintenance(models.Model):
@@ -22,6 +22,7 @@ class Maintenance(models.Model):
     
     # ----- STATUTS -----
     STATUT_CHOICES = [
+        ('en_attente', 'En attente'),
         ('planifiee', 'Planifiée'),
         ('confirmee', 'Confirmée'),
         ('en_cours', 'En cours'),
@@ -49,11 +50,11 @@ class Maintenance(models.Model):
     
     # Infos véhicule
     vehicul = models.ForeignKey("vehicul_app.vehicul", on_delete=models.SET_NULL, related_name="maintenance", null=True, blank=True)
-    marque = models.CharField(max_length=50)
-    modele = models.CharField(max_length=100)
-    annee = models.IntegerField()
+    marque = models.CharField(max_length=50, null=True, blank=True)
+    modele = models.CharField(max_length=100, blank=True, null=True)
+    annee = models.IntegerField(null=True, blank=True)
     immatriculation = models.CharField(max_length=20, null=True, blank=True)
-    kilometrage_actuel = models.IntegerField()
+    kilometrage_actuel = models.IntegerField(null=True, blank=True)
     
     # Origine (remplace le boolean)
     origine = models.CharField(max_length=20, choices=ORIGINE_CHOICES, default='externe')
@@ -63,10 +64,10 @@ class Maintenance(models.Model):
     priorite = models.CharField(max_length=20, choices=PRIORITE_CHOICES, default='normale')
     
     # Dates et kilométrage
-    date_prevue = models.DateField(null=True, blank=True)
-    date_prochaine = models.DateField()
+    date_prevue = models.DateTimeField(null=True, blank=True)
+    date_prochaine = models.DateTimeField(null=True, blank=True)
     date_derniere = models.DateField(null=True, blank=True)
-    kilometrage_prochain = models.IntegerField()
+    kilometrage_prochain = models.IntegerField(null=True, blank=True)
     kilometrage_dernier = models.IntegerField(null=True, blank=True)
     
     # Prix (si payant)
@@ -96,9 +97,13 @@ class Maintenance(models.Model):
     
     @property
     def est_en_retard(self):
-        """True si la date de la maintenance est dépassée"""
-        return self.date_prochaine < datetime.now().date() and self.statut not in ["effectuee", "annulee"]
-    
+        # 1. Si aucune date n'est définie, la maintenance ne peut pas être en retard
+        if not self.date_prochaine:
+            return False
+            
+        # 2. Vérification du retard selon la date et le statut
+        return self.date_prochaine < timezone.now() and self.statut not in ["effectuee", "annulee"]
+        
     @property
     def km_restant(self):
         """Kilometre restant avant la prochaine maintenance"""

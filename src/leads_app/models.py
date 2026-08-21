@@ -192,10 +192,10 @@ class Vente(models.Model):
     
     @property
     def reste_a_payer(self):
-        """Calcule le reste à payer sur la partie financée (hors apport)."""
+        if self.type_vente != 'maison':
+            return Decimal('0')
         if not self.montant_finance:
             return Decimal('0')
-
         total_echeances_payees = sum(
             (Decimal(str(e['montant'])) for e in self.echeances if e.get('paye')),
             Decimal('0')

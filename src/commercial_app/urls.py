@@ -23,13 +23,16 @@ urlpatterns = [
     #######################________Maintenance____________#############################
     path('maintenances/',views.MaintenanceListView.as_view(), name='maintenance-list'),
     path('maintenances/ajouter/',views.MaintenanceCreateView.as_view(), name='maintenance-create'),
+    path('creer/maintenance/',views.ClientCreateMaintenance.as_view(),name="client-create-maintenance"),
     path('maintenances/<int:pk>/',views.MaintenanceDetailView.as_view(), name='maintenance-detail'),
     path('maintenances/<int:pk>/modifier/',views.MaintenanceUpdateView.as_view(), name='maintenance-update'),
     path('maintenances/<int:pk>/supprimer/',views.MaintenanceDeleteView.as_view(), name='maintenance-delete'),
+    path('maintenances/<int:pk>/maj/prix/',views.MajMaintenancePrix.as_view(), name="maintenance-prix-maj"),
     path('maintenances/<int:maintenance_id>/changer_statut/',views.changer_statut_maintenance, name='changer-statut-maintenance'),
     path('confirmer/maintenance/<int:maintenance_id>/',views.confirmer_maintenance, name='confirmer-maintenance'),
     path('refuser/maintenance/<int:maintenance_id>/',views.refuser_maintenance, name='refuser-maintenance'),
     path("changer/statut/maintenance/<int:maintenance_id>/<str:nouveau_statut>/", views.changer_statut_maintenance, name="changer-statut-maintenance"),
+    
     
     
     

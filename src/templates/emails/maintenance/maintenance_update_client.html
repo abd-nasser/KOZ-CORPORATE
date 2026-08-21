@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mise à jour de votre maintenance</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; -webkit-font-smoothing: antialiased;">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f4f6f9; padding: 20px 0;">
+        <tr>
+            <td align="center">
+                <!-- Conteneur principal (600px max) -->
+                <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+                    
+                    <!-- En-tête -->
+                    <tr>
+                        <td align="center" style="background-color: #1e293b; padding: 25px 20px;">
+                            <h1 style="color: #ffffff; margin: 0; font-size: 20px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">
+                                KOZ Services
+                            </h1>
+                            <p style="color: #94a3b8; margin: 5px 0 0 0; font-size: 13px;">
+                                Suivi de maintenance & entretien
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Corps de l'email -->
+                    <tr>
+                        <td style="padding: 30px 25px;">
+                            <h2 style="color: #0f172a; margin-top: 0; font-size: 18px; font-weight: 600;">
+                                Bonjour {{ client.nom_complet|default:"-" }},
+                            </h2>
+                            <p style="color: #475569; font-size: 14px; line-height: 1.6; margin-bottom: 20px;">
+                                Une mise à jour a été effectuée concernant votre demande de maintenance. Voici le récapitulatif des informations mises à jour :
+                            </p>
+
+                            <!-- Tableau de synthèse -->
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 15px; margin-bottom: 20px;">
+                                <tr>
+                                    <td style="padding: 8px 0; color: #64748b; font-size: 13px; width: 40%;"><strong>Type :</strong></td>
+                                    <td style="padding: 8px 0; color: #0f172a; font-size: 13px; font-weight: 600;">{{ type_maintenance }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #64748b; font-size: 13px;"><strong>Véhicule :</strong></td>
+                                    <td style="padding: 8px 0; color: #0f172a; font-size: 13px; font-weight: 600;">{{ vehicule }}</td>
+                                </tr>
+                                {% if date_prevue %}
+                                <tr>
+                                    <td style="padding: 8px 0; color: #64748b; font-size: 13px;"><strong>Date & Heure :</strong></td>
+                                    <td style="padding: 8px 0; color: #2563eb; font-size: 13px; font-weight: 600;">
+                                        {{ date_prevue|date:"d/m/Y à H:i" }}
+                                    </td>
+                                </tr>
+                                {% endif %}
+                            </table>
+
+                            <!-- Remarque / Notes du technicien (Si renseignées) -->
+                            {% if notes_technicien %}
+                            <div style="background-color: #eff6ff; border-left: 4px solid #2563eb; padding: 12px 15px; border-radius: 0 6px 6px 0; margin-bottom: 25px;">
+                                <p style="color: #1e40af; margin: 0 0 4px 0; font-size: 12px; font-weight: 700; text-transform: uppercase;">
+                                    Note du technicien / Service :
+                                </p>
+                                <p style="color: #1e3a8a; margin: 0; font-size: 13px; line-height: 1.5; font-style: italic;">
+                                    "{{ notes_technicien }}"
+                                </p>
+                            </div>
+                            {% endif %}
+
+                            <!-- Bouton Call-to-Action -->
+                            {% if lien_suivi %}
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 25px; margin-bottom: 25px;">
+                                <tr>
+                                    <td align="center">
+                                        <a href="{{ lien_suivi }}" target="_blank" style="background-color: #2563eb; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: 600; font-size: 14px; display: inline-block;">
+                                            Consulter ma demande en ligne
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                            {% endif %}
+
+                        </td>
+                    </tr>
+
+                    <!-- Pied de page -->
+                    <tr>
+                        <td align="center" style="background-color: #f8fafc; border-top: 1px solid #e2e8f0; padding: 20px; color: #94a3b8; font-size: 12px;">
+                            <p style="margin: 0 0 6px 0;">Cet email a été envoyé automatiquement par l'application <strong>KOZ Corporate</strong>.</p>
+                            <p style="margin: 0;">&copy; {{ "now"|date:"Y" }} KOZ Services. Tous droits réservés.</p>
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

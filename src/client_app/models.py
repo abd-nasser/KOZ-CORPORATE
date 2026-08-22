@@ -120,6 +120,9 @@ class Maintenance(models.Model):
             models.Index(fields=['priorite', 'statut']),
         ]
 
+from django.db import models
+from django.urls import reverse
+
 class Documents(models.Model):
     client = models.ForeignKey('auth_app.kozUser', on_delete=models.CASCADE, related_name='documents')
     demande_financement = models.OneToOneField('leads_app.demande_financement', on_delete=models.CASCADE, related_name='documents', null=True, blank=True)
@@ -133,26 +136,29 @@ class Documents(models.Model):
     attestation_non_engagement = models.FileField(upload_to='documents/%Y/%m/%d/', verbose_name="Attestation de non-engagement")
     contrat_travail = models.FileField(upload_to='documents/%Y/%m/%d/', verbose_name="Contrat de travail")
     attestation_travail = models.FileField(upload_to='documents/%Y/%m/%d/', verbose_name="Attestation de travail (<3 mois)")
-    quittance_salaire = models.FileField(upload_to='documents/%Y/%m/%d/', verbose_name="quittance de salaire")
     
     # === BANQUE ===
     relevé_bancaire = models.FileField(upload_to='documents/%Y/%m/%d/', verbose_name="Relevé bancaire (12 mois) + RIB")
     specimen_signature = models.FileField(upload_to='documents/%Y/%m/%d/', verbose_name="Spécimen de recueil de signature")
     
-      # ===== EMPLOI & REVENUS =====
+    # === BULLETINS DE PAIE ===
     bulletin_1 = models.FileField(upload_to='documents/%Y/%m/%d/', verbose_name="Bulletin de paie (mois -3)", blank=True, null=True)
     bulletin_2 = models.FileField(upload_to='documents/%Y/%m/%d/', verbose_name="Bulletin de paie (mois -2)", blank=True, null=True)
     bulletin_3 = models.FileField(upload_to='documents/%Y/%m/%d/', verbose_name="Bulletin de paie (mois -1)", blank=True, null=True)
     
-    
+    # === GÉOLOCALISATION GPS (Remplace l'ancien FileField) ===
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True, verbose_name="Latitude GPS")
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True, verbose_name="Longitude GPS")
+    # Optionnel: On garde un fichier secours au cas où le client veut aussi importer un plan papier
+    plan_geolocalisation = models.FileField(upload_to='documents/%Y/%m/%d/', verbose_name="Plan papier de géolocalisation (Optionnel)", blank=True, null=True)
+
     # === AUTRES JUSTIFICATIFS ===
-    certificat_presence = models.FileField(upload_to='documents/%Y/%m/%d/', verbose_name="Certificat de présence au corps (âge départ retraite)", blank=True, null=True)
-    geolocalisation = models.FileField(upload_to='documents/%Y/%m/%d/', verbose_name="Plan de géolocalisation", blank=True, null=True)
+    certificat_presence = models.FileField(upload_to='documents/%Y/%m/%d/', verbose_name="Certificat de présence au corps (FDS)", blank=True, null=True)
     garanties = models.FileField(upload_to='documents/%Y/%m/%d/', verbose_name="Garanties proposées (supports)", blank=True, null=True)
     recu_acompte = models.FileField(upload_to='documents/%Y/%m/%d/', verbose_name="Reçu des frais d'acompte de dossier", blank=True, null=True)
     fiche_demande = models.FileField(upload_to='documents/%Y/%m/%d/', verbose_name="Fiche de demande de financement", blank=True, null=True)
     
-    # Statut (inchangé)
+    # Statut du dossier
     STATUT_DOCS = [
         ("vide", "Dossier vide"),
         ('incomplet', 'Dossier incomplet'),
@@ -163,10 +169,11 @@ class Documents(models.Model):
     ]
     statut_dossier = models.CharField(max_length=20, choices=STATUT_DOCS, default='vide')
     
-    commentaire_rejet = models.TextField(blank=True, null=True,
-                                    verbose_name="Commentaires du commercial ou de l'analyste",
-                                    help_text="Utilisez ce champ pour indiquer les documents manquants, les erreurs à corriger, ou toute autre remarque pertinente pour le client.")        
-                                    
+    commentaire_rejet = models.TextField(
+        blank=True, null=True,
+        verbose_name="Commentaires du commercial ou de l'analyste",
+        help_text="Utilisez ce champ pour indiquer les documents manquants, les erreurs à corriger, ou toute autre remarque pertinente pour le client."
+    )        
     
     date_upload = models.DateTimeField(auto_now_add=True)
     date_validation = models.DateTimeField(null=True, blank=True)
@@ -176,23 +183,33 @@ class Documents(models.Model):
     
     def get_absolute_url(self):
         return reverse('leads_app:document-detail', kwargs={'pk': self.pk})
-    
+
+    @property
+    def google_maps_url(self):
+        """Raccourci pour le DG / Commercial afin d'ouvrir le lieu directement dans Google Maps"""
+        if self.latitude and self.longitude:
+            return f"https://www.google.com/maps?q={self.latitude},{self.longitude}"
+        return None
+
     def verifier_completude(self):
-        """Vérifie si les documents OBLIGATOIRES sont présents"""
+        """Vérifie si les documents OBLIGATOIRES et la position GPS sont présents"""
+        # Vérification des coordonnées GPS
+        has_geoloc = bool(self.latitude and self.longitude)
+
         requis = [
             self.cni_passeport,
             self.justificatif_domicile,
             self.attestation_non_engagement,
             self.contrat_travail,
             self.attestation_travail,
-            self.quittance_salaire,
             self.relevé_bancaire,
             self.specimen_signature,
             self.bulletin_1,
             self.bulletin_2,
-            self.bulletin_3
+            self.bulletin_3,
         ]
-        if all(requis):
+        
+        if all(requis) and has_geoloc:
             self.statut_dossier = 'complet'
             self.save()
             return True

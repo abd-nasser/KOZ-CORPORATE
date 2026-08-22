@@ -80,8 +80,6 @@ class MAJmaintenanceForm(forms.ModelForm):
         }
 
 
-
-
 class ClientMaintenanceForm(forms.ModelForm):
     class Meta:
         model = Maintenance

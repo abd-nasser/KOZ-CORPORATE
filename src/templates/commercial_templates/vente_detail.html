@@ -241,6 +241,17 @@
                                     {% endif %}
                                 </span>
                             </div>
+
+                            <div class="bg-white p-3 rounded-lg border border-slate-200/60">
+                                
+                                {% if vente.demande_financement.montant_finance  %}
+                        
+                                <span class="text-xs text-slate-400 block mb-1">Montant financé</span>
+                                <span class="font-extrabold text-emerald-600">
+                                        {{ vente.demande_financement.montant_finance|intcomma }} FCFA 
+                                </span>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
                     {% endif %}

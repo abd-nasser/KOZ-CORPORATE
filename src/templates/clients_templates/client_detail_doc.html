@@ -14,7 +14,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
+    <!-- External Libraries -->
+    <!-- Dépendances Leaflet (À placer idéalement dans le <head> de votre base.html) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <!-- UI Plugins -->
     <script src="https://unpkg.com/lenis@1.3.25/dist/lenis.min.js"></script> 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
@@ -160,8 +163,43 @@
                 </div>
                 {% include 'modals/leads/confirm_doc_delete.html' %}
                 {% endif %}
-
+               
                 {% if document.statut_dossier == 'modification' %}
+
+                 {% if document.commentaire_rejet %}
+                <div class="alert alert-warning shadow-sm border border-warning/30 rounded-xl my-4 p-4">
+                    <div class="flex items-start gap-3 w-full">
+                        <!-- Icône Alerte -->
+                        <div class="p-2.5 bg-warning/20 text-warning-content rounded-xl shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 stroke-current" fill="none" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                        </div>
+
+                        <!-- Contenu du message -->
+                        <div class="flex-1">
+                            <div class="flex items-center justify-between flex-wrap gap-1 mb-1">
+                                <h4 class="font-bold text-sm text-base-content">
+                                    Action requise sur votre dossier
+                                </h4>
+                                <span class="badge badge-warning badge-xs font-bold uppercase tracking-wider">Note de l'analyste</span>
+                            </div>
+
+                            <!-- Encadré du texte du commentaire -->
+                            <div class="bg-base-100/80 p-3 rounded-lg border border-warning/20 my-2">
+                                <p class="text-xs text-base-content/90 font-medium leading-relaxed whitespace-pre-line">
+                                    "{{ document.commentaire_rejet }}"
+                                </p>
+                            </div>
+
+                            <p class="text-[11px] text-base-content/60 flex items-center gap-1 italic">
+                                💡 Veuillez corriger ou réimporter les documents indiqués ci-dessous pour débloquer le traitement.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
                 <div class="bg-amber-50/80 border border-amber-200/80 rounded-2xl p-5 sm:p-6 shadow-sm">
                     <div class="flex items-start gap-4">
                         <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center flex-shrink-0 text-lg">
@@ -319,22 +357,7 @@
                             {% endif %}
                         </div>
 
-                        <!-- Quittance globale / synthèse -->
-                        <div class="doc-card flex items-center justify-between p-4 bg-slate-50/60 rounded-xl border border-slate-200/60">
-                            <div class="flex items-center gap-3">
-                                <span class="text-lg">💵</span>
-                                <span class="text-sm font-medium text-slate-700">3 bulletins de paie (global)</span>
-                            </div>
-                            {% if document.quittance_salaire %}
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                                    <i class="fas fa-check-circle text-emerald-600"></i> Recu
-                                </span>
-                            {% else %}
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-rose-100 text-rose-800 border border-rose-200">
-                                    <i class="fas fa-times-circle text-rose-500"></i> Incomplet
-                                </span>
-                            {% endif %}
-                        </div>
+                       
                     </div>
 
                     <!-- Sous-Détail Bulletins -->
@@ -419,6 +442,109 @@
                         </div>
                     </div>
                 </section>
+                  !-- BLOC GEOLOCALISATION -  -->
+<div class="card bg-base-100 border border-base-300 shadow-sm overflow-hidden">
+    <div class="card-body p-5">
+        
+        <!-- En-tête du bloc -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-base-200">
+            <div>
+                <span class="badge badge-primary badge-outline text-xs font-semibold mb-1">Localisation vérifiée</span>
+                <h3 class="card-title text-base text-base-content flex items-center gap-2">
+                    📍 Position
+                </h3>
+            </div>
+            
+            <!-- Actions externes -->
+            <div class="flex items-center gap-2 flex-wrap">
+                {% if document.google_maps_url %}
+                    <a href="{{ document.google_maps_url }}" target="_blank" rel="noopener noreferrer" 
+                       class="btn btn-sm btn-outline btn-primary gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                        Google Maps
+                    </a>
+                    <a href="https://waze.com/ul?ll={{ document.latitude }},{{ document.longitude }}&navigate=yes" target="_blank" rel="noopener noreferrer" 
+                       class="btn btn-sm btn-ghost gap-1 text-base-content/70">
+                        Waze
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if document.latitude and document.longitude %}
+            <!-- Carte Leaflet interactive (Lecture seule) -->
+            <div id="dg-map-detail" class="w-full h-64 rounded-box border border-base-300 my-3 z-0"></div>
+
+            <!-- Meta d'information & Coordonnées -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-base-200/50 p-3 rounded-lg text-xs">
+                <div>
+                    <span class="text-base-content/60 block">Coordonnées GPS</span>
+                    <span class="font-mono font-bold text-base-content">
+                        {{ document.latitude }}, {{ document.longitude }}
+                    </span>
+                </div>
+                <div>
+                    <span class="text-base-content/60 block">Plan papier joint</span>
+                    {% if document.plan_geolocalisation %}
+                        <a href="{{ document.plan_geolocalisation.url }}" target="_blank" class="text-primary underline font-medium flex items-center gap-1 mt-0.5">
+                            📄 Télécharger le document annexé
+                        </a>
+                    {% else %}
+                        <span class="text-base-content/40 italic">Aucun fichier scanné fourni</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- JS Initialisation Carte en Mode Lecture Seule -->
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    const lat = parseFloat("{{ document.latitude }}");
+                    const lng = parseFloat("{{ document.longitude }}");
+
+                    // Initialisation et centrage sur les coordonnées du client
+                    const mapDg = L.map('dg-map-detail', {
+                        scrollWheelZoom: false // Évite le zoom accidentel lors du scroll de page
+                    }).setView([lat, lng], 16);
+
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 19,
+                        attribution: '© OpenStreetMap'
+                    }).addTo(mapDg);
+
+                    // Marqueur principal avec Popup d'information
+                    const marker = L.marker([lat, lng]).addTo(mapDg);
+                    marker.bindPopup(`
+                        <div class="text-xs p-1">
+                            <strong>{{ document.client.nom_complet|default:"Client KOZ" }}</strong><br/>
+                            Dossier N° {{ document.pk }}
+                        </div>
+                    `).openPopup();
+                });
+            </script>
+
+        {% else %}
+            <!-- Fallback si la géolocalisation n'a pas encore été renseignée -->
+            <div class="alert alert-warning text-xs mt-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-5 w-5" fill="none" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <span>Aucune coordonnée GPS enregistrée pour ce dossier.</span>
+            </div>
+        {% endif %}
+        <div class="doc-card flex items-center justify-between p-3.5 bg-slate-50/40 rounded-xl border border-slate-200/50">
+                            <span class="text-xs font-medium text-slate-700">📍 Plan de géolocalisation</span>
+                            {% if document.plan_geolocalisation %}
+                                <span class="text-emerald-600 text-xs font-semibold flex items-center gap-1"><i class="fas fa-check-circle"></i> Fourni</span>
+                            {% else %}
+                                <span class="text-slate-400 text-xs font-normal flex items-center gap-1"><i class="fas fa-minus"></i> Non fourni</span>
+                            {% endif %}
+                        </div>
+
+    </div>
+     
+</div>
 
 
                 <!-- ==================== SECTION 4 : AUTRES JUSTIFICATIFS (OPTIONNELS) ==================== -->
@@ -440,14 +566,7 @@
                             {% endif %}
                         </div>
 
-                        <div class="doc-card flex items-center justify-between p-3.5 bg-slate-50/40 rounded-xl border border-slate-200/50">
-                            <span class="text-xs font-medium text-slate-700">📍 Plan de géolocalisation</span>
-                            {% if document.geolocalisation %}
-                                <span class="text-emerald-600 text-xs font-semibold flex items-center gap-1"><i class="fas fa-check-circle"></i> Fourni</span>
-                            {% else %}
-                                <span class="text-slate-400 text-xs font-normal flex items-center gap-1"><i class="fas fa-minus"></i> Non fourni</span>
-                            {% endif %}
-                        </div>
+                       
 
                         <div class="doc-card flex items-center justify-between p-3.5 bg-slate-50/40 rounded-xl border border-slate-200/50">
                             <span class="text-xs font-medium text-slate-700">🛡️ Garanties proposées</span>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nouvelle demande de maintenance</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; -webkit-font-smoothing: antialiased;">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f4f6f9; padding: 20px 0;">
+        <tr>
+            <td align="center">
+                <!-- Conteneur principal (600px max) -->
+                <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+                    
+                    <!-- En-tête -->
+                    <tr>
+                        <td align="center" style="background-color: #0f172a; padding: 25px 20px;">
+                            <h1 style="color: #ffffff; margin: 0; font-size: 20px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">
+                                KOZ Services
+                            </h1>
+                            <p style="color: #38bdf8; margin: 5px 0 0 0; font-size: 13px; font-weight: 500;">
+                                🔔 Nouvelle Demande Client (Espace Commercial)
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Corps de l'email -->
+                    <tr>
+                        <td style="padding: 30px 25px;">
+                            <h2 style="color: #0f172a; margin-top: 0; font-size: 18px; font-weight: 600;">
+                                Bonjour l'équipe commerciale,
+                            </h2>
+                            <p style="color: #475569; font-size: 14px; line-height: 1.6; margin-bottom: 20px;">
+                                Le client <strong>{{ client.nom_complet|default:client.get_full_name|default:client.username }}</strong> vient de soumettre une nouvelle demande de maintenance sur la plateforme.
+                            </p>
+
+                            <!-- Encadré d'action requise -->
+                            <div style="background-color: #fffbe3; border-left: 4px solid #f59e0b; padding: 12px 15px; border-radius: 0 6px 6px 0; margin-bottom: 20px;">
+                                <p style="color: #b45309; margin: 0 0 4px 0; font-size: 12px; font-weight: 700; text-transform: uppercase;">
+                                    ⚡ Statut : En attente de traitement
+                                </p>
+                                <p style="color: #78350f; margin: 0; font-size: 13px; line-height: 1.4;">
+                                    Veuillez analyser la demande, renseigner le montant estimé et ajuster le planning pour faire passer la demande à <strong>Planifiée</strong>.
+                                </p>
+                            </div>
+
+                            <!-- Tableau récapitulatif -->
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 15px; margin-bottom: 20px;">
+                                <tr>
+                                    <td style="padding: 8px 0; color: #64748b; font-size: 13px; width: 40%;"><strong>Client :</strong></td>
+                                    <td style="padding: 8px 0; color: #0f172a; font-size: 13px; font-weight: 600;">
+                                        {{ client.nom_complet|default:client.get_full_name|default:client.username }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #64748b; font-size: 13px;"><strong>Véhicule :</strong></td>
+                                    <td style="padding: 8px 0; color: #0f172a; font-size: 13px; font-weight: 600;">{{ vehicule }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #64748b; font-size: 13px;"><strong>Type intervention :</strong></td>
+                                    <td style="padding: 8px 0; color: #0f172a; font-size: 13px; font-weight: 600;">{{ type_maintenance }}</td>
+                                </tr>
+                                {% if date_prevue %}
+                                <tr>
+                                    <td style="padding: 8px 0; color: #64748b; font-size: 13px;"><strong>Date souhaitée :</strong></td>
+                                    <td style="padding: 8px 0; color: #2563eb; font-size: 13px; font-weight: 600;">
+                                        {{ date_prevue|date:"d/m/Y à H:i" }}
+                                    </td>
+                                </tr>
+                                {% endif %}
+                                <tr>
+                                    <td style="padding: 8px 0; color: #64748b; font-size: 13px;"><strong>Soumis le :</strong></td>
+                                    <td style="padding: 8px 0; color: #64748b; font-size: 13px;">
+                                        {{ date_creation|date:"d/m/Y à H:i" }}
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Notes du client (Si renseignées) -->
+                            {% if notes_client %}
+                            <div style="background-color: #f1f5f9; border-left: 4px solid #64748b; padding: 12px 15px; border-radius: 0 6px 6px 0; margin-bottom: 25px;">
+                                <p style="color: #475569; margin: 0 0 4px 0; font-size: 12px; font-weight: 700; text-transform: uppercase;">
+                                    Notes / Symptômes déclarés par le client :
+                                </p>
+                                <p style="color: #334155; margin: 0; font-size: 13px; line-height: 1.5; font-style: italic;">
+                                    "{{ notes_client }}"
+                                </p>
+                            </div>
+                            {% endif %}
+
+                            <!-- Bouton d'action direct vers le CRM/Admin -->
+                            {% if lien_detail %}
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 25px; margin-bottom: 20px;">
+                                <tr>
+                                    <td align="center">
+                                        <a href="{{ lien_detail }}" target="_blank" style="background-color: #0f172a; color: #ffffff; text-decoration: none; padding: 12px 26px; border-radius: 6px; font-weight: 600; font-size: 14px; display: inline-block;">
+                                            Prendre en charge la demande
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                            {% endif %}
+                        </td>
+                    </tr>
+
+                    <!-- Pied de page -->
+                    <tr>
+                        <td align="center" style="background-color: #f8fafc; border-top: 1px solid #e2e8f0; padding: 20px; color: #94a3b8; font-size: 12px;">
+                            <p style="margin: 0 0 6px 0;">Notification interne adressée au pôle commercial.</p>
+                            <p style="margin: 0;">&copy; {{ "now"|date:"Y" }} KOZ Corporate. Tous droits réservés.</p>
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

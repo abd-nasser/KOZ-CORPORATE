@@ -63,18 +63,18 @@ class DemandeFinancementForm(forms.ModelForm):
     )
     
     taux_interet = forms.ChoiceField(
-        choices = [(i, f"{i}%") for i in range(0, 18)],  # Taux d'intérêt de 0% à 17%
-        required=False,
-        initial=8,  # Taux d'intérêt par défaut (exemple : 8%)
-        label="📈 Taux d'intérêt annuel (%)",
-        widget=forms.Select(attrs={
-            "class": "select select-bordered w-full",
-            'hx-get':'/leads/estimer-prix/', # URL de la vue qui traite la simulation
-            'hx-target': '#resultat-simulation',                # ID de l'élément où afficher le résultat de la simulation
-            'hx-trigger': 'change delay:300ms',                   # Déclenche la requête au changement de sélection
-            'hx-include': '#simulation-fields',                    # Inclure les champs du formulaire dans la requête HTMX
-        })
-    )
+    choices=[(i, f"{i}%") for i in range(12, 18)],
+    required=False,
+    initial=12,  # Alignée avec les choix (12% à 17%)
+    label="📈 Taux d'intérêt annuel (%)",
+    widget=forms.Select(attrs={
+        "class": "select select-bordered w-full",
+        'hx-get': '/leads/estimer-prix/',
+        'hx-target': '#resultat-simulation',
+        'hx-trigger': 'change changed delay:300ms',
+        'hx-include': '#simulation-fields',
+    })
+)
     
     
     class Meta:
@@ -90,13 +90,7 @@ class DemandeFinancementForm(forms.ModelForm):
                 'step': 10000,
                 'placeholder': 'Montant de l’apport (FCFA)'
             }),
-            'duree_mois': forms.Select(choices=[
-                (12, '12 mois'),
-                (24, '24 mois'),
-                (36, '36 mois'),
-                (48, '48 mois'),
-                (60, '60 mois'),
-            ], attrs={'class': 'select select-bordered w-full'}),
+            'duree_mois': forms.Select(choices=[(i, f"{i} mois") for i in range(1, 25)], attrs={'class': 'select select-bordered w-full'}),
             
             'revenus_mensuel': forms.NumberInput(attrs={
                 'class': 'input input-bordered w-full',
@@ -155,15 +149,14 @@ class DocumentsUploadForm(forms.ModelForm):
             'justificatif_domicile',
             'attestation_non_engagement',
             'contrat_travail',
-            'attestation_travail',
-            'quittance_salaire',      
+            'attestation_travail',      
             'bulletin_1',
             'bulletin_2',
             'bulletin_3',
             'relevé_bancaire',
             'specimen_signature',
             'certificat_presence',
-            'geolocalisation',
+            'plan_geolocalisation',
             'garanties',
             'recu_acompte',
             'fiche_demande',
@@ -215,7 +208,7 @@ class DocumentsUploadForm(forms.ModelForm):
             ('bulletin_3', 'Bulletin de paie (mois -1)'),
             ('relevé_bancaire', 'Relevé bancaire (12 mois) + RIB'),
             ('specimen_signature', 'Spécimen de signature'),
-            ('quittance_salaire', 'Quittance de salaire'),
+            ('plan_geolocalisation', 'plan de géolocalisation')
         ]
         
         for field_name, field_label in required_fields:
@@ -295,3 +288,17 @@ class DocumentsUploadForm(forms.ModelForm):
                 )
         
         return file
+    
+    
+
+class DocumentCommentForm(forms.ModelForm):
+    class Meta:
+        model = Documents
+        fields = ["commentaire_rejet"]
+        widgets = {
+            "commentaire_rejet": forms.Textarea(attrs={
+                "class": "textarea textarea-bordered w-full h-32 focus:textarea-warning text-sm",
+                "placeholder": "Ex: La CNIB est illisible, veuillez fournir une copie en cours de validité...",
+                "rows": 4,
+            })
+        }

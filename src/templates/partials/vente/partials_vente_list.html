@@ -66,15 +66,30 @@
                         </div>
 
                         <!-- Montant -->
+                        
+                        {% if vente.montant_finance %}
                         <div class="flex items-center gap-2">
                             <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
                                 <i class="fas fa-coins"></i>
                             </div>
                             <div>
                                 <span class="text-slate-400 block text-[10px] uppercase font-semibold">Montant financé</span>
-                                <span class="font-extrabold text-emerald-700 text-sm">{{ vente.montant|intcomma }} <span class="text-[10px]">FCFA</span></span>
+                                <span class="font-extrabold text-emerald-700 text-sm">{{ vente.montant_finance|intcomma }} <span class="text-[10px]">FCFA</span></span>
                             </div>
                         </div>
+                        {% else %}
+                        <div class="flex items-center gap-2">
+                            <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                                <i class="fas fa-coins"></i>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 block text-[10px] uppercase font-semibold">Montant total payé</span>
+                                <span class="font-extrabold text-emerald-700 text-sm">{{ vente.montant_total_paye|intcomma }} <span class="text-[10px]">FCFA</span></span>
+                            </div>
+                        </div>
+                        {% endif %}
+                            
+                        
 
                         <!-- Date -->
                         <div class="flex items-center gap-2">

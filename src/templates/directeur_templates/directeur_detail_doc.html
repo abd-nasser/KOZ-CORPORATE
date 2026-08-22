@@ -17,6 +17,8 @@
     <script src="https://unpkg.com/splitting/dist/splitting.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/splitting/dist/splitting.css">
     <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
     <title>Détail dossier - {{ document.client.nom_complet }} | KOZ Services</title>
     <style>
@@ -435,18 +437,7 @@
                                 {% endif %}
                             </div>
 
-                            <div class="doc-card p-4 rounded-xl border border-slate-200 bg-white flex items-center justify-between">
-                                <span class="text-sm font-semibold text-slate-800">3 derniers bulletins (Groupés)</span>
-                                {% if document.quittance_salaire %}
-                                    <a href="{{ document.quittance_salaire.url }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 font-semibold text-xs transition">
-                                        <i class="fas fa-eye"></i> Voir
-                                    </a>
-                                {% else %}
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-50 text-rose-600 font-medium text-xs border border-rose-100">
-                                        <i class="fas fa-times-circle"></i> Manquant
-                                    </span>
-                                {% endif %}
-                            </div>
+                            
                         </div>
 
                         <!-- Sub-section Bulletins individuels -->
@@ -485,6 +476,8 @@
                                         <span class="text-rose-500 text-2xs font-semibold"><i class="fas fa-times"></i> Non fourni</span>
                                     {% endif %}
                                 </div>
+
+                                
                             </div>
                         </div>
 
@@ -537,6 +530,100 @@
                         </div>
                     </div>
                 </div>
+                !-- BLOC GEOLOCALISATION -  -->
+<div class="card bg-base-100 border border-base-300 shadow-sm overflow-hidden">
+    <div class="card-body p-5">
+        
+        <!-- En-tête du bloc -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-base-200">
+            <div>
+                <span class="badge badge-primary badge-outline text-xs font-semibold mb-1">Localisation vérifiée</span>
+                <h3 class="card-title text-base text-base-content flex items-center gap-2">
+                    📍 Domicile du client
+                </h3>
+            </div>
+            
+            <!-- Actions externes -->
+            <div class="flex items-center gap-2 flex-wrap">
+                {% if document.google_maps_url %}
+                    <a href="{{ document.google_maps_url }}" target="_blank" rel="noopener noreferrer" 
+                       class="btn btn-sm btn-outline btn-primary gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                        Google Maps
+                    </a>
+                    <a href="https://waze.com/ul?ll={{ document.latitude }},{{ document.longitude }}&navigate=yes" target="_blank" rel="noopener noreferrer" 
+                       class="btn btn-sm btn-ghost gap-1 text-base-content/70">
+                        Waze
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if document.latitude and document.longitude %}
+            <!-- Carte Leaflet interactive (Lecture seule) -->
+            <div id="dg-map-detail" class="w-full h-64 rounded-box border border-base-300 my-3 z-0"></div>
+
+            <!-- Meta d'information & Coordonnées -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-base-200/50 p-3 rounded-lg text-xs">
+                <div>
+                    <span class="text-base-content/60 block">Coordonnées GPS</span>
+                    <span class="font-mono font-bold text-base-content">
+                        {{ document.latitude }}, {{ document.longitude }}
+                    </span>
+                </div>
+                <div>
+                    <span class="text-base-content/60 block">Plan papier joint</span>
+                    {% if document.plan_geolocalisation %}
+                        <a href="{{ document.plan_geolocalisation.url }}" target="_blank" class="text-primary underline font-medium flex items-center gap-1 mt-0.5">
+                            📄 Télécharger le document annexé
+                        </a>
+                    {% else %}
+                        <span class="text-base-content/40 italic">Aucun fichier scanné fourni</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- JS Initialisation Carte en Mode Lecture Seule -->
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    const lat = parseFloat("{{ document.latitude }}");
+                    const lng = parseFloat("{{ document.longitude }}");
+
+                    // Initialisation et centrage sur les coordonnées du client
+                    const mapDg = L.map('dg-map-detail', {
+                        scrollWheelZoom: false // Évite le zoom accidentel lors du scroll de page
+                    }).setView([lat, lng], 16);
+
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 19,
+                        attribution: '© OpenStreetMap'
+                    }).addTo(mapDg);
+
+                    // Marqueur principal avec Popup d'information
+                    const marker = L.marker([lat, lng]).addTo(mapDg);
+                    marker.bindPopup(`
+                        <div class="text-xs p-1">
+                            <strong>{{ document.client.nom_complet|default:"Client KOZ" }}</strong><br/>
+                            Dossier N° {{ document.pk }}
+                        </div>
+                    `).openPopup();
+                });
+            </script>
+
+        {% else %}
+            <!-- Fallback si la géolocalisation n'a pas encore été renseignée -->
+            <div class="alert alert-warning text-xs mt-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-5 w-5" fill="none" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <span>Aucune coordonnée GPS enregistrée pour ce dossier.</span>
+            </div>
+        {% endif %}
+
+    </div>
+</div>
 
                 <!-- SECTION 4: Autres Justificatifs (Optionnels) -->
                 <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
@@ -564,8 +651,8 @@
 
                         <div class="p-3.5 rounded-xl border border-slate-200/80 bg-white flex items-center justify-between">
                             <span class="text-xs font-semibold text-slate-700">Plan de géolocalisation</span>
-                            {% if document.geolocalisation %}
-                                <a href="{{ document.geolocalisation.url }}" target="_blank" class="text-emerald-700 font-semibold text-xs hover:underline">
+                            {% if document.plan_geolocalisation %}
+                                <a href="{{ document.plan_geolocalisation.url }}" target="_blank" class="text-emerald-700 font-semibold text-xs hover:underline">
                                     <i class="fas fa-eye"></i> Voir
                                 </a>
                             {% else %}

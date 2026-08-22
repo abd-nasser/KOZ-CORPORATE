@@ -1707,14 +1707,15 @@ class ClientCreateMaintenance(LoginRequiredMixin, UserPassesTestMixin, CreateVie
         # ==========================================
         try:
             commerciaux = kozUser.objects.filter(role='commercial', is_active=True)
-            vehicule = maintenance.vehicule if hasattr(maintenance, 'vehicule') else "Véhicule"
+        
 
             context_email = {
                 'client': self.request.user,
                 'maintenance': maintenance,
+                "vehicule":maintenance.vehicul if maintenance.vehicul else f'{maintenance.marque}-{maintenance.modele}',
                 'date_prevue': maintenance.date_prevue,
-                'notes_client': maintenance.notes_client if hasattr(maintenance, 'notes_client') else "",
-                'type_maintenance': maintenance.type_maintenance if hasattr(maintenance, 'type_maintenance') else "Révision",
+                'notes_client': maintenance.notes_client if maintenance.notes_client else "",
+                'type_maintenance': maintenance.type_maintenance if maintenance.type_maintenance else "Révision",
                 'lien_detail': self.request.build_absolute_uri(maintenance.get_absolute_url()),
                 'date_creation': timezone.now(),
             }

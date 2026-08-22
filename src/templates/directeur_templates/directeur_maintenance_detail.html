@@ -84,7 +84,7 @@
         <div class="space-y-6">
 
             <!-- Hero Header Banner -->
-            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-950 p-6 sm:p-8 text-white shadow-xl shadow-slate-900/10">
+            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-700 via-blue-400 to-indigo-700 p-6 sm:p-8 text-white shadow-xl shadow-slate-900/10">
                 <!-- Motif de fond filigrane -->
                 <div class="absolute -right-12 -bottom-12 opacity-10 pointer-events-none">
                     <i class="fas fa-wrench text-[220px]"></i>
@@ -353,7 +353,17 @@
                                 <i class="fas fa-info-circle text-blue-600 mt-0.5"></i>
                                 <span>Le montant réel sera définitivement ajusté après validation des travaux par le chef d'atelier.</span>
                             </div>
+
+                             {% if maintenance.statut == "en_cours" %}
+                        <div class="flex flex-wrap items-center gap-3 left-2 pt-4 md:pt-0 border-t md:border-t-0 border-green-800">
+                            <button onclick="document.getElementById('maj_maintenanceModal').showModal()" 
+                                    class="px-4 py-2.5 rounded-xl bg-green/10 hover:bg-green/20 text-green-600 text-sm font-semibold backdrop-blur-md border border-green/10 transition-all flex items-center gap-2">
+                                <i class="fas fa-pen text-xs"></i> Maj montant réel
+                            </button>
                         </div>
+                        {% endif %}
+                        </div>
+                       
                     </div>
 
                 </div>
@@ -368,6 +378,7 @@
     {% include 'modals/maintenance/update_maintenance.html' %}
     {% include 'modals/maintenance/confirm_maintenance_delete.html' %}
     {% include 'modals/maintenance/gestion_maintenance.html' %}
+    {% include 'modals/maintenance/maintenance_prix_form.html' %}
 
     <!-- Footer -->
     <footer class="bg-white border-t border-slate-200/80 py-6 mt-12">

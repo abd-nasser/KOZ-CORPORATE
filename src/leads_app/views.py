@@ -246,6 +246,7 @@ def demande_financement_view(request, vehicul_id):
     demande.Vehicul_interested = vehicul
     demande.montant_finance = vehicul.prix - form.cleaned_data.get('apport', 0)
     demande.mensualite = form.cleaned_data.get("mensualite_souhaitee")
+    demande.taux_interet = form.cleaned_data.get("taux_interet")
     demande.etape = "nouvelle"
     demande.save()
 
@@ -443,18 +444,24 @@ def refuser_demande(request, demande_id):
 
     return redirect("leads_app:detail-demande", demande.pk)    
 
+from decimal import Decimal, InvalidOperation
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+
 @login_required
 def estimer_prix_vehicule(request):
-    # 1. On récupère les données GET (envoyées par HTMX)
+    # 1. Récupération & nettoyage des paramètres GET
     try:
-        mensualite = Decimal(request.GET.get('mensualite_souhaitee', 0) or 0)
-    except InvalidOperation:
-        mensualite = Decimal(0)
+        # Accepte 'mensualite_souhaitee' ou 'revenus_mensuel'
+        raw_mensualite = request.GET.get('mensualite_souhaitee') or request.GET.get('revenus_mensuel') or 0
+        mensualite = float(raw_mensualite)
+    except (TypeError, ValueError):
+        mensualite = 0.0
 
     try:
-        taux_annuel = Decimal(request.GET.get('taux_interet', 8) or 8) / Decimal(100)
-    except InvalidOperation:
-        taux_annuel = Decimal('0.08')
+        taux_annuel = float(request.GET.get('taux_interet', 12) or 12) / 100.0
+    except (TypeError, ValueError):
+        taux_annuel = 0.12
 
     try:
         duree_mois = int(request.GET.get('duree_mois', 36) or 36)
@@ -462,23 +469,30 @@ def estimer_prix_vehicule(request):
         duree_mois = 36
 
     try:
-        apport = Decimal(request.GET.get('apport', 0) or 0)
-    except InvalidOperation:
-        apport = Decimal(0)
+        apport = float(request.GET.get('apport', 0) or 0)
+    except (TypeError, ValueError):
+        apport = 0.0
 
+    # 2. Calcul du prix estimé
     if mensualite <= 0 or duree_mois <= 0:
-        prix_vehicule = Decimal(0)
+        prix_vehicule = apport  # Si pas de mensualité renseignée, le budget se limite à l'apport
     else:
-        taux_mensuel = taux_annuel / Decimal(12)
+        taux_mensuel = taux_annuel / 12.0
 
         if taux_mensuel == 0:
             capital = mensualite * duree_mois
         else:
+            # Formule de la valeur présente d'une annuité : C = M * (1 - (1 + r)^-n) / r
             capital = mensualite * (1 - (1 + taux_mensuel) ** (-duree_mois)) / taux_mensuel
 
         prix_vehicule = capital + apport
 
-    return render(request, "partials/leads/resulta_simulation.html", {"prix_estime": prix_vehicule})
+    # Convertir en Decimal/Int pour l'affichage propre dans la template
+    prix_estime_final = Decimal(str(round(prix_vehicule, 2)))
+
+    return render(request, "partials/leads/resulta_simulation.html", {
+        "prix_estime": prix_estime_final
+    })
 
 class DemandeFinView(LoginRequiredMixin, ListView):
     model = demande_financement
@@ -642,15 +656,22 @@ def upload_multiple_documents(request, demande_id):
     
     if request.method == 'POST':
         form = DocumentsUploadForm(request.POST, request.FILES, instance=dossier)
+        latitude = request.POST.get("latitude")
+        longitude = request.POST.get('longitude')
+               
+                    
         if form.is_valid():
-            dossier = form.save() 
+            dossier = form.save(commit=False)
+            dossier.latitude = latitude
+            dossier.longitude = longitude
+            dossier.save()
+            form.save()
             if dossier.verifier_completude():
                 # ✅ Dossier complet
                 dossier.statut_dossier = "complet"
                 dossier.save()
                 demande.etape = "en_cours"
                 demande.save()
-                
                 
                 # ✉️ Email à tous les commerciaux
                 try:
@@ -721,9 +742,14 @@ def upload_offre_documents(request, offre_id):
     
     if request.method == "POST":
         form = DocumentsUploadForm(request.POST, request.FILES, instance=dossier)
-        
+        latitude = request.POST.get("latitude")
+        longitude = request.POST.get('longitude')
         if form.is_valid():
-            dossier = form.save()
+            dossier = form.save(commit=False)
+            dossier.latitude = latitude
+            dossier.longitude = longitude
+            dossier.save()
+            form.save()
             
             # ✅ Vérifier la complétude du dossier
             if dossier.verifier_completude():
@@ -1068,6 +1094,16 @@ def modifier_dossier(request, dossier_id):
         })
         response["HX-Trigger"] = "closeGestionDocModal"
         return response
+    
+    if not dossier.commentaire_rejet or dossier.commentaire_rejet is None:
+        response = render(request, "partials/documents/_documents_result.html", {
+                    "success": False,
+                    "title": "⚠️ Attention",
+                    "message": "Veillez renseigner les documents à  modifier ou manquants",
+                })
+        response["HX-Trigger"] = "closeGestionDocModal"
+        return response
+        
     
     # ✅ Mise à jour du statut
     dossier.statut_dossier = "modification"
@@ -1644,9 +1680,22 @@ class DocumentUpdateView(LoginRequiredMixin, UpdateView):
     
     def form_valid(self, form):
         time.sleep(3)
-        self.object = form.save()
-        dossier = self.object
+       # 1. Récupération des données POST via self.request
+        latitude = self.request.POST.get("latitude")
+        longitude = self.request.POST.get("longitude")
 
+        # 2. Bloquer la sauvegarde directe pour injecter les coordonnées
+        dossier = form.save(commit=False)
+        if latitude:
+            dossier.latitude = latitude
+        if longitude:
+            dossier.longitude = longitude
+
+        dossier.save()
+        form.save_m2m()  # Pour préserver d'éventuelles relations ManyToMany
+        self.object = dossier
+
+        # 3. Logique de complétude
         if dossier.verifier_completude():
             dossier.statut_dossier = "complet"
             dossier.save()
@@ -1728,7 +1777,146 @@ class DocumentDeleteView(LoginRequiredMixin,UserPassesTestMixin, DeleteView):
     template_name = "clients_templates/client_detail.doc.html"
     success_url = reverse_lazy("leads_app:documents-list")
     
+from django.views.generic import UpdateView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.urls import reverse_lazy
+from client_app.models import Documents
+from .forms import DocumentCommentForm
+
+class DocumentCommentUpdateView(LoginRequiredMixin, UpdateView):
+    model = Documents
+    form_class = DocumentCommentForm
+
+    def form_valid(self, form):
+        time.sleep(1.5)
+        dossier = form.save(commit=False)
+         # Vérifier que l'utilisateur est commercial ou directeur
+        if self.request.user.role not in ['commercial', 'directeur']:
+            response = render(self.request, "partials/documents/_documents_result.html", {
+                    "success": False,
+                    "title": "❌ Action non autorisée",
+                    "message": "Vous n'avez pas l'autorisation de modifier ce dossier.",
+                })
+            response["HX-Trigger"] = "closeGestionDocModal"
+            return response
         
+        # Vérifier si le dossier peut être modifié
+        if dossier.statut_dossier == "valide":
+            response = render(self.request, "partials/documents/_documents_result.html", {
+                    "success": False,
+                    "title": "⚠️ Attention",
+                    "message": "Ce dossier a déjà été validé, vous ne pouvez pas demander de modifications.",
+                })
+            response["HX-Trigger"] = "closeGestionDocModal"
+            return response
+        
+        if dossier.statut_dossier == "rejete":
+            response = render(self.request, "partials/documents/_documents_result.html", {
+                    "success": False,
+                    "title": "⚠️ Attention",
+                    "message": "Ce dossier a été rejeté. Une nouvelle demande ou offre de financement est nécessaire.",
+                })
+            response["HX-Trigger"] = "closeGestionDocModal"
+            return response
+        
+        if not dossier.commentaire_rejet or dossier.commentaire_rejet is None:
+            response = render(self.request, "partials/documents/_documents_result.html", {
+                            "success": False,
+                            "title": "⚠️ Attention",
+                            "message": "Veillez renseigner les documents à  modifier ou manquants",
+                        })
+            response["HX-Trigger"] = "closeGestionDocModal"
+            return response
+        
+        # ✅ Mise à jour du statut
+        dossier.statut_dossier = "modification"
+        dossier.save()
+        
+        # ✅ Déterminer le contexte (demande ou offre)
+        demande = dossier.demande_financement
+        offre = dossier.offre_financement
+        
+        if demande:
+                contexte_nom = "demande de financement"
+                vehicule = str(demande.Vehicul_interested) if demande.Vehicul_interested else "Véhicule sélectionné"
+                
+                
+        elif offre:
+                contexte_nom = "offre de financement"
+                vehicule = str(offre.vehicule_propose) if offre.vehicule_propose else "Véhicule sélectionné"
+                
+                
+        else:
+            contexte_nom = "dossier"
+            vehicule = "Non renseigné"
+            
+        
+        # ✉️ EMAIL AU CLIENT
+        try:
+            context_email = {
+                    'client': dossier.client,
+                    'commercial': self.request.user,
+                    'dossier_id': dossier.id,
+                    'contexte': contexte_nom,
+                    'vehicule': vehicule,
+                    'lien_chat': f"http://127.0.0.1:8000/chat/{dossier.client.pk}/",
+                    'lien_dossier': self.request.build_absolute_uri(
+                        reverse("leads_app:document-detail", kwargs={"pk": dossier.pk})
+                    ),
+                }
+            html_message = render_to_string('emails/documents/demande_modification_documents.html', context_email)
+            plain_message = strip_tags(html_message)
+                
+            send_mail(
+                    subject="📝 Demande de modification de vos documents - KOZ Services",
+                    message=plain_message,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[dossier.client.email],
+                    html_message=html_message,
+                    fail_silently=False,
+                )
+        except Exception as e:
+            logger.error(f"Erreur envoi email au client: {e}")
+        
+         # 💬 MESSAGE DANS LE CHAT INTERNE
+        try:
+            from chat_app.models import Message
+                
+            if demande:
+                message_contenu = (
+                        f"📄 Demande de modification de vos documents pour la demande de financement "
+                        f"du véhicule {vehicule}. Veuillez consulter votre espace client."
+                    )
+            elif offre:
+                message_contenu = (
+                        f"📄 Demande de modification de vos documents pour l'offre de financement "
+                        f"n°{offre.id} (véhicule {vehicule}). Veuillez consulter votre espace client."
+                    )
+            else:
+                message_contenu = (
+                        f"📄 Demande de modification de vos documents pour votre dossier. "
+                        f"Veuillez consulter votre espace client."
+                    )
+                
+                Message.objects.create(
+                    client=dossier.client,
+                    commercial=self.request.user,
+                    contenu=message_contenu,
+                    est_client=False,
+                )
+        except Exception as e:
+                logger.error(f"Erreur création message chat: {e}")
+        response = render(self.request, "partials/documents/_documents_result.html", {
+                "success": True,
+                "title": "✅ Demande envoyée",
+                "message": f"Une demande de modification a été envoyée à {dossier.client.nom_complet}.",
+                "reload_on_close": True,
+            })
+        response["HX-Trigger"] = "closeGestionDocModal"
+        return response
+        
+
+   
     
 
     

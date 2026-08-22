@@ -116,14 +116,7 @@
                                 {{ upload_doc_form.attestation_travail }}
                             </div>
                         </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">
-                                {{ upload_doc_form.quittance_salaire.label }} <span class="text-rose-500">*</span>
-                            </label>
-                            <div class="custom-file-field">
-                                {{ upload_doc_form.quittance_salaire }}
-                            </div>
-                        </div>
+                        
                     </div>
 
                     <!-- Section Bulletins de paie -->
@@ -174,9 +167,68 @@
                             <div class="custom-file-field">
                                 {{ upload_doc_form.specimen_signature }}
                             </div>
-                        </div>
+                        </div>     
                     </div>
                 </div>
+
+                <!-- BLOC GÉOLOCALISATION DOSSIER -->
+                <div class="card bg-base-100 border border-base-300 p-4 shadow-sm space-y-4">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                        <div>
+                            <h3 class="font-bold text-base text-base-content flex items-center gap-2">
+                                📍 Localisation du domicile 
+                                <span class="text-[10px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200/60">
+                                Requis
+                                </span>
+                            </h3>
+                            <p class="text-xs text-base-content/70">
+                                Partagez votre position exacte ou déplacez le marqueur sur la carte. <span class="text-rose-500">*</span>
+                            </p>
+                        </div>
+        
+                        <!-- Bouton Style WhatsApp -->
+                        <button type="button" 
+                                id="btn-geoloc" 
+                                onclick="capturerPositionGPS()" 
+                                class="btn btn-primary btn-sm gap-2 w-full sm:w-auto">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            Partager ma position actuelle 
+                        </button>
+                     </div>
+
+                        <!-- Message de statut -->
+                        <div id="geo-status" class="text-xs font-medium hidden"></div>
+
+                        <!-- Carte de prévisualisation -->
+                        <div id="map-preview" class="w-full h-52 rounded-box border border-base-300 z-0"></div>
+
+                        <!-- Champs Django (Remplis automatiquement par le JS) -->
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="label py-1"><span class="label-text-alt font-bold">Latitude</span></label>
+                                <input type="text" name="latitude" id="id_latitude" value="{{ upload_doc_form.latitude.value|default:'' }}" 
+                                    class="input input-bordered input-sm w-full bg-base-200 text-xs" readonly required placeholder="Ex: 12.371428" />
+                            </div>
+                            <div>
+                                <label class="label py-1"><span class="label-text-alt font-bold">Longitude</span></label>
+                                <input type="text" name="longitude" id="id_longitude" value="{{ upload_doc_form.longitude.value|default:'' }}" 
+                                    class="input input-bordered input-sm w-full bg-base-200 text-xs" readonly required placeholder="Ex: -1.519722" />
+                            </div>
+                        </div>
+                        <!-- Champs Django (optionnel) -->
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">
+                                {{ upload_doc_form.plan_geolocalisation.label }} <span class="text-blue-500">opt</span>
+                            </label>
+                            <div class="custom-file-field">
+                                {{ upload_doc_form.plan_geolocalisation }}
+                            </div>
+                        </div>
+                </div>
+
 
                 <!-- 4. AUTRES (Optionnels) -->
                 <div class="bg-slate-50/70 border border-slate-200/80 rounded-xl p-4 transition-colors">
@@ -197,14 +249,7 @@
                                 {{ upload_doc_form.certificat_presence }}
                             </div>
                         </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">
-                                {{ upload_doc_form.geolocalisation.label }}
-                            </label>
-                            <div class="custom-file-field">
-                                {{ upload_doc_form.geolocalisation }}
-                            </div>
-                        </div>
+                        
                         <div>
                             <label class="block text-xs font-medium text-slate-600 mb-1">
                                 {{ upload_doc_form.garanties.label }}
@@ -229,6 +274,7 @@
                                 {{ upload_doc_form.fiche_demande }}
                             </div>
                         </div>
+                        
                     </div>
                 </div>
                     <!-- Footer fixe avec boutons d'action -->
@@ -261,6 +307,83 @@
         const modal = document.getElementById('upload_doc_modal');
         if (modal) modal.close();
     });
+</script>
+
+<script>
+    // Coordonnées par défaut (ex: Ouagadougou / Centre-ville)
+    let defaultLat = parseFloat(document.getElementById('id_latitude').value) || 12.371428;
+    let defaultLng = parseFloat(document.getElementById('id_longitude').value) || -1.519722;
+    let initialZoom = document.getElementById('id_latitude').value ? 16 : 12;
+
+    // Initialisation de la carte Leaflet
+    const map = L.map('map-preview').setView([defaultLat, defaultLng], initialZoom);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    // Marqueur déplaçable
+    let marker = L.marker([defaultLat, defaultLng], { draggable: true }).addTo(map);
+
+    // Mettre à jour les champs HTML au déplacement manuel du marqueur
+    marker.on('dragend', function (e) {
+        const coord = e.target.getLatLng();
+        mettreAJourCoordonnees(coord.lat, coord.lng);
+    });
+
+    function mettreAJourCoordonnees(lat, lng) {
+        const formattedLat = parseFloat(lat).toFixed(6);
+        const formattedLng = parseFloat(lng).toFixed(6);
+        
+        document.getElementById('id_latitude').value = formattedLat;
+        document.getElementById('id_longitude').value = formattedLng;
+        
+        afficherStatus(`✅ Coordonnées sélectionnées : ${formattedLat}, ${formattedLng}`, 'text-success');
+    }
+
+    function capturerPositionGPS() {
+        const btn = document.getElementById('btn-geoloc');
+        const status = document.getElementById('geo-status');
+
+        if (!navigator.geolocation) {
+            afficherStatus("❌ La géolocalisation n'est pas supportée par votre navigateur.", 'text-error');
+            return;
+        }
+
+        btn.classList.add('loading');
+        afficherStatus("⏳ Recherche de votre position GPS en cours...", 'text-info');
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+
+                // Mise à jour de la carte & du marqueur
+                map.setView([lat, lng], 17);
+                marker.setLatLng([lat, lng]);
+
+                // Mise à jour des inputs Django
+                mettreAJourCoordonnees(lat, lng);
+                btn.classList.remove('loading');
+            },
+            (error) => {
+                btn.classList.remove('loading');
+                let msg = "❌ Impossible de récupérer la position.";
+                if (error.code === error.PERMISSION_DENIED) {
+                    msg = "❌ Permission GPS refusée. Veuillez autoriser l'accès à la localisation.";
+                }
+                afficherStatus(msg, 'text-error');
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
+    }
+
+    function afficherStatus(message, classeCouleur) {
+        const status = document.getElementById('geo-status');
+        status.className = `text-xs font-medium ${classeCouleur}`;
+        status.innerText = message;
+        status.classList.remove('hidden');
+    }
 </script>
 
 <style>

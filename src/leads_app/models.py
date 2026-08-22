@@ -91,7 +91,8 @@ class demande_financement(models.Model):
     montant_finance = models.DecimalField(max_digits=12, decimal_places=0, default=0)
     
     mensualite = models.DecimalField(max_digits=12, decimal_places=0, blank=True, null=True)
-    duree_mois = models.IntegerField(default=36)
+    taux_interet = models.IntegerField(default=12)
+    duree_mois = models.IntegerField(default=24)
     
     revenus_mensuel = models.DecimalField(max_digits=12, decimal_places=0, blank=True, null=True)
     

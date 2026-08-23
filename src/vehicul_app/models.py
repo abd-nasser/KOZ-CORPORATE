@@ -122,7 +122,11 @@ class Vehicul(models.Model):
     def stock_alerte(self):
         """Vérifie si le stock est en dessous du seuil d'alerte"""
         return self.stock <= self.stock_min
-        
+    
+    @property
+    def marque_and_model(self):
+        return f'{self.marque.nom}-{self.modele}'
+      
     def __str__(self):
         marque_nom = self.marque.nom if self.marque else "?"
         modele_nom = self.modele if self.modele else "?"

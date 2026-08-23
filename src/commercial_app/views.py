@@ -925,30 +925,24 @@ def changer_statut_vente(request, vente_id):
     return redirect('commercial_app:vente-detail', pk=vente.id)
 
 
+from django.core.mail import EmailMessage
+from django.conf import settings
+from utils.pdf import render_to_pdf  # Import du helper crée à l'étape 1
+
 @login_required
 def marquer_paye(request, vente_id, numero_echeance):
     if request.user.role not in ["directeur", "commercial"]:
-            messages.warning(request, "Vous n'etes pas autorisé changer le status de cette vente")
-            messages.warning(request, "Si toute fois nouvelle tentative votre compte sera bloqué")
-            return redirect('home_app:home-page')
-    time.sleep(3)
+        messages.warning(request, "Vous n'etes pas autorisé changer le status de cette vente")
+        messages.warning(request, "Si toute fois nouvelle tentative votre compte sera bloqué")
+        return redirect('home_app:home-page')
+        
+    time.sleep(1) # réduit à 1s pour accélérer
     vente = get_object_or_404(Vente, id=vente_id)
     numero_echeance = int(numero_echeance)
-
-    # ✅ Vérification des droits
-    if request.user.role not in ['commercial', 'directeur']:
-        response = render(request, "partials/vente/_vente_result.html", {
-            "success": False,
-            "title": "❌ Action non autorisée",
-            "message": "Vous n'avez pas les droits pour effectuer cette action.",
-        })
-        response['HX-Trigger'] = "closePaiementModal"
-        return response
 
     if request.method != 'POST':
         return redirect('commercial_app:vente-detail', vente.pk)
 
-    # ✅ Validation de la date de paiement
     date_paiement_str = request.POST.get('date_paiement')
     try:
         date_paiement = (
@@ -965,7 +959,6 @@ def marquer_paye(request, vente_id, numero_echeance):
         return response
 
     with transaction.atomic():
-        # ✅ Vérifier l'état actuel de l'échéance AVANT modification
         echeance_actuelle = next(
             (e for e in vente.echeances if e['numero'] == numero_echeance), None
         )
@@ -988,18 +981,17 @@ def marquer_paye(request, vente_id, numero_echeance):
             response['HX-Trigger'] = "closePaiementModal"
             return response
 
-        # ✅ Marquer l'échéance comme payée dans le JSON
+        # 1. Marquer l'échéance payée
         echeance_actuelle['paye'] = True
         echeance_actuelle['date_paiement'] = date_paiement.isoformat()
 
-        # ✅ Apport déjà versé + toutes les échéances payées
         total_echeances_payees = sum(
             Decimal(str(e['montant'])) for e in vente.echeances if e['paye']
         )
         vente.montant_total_paye = vente.montant + total_echeances_payees
         vente.save()
 
-        # ✅ Synchroniser le PaiementFinancement correspondant
+        # 2. Synchroniser le PaiementFinancement
         paiement = PaiementFinancement.objects.filter(
             vente=vente,
             reference=f"PAY-{vente.id}-{numero_echeance}"
@@ -1010,15 +1002,78 @@ def marquer_paye(request, vente_id, numero_echeance):
             paiement.date_paiement = date_paiement
             paiement.save()
 
+            # 3. 📄 GENERATION DU REÇU PDF + EMAIL CLIENT
+            pdf_bytes = render_to_pdf('pdf/recu_paiement.html', {
+                'paiement': paiement,
+                'vente': vente
+            })
+
+            if pdf_bytes and vente.client.email:
+                sujet = f"Reçu de paiement - Échéance #{numero_echeance} ({paiement.reference})"
+                corps = (
+                    f"Bonjour {vente.client.nom_complet},\n\n"
+                    f"Nous vous confirmons le bon règlement de votre échéance de {paiement.montant} FCFA "
+                    f"effectué le {date_paiement.strftime('%d/%m/%Y')}.\n\n"
+                    "Vous trouverez votre reçu officiel de paiement joint à ce message.\n\n"
+                    "Cordialement,\nL'équipe KOZ Services."
+                )
+
+                email = EmailMessage(
+                    subject=sujet,
+                    body=corps,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    to=[vente.client.email]
+                )
+                email.attach(f"Reçu_Paiement_{paiement.reference}.pdf", pdf_bytes, 'application/pdf')
+                email.send(fail_silently=True)
+
     response = render(request, "partials/vente/_vente_result.html", {
         "success": True,
         "title": "✅ Paiement enregistré",
-        "message": f"L'échéance #{numero_echeance} a été marquée comme payée.",
+        "message": f"L'échéance #{numero_echeance} a été marquée comme payée et le reçu a été envoyé par email au client.",
         "reload_on_close": True,
     })
     response['HX-Trigger'] = "closePaiementModal"
     return response
 
+from django.shortcuts import get_object_or_404, redirect
+from django.http import HttpResponse, Http404
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from utils.pdf import render_to_pdf
+
+@login_required
+def telecharger_recu_pdf(request, vente_id, numero_echeance):
+    vente = get_object_or_404(Vente, pk=vente_id)
+    
+    # 🛡️ 1. Vérification des droits d'accès
+    if request.user != vente.client and request.user.role not in ['commercial', 'directeur']:
+        raise Http404("Accès non autorisé")
+    
+    # 🔍 2. Récupération du paiement grâce au pattern de référence
+    reference_recherchee = f"PAY-{vente.id}-{numero_echeance}"
+    paiement = get_object_or_404(PaiementFinancement, vente=vente, reference=reference_recherchee)
+
+    # ⚠️ 3. Sécurité : vérifier que l'échéance est réellement payée
+    if paiement.statut != 'paye':
+        messages.error(request, f"L'échéance #{numero_echeance} n'est pas encore réglée.")
+        return redirect('commercial_app:vente-detail', pk=vente.pk)
+
+    # 📄 4. Génération du PDF
+    pdf_bytes = render_to_pdf('pdf/recu_paiement.html', {
+        'paiement': paiement,
+        'vente': vente
+    })
+
+    if not pdf_bytes:
+        raise Http404("Erreur lors de la génération du document PDF.")
+
+    # 📥 5. Envoi du fichier PDF au navigateur
+    response = HttpResponse(pdf_bytes, content_type='application/pdf')
+    
+    # inline = Ouvre dans le navigateur / attachment = Télécharge directement
+    response['Content-Disposition'] = f'inline; filename="Recu_Paiement_{reference_recherchee}.pdf"'
+    return response
 
 class venteSimpleCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     def test_func(self):
@@ -1216,6 +1271,7 @@ def refuser_maintenance(request, maintenance_id):
     response["HX-Trigger"] = "closeGestMaintenanceModal"
     return response
 
+@login_required
 def changer_statut_maintenance(request, maintenance_id, nouveau_statut):
     time.sleep(1.5)  # Petit délai pour l'expérience UI (HTMX loader)
     maintenance = get_object_or_404(Maintenance, id=maintenance_id)

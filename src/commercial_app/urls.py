@@ -43,6 +43,7 @@ urlpatterns = [
     path('ventes/partial/', views.VenteListView.as_view(), name='vente-list-partial'),
     path('vente/<int:vente_id>/changer-statut/',views.changer_statut_vente, name='changer-statut-vente'),
     path('vente/<int:vente_id>/marquer-paye/<int:numero_echeance>/', views.marquer_paye, name='marquer-paye'),
+    path('ventes/<int:vente_id>/echeances/<int:numero_echeance>/recu/pdf/', views.telecharger_recu_pdf, name='telecharger-recu-pdf'),
     
     
     ########################________RendezVous____________#############################

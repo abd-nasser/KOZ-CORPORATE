@@ -424,6 +424,11 @@
                                                     </span>
                                                 {% endif %}
                                             </span>
+                                            <a href="{% url 'commercial_app:telecharger-recu-pdf' vente.id echeance.numero %}" 
+                                                target="_blank" 
+                                                class="btn btn-xs btn-outline btn-success gap-1">
+                                                    📄 Reçu PDF
+                                            </a>
                                         {% else %}
                                             <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200/60">
                                                 <i class="fas fa-hourglass-half text-amber-500"></i> En attente

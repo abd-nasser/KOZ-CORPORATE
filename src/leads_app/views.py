@@ -1859,7 +1859,7 @@ class DocumentCommentUpdateView(LoginRequiredMixin, UpdateView):
                     'dossier_id': dossier.id,
                     'contexte': contexte_nom,
                     'vehicule': vehicule,
-                    'lien_chat': f"http://127.0.0.1:8000/chat/{dossier.client.pk}/",
+                    'lien_chat': f"https://www.koz-corporate.pro/chat/{dossier.client.pk}/",
                     'lien_dossier': self.request.build_absolute_uri(
                         reverse("leads_app:document-detail", kwargs={"pk": dossier.pk})
                     ),

@@ -1,0 +1,190 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Reçu de Paiement - {{ paiement.reference }}</title>
+    <style>
+        @page {
+            size: a4 portrait;
+            margin: 1.5cm 2cm 2cm 2cm;
+        }
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            color: #333333;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        /* FILIGRANE / WATERMARK ARRIÈRE-PLAN */
+        .watermark {
+            position: absolute;
+            top: 250px;
+            left: 80px;
+            width: 400px;
+            opacity: 0.06; /* Faible opacité pour ne pas gêner la lecture */
+            z-index: -1000;
+        }
+
+        /* EN-TÊTE */
+        .header {
+            width: 100%;
+            border-bottom: 2px solid #0056b3;
+            padding-bottom: 12px;
+            margin-bottom: 25px;
+        }
+        .logo-header {
+            max-height: 55px;
+            width: auto;
+        }
+        .document-title {
+            font-size: 18px;
+            font-weight: bold;
+            text-align: right;
+            color: #28a745;
+        }
+
+        /* BLOCS CLIENT & DETAILS */
+        .section-table {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .box {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 12px;
+            border-radius: 4px;
+        }
+
+        /* TABLEAU PAIEMENT */
+        .table-data {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        .table-data th {
+            background-color: #0056b3;
+            color: #ffffff;
+            padding: 8px;
+            text-align: left;
+            font-size: 12px;
+        }
+        .table-data td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .badge-success {
+            background-color: #28a745;
+            color: #ffffff;
+            padding: 4px 8px;
+            font-weight: bold;
+            font-size: 11px;
+            border-radius: 3px;
+        }
+        .total-box {
+            margin-top: 20px;
+            text-align: right;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        /* PIED DE PAGE & TAMPON */
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 10px;
+            color: #777777;
+            border-top: 1px solid #dee2e6;
+            padding-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+
+    <!-- EN-TÊTE AVEC LOGO -->
+    <table class="header">
+        <tr>
+            <td width="50%" style="vertical-align: middle;">
+                <img src="{% static 'images/koz_logo_noBack.png' %}" class="logo-header" alt="KOZ Services"><br>
+                <small style="color: #666; font-size: 10px;">Solution & Financement Automobile</small>
+            </td>
+            <td width="50%" class="document-title" style="vertical-align: middle;">
+                REÇU DE PAIEMENT<br>
+                <small style="font-size: 12px; color: #555;">Réf: {{ paiement.reference }}</small>
+            </td>
+        </tr>
+    </table>
+
+    <!-- CLIENT & VENTE -->
+    <table class="section-table">
+        <tr>
+            <td width="50%" style="padding-right: 10px;">
+                <div class="box">
+                    <strong>Informations Client :</strong><br>
+                    Nom : {{ paiement.client.nom_complet }}<br>
+                    Email : {{ paiement.client.email|default:"Non renseigné" }}
+                </div>
+            </td>
+            <td width="50%" style="padding-left: 10px;">
+                <div class="box">
+                    <strong>Détails du Véhicule / Vente :</strong><br>
+                    Véhicule : {{ vente.vehicul.marque_and_model }}<br>
+                    Date d'opération : {{ paiement.date_paiement|date:"d/m/Y" }}
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <!-- DÉTAILS DU PAIEMENT -->
+    <table class="table-data">
+        <thead>
+            <tr>
+                <th>Désignation</th>
+                <th>Date d'échéance</th>
+                <th>Date de Règlement</th>
+                <th>Statut</th>
+                <th style="text-align: right;">Montant réglé</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Échéance de financement (Réf: {{ paiement.reference }})</td>
+                <td>{{ paiement.date_echeance|date:"d/m/Y" }}</td>
+                <td>{{ paiement.date_paiement|date:"d/m/Y" }}</td>
+                <td><span class="badge-success">PAYÉ</span></td>
+                <td style="text-align: right;"><strong>{{ paiement.montant }} FCFA</strong></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- TOTAL -->
+    <div class="total-box">
+        Total Encaissé : <span style="color: #28a745;">{{ paiement.montant }} FCFA</span>
+    </div>
+
+    <!-- PIED DE PAGE & TAMPON -->
+    <div style="margin-top: 40px;">
+        <table width="100%">
+            <tr>
+                <td width="60%">
+                    <p style="font-size: 11px; color: #666;">
+                        * Ce document sert de décharge officielle de paiement pour l'échéance susmentionnée.
+                    </p>
+                </td>
+                <td width="40%" style="text-align: center;">
+                    <strong>La Direction Commerciale</strong><br><br><br>
+                    <span style="color: #28a745; font-weight: bold; border: 2px dashed #28a745; padding: 5px 10px;">
+                        ✔ VALIDÉ & ENCAISSÉ
+                    </span>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="footer">
+        KOZ Services - Document généré automatiquement le {{ paiement.date_paiement|date:"d/m/Y" }}
+    </div>
+
+</body>
+</html>

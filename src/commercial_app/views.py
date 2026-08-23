@@ -932,9 +932,14 @@ from utils.pdf import render_to_pdf  # Import du helper crée à l'étape 1
 @login_required
 def marquer_paye(request, vente_id, numero_echeance):
     if request.user.role not in ["directeur", "commercial"]:
-        messages.warning(request, "Vous n'etes pas autorisé changer le status de cette vente")
-        messages.warning(request, "Si toute fois nouvelle tentative votre compte sera bloqué")
-        return redirect('home_app:home-page')
+        response = render(request, "partials/vente/_vente_result.html", {
+                    "success": False,
+                    "title": "❌ Erreur",
+                    "message": """Vous n'etes pas autorisé changer le status de cette vente 
+                                Si toute fois nouvelle tentative votre compte sera bloqué""",
+                })
+        response['HX-Trigger'] = "closePaiementModal"
+        return response
         
     time.sleep(1) # réduit à 1s pour accélérer
     vente = get_object_or_404(Vente, id=vente_id)

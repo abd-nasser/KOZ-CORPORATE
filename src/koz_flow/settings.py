@@ -267,7 +267,9 @@ INTERNAL_IPS = [
 CRISPY_ALLOWED_TEMPLATE_PACKS = "tailwind"
 CRISPY_TEMPLATE_PACK = "tailwind"
 
-NPM_BIN_PATH = r"C:\Program Files\nodejs\npm.cmd"
+import shutil
+
+NPM_BIN_PATH = shutil.which("npm") or "/usr/bin/npm"
 
 #Email configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

@@ -352,8 +352,6 @@ def contact_form(request):
             
         })
         
-       
-
 
 def prise_rdv(request):
     

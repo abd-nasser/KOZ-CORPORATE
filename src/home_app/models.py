@@ -421,7 +421,8 @@ class RendezVous(models.Model):
         blank=True,
         on_delete=models.CASCADE,
         related_name='rendez_vous',
-        verbose_name="Client"
+        verbose_name="Client",
+        limit_choices_to={"role":"client"}
     )
     nom = models.CharField(max_length=255, verbose_name="Nom", null=True, blank=True )
     prenom = models.CharField(max_length=255, verbose_name="Prenom", null=True, blank=True)

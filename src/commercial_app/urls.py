@@ -47,7 +47,9 @@ urlpatterns = [
     
     
     ########################________RendezVous____________#############################
-     path('rendez-vous/', views.CommercialRendezVousListView.as_view(), name='rendez-vous-list'),
+    path('rendez-vous/<int:client_id>/creer/', views.com_create_rdv, name='rdv-creer'),
+    path('rendez-vous/creer/', views.com_create_rdv, name='rdv-creer'),
+    path('rendez-vous/', views.CommercialRendezVousListView.as_view(), name='rendez-vous-list'),
     path('rendez-vous/confirmer/<int:rdv_id>/', views.confirmer_rdv, name='confirmer-rdv'),
     path('rendez-vous/annuler/<int:rdv_id>/', views.annuler_rdv, name='annuler-rdv'),
     path('rendez-vous/terminer/<int:rdv_id>/', views.terminer_rdv, name='terminer-rdv'),

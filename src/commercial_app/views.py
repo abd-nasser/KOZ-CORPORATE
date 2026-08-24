@@ -5,14 +5,17 @@ from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from leads_app.utils import generer_echeances_offre, generer_echeances_demande
-from datetime import datetime
+from utils.pdf import render_to_pdf
 
+from datetime import datetime
+from django.http import HttpResponse, Http404
 
 from django.urls import reverse_lazy, reverse
 from django.conf import settings
 
 from django.contrib import messages
 from django.db.models import Q
+from django.db import transaction
 from django.utils import timezone
 from django.views.generic import TemplateView, ListView, DetailView, CreateView, DeleteView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
@@ -33,11 +36,15 @@ from home_app.models import RendezVous
 from auth_app.forms import UserRegisterForm, ChangePasswordForm
 from leads_app.forms import GestionFinancementForm, DocumentsUploadForm, VenteSimpleForm
 from client_app.forms import ClientMaintenanceForm, MAJmaintenanceForm, MaintenanceForm
-from .forms import OffreFinancementForm, OffreSimpleForm
+from .forms import OffreFinancementForm, OffreSimpleForm, RdvForm, ClientRdvForm
+
+from django.core.mail import EmailMessage
+
+  
 
 import logging
 import time
-from django.db import transaction
+
 
 logger = logging.getLogger(__name__)
 
@@ -925,9 +932,7 @@ def changer_statut_vente(request, vente_id):
     return redirect('commercial_app:vente-detail', pk=vente.id)
 
 
-from django.core.mail import EmailMessage
-from django.conf import settings
-from utils.pdf import render_to_pdf  # Import du helper crée à l'étape 1
+
 
 @login_required
 def marquer_paye(request, vente_id, numero_echeance):
@@ -1041,11 +1046,7 @@ def marquer_paye(request, vente_id, numero_echeance):
     response['HX-Trigger'] = "closePaiementModal"
     return response
 
-from django.shortcuts import get_object_or_404, redirect
-from django.http import HttpResponse, Http404
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from utils.pdf import render_to_pdf
+
 
 @login_required
 def telecharger_recu_pdf(request, vente_id, numero_echeance):
@@ -1851,7 +1852,54 @@ class CommercialRendezVousListView(LoginRequiredMixin, UserPassesTestMixin, List
             'annule': RendezVous.objects.filter(statut='annule').count(),
             'termine': RendezVous.objects.filter(statut='termine').count(),
         }
+        if "rdv_form" not in context:
+            context['rdv_form'] = RdvForm()
         return context
+
+
+
+
+@login_required
+def com_create_rdv(request, client_id=None):
+    # 🛡️ Sécurité : Accès réservé aux commerciaux et directeurs
+    if request.user.role not in ['commercial', 'directeur',]:
+        raise Http404("Accès non autorisé")
+
+    initial_data = {}
+    
+    # Si le commercial crée le RDV directement depuis la fiche d'un client
+    if client_id:
+        from auth_app.models import kozUser
+        client_obj = get_object_or_404(kozUser, pk=client_id)
+        initial_data['client'] = client_obj
+
+    if request.method == 'POST':
+        form = RdvForm(request.POST)
+        if form.is_valid():
+            rdv = form.save(commit=False)
+            
+            if rdv.client:
+                # On découpe en 2 parties maximum : le 1er mot et TOUT le reste
+                parts = (rdv.client.nom_complet or "").strip().split(maxsplit=1)
+                
+                if parts:
+                    rdv.nom = rdv.nom or parts[0]
+                    # On vérifie si la 2ème partie existe pour éviter le IndexError
+                    rdv.prenom = rdv.prenom or (parts[1] if len(parts) > 1 else "")
+                
+                # N'oublie pas le téléphone aussi !
+                rdv.telephone = rdv.telephone or getattr(rdv.client, 'telephone', '')
+
+            rdv.statut = 'confirme' # Directement confirmé par le commercial
+            rdv.save()
+            envoyer_notification_rdv(rdv)  # Déclenchement automatique
+            messages.success(request, "Rendez-vous créé et email de confirmation envoyé !")
+            messages.success(request, f"Rendez-vous programmé avec succès pour le {rdv.date_rendez_vous.strftime('%d/%m/%Y à %H:%M')}.")
+            return redirect('commercial_app:rendez-vous-list')
+    else:
+        form = RdvForm(initial=initial_data)
+
+    return reverse(request, 'commercial_templates/rendez_vous_list.html', {'form': form})
 
 
 @login_required
@@ -1859,6 +1907,8 @@ def confirmer_rdv(request, rdv_id):
     rdv = get_object_or_404(RendezVous, id=rdv_id)
     rdv.statut = 'confirme'
     rdv.save()
+    if rdv.client:
+        envoyer_notification_rdv(rdv)
     messages.success(request, f"✅ Rendez-vous du {rdv.date_rendez_vous.strftime('%d/%m/%Y à %H:%M')} confirmé !")
     return redirect('commercial_app:rendez-vous-list')
 
@@ -1879,3 +1929,39 @@ def terminer_rdv(request, rdv_id):
     rdv.save()
     messages.success(request, f"✅ Rendez-vous du {rdv.date_rendez_vous.strftime('%d/%m/%Y à %H:%M')} terminé !")
     return redirect('commercial_app:rendez-vous-list')
+
+
+
+def envoyer_notification_rdv(rdv):
+    # 1. Récupération dynamique de l'email destinataire
+    destinataire = None
+    nom_destinataire = ""
+
+    if rdv.client and rdv.client.email:
+        destinataire = rdv.client.email
+        nom_destinataire = rdv.client.get_nom_complet() 
+    elif getattr(rdv, 'email', None):  # Si champ email direct sur prospect
+        destinataire = rdv.email
+        nom_destinataire = f"{rdv.prenom} {rdv.nom}".strip()
+
+    # 2. Envoi conditionnel si l'email existe
+    if destinataire:
+        sujet = f"KOZ Services — Rendez-vous confirmé le {rdv.date_rendez_vous.strftime('%d/%m/%Y')}"
+        
+        # Message texte clair (ou rendu via template HTML)
+        message = (
+            f"Bonjour {nom_destinataire},\n\n"
+            f"Votre rendez-vous a bien été enregistré.\n\n"
+            f"📅 Date : {rdv.date_rendez_vous.strftime('%d/%m/%Y à %H:%M')}\n"
+            f"⏱️ Durée : {rdv.duree} minutes\n"
+            f"📌 Motif : {rdv.motif}\n\n"
+            f"L'équipe KOZ Services."
+        )
+
+        send_mail(
+            subject=sujet,
+            message=message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[destinataire],
+            fail_silently=True  # Évite de faire planter la requête si le serveur SMTP flanche
+        )

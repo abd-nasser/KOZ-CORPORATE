@@ -2,251 +2,348 @@
 {% load tailwind_tags %}
 {% load humanize %}
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-theme="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {% tailwind_css %}
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <title>Gestion des rendez-vous - KOZ Services</title>
-    <style>
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-in-up { animation: fadeInUp 0.3s ease-out forwards; }
-        .glass-nav {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-        }
-        .rdv-card {
-            transition: all 0.2s ease;
-        }
-        .rdv-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
-        }
-        .badge-statut {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 0.2rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.65rem;
-            font-weight: 600;
-        }
-        .badge-statut.en_attente { background: #fef3c7; color: #92400e; }
-        .badge-statut.confirme { background: #dcfce7; color: #166534; }
-        .badge-statut.annule { background: #fee2e2; color: #991b1b; }
-        .badge-statut.termine { background: #dbeafe; color: #1e40af; }
-        .btn-primary {
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
-            color: white;
-            border: none;
-            transition: all 0.3s ease;
-            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.5);
-        }
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
-            transform: translateY(-2px);
-            box-shadow: 0 20px 35px -8px rgba(59, 130, 246, 0.7);
-        }
-    </style>
 </head>
-<body class="bg-gray-50 font-inter">
+<body class="bg-base-200/60 font-inter min-h-screen flex flex-col antialiased">
 
     <!-- ===== NAVBAR ===== -->
-    <nav class="glass-nav sticky top-0 z-40 shadow-sm">
+    <nav class="bg-base-100/80 backdrop-blur-md sticky top-0 z-40 border-b border-base-200 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl flex items-center justify-center shadow-lg">
-                    <span class="text-white font-bold text-xl">K</span>
+                <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center shadow-md shadow-blue-500/20">
+                    <span class="text-white font-extrabold text-xl">K</span>
                 </div>
-                <span class="text-xl font-bold bg-gradient-to-r from-blue-700 to-indigo-600 bg-clip-text text-transparent">KOZ Services</span>
-                <span class="hidden md:inline-block px-2 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">Commercial</span>
+                <div>
+                    <span class="text-lg font-bold bg-gradient-to-r from-blue-700 to-indigo-600 bg-clip-text text-transparent">KOZ Services</span>
+                    <span class="hidden md:inline-block ml-2 px-2 py-0.5 bg-blue-50 text-blue-700 text-xs font-semibold rounded-full border border-blue-100">Commercial</span>
+                </div>
             </div>
-            <a href="{% url 'commercial_app:commercial-view' %}" class="text-gray-600 hover:text-blue-600 transition text-sm flex items-center gap-1">
-                <i class="fas fa-arrow-left"></i> Retour
+            <a href="{% url 'commercial_app:commercial-view' %}" class="btn btn-ghost btn-sm text-base-content/70 hover:text-blue-600 gap-2">
+                <i class="fas fa-arrow-left"></i>
+                <span>Retour au tableau de bord</span>
             </a>
         </div>
     </nav>
 
-    <!-- ===== MAIN ===== -->
-    <main class="max-w-7xl mx-auto px-4 py-8" style="min-height:80vh;">
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="max-w-7xl mx-auto px-4 py-8 flex-1 w-full">
 
-        <!-- Messages flash -->
+        <!-- Messages Flash -->
         {% if messages %}
         <div class="mb-6 space-y-2">
             {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} shadow-xl rounded-xl animate-fade-in-up">
+            <div class="alert alert-{{ message.tags|default:'info' }} shadow-md rounded-xl text-sm border-0">
+                <i class="fas fa-info-circle text-lg"></i>
                 <span>{{ message }}</span>
+                 <button onclick="this.parentElement.remove()" class="text-xs opacity-60 hover:opacity-100">
+            <i class="fas fa-xmark"></i>
+        </button>
             </div>
             {% endfor %}
         </div>
         {% endif %}
 
-        <!-- En-tête -->
-        <div class="flex flex-wrap justify-between items-center gap-4 mb-6 animate-fade-in-up">
+        <!-- En-tête & Statut Cards -->
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
             <div>
-                <h1 class="text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-3">
+                <h1 class="text-2xl md:text-3xl font-extrabold text-base-content flex items-center gap-3">
                     <i class="fas fa-calendar-check text-blue-600"></i>
                     Gestion des rendez-vous
                 </h1>
-                <p class="text-gray-500 text-sm mt-1">
-                    {{ page_obj.paginator.count }} rendez-vous au total
+                <p class="text-base-content/60 text-sm mt-1">
+                    {{ page_obj.paginator.count|default:rendez_vous|length }} rendez-vous au total
                 </p>
             </div>
-            <div class="flex gap-3 text-sm">
-                <span class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full">{{ statistiques.en_attente }} en attente</span>
-                <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full">{{ statistiques.confirme }} confirmés</span>
-                <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full">{{ statistiques.termine }} terminés</span>
-                <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full">{{ statistiques.annule }} annulés</span>
+
+            <div class="flex flex-wrap items-center gap-3">
+                <!-- Bouton Déclencheur Modale -->
+                <button onclick="modal_add_rdv.showModal()" class="btn btn-primary text-white shadow-lg shadow-blue-600/20 gap-2 rounded-xl">
+                    <i class="fas fa-plus"></i>
+                    Nouveau Rendez-vous
+                </button>
+            </div>
+        </div>
+
+        <!-- Badges Statistiques -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+            <div class="bg-base-100 p-4 rounded-xl border border-base-200 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-semibold text-base-content/50 uppercase tracking-wider">En attente</p>
+                    <p class="text-xl font-bold text-warning mt-1">{{ statistiques.en_attente|default:0 }}</p>
+                </div>
+                <div class="w-10 h-10 rounded-lg bg-warning/10 text-warning flex items-center justify-center">
+                    <i class="fas fa-clock text-lg"></i>
+                </div>
+            </div>
+            <div class="bg-base-100 p-4 rounded-xl border border-base-200 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-semibold text-base-content/50 uppercase tracking-wider">Confirmés</p>
+                    <p class="text-xl font-bold text-success mt-1">{{ statistiques.confirme|default:0 }}</p>
+                </div>
+                <div class="w-10 h-10 rounded-lg bg-success/10 text-success flex items-center justify-center">
+                    <i class="fas fa-check-circle text-lg"></i>
+                </div>
+            </div>
+            <div class="bg-base-100 p-4 rounded-xl border border-base-200 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-semibold text-base-content/50 uppercase tracking-wider">Terminés</p>
+                    <p class="text-xl font-bold text-info mt-1">{{ statistiques.termine|default:0 }}</p>
+                </div>
+                <div class="w-10 h-10 rounded-lg bg-info/10 text-info flex items-center justify-center">
+                    <i class="fas fa-flag-checkered text-lg"></i>
+                </div>
+            </div>
+            <div class="bg-base-100 p-4 rounded-xl border border-base-200 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-semibold text-base-content/50 uppercase tracking-wider">Annulés</p>
+                    <p class="text-xl font-bold text-error mt-1">{{ statistiques.annule|default:0 }}</p>
+                </div>
+                <div class="w-10 h-10 rounded-lg bg-error/10 text-error flex items-center justify-center">
+                    <i class="fas fa-times-circle text-lg"></i>
+                </div>
             </div>
         </div>
 
         <!-- ===== FILTRES ===== -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6 animate-fade-in-up">
+        <div class="bg-base-100 rounded-2xl shadow-sm border border-base-200 p-4 mb-6">
             <form method="get" class="flex flex-wrap gap-3 items-end">
-                <div>
-                    <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Statut</label>
-                    <select name="statut" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <option value="">Tous</option>
+                <div class="form-control w-full sm:w-auto min-w-[200px]">
+                    <label class="label label-text text-xs font-semibold text-base-content/60 uppercase">Filtrer par statut</label>
+                    <select name="statut" class="select select-bordered select-sm w-full rounded-lg">
+                        <option value="">Tous les statuts</option>
                         {% for value, label in statut_choices %}
                         <option value="{{ value }}" {% if request.GET.statut == value %}selected{% endif %}>{{ label }}</option>
                         {% endfor %}
                     </select>
                 </div>
-                <button type="submit" class="btn-primary px-4 py-2 rounded-lg text-sm font-medium">
-                    <i class="fas fa-filter mr-1"></i> Filtrer
-                </button>
-                <a href="{% url 'commercial_app:rendez-vous-list' %}" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-sm font-medium transition">
-                    <i class="fas fa-times mr-1"></i> Réinitialiser
-                </a>
+                <div class="flex gap-2">
+                    <button type="submit" class="btn btn-primary btn-sm rounded-lg text-white">
+                        <i class="fas fa-filter"></i> Filtrer
+                    </button>
+                    <a href="{% url 'commercial_app:rendez-vous-list' %}" class="btn btn-ghost btn-sm rounded-lg border border-base-300">
+                        <i class="fas fa-undo"></i> Réinitialiser
+                    </a>
+                </div>
             </form>
         </div>
 
-        <!-- ===== LISTE ===== -->
+        <!-- ===== LISTE DES RDV ===== -->
         <div class="space-y-4">
             {% for rdv in rendez_vous %}
-            <div class="rdv-card bg-white rounded-xl shadow-sm border border-gray-100 p-5 animate-fade-in-up" style="animation-delay: {{ forloop.counter|add:'1'|stringformat:'s' }}00ms">
-                <div class="flex flex-wrap justify-between items-start gap-4">
+            <div class="bg-base-100 rounded-2xl border border-base-200 p-5 shadow-sm hover:shadow-md transition-all duration-200">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     
-                   
-                        
-                    
-                        
-                    <!-- Infos -->
-                    <div class="flex-1 min-w-0">
-                         {% if rdv.client %}
-                        <div class="flex flex-wrap items-center gap-3 mb-2">
-                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                                {{ rdv.client.nom_complet|slice:":1"|upper }}
+                    <!-- Informations Client / Prospect -->
+                    <div class="flex items-start gap-4 flex-1">
+                        {% if rdv.client %}
+                            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-bold text-lg flex items-center justify-center shadow-sm flex-shrink-0">
+                                {{ rdv.client.nom_complet|default:rdv.nom|slice:":1"|upper }}
                             </div>
                             <div>
-                                <p class="font-semibold text-gray-800">{{ rdv.client.nom_complet }}</p>
-                                <p class="text-xs text-gray-400">{{ rdv.client.email }}</p>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <h3 class="font-bold text-base-content text-base">{{ rdv.client.nom_complet|default:rdv.nom }}</h3>
+                                    <span class="badge badge-sm badge-outline badge-primary font-medium">Client BDD</span>
+                                </div>
+                                <p class="text-xs text-base-content/60 mt-0.5"><i class="fas fa-envelope mr-1"></i>{{ rdv.client.email|default:"Pas d'email" }}</p>
                             </div>
-                            <span class="badge-statut {{ rdv.statut }}">
-                                <i class="fas fa-{% if rdv.statut == 'confirme' %}check-circle{% elif rdv.statut == 'annule' %}times-circle{% elif rdv.statut == 'termine' %}flag-checkered{% else %}clock{% endif %}"></i>
-                                {{ rdv.get_statut_display }}
-                            </span>
-                        </div>
                         {% else %}
-                        <div class="flex flex-wrap items-center gap-3 mb-2">
-                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                                {{ rdv.nom }}
+                            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-600 text-white font-bold text-lg flex items-center justify-center shadow-sm flex-shrink-0">
+                                {{ rdv.nom|slice:":1"|upper }}
                             </div>
                             <div>
-                                <p class="font-semibold text-gray-800">{{ rdv.prenom }}</p>
-                                <p class="text-xs text-gray-400">{{ rdv.telephone }}</p>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <h3 class="font-bold text-base-content text-base">{{ rdv.prenom }} {{ rdv.nom }}</h3>
+                                    <span class="badge badge-sm badge-outline badge-warning font-medium">Prospect</span>
+                                </div>
+                                <p class="text-xs text-base-content/60 mt-0.5"><i class="fas fa-phone mr-1"></i>{{ rdv.telephone|default:"Non renseigné" }}</p>
                             </div>
-                            <span class="badge-statut {{ rdv.statut }}">
-                                <i class="fas fa-{% if rdv.statut == 'confirme' %}check-circle{% elif rdv.statut == 'annule' %}times-circle{% elif rdv.statut == 'termine' %}flag-checkered{% else %}clock{% endif %}"></i>
-                                {{ rdv.get_statut_display }}
-                            </span>
-                        </div>
                         {% endif %}
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
-                            <div class="flex items-center gap-2 text-gray-600">
-                                <i class="fas fa-calendar-alt text-blue-500 w-4"></i>
-                                <span>{{ rdv.date_rendez_vous|date:"d/m/Y à H:i" }}</span>
-                            </div>
-                            <div class="flex items-center gap-2 text-gray-600">
-                                <i class="fas fa-clock text-blue-500 w-4"></i>
-                                <span>{{ rdv.duree }} minutes</span>
-                            </div>
-                            <div class="flex items-center gap-2 text-gray-600 col-span-2">
-                                <i class="fas fa-tag text-blue-500 w-4"></i>
-                                <span>{{ rdv.motif }}</span>
-                            </div>
-                            {% if rdv.message %}
-                            <div class="flex items-center gap-2 text-gray-600 col-span-2">
-                                <i class="fas fa-comment text-blue-500 w-4"></i>
-                                <span class="text-sm">{{ rdv.message }}</span>
-                            </div>
+                    </div>
+
+                    <!-- Métadonnées RDV -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-base-content/70 md:w-1/2 bg-base-200/50 p-3 rounded-xl">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-calendar-alt text-blue-600 w-4"></i>
+                            <span class="font-medium text-base-content">{{ rdv.date_rendez_vous|date:"d/m/Y à H:i" }}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-clock text-blue-600 w-4"></i>
+                            <span>{{ rdv.duree }} minutes</span>
+                        </div>
+                        <div class="flex items-center gap-2 sm:col-span-2">
+                            <i class="fas fa-tag text-blue-600 w-4"></i>
+                            <span class="font-semibold text-base-content">Motif :</span> {{ rdv.motif }}
+                        </div>
+                    </div>
+
+                    <!-- Statut & Actions -->
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between md:justify-end gap-3 flex-shrink-0 border-t md:border-t-0 pt-3 md:pt-0 border-base-200">
+                        
+                        <!-- Badge Statut -->
+                        <div>
+                            {% if rdv.statut == 'confirme' %}
+                                <span class="badge badge-success gap-1 text-white font-semibold py-3 px-3"><i class="fas fa-check-circle"></i> Confirmé</span>
+                            {% elif rdv.statut == 'en_attente' %}
+                                <span class="badge badge-warning gap-1 text-warning-content font-semibold py-3 px-3"><i class="fas fa-clock"></i> En attente</span>
+                            {% elif rdv.statut == 'termine' %}
+                                <span class="badge badge-info gap-1 text-white font-semibold py-3 px-3"><i class="fas fa-flag-checkered"></i> Terminé</span>
+                            {% else %}
+                                <span class="badge badge-error gap-1 text-white font-semibold py-3 px-3"><i class="fas fa-times-circle"></i> Annulé</span>
+                            {% endif %}
+                        </div>
+
+                        <!-- Formulaires d'actions -->
+                        <div class="flex gap-1.5 flex-wrap">
+                            {% if rdv.statut == 'en_attente' %}
+                                <form method="post" action="{% url 'commercial_app:confirmer-rdv' rdv.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-xs btn-success text-white gap-1"><i class="fas fa-check"></i> Valider</button>
+                                </form>
+                                <form method="post" action="{% url 'commercial_app:annuler-rdv' rdv.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-xs btn-error text-white gap-1"><i class="fas fa-times"></i> Annuler</button>
+                                </form>
+                            {% elif rdv.statut == 'confirme' %}
+                                <form method="post" action="{% url 'commercial_app:terminer-rdv' rdv.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-xs btn-info text-white gap-1"><i class="fas fa-flag-checkered"></i> Terminer</button>
+                                </form>
+                                <form method="post" action="{% url 'commercial_app:annuler-rdv' rdv.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-xs btn-ghost text-error gap-1"><i class="fas fa-times"></i> Annuler</button>
+                                </form>
                             {% endif %}
                         </div>
                     </div>
 
-                    <!-- Actions -->
-                    <div class="flex flex-wrap gap-2 flex-shrink-0">
-                        {% if rdv.statut == 'en_attente' %}
-                        <form method="post" action="{% url 'commercial_app:confirmer-rdv' rdv.id %}">
-                            {% csrf_token %}
-                            <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1">
-                                <i class="fas fa-check"></i> Confirmer
-                            </button>
-                        </form>
-                        <form method="post" action="{% url 'commercial_app:annuler-rdv' rdv.id %}">
-                            {% csrf_token %}
-                            <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1">
-                                <i class="fas fa-times"></i> Annuler
-                            </button>
-                        </form>
-                        {% elif rdv.statut == 'confirme' %}
-                        <form method="post" action="{% url 'commercial_app:terminer-rdv' rdv.id %}">
-                            {% csrf_token %}
-                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1">
-                                <i class="fas fa-flag-checkered"></i> Terminer
-                            </button>
-                        </form>
-                        <form method="post" action="{% url 'commercial_app:annuler-rdv' rdv.id %}">
-                            {% csrf_token %}
-                            <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1">
-                                <i class="fas fa-times"></i> Annuler
-                            </button>
-                        </form>
-                        {% elif rdv.statut == 'termine' %}
-                        <span class="text-xs text-gray-400 flex items-center gap-1">
-                            <i class="fas fa-check-circle text-green-500"></i> Terminé
-                        </span>
-                        {% else %}
-                        <span class="text-xs text-gray-400 flex items-center gap-1">
-                            <i class="fas fa-times-circle text-red-500"></i> Annulé
-                        </span>
-                        {% endif %}
-                    </div>
                 </div>
             </div>
             {% empty %}
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
-                <div class="w-20 h-20 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                    <i class="fas fa-calendar-times text-3xl text-gray-400"></i>
+            <div class="bg-base-100 rounded-2xl border border-base-200 p-12 text-center">
+                <div class="w-16 h-16 mx-auto bg-base-200 rounded-full flex items-center justify-center mb-4 text-base-content/40">
+                    <i class="fas fa-calendar-times text-2xl"></i>
                 </div>
-                <p class="text-gray-500">Aucun rendez-vous trouvé</p>
+                <h3 class="text-lg font-bold text-base-content">Aucun rendez-vous trouvé</h3>
+                <p class="text-sm text-base-content/60 mt-1">Modifiez vos filtres ou créez un nouveau rendez-vous.</p>
             </div>
             {% endfor %}
         </div>
 
     </main>
 
-    <footer class="bg-gray-800 text-white py-6 mt-12">
-        <div class="max-w-7xl mx-auto px-4 text-center text-sm text-gray-400">
-            <p>&copy; {% now "Y" %} KOZ Services — Tous droits réservés</p>
+    <!-- ===== MODALE CRÉATION RDV ===== -->
+    <dialog id="modal_add_rdv" class="modal modal-bottom sm:modal-middle">
+        <div class="modal-box bg-base-100 p-6 rounded-2xl border border-base-200 max-w-lg">
+            
+            <!-- Fermeture -->
+            <form method="dialog">
+                <button class="btn btn-sm btn-circle btn-ghost absolute right-4 top-4 text-base-content/50">✕</button>
+            </form>
+
+            <h3 class="font-extrabold text-xl text-base-content flex items-center gap-2 mb-1">
+                <i class="fas fa-calendar-plus text-blue-600"></i>
+                Nouveau Rendez-vous
+            </h3>
+            <p class="text-xs text-base-content/60 mb-6">Programmer un rendez-vous avec un client existant ou un nouveau prospect.</p>
+
+            <form method="post" action="{% url 'commercial_app:rdv-creer' %}" class="space-y-4">
+                {% csrf_token %}
+
+                <!-- SELECTEUR TYPE CLIENT / PROSPECT -->
+                <div class="bg-base-200 p-1 rounded-xl flex text-xs font-semibold">
+                    <button type="button" id="tab-client" onclick="toggleClientMode('bdd')" class="flex-1 py-2 rounded-lg bg-base-100 shadow-sm text-blue-600 transition-all text-center">
+                        Client BDD
+                    </button>
+                    <button type="button" id="tab-prospect" onclick="toggleClientMode('prospect')" class="flex-1 py-2 rounded-lg text-base-content/60 hover:text-base-content transition-all text-center">
+                        Nouveau Prospect
+                    </button>
+                </div>
+
+                <!-- OPTION A : Client BDD -->
+                <div id="section-client-bdd" class="form-control">
+                    <label class="label label-text text-xs font-semibold">Sélectionner un Client</label>
+                    {{ rdv_form.client }}
+                </div>
+
+                <!-- OPTION B : Prospect Externe (Masqué par défaut) -->
+                <div id="section-prospect" class="space-y-3 hidden">
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="form-control">
+                            <label class="label label-text text-xs font-semibold">Nom</label>
+                            {{ rdv_form.nom }}
+                        </div>
+                        <div class="form-control">
+                            <label class="label label-text text-xs font-semibold">Prénom</label>
+                            {{ rdv_form.prenom }}
+                        </div>
+                    </div>
+                    <div class="form-control">
+                        <label class="label label-text text-xs font-semibold">Téléphone</label>
+                        {{ rdv_form.telephone }}
+                    </div>
+                </div>
+
+                <!-- CHAMPS COMMUNS -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-base-200">
+                    <div class="form-control sm:col-span-2">
+                        <label class="label label-text text-xs font-semibold">Date & Heure du RDV</label>
+                        {{ rdv_form.date_rendez_vous }}
+                    </div>
+                    <div class="form-control">
+                        <label class="label label-text text-xs font-semibold">Durée (minutes)</label>
+                        {{ rdv_form.duree }}
+                    </div>
+                    <div class="form-control">
+                        <label class="label label-text text-xs font-semibold">Motif</label>
+                        {{ rdv_form.motif }}
+                    </div>
+                </div>
+
+                <!-- BOUTON VALIDER -->
+                <div class="modal-action pt-4 border-t border-base-200">
+                    <button type="submit" class="btn btn-primary text-white w-full shadow-md rounded-xl">
+                        <i class="fas fa-check-circle"></i> Confirmer le Rendez-vous
+                    </button>
+                </div>
+            </form>
         </div>
+        <form method="dialog" class="modal-backdrop">
+            <button>Fermer</button>
+        </form>
+    </dialog>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="bg-base-100 border-t border-base-200 py-6 mt-12 text-center text-xs text-base-content/50">
+        <p>&copy; {% now "Y" %} KOZ Services — Tous droits réservés</p>
     </footer>
 
+    <!-- JS BASCULE ONGLETS MODALE -->
+    <script>
+        function toggleClientMode(mode) {
+            const bddSection = document.getElementById('section-client-bdd');
+            const prospectSection = document.getElementById('section-prospect');
+            const tabClient = document.getElementById('tab-client');
+            const tabProspect = document.getElementById('tab-prospect');
+
+            if (mode === 'bdd') {
+                bddSection.classList.remove('hidden');
+                prospectSection.classList.add('hidden');
+                tabClient.className = 'flex-1 py-2 rounded-lg bg-base-100 shadow-sm text-blue-600 transition-all text-center';
+                tabProspect.className = 'flex-1 py-2 rounded-lg text-base-content/60 hover:text-base-content transition-all text-center';
+            } else {
+                bddSection.classList.add('hidden');
+                prospectSection.classList.remove('hidden');
+                tabProspect.className = 'flex-1 py-2 rounded-lg bg-base-100 shadow-sm text-blue-600 transition-all text-center';
+                tabClient.className = 'flex-1 py-2 rounded-lg text-base-content/60 hover:text-base-content transition-all text-center';
+            }
+        }
+    </script>
 </body>
 </html>

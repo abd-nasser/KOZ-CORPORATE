@@ -105,149 +105,90 @@ gsap.registerPlugin(ScrollTrigger);
 
         
 // ============================================================
-// ACTUALITE ANIMATION
+// ACTUALITES ANIMATIONS GSAP
 // ============================================================
 document.addEventListener('DOMContentLoaded', function() {
-    gsap.from(".actualite_fade", {
-                scrollTrigger: {
-                    trigger: ".actualite_sec",
-                    start: "top 60%",
-                    end: "top 30%",
-                    toggleActions: "play none none reverse", 
-                    
-                },
-                opacity: 0,
-                y: 200,
-                duration: 1,
-                ease: "power3.out",
-                
-            });
-
-    // ACTUALITE ANIMATION COLONE GAUCHE
-    // =============================================
-
-    gsap.from(".actu_video_img",{
-                scrollTrigger:{
-                    trigger:".actu_video_img",
-                    start: "top 70%",
-                    end: "top 30%",
-                    toggleActions: "play none none reverse", 
-                    
-                },
-                opacity: 0,
-                x: -200,
-                duration: 1,
-                ease: "power3.out",
-            });
-
-    gsap.from(".actu_type", {
-                scrollTrigger: {
-                    trigger: ".actu_type",
-                    start: "top 60%",
-                    end: "top 30%",
-                    toggleActions: "play none none reverse", 
-                    
-                },
-                opacity: 0,
-                x: 200,
-                duration: 1,
-                ease: "power3.out",
-            
-            });
-
-    gsap.from(".actu_vedette",{
-                scrollTrigger:{
-                    trigger:".actu_vedette",
-                    start: "top 65%",
-                    end: "top 30%",
-                    toggleActions: "play none none reverse", 
-                    
-                },
-                opacity: 0,
-                y: 200,
-                duration: 1,
-                ease: "power3.out",
-            });
-    gsap.from(".actu_titre",{
-                scrollTrigger:{
-                    trigger:".actu_titre",
-                    start: "top 90%",
-                    end: "top 30%",
-                    toggleActions: "play none none reverse", 
-                   
-                },
-                opacity: 0,
-                x: -200,
-                duration: 1.5,
-                ease: "power3.out",
-            });
-
-    gsap.from(".actu_mini_descript",{
-                scrollTrigger:{
-                    trigger:".actu_titre",
-                    start: "top 90%",
-                    end: "top 30%",
-                    toggleActions: "play none none reverse", 
-                    
-                },
-                opacity: 0,
-                y: 200,
-                duration: 2,
-                ease: "power3.out",
-            });
-
-
-     // ACTUALITE ANIMATION COLONE DROITE
-    // =============================================
-    gsap.from(".actu_descript",{
-                scrollTrigger:{
-                    trigger:".actu_descript",
-                    start: "top 70%",
-                    end: "top 30%",
-                    toggleActions: "play none none reverse", 
-                    
-                },
-                opacity: 0,
-                x: 200,
-                duration: 1,
-                ease: "power3.out",
-            });
     
-    gsap.from(".text-leading",{
-                scrollTrigger:{
-                    trigger:".actu_descript",
-                    start: "bottom 82%",
-                    end: "top 30%",
-                    toggleActions: "play none none reverse", 
-                    
-                    
-                },
-                opacity: 0,
-                y: 200,
-                duration: 1.5,
-                ease: "power3.out",
-            });
-
+    // Vérification de la présence des plugins
+    if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
     
-    // ACTUALITE ANIMATION GALERIE EN BAS
-    // =============================================
-    gsap.from(".actu-img-galerie",{
-                scrollTrigger:{
-                    trigger:".actu-img-galerie",
-                    start: "-2% 100%",
-                    end: "top 30%",
-                    toggleActions: "play none none reverse", 
-       
-                },
-                opacity: 0,
-                y: 200,
-                duration: 1,
-                ease: "power3.out",
-            });
+    gsap.registerPlugin(ScrollTrigger);
 
+    // Animation du titre principal de section
+    gsap.from(".informes", {
+        scrollTrigger: {
+            trigger: ".actualite_sec",
+            start: "top 80%",
+            toggleActions: "play none none reverse"
+        },
+        opacity: 0,
+        y: 30,
+        duration: 0.8,
+        ease: "power2.out"
+    });
 
+    // Timeline Colonne Gauche (Hero Média)
+    const heroTl = gsap.timeline({
+        scrollTrigger: {
+            trigger: ".act-hero",
+            start: "top 75%",
+            toggleActions: "play none none reverse"
+        }
+    });
 
+    heroTl.from(".act-hero", {
+        opacity: 0,
+        x: -40,
+        duration: 0.9,
+        ease: "power3.out"
+    })
+    .from([".actu_type", ".actu_vedette"], {
+        opacity: 0,
+        y: -15,
+        stagger: 0.1,
+        duration: 0.4,
+        ease: "power2.out"
+    }, "-=0.4")
+    .from([".actu_titre", ".actu_mini_descript"], {
+        opacity: 0,
+        y: 20,
+        stagger: 0.12,
+        duration: 0.5,
+        ease: "power2.out"
+    }, "-=0.2");
+
+    // Timeline Colonne Droite (Description + Galerie)
+    const rightTl = gsap.timeline({
+        scrollTrigger: {
+            trigger: ".actu_descript",
+            start: "top 75%",
+            toggleActions: "play none none reverse"
+        }
+    });
+
+    rightTl.from(".actu_descript", {
+        opacity: 0,
+        x: 40,
+        duration: 0.8,
+        ease: "power3.out"
+    })
+    gsap.from(".actu-img-galerie > div" , {
+    scrollTrigger: {
+        trigger: ".actu-img-galerie", // Ou le conteneur parent de ta galerie
+        start: "top 85%",
+        toggleActions: "play none none reverse"
+    },
+    autoAlpha: 0,       // Remplace opacity: 0 pour éviter les glitches
+    y: 20,
+    scale: 0.9,
+    stagger: 0.1,
+    duration: 0.5,
+    ease: "back.out(1.4)",
+    clearProps: "all"   // Supprime le style inline à la fin
 });
+});
+
+
 
 
 
@@ -516,132 +457,88 @@ document.addEventListener('DOMContentLoaded', function() {
 // ANIMATION : MISSION & VALEURS
 // ============================================================
 document.addEventListener('DOMContentLoaded', function() {
-    gsap.from(".mission_valeur_fade", {
-                scrollTrigger: {
-                    trigger: ".mission_valeur_fade",
-                    start: "top 70%",
-                    end: "top 30%",
-                    toggleActions: "play none none reverse", 
-                    
-                },
-                opacity: 0,
-                y: 200,
-                duration: 1,
-                ease: "power3.out",
-            
-            });
+    gsap.registerPlugin(ScrollTrigger);
 
-        gsap.from(".mission", {
-                scrollTrigger: {
-                    trigger: ".mission",
-                    start: "top 70%",
-                    end: "top 30%",
-                    toggleActions: "play none none reverse",
-                   
-                    
-                },
-                opacity: 0,
-                x: -200,
-                duration: 1,
-                ease: "power3.out",
-            
-            });
+    let mm = gsap.matchMedia();
 
-        gsap.from(".valeur", {
-                scrollTrigger: {
-                    trigger: ".valeur",
-                    start: "top 70%",
-                    end: "top 30%",
-                    toggleActions: "play none none reverse",
-                 
-                    
-                },
-                opacity: 0,
-                x: 200,
-                duration: 1,
-                ease: "power3.out",
-            
-            });
+    mm.add({
+        // Desktop / Tablette
+        isDesktop: "(min-width: 768px)",
+        // Mobile
+        isMobile: "(max-width: 767px)"
+    }, (context) => {
+        let { isDesktop } = context.conditions;
 
-        gsap.from(".valeur .v_1", {
-                scrollTrigger: {
-                    trigger: ".v_1",
-                    start: "top 40%",
-                    end: "top 30%",
-                    toggleActions: "play none none reverse",
-                   
-                    
-                },
-                opacity: 0,
-                y: -200,
-                duration: 1,
-                ease: "power3.out",
-            
-            });
+        // 1. Animation En-tête
+        gsap.from(".mission_header", {
+            scrollTrigger: {
+                trigger: ".mission_header",
+                start: "top 85%",
+                toggleActions: "play none none reverse"
+            },
+            opacity: 0,
+            y: 30,
+            duration: 0.8,
+            ease: "power2.out"
+        });
 
-            gsap.from(".valeur .v_2", {
-                scrollTrigger: {
-                    trigger: ".v_1",
-                    start: "top 40%",
-                    end: "top 30%",
-                    toggleActions: "play none none reverse",
-                   
-                    
-                },
-                opacity: 0,
-                x: 200,
-                duration: 1,
-                ease: "power3.out",
-            
-            });
+        // 2. Animation Carte Mission (Arrivée depuis la gauche sur Desktop, le bas sur Mobile)
+        gsap.from(".mission_card", {
+            scrollTrigger: {
+                trigger: ".mission_card",
+                start: "top 80%",
+                toggleActions: "play none none reverse"
+            },
+            opacity: 0,
+            x: isDesktop ? -40 : 0,
+            y: isDesktop ? 0 : 30,
+            duration: 0.9,
+            ease: "power3.out"
+        });
+        // 3. Animation Carte Valeurs + Apparition progressive des 4 items (Stagger)
+let valeurTl = gsap.timeline({
+    scrollTrigger: {
+        trigger: ".valeur_card",
+        start: "top 85%",
+        toggleActions: "play none none reverse",
+        invalidateOnRefresh: true
+    }
+});
 
-            gsap.from(".valeur .v_3", {
-                scrollTrigger: {
-                    trigger: ".v_1",
-                    start: "top 40%",
-                    end: "top 30%",
-                    toggleActions: "play none none reverse",
-                    
-                },
-                opacity: 0,
-                y: 200,
-                duration: 1,
-                ease: "power3.out",
-            
-            });
+valeurTl.from(".valeur_card", {
+    autoAlpha: 0, // Remplace opacity: 0 (gère visibility + opacity)
+    x: isDesktop ? 40 : 0,
+    y: isDesktop ? 0 : 30,
+    duration: 0.9,
+    ease: "power3.out",
+    clearProps: "all" // Nettoie le CSS inline à la fin de l'anim
+})
+.from(".valeur_item", {
+    autoAlpha: 0,
+    y: 20,
+    duration: 0.4,
+    stagger: 0.1,
+    ease: "power2.out",
+    clearProps: "all"
+}, "-=0.4");
 
-             gsap.from(".valeur .v_4", {
-                scrollTrigger: {
-                    trigger: ".v_1",
-                    start: "top 40%",
-                    end: "top 30%",
-                    toggleActions: "play none none reverse",
-                    
-                    
-                },
-                opacity: 0,
-                y: 200,
-                duration: 1,
-                ease: "power3.out",
-            
-            });
-
-            gsap.from(".citation", {
-                scrollTrigger: {
-                    trigger: ".citation",
-                    start: "top 90%",
-                    end: "top 30%",
-                    toggleActions: "play none none reverse",
-                    
-                },
-                opacity: 0,
-                y: 200,
-                duration: 1,
-                ease: "power3.out",
-            
-            });
-
-        })
+// 4. Animation Bandeau Citation
+gsap.from(".citation", {
+    scrollTrigger: {
+        trigger: ".citation",
+        start: "top 90%",
+        toggleActions: "play none none reverse",
+        invalidateOnRefresh: true
+    },
+    autoAlpha: 0,
+    scale: 0.95,
+    y: 20,
+    duration: 0.8,
+    ease: "power2.out",
+    clearProps: "all"
+});
+    });
+});
     
         
 // ============================================================

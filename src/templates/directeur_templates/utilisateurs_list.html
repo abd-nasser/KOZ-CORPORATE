@@ -1,0 +1,199 @@
+{% load static %}
+{% load tailwind_tags %}
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% tailwind_css %}
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <title>Gestion des Utilisateurs — Direction KOZ Services</title>
+</head>
+<body class="bg-slate-50 font-['Plus_Jakarta_Sans',sans-serif] min-h-screen text-slate-800 antialiased flex flex-col">
+
+    <!-- Header / Navbar Direction -->
+    <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-30 text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center text-white font-extrabold text-lg shadow-lg shadow-blue-600/30">
+                    K
+                </div>
+                <div>
+                    <h1 class="font-bold text-base leading-none">KOZ Services</h1>
+                    <p class="text-xs text-slate-400 mt-0.5">Espace Direction</p>
+                </div>
+            </div>
+
+            <a href="{% url 'directeur_app:directeur-view' %}" class="text-xs font-semibold text-slate-300 hover:text-white flex items-center gap-2 bg-slate-800 hover:bg-slate-700 px-3.5 py-2 rounded-xl transition-all border border-slate-700">
+                <i class="fas fa-arrow-left text-[11px]"></i>
+                <span>Tableau de bord</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Contenu Principal -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8 flex-1 w-full space-y-8">
+
+        <!-- Banner Titre + Synthese -->
+        <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-blue-950 rounded-3xl p-6 sm:p-8 text-white shadow-xl shadow-slate-900/10 relative overflow-hidden flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+            <div class="relative z-10 space-y-2">
+                <div class="inline-flex items-center gap-2 px-3 py-1 bg-blue-500/20 border border-blue-400/30 rounded-full text-blue-300 text-xs font-medium">
+                    <i class="fas fa-users-gear text-[10px]"></i>
+                    <span>Supervision Annuaire</span>
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Gestion des Utilisateurs</h2>
+                <p class="text-slate-300 text-xs sm:text-sm max-w-xl">
+                    Consultez l'ensemble des comptes de la plateforme répartis par rôle et accédez aux actions rapides.
+                </p>
+            </div>
+
+            <div class="relative z-10 flex items-center gap-3">
+                <div class="bg-white/10 backdrop-blur-md border border-white/10 px-4 py-3 rounded-2xl text-center">
+                    <p class="text-2xl font-extrabold text-white">{{ all_users|length }}</p>
+                    <p class="text-[10px] text-slate-300 uppercase tracking-wider font-semibold">Total Comptes</p>
+                </div>
+            </div>
+
+            <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-blue-500/10 rounded-full blur-2xl pointer-events-none"></div>
+        </div>
+
+        <!-- Onglets / Système de Filtres (Alpine/CSS Native Tabs via DaisyUI) -->
+        <div class="space-y-6" x-data="{ activeTab: 'all' }">
+            
+            <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-4">
+                <div class="flex flex-wrap gap-2">
+                    <button @click="activeTab = 'all'" :class="activeTab === 'all' ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'" class="px-4 py-2.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 shadow-xs">
+                        <i class="fas fa-layer-group"></i>
+                        <span>Tous les comptes</span>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] bg-slate-700 text-slate-200">{{ all_users|length }}</span>
+                    </button>
+
+                    <button @click="activeTab = 'commerciaux'" :class="activeTab === 'commerciaux' ? 'bg-blue-600 text-white' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'" class="px-4 py-2.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 shadow-xs">
+                        <i class="fas fa-briefcase"></i>
+                        <span>Commerciaux</span>
+                    </button>
+
+                    <button @click="activeTab = 'clients'" :class="activeTab === 'clients' ? 'bg-emerald-600 text-white' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'" class="px-4 py-2.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 shadow-xs">
+                        <i class="fas fa-user-tag"></i>
+                        <span>Clients</span>
+                    </button>
+
+                    <button @click="activeTab = 'directeurs'" :class="activeTab === 'directeurs' ? 'bg-amber-600 text-white' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'" class="px-4 py-2.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 shadow-xs">
+                        <i class="fas fa-user-shield"></i>
+                        <span>Direction</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Grille des Cartes Utilisateurs -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {% for u in all_users %}
+                    {% comment %} Détection du rôle pour le filtre Alpine.js {% endcomment %}
+                    <div x-show="activeTab === 'all' || 
+                                (activeTab === 'commerciaux' && ('{{ u.role }}' === 'commercial' || '{{ u.is_staff }}' === 'True')) || 
+                                (activeTab === 'clients' && ('{{ u.role }}' === 'client' || ('{{ u.is_staff }}' === 'False' && '{{ u.is_superuser }}' === 'False'))) || 
+                                (activeTab === 'directeurs' && ('{{ u.role }}' === 'directeur' || '{{ u.is_superuser }}' === 'True'))"
+                         x-transition
+                         class="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-xs hover:shadow-xl hover:border-slate-300 transition-all duration-300 flex flex-col justify-between space-y-4 relative overflow-hidden group">
+                        
+                        <!-- Top Info Profil -->
+                        <div class="space-y-3">
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 rounded-2xl bg-slate-100 border border-slate-200 text-slate-700 font-extrabold text-lg flex items-center justify-center group-hover:scale-105 transition-transform flex-shrink-0">
+                                        {{ u.nom_complet|slice:":1"|upper }}
+                                    </div>
+                                    <div class="min-w-0">
+                                        <h3 class="font-bold text-slate-900 text-sm truncate">
+                                            {{ u.nom_complet }}
+                                        </h3>
+                                        <p class="text-xs text-slate-400 truncate">@{{ u.nom_complet }}</p>
+                                    </div>
+                                </div>
+
+                                <!-- Badge Rôle -->
+                                {% if u.role == 'directeur' or u.is_superuser %}
+                                    <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-amber-50 text-amber-700 border border-amber-200 flex-shrink-0">
+                                        Direction
+                                    </span>
+                                {% elif u.role == 'commercial' or u.is_staff %}
+                                    <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-blue-50 text-blue-700 border border-blue-200 flex-shrink-0">
+                                        Commercial
+                                    </span>
+                                {% else %}
+                                    <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200 flex-shrink-0">
+                                        Client
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                            <!-- Coordonnées -->
+                            <div class="bg-slate-50 rounded-2xl p-3 space-y-1.5 border border-slate-100 text-xs text-slate-600">
+                                <div class="flex items-center gap-2 truncate">
+                                    <i class="fas fa-envelope text-slate-400 text-[11px] w-4"></i>
+                                    <span class="truncate">{{ u.email|default:"Aucun email" }}</span>
+                                </div>
+                                <div class="flex items-center gap-2 truncate">
+                                    <i class="fas fa-phone text-slate-400 text-[11px] w-4"></i>
+                                    <span>{{ u.telephone|default:"Non renseigné" }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Actions Rapides -->
+                        <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                            <div class="flex items-center gap-1.5 w-full">
+                                
+                                <!-- Action 1 : Détails -->
+                                {% if u.role == 'client' or not u.role == "commercial" and not u.is_superuser %}
+                                <a href='{% url "client_app:client-detail" u.id  %}' title="Voir les détails" class="flex-1 inline-flex items-center justify-center gap-1.5 bg-slate-100 hover:bg-slate-900 hover:text-white text-slate-700 font-bold px-3 py-2 rounded-xl text-xs transition-all">
+                                    <i class="fas fa-eye text-[11px]"></i>
+                                    <span>Détails</span>
+                                </a>
+                                {% endif %}
+                                {% if u.role == 'client' or not  u.role == "commercial" and not u.is_superuser %}
+                                <!-- Action 2 : Chat -->
+                                <a href="{% url 'chat_app:chat-view' u.id %}" title="Démarrer une discussion" class="flex-1 inline-flex items-center justify-center gap-1.5 bg-blue-50 hover:bg-blue-600 hover:text-white text-blue-600 font-bold px-3 py-2 rounded-xl text-xs transition-all">
+                                    <i class="fas fa-comments text-[11px]"></i>
+                                    <span>Chat</span>
+                                </a>
+                                {% endif %}
+
+                                <!-- Action 3 : RDV (Uniquement pour les Clients) 
+                                {% if u.role == 'client' or not u.is_staff and not u.is_superuser %}
+                                    <a href="#" title="Voir ou programmer des rendez-vous" class="flex-1 inline-flex items-center justify-center gap-1.5 bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-600 font-bold px-3 py-2 rounded-xl text-xs transition-all">
+                                        <i class="fas fa-calendar-alt text-[11px]"></i>
+                                        <span>RDV</span>
+                                    </a>
+                                {% endif %}-->
+
+                            </div>
+                        </div>
+
+                    </div>
+                {% empty %}
+                    <div class="col-span-full bg-white rounded-3xl p-12 text-center border border-slate-200/80 space-y-3">
+                        <div class="w-16 h-16 bg-slate-100 rounded-3xl flex items-center justify-center mx-auto text-slate-400 text-2xl">
+                            <i class="fas fa-users-slash"></i>
+                        </div>
+                        <h4 class="font-bold text-slate-900 text-base">Aucun utilisateur trouvé</h4>
+                        <p class="text-xs text-slate-500">Aucun compte n'a encore été créé dans la base de données.</p>
+                    </div>
+                {% endfor %}
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Inclusion d'Alpine.js pour la gestion fluide des onglets côté client -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-400 mt-auto">
+        <p>&copy; {% now "Y" %} KOZ Services — Espace Direction</p>
+        <p class="font-medium text-slate-700">Conçu par <strong>SPIRIT-DIGIT Agency</strong></p>
+    </footer>
+
+</body>
+</html>

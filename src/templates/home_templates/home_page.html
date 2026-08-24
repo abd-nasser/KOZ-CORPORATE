@@ -233,155 +233,150 @@
 
 </section>
 
-    <!-- ============================================================ -->
-    <!-- SECTION ACTUALITÉ – PREMIUM                                  -->
-    <!-- ============================================================ -->
-    <section class="py-16 sm:py-20 relative  actualite_sec  bg-white overflow-hidden">
+<!-- ============================================================ -->
+<!-- SECTION ACTUALITÉ – PREMIUM                                   -->
+<!-- ============================================================ -->
+<section class="py-16 sm:py-20 relative actualite_sec bg-white overflow-hidden">
+    
+    <!-- Dégradé de fond -->
+    <div class="absolute inset-0 pointer-events-none">
+        <div class="absolute top-0 right-0 w-96 h-96 bg-blue-50/30 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-0 left-0 w-96 h-96 bg-indigo-50/30 rounded-full blur-3xl"></div>
+    </div>
+
+    <div class="container actualite_fade mx-auto px-4 max-w-7xl relative z-10">
         
-        <!-- Dégradé de fond -->
-        <div class="absolute inset-0 pointer-events-none">
-            <div class="absolute top-0 right-0 w-96 h-96 bg-blue-50/30 rounded-full blur-3xl"></div>
-            <div class="absolute bottom-0 left-0 w-96 h-96 bg-indigo-50/30 rounded-full blur-3xl"></div>
+        <!-- ===== EN-TÊTE ===== -->
+        <div class="text-center informes mb-10">
+            <span class="inline-block text-xs font-semibold text-blue-600 uppercase tracking-[0.2em] bg-blue-50 px-5 py-2 rounded-full mb-4 border border-blue-100">
+                📰 Actualités
+            </span>
+            <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-800">
+                Dernières <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">actualités</span>
+            </h2>
+            <p class="text-gray-500 mt-3 max-w-2xl mx-auto text-sm sm:text-base">
+                Restez informés des dernières nouveautés de KOZ Services
+            </p>
         </div>
 
-        <div class="container mt-0 actualite_fade min-h-auto mx-auto px-4 max-w-7xl relative z-10">
+        <!-- ===== GRILLE PRINCIPALE ===== -->
+        {% if actualites %}
+        {% with actu=actualites.0 %}
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-stretch">
             
-            <!-- ===== EN-TÊTE ===== -->
-            <div class="text-center informes mb-2">
-                <span class="inline-block text-xs font-semibold text-blue-600 uppercase tracking-[0.2em] bg-blue-50 px-5 py-2 rounded-full mb-4 border border-blue-100">
-                    📰 Actualités
-                </span>
-                <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-800">
-                    Dernières <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">actualités</span>
-                </h2>
-                <p class="text-gray-500  mt-3 max-w-2xl mx-auto text-sm sm:text-base">
-                    Restez informés des dernières nouveautés de KOZ Services
-                </p>
-            </div>
-
-            <!-- ===== GRILLE PRINCIPALE ===== -->
-            {% if actualites %}
-            {% with actu=actualites.0 %}
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+            <!-- ===== COLONNE GAUCHE : HERO (50%) ===== -->
+            <div class="act-hero relative overflow-hidden rounded-2xl bg-gray-900 aspect-[4/5] sm:aspect-[16/10] lg:aspect-auto group shadow-lg">
                 
-                <!-- ===== COLONNE GAUCHE : HERO (50%) ===== -->
-                <div class="relative actu_video_img act-hero overflow-hidden bg-gray-900 aspect-[6/9] lg:aspect-auto group">
-                    
-                    <!-- VIDÉO OU IMAGE -->
-                    {% if actu.video_file or actu.video_url %}
-                        <!-- Vidéo -->
-                        <div class=" relative w-full h-full">
-                            {% if actu.video_file %}
-                                <video class="w-full  h-full object-cover" controls playsinline preload="metadata">
-                                    <source src="{{ actu.video_file.url }}" type="video/mp4">
-                                </video>
-                            {% elif actu.video_url %}
-                                <iframe class="w-full h-full" src="{{ actu.video_url }}" frameborder="0" allowfullscreen></iframe>
-                            {% endif %}
-                        </div>
-                    {% else %}
-                        <!-- Image -->
-                        <img src="{{ actu.image_principale.url }}" 
-                            alt="{{ actu.titre }}"
-                            class="w-full h-full actu_video_img object-cover transition duration-700 group-hover:scale-105">
-                        <!-- Overlay -->
-                        
-                    {% endif %}
-                    
-                    <!-- Badges superposés -->
-                    <div class="absolute top-4 left-4 flex flex-wrap gap-2 z-10">
-                        <span class="text-3xl actu_type font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-yellow-800 px-3 py-1"
-                            >
-                            <i class="fas {{ actu.type_icone }} mr-1"></i>
-                            <em>{{ actu.get_type_display }}</em>
-                        </span>
-                        {% if actu.est_vedette %}
-                        <span class="text-xl font-bold actu_vedette  text-yellow-600 px-3 py-1 ">
-                            <i class="fas fa-star mr-1"></i><em>Vedette</em> 
-                        </span>
+                <!-- VIDÉO OU IMAGE -->
+                {% if actu.video_file or actu.video_url %}
+                    <div class="relative w-full h-full">
+                        {% if actu.video_file %}
+                            <video class="w-full h-full object-cover" controls playsinline preload="metadata">
+                                <source src="{{ actu.video_file.url }}" type="video/mp4">
+                            </video>
+                        {% elif actu.video_url %}
+                            <iframe class="w-full h-full" src="{{ actu.video_url }}" frameborder="0" allowfullscreen></iframe>
                         {% endif %}
                     </div>
-
-                    <div class="absolute bottom-8 left-0 right-0 p-6 z-10 bg-gradient-to-t from-black/90 via-black/50 to-transparent">
-                        <span class="text-xs text-white/60 flex items-center gap-2">
-                            <i class="fas fa-calendar-alt"></i>
-                            {{ actu.date_evenement|date:"d/m Y" }}
-                        </span>
-                        <h3 class="text-xl actu_titre sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-yellow-800 mt-1"><em>{{ actu.titre }}</em></h3>
-                        <p class="text-sm text-white/75 actu_mini_descript mt-1 line-clamp-2">{{ actu.description_courte|default:actu.description|truncatechars:120 }}</p>
-                        
-                    </div>
-                    
-                    
-                    
+                {% else %}
+                    <img src="{{ actu.image_principale.url }}" 
+                         alt="{{ actu.titre }}"
+                         class="w-full h-full object-cover transition duration-700 group-hover:scale-105">
+                {% endif %}
+                
+                <!-- Badges superposés -->
+                <div class="absolute top-4 left-4 flex flex-wrap gap-2 z-10">
+                    <span class="actu_type text-sm font-bold text-amber-900 bg-amber-100/90 backdrop-blur-md px-3 py-1.5 rounded-lg shadow-sm border border-amber-200 flex items-center">
+                        <i class="fas {{ actu.type_icone }} mr-1.5"></i>
+                        <em>{{ actu.get_type_display }}</em>
+                    </span>
+                    {% if actu.est_vedette %}
+                    <span class="actu_vedette text-sm font-bold text-yellow-800 bg-yellow-300/90 backdrop-blur-md px-3 py-1.5 rounded-lg shadow-sm border border-yellow-400 flex items-center">
+                        <i class="fas fa-star mr-1.5 text-yellow-600"></i><em>Vedette</em> 
+                    </span>
+                    {% endif %}
                 </div>
 
-                <!-- ===== COLONNE DROITE (50%) ===== -->
-                <div class="flex flex-col gap-4">
+                <!-- Overlay texte sur image/vidéo -->
+                <div class="absolute bottom-0 left-0 right-0 p-6 z-10 bg-gradient-to-t from-black/90 via-black/50 to-transparent">
+                    <span class="text-xs text-white/70 flex items-center gap-2 mb-1">
+                        <i class="fas fa-calendar-alt"></i>
+                        {{ actu.date_evenement|date:"d/m/Y" }}
+                    </span>
+                    <h3 class="actu_titre text-xl sm:text-2xl lg:text-3xl font-bold text-white leading-tight">
+                        <em>{{ actu.titre }}</em>
+                    </h3>
+                    <p class="actu_mini_descript text-sm text-white/80 mt-2 line-clamp-2">
+                        {{ actu.description_courte|default:actu.description|truncatechars:120 }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- ===== COLONNE DROITE (50%) ===== -->
+            <div class="flex flex-col gap-4">
+                
+                <!-- HAUT : DESCRIPTION -->
+                <div class="actu_descript flex-1 bg-gradient-to-br from-blue-50/60 to-indigo-50/60 rounded-2xl p-6 border border-blue-100/60 relative overflow-hidden flex flex-col justify-between">
+                    <div class="absolute -top-6 -right-6 text-7xl text-blue-200/30 pointer-events-none">
+                        <i class="fas fa-quote-right"></i>
+                    </div>
                     
-                    <!-- ===== HAUT (60%) : DESCRIPTION AVEC SPLITTING ===== -->
-                    <div class="flex-1 relative bg-gradient-to-br actu_descript from-blue-50/50 to-indigo-50/50 rounded-2xl p-6 border border-blue-100/50 relative overflow-hidden">
-                        <!-- Icône de fond -->
-                        <div class="absolute -top-10 -right-10 text-8xl text-blue-100/20">
-                            <i class="fas fa-quote-right"></i>
-                        </div>
-                        
-                        <span class="text-xs font-semibold text-blue-600 uppercase tracking-wider">
+                    <div>
+                        <span class="text-xs font-semibold text-blue-600 uppercase tracking-wider block mb-3">
                             <i class="fas fa-align-left mr-1"></i> À découvrir
                         </span>
                         
-                        <!-- Description avec Splitting -->
-                        <div data-splitting class="description-splitting text-leading mt-2">
-                            <p class="text-base sm:text-lg text-gray-700">
-                                {{ actu.description|truncatechars:250 }}
+                        <div class="text-leading">
+                            <p class="text-base sm:text-lg text-gray-700 leading-relaxed">
+                                {{ actu.description|truncatechars:280 }}
                             </p>
                         </div>
-                        
-                        <a href="#" 
-                        class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium text-sm mt-4 group/link">
+                    </div>
+                    
+                    <div class="mt-6 pt-4 border-t border-blue-100/80">
+                        <a href="#" class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-semibold text-sm group/link transition">
                             En savoir plus
                             <i class="fas fa-arrow-right text-xs group-hover/link:translate-x-1 transition-transform"></i>
                         </a>
                     </div>
+                </div>
 
-                    <!-- ===== BAS (40%) : GALERIE D'IMAGES ===== -->
-                    {% if actu.images_list|length > 1 %}
-                    <div class="grid actu-img-galerie grid-cols-2 sm:grid-cols-3 gap-3">
-                        {% for image in actu.images_list %}
-                            {% if forloop.counter0 > 0 and forloop.counter0 < 4 %}
-                            <div class="relative aspect-square rounded-xl overflow-hidden bg-gray-200 group/img cursor-pointer hover:shadow-lg transition"
-                                onclick="openLightbox('{{ image.url }}')">
-                                <img src="{{ image.url }}" 
-                                    alt="{{ actu.titre }}" 
-                                    class="w-full h-full object-cover group-hover/img:scale-110 transition duration-500">
-                                <div class="absolute inset-0 bg-black/20 opacity-0 group-hover/img:opacity-100 transition flex items-center justify-center">
-                                    <i class="fas fa-search-plus text-white text-xl"></i>
-                                </div>
+                <!-- BAS : GALERIE D'IMAGES -->
+                {% if actu.images_list|length > 1 %}
+                <div class="actu-img-galerie grid grid-cols-3 gap-3">
+                    {% for image in actu.images_list %}
+                        {% if forloop.counter0 > 0 and forloop.counter0 < 4 %}
+                        <div class="relative  aspect-square rounded-xl overflow-hidden bg-gray-200 group/img cursor-pointer hover:shadow-md transition"
+                             onclick="openLightbox('{{ image.url }}')">
+                            <img src="{{ image.url }}" 
+                                 alt="{{ actu.titre }}" 
+                                 class="w-full h-full object-cover group-hover/img:scale-110 transition duration-500">
+                            <div class="absolute inset-0 bg-black/30 opacity-0 group-hover/img:opacity-100 transition flex items-center justify-center">
+                                <i class="fas fa-search-plus text-white text-lg"></i>
                             </div>
-                            {% endif %}
-                        {% endfor %}
-                    </div>
-                    {% endif %}
-
+                        </div>
+                        {% endif %}
+                    {% endfor %}
                 </div>
-            </div>
-            {% endwith %}
-            {% else %}
-            
-            <!-- ===== AUCUNE ACTUALITÉ ===== -->
-            <div class="text-center py-16">
-                <div class="w-24 h-24 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                    <i class="fas fa-newspaper text-4xl text-gray-400"></i>
-                </div>
-                <p class="text-gray-500 text-lg">Aucune actualité disponible</p>
-                <p class="text-gray-400 text-sm mt-1">Revenez bientôt pour découvrir nos dernières nouvelles</p>
-            </div>
-            
-            {% endif %}
+                {% endif %}
 
+            </div>
         </div>
-    </section>
+        {% endwith %}
+        {% else %}
+        
+        <!-- ===== AUCUNE ACTUALITÉ ===== -->
+        <div class="text-center py-16">
+            <div class="w-20 h-20 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4 text-gray-400">
+                <i class="fas fa-newspaper text-3xl"></i>
+            </div>
+            <p class="text-gray-600 text-lg font-medium">Aucune actualité disponible</p>
+            <p class="text-gray-400 text-sm mt-1">Revenez bientôt pour découvrir nos dernières nouvelles</p>
+        </div>
+        {% endif %}
 
+    </div>
+</section>
 
     <!-- ============================================================ -->
     <!-- SECTION SERVICES – SCROLL IMMERSIF                           -->
@@ -646,167 +641,165 @@
             </div>
     </section>
 
-    <!-- ============================================================ -->
-    <!-- SECTION MISSION & VALEURS (Version améliorée)               -->
-    <!-- ============================================================ -->
-    <section class="py-16 relative bg-white overflow-hidden">
+<!-- ============================================================ -->
+<!-- SECTION MISSION & VALEURS                                     -->
+<!-- ============================================================ -->
+<section class="py-16 relative bg-white overflow-hidden">
+    
+    <!-- Dégradé de fond -->
+    <div class="absolute inset-0 pointer-events-none">
+        <div class="absolute top-0 right-0 w-72 sm:w-96 h-72 sm:h-96 bg-blue-50 rounded-full blur-3xl opacity-40"></div>
+        <div class="absolute bottom-0 left-0 w-72 sm:w-96 h-72 sm:h-96 bg-indigo-50 rounded-full blur-3xl opacity-40"></div>
+    </div>
+
+    <div class="container relative z-10 mx-auto px-4 max-w-7xl">
         
-        <!-- Dégradé de fond -->
-        <div class="absolute inset-0 pointer-events-none">
-            <div class="absolute top-0 right-0 w-96 h-96 bg-blue-50 rounded-full blur-3xl opacity-40"></div>
-            <div class="absolute bottom-0 left-0 w-96 h-96 bg-indigo-50 rounded-full blur-3xl opacity-40"></div>
+        <!-- ===== EN-TÊTE ===== -->
+        <div class="mission_header text-center mb-12">
+            <span class="inline-block text-xs font-semibold text-blue-600 uppercase tracking-[0.2em] bg-blue-50 px-5 py-2 mb-4 border border-blue-100 rounded-full">
+                ✦ Notre ADN
+            </span>
+            <h2 class="text-3xl sm:text-4xl font-bold text-gray-800">
+                Mission & <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Valeurs</span>
+            </h2>
+            <div class="w-20 h-1 bg-gradient-to-r from-blue-500 to-indigo-500 mx-auto mt-4 rounded-full"></div>
         </div>
 
-        <div class="container mission_valeur_fade relative z-10 mx-auto px-4 max-w-7xl">
+        <!-- ===== GRILLE ===== -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
             
-            <!-- ===== EN-TÊTE ===== -->
-            <div class="text-center mb-12">
-                <span class="inline-block text-xs font-semibold text-blue-600 uppercase tracking-[0.2em] bg-blue-50 px-5 py-2  mb-4 border border-blue-100">
-                    ✦ Notre ADN
-                </span>
-                <h2 class="text-3xl sm:text-4xl font-bold text-gray-800">
-                    Mission & <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Valeurs</span>
-                </h2>
-                <div class="w-20 h-1 bg-gradient-to-r from-blue-500 to-indigo-500 mx-auto mt-4 "></div>
-            </div>
-
-            <!-- ===== GRILLE ===== -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
-                
-                <!-- ===== COLONNE GAUCHE : MISSION ===== -->
-                <div class="relative group mission">
-                    <div class="absolute -inset-1 bg-gradient-to-r from-blue-500 to-indigo-500  opacity-0 group-hover:opacity-20 blur-xl transition duration-500"></div>
-                    <div class="relative bg-white  p-6 shadow-lg border border-gray-100 hover:shadow-2xl transition duration-500 h-full">
-                        <div class="flex items-center gap-4 mb-4">
-                            <div class="w-12 h-12  bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center shadow-lg shadow-blue-500/25 flex-shrink-0">
+            <!-- ===== COLONNE GAUCHE : MISSION ===== -->
+            <div class="mission_card relative group">
+                <div class="absolute -inset-1 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-2xl opacity-0 group-hover:opacity-20 blur-xl transition duration-500"></div>
+                <div class="relative bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-100 hover:shadow-2xl transition duration-500 h-full flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center gap-4 mb-6">
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center shadow-lg shadow-blue-500/25 flex-shrink-0">
                                 <i class="fas fa-flag text-xl text-white"></i>
                             </div>
                             <div>
-                                <h3 class="text-lg font-bold text-gray-800">Notre Mission</h3>
+                                <h3 class="text-xl font-bold text-gray-800">Notre Mission</h3>
                                 <p class="text-xs text-gray-400">Ce qui nous anime chaque jour</p>
                             </div>
                         </div>
 
-                        <p>
-                            <strong class="text-blue-600"> <em> Révolutionner et Démocratiser le secteur de la concession automobile en Afrique</em></strong>
+                        <p class="text-base sm:text-lg font-semibold text-blue-600 mb-3">
+                            Révolutionner et Démocratiser le secteur de la concession automobile en Afrique
                         </p>
                         
-                        <p class="text-gray-600 mt-4 leading-relaxed text-sm"> <em>
-                            Chez <strong class="text-blue-600">KOZ Services</strong>, nous croyons que chaque 
+                        <p class="text-gray-600 leading-relaxed text-sm italic">
+                            Chez <strong class="text-blue-600 not-italic">KOZ Services</strong>, nous croyons que chaque 
                             personne mérite de rouler en toute sérénité. Notre mission est de 
-                            <strong class="text-gray-800">rendre l'accession à la voiture plus simple, 
-                            plus transparente et plus humaine</strong>, grâce à des solutions de 
-                            financement flexibles et un accompagnement personnalisé.</em>
+                            <strong class="text-gray-800 not-italic">rendre l'accès à la voiture plus simple, 
+                            plus transparent et plus humain</strong>, grâce à des solutions de 
+                            financement flexibles et un accompagnement personnalisé.
                         </p>
 
-                        <div class="flex items-center mt-4 gap-4 mb-4">
-                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/25 flex-shrink-0">
-                            <i class=" fas fa-gem text-2xl text-white"></i>
-                        </div>
-                        <div>
-                            <h2 class="text-3xl sm:text-4xl font-bold text-gray-800"> 
-                                <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Vision</span>
-                            </h2>
-                            
-                            <strong class="text-gray-400 leading-relaxed text-xs"><em>Créer un pont entre l’expertise de la Diaspora et la connaissance du marché locale afin de professionnaliser le secteur de la concession automobile en Afrique</em></strong>
-
+                        <div class="flex items-start gap-4 mt-6 pt-6 border-t border-gray-100">
+                            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-md shadow-indigo-500/20 flex-shrink-0 mt-1">
+                                <i class="fas fa-gem text-lg text-white"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-bold text-gray-800">Vision</h4>
+                                <p class="text-gray-500 leading-relaxed text-xs mt-1">
+                                    Créer un pont entre l’expertise de la Diaspora et la connaissance du marché local afin de professionnaliser le secteur de la concession automobile en Afrique.
+                                </p>
+                            </div>
                         </div>
                     </div>
-                        
                     
-                        
-                        <div class="mt-4 pt-4 border-t border-gray-100 flex flex-wrap items-center gap-3">
-                            <div class="flex items-center gap-1.5 text-xs text-gray-500">
-                                <i class="fas fa-check-circle text-green-500 text-sm"></i>
-                                <span>Accessibilité</span>
-                            </div>
-                            <div class="flex items-center gap-1.5 text-xs text-gray-500">
-                                <i class="fas fa-check-circle text-green-500 text-sm"></i>
-                                <span>Transparence</span>
-                            </div>
-                            <div class="flex items-center gap-1.5 text-xs text-gray-500">
-                                <i class="fas fa-check-circle text-green-500 text-sm"></i>
-                                <span>Proximité</span>
-                            </div>
+                    <div class="mt-6 pt-4 border-t border-gray-100 flex flex-wrap items-center gap-4">
+                        <div class="flex items-center gap-1.5 text-xs text-gray-600 font-medium">
+                            <i class="fas fa-check-circle text-green-500 text-sm"></i>
+                            <span>Accessibilité</span>
+                        </div>
+                        <div class="flex items-center gap-1.5 text-xs text-gray-600 font-medium">
+                            <i class="fas fa-check-circle text-green-500 text-sm"></i>
+                            <span>Transparence</span>
+                        </div>
+                        <div class="flex items-center gap-1.5 text-xs text-gray-600 font-medium">
+                            <i class="fas fa-check-circle text-green-500 text-sm"></i>
+                            <span>Proximité</span>
                         </div>
                     </div>
                 </div>
-
-                <!-- ===== COLONNE DROITE : VALEURS ===== -->
-                <div class="bg-white valeur p-6 shadow-lg border border-gray-100 hover:shadow-2xl transition duration-500">
-                    <div class="flex items-center gap-4 mb-4">
-                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/25 flex-shrink-0">
-                            <i class="fas fa-heart text-xl text-white"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-bold text-gray-800">Nos Valeurs</h3>
-                            <p class="text-xs text-gray-400">Ce qui nous guide au quotidien</p>
-                        </div>
-                    </div>
-
-                    <!-- ===== GRILLE DES VALEURS (responsif) ===== -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        
-                        <!-- Valeur 1 -->
-                        <div class="flex items-start gap-3 p-3 v_1 bg-gray-50/50 hover:bg-blue-50/50 transition group border border-transparent hover:border-blue-100">
-                            <div class="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-100 transition">
-                                <i class="fas fa-handshake text-blue-600 text-sm"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-semibold text-gray-800">1. La Confiance</h4>
-                                    <p class="text-sm text-gray-500 leading-relaxed">Bâtir une relation durable avec nos clients, basée sur la transparence et l'intégrité.</p>
-                            </div>
-                        </div>
-                        
-                        <!-- Valeur 2 -->
-                        <div class="flex items-start gap-3 p-3 v_2 bg-gray-50/50 hover:bg-blue-50/50 transition group border border-transparent hover:border-blue-100">
-                            <div class="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-100 transition">
-                                <i class="fas fa-bolt text-blue-600 text-sm"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-semibold text-gray-800">2. L'Innovation</h4>
-                                <p class="text-sm text-gray-500 leading-relaxed">Proposer des solutions simples et modernes pour simplifier l'achat automobile.</p>
-                            </div>
-                        </div>
-                        
-                        <!-- Valeur 3 -->
-                        <div class="flex items-start gap-3 p-3 v_3  bg-gray-50/50 hover:bg-blue-50/50 transition group border border-transparent hover:border-blue-100">
-                            <div class="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-100 transition">
-                                <i class="fas fa-users text-blue-600 text-sm"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-semibold text-gray-800">2. L'Innovation</h4>
-                                <p class="text-sm text-gray-500 leading-relaxed">Proposer des solutions simples et modernes pour simplifier l'achat automobile.</p>
-                            </div>
-                        </div>
-                        
-                        <!-- Valeur 4 -->
-                        <div class="flex items-start gap-3 p-3 v_4 bg-gray-50/50 hover:bg-blue-50/50 transition group border border-transparent hover:border-blue-100">
-                            <div class="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-100 transition">
-                                <i class="fas fa-shield-alt text-blue-600 text-sm"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-semibold text-gray-800">4. La Sécurité</h4>
-                                <p class="text-sm text-gray-500 leading-relaxed">Garantir des transactions sécurisées et des conseils fiables à nos clients.</p>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-
             </div>
 
-            <!-- ===== BANDEAU CITATION ===== -->
-            <div class="mt-10 p-6 citation bg-gradient-to-r from-blue-600 to-indigo-600 text-center shadow-xl">
-                <p class="text-white text-base md:text-lg font-medium leading-relaxed max-w-3xl mx-auto">
-                    <i class="fas fa-quote-left text-blue-200/50 mr-2"></i>
-                    KOZ Services, n'achetez pas une auto, changez votre vie
-                    <i class="fas fa-quote-right text-blue-200/50 ml-2"></i>
-                </p>
+            <!-- ===== COLONNE DROITE : VALEURS ===== -->
+            <div class="valeur_card bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-100 hover:shadow-2xl transition duration-500">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/25 flex-shrink-0">
+                        <i class="fas fa-heart text-xl text-white"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-800">Nos Valeurs</h3>
+                        <p class="text-xs text-gray-400">Ce qui nous guide au quotidien</p>
+                    </div>
+                </div>
+
+                <!-- GRILLE DES VALEURS -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    
+                    <!-- Valeur 1 -->
+                    <div class="valeur_item flex items-start gap-3 p-3.5 rounded-xl bg-gray-50/70 hover:bg-blue-50/50 transition group border border-transparent hover:border-blue-100">
+                        <div class="w-9 h-9 rounded-lg bg-blue-100/60 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-600 group-hover:text-white transition duration-300">
+                            <i class="fas fa-handshake text-blue-600 text-sm group-hover:text-white transition duration-300"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-800 text-sm">1. La Confiance</h4>
+                            <p class="text-xs text-gray-500 leading-relaxed mt-0.5">Bâtir une relation durable basée sur la transparence et l'intégrité.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Valeur 2 -->
+                    <div class="valeur_item flex items-start gap-3 p-3.5 rounded-xl bg-gray-50/70 hover:bg-blue-50/50 transition group border border-transparent hover:border-blue-100">
+                        <div class="w-9 h-9 rounded-lg bg-blue-100/60 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-600 group-hover:text-white transition duration-300">
+                            <i class="fas fa-bolt text-blue-600 text-sm group-hover:text-white transition duration-300"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-800 text-sm">2. L'Innovation</h4>
+                            <p class="text-xs text-gray-500 leading-relaxed mt-0.5">Proposer des solutions simples et modernes pour l'achat automobile.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Valeur 3 -->
+                    <div class="valeur_item flex items-start gap-3 p-3.5 rounded-xl bg-gray-50/70 hover:bg-blue-50/50 transition group border border-transparent hover:border-blue-100">
+                        <div class="w-9 h-9 rounded-lg bg-blue-100/60 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-600 group-hover:text-white transition duration-300">
+                            <i class="fas fa-users text-blue-600 text-sm group-hover:text-white transition duration-300"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-800 text-sm">3. L'Humain</h4>
+                            <p class="text-xs text-gray-500 leading-relaxed mt-0.5">Placer la proximité et l'écoute au cœur de chaque transaction.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Valeur 4 -->
+                    <div class="valeur_item flex items-start gap-3 p-3.5 rounded-xl bg-gray-50/70 hover:bg-blue-50/50 transition group border border-transparent hover:border-blue-100">
+                        <div class="w-9 h-9 rounded-lg bg-blue-100/60 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-600 group-hover:text-white transition duration-300">
+                            <i class="fas fa-shield-alt text-blue-600 text-sm group-hover:text-white transition duration-300"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-800 text-sm">4. La Sécurité</h4>
+                            <p class="text-xs text-gray-500 leading-relaxed mt-0.5">Garantir des transactions sécurisées et des conseils fiables.</p>
+                        </div>
+                    </div>
+
+                </div>
             </div>
 
         </div>
-    </section>
+
+        <!-- ===== BANDEAU CITATION ===== -->
+        <div class="citation mt-10 p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-center shadow-xl">
+            <p class="text-white text-base sm:text-xl font-medium leading-relaxed max-w-3xl mx-auto">
+                <i class="fas fa-quote-left text-blue-200/50 mr-2"></i>
+                KOZ Services, n'achetez pas une auto, changez votre vie
+                <i class="fas fa-quote-right text-blue-200/50 ml-2"></i>
+            </p>
+        </div>
+
+    </div>
+</section>
 
     <!-- ============================================================ -->
     <!-- SECTION PRODUITS VEDETTE (PREMIUM)                           -->
@@ -1251,16 +1244,16 @@
                     <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center shadow-lg shadow-blue-500/25 mb-4">
                         <i class="fas fa-building text-2xl text-white"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-white mb-2">Financement KOZ</h3>
+                    <h3 class="text-xl font-bold text-blue-700 mb-2">Financement KOZ</h3>
                     <p class="text-gray-400 text-sm leading-relaxed">
                         Financement direct par KOZ Services. Pas d'intermédiaire, des conditions avantageuses et un suivi personnalisé.
                     </p>
                     <ul class="mt-4 space-y-2 text-sm text-gray-700">
-                        <li class="flex items-center gap-2"><i class="fas fa-check-circle text-blue-700"></i> Taux à partir de 5%</li>
-                        <li class="flex items-center gap-2"><i class="fas fa-check-circle text-blue-700"></i> Durée flexible (12-60 mois)</li>
+                        <li class="flex items-center gap-2"><i class="fas fa-check-circle text-blue-700"></i> Taux de 75% à la Commande</li>
+                        <li class="flex items-center gap-2"><i class="fas fa-check-circle text-blue-700"></i> Taux de 25% à l'arrivé ou en (6mois) d'étalage</li>
                         <li class="flex items-center gap-2"><i class="fas fa-check-circle text-blue-700"></i> Zéro frais de dossier</li>
                     </ul>
-                    <a href="#" class="inline-flex items-center gap-2 text-blue-700 hover:text-blue-300 font-medium text-sm mt-4 transition group/link">
+                    <a href="#contact" class="inline-flex items-center gap-2 text-blue-700 hover:text-blue-300 font-medium text-sm mt-4 transition group/link">
                         En savoir plus <i class="fas fa-arrow-right text-xs group-hover/link:translate-x-1 transition-transform"></i>
                     </a>
                 </div>
@@ -1270,16 +1263,17 @@
                     <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center shadow-lg shadow-emerald-500/25 mb-4">
                         <i class="fas fa-handshake text-2xl text-white"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-white mb-2">Fidelis Finance</h3>
+                    <h3 class="text-xl font-bold text-emerald-500 mb-2">Fidelis Finance</h3>
                     <p class="text-gray-400 text-sm leading-relaxed">
                         Partenaire financier de confiance. Des solutions de crédit auto adaptées à votre profil.
                     </p>
                     <ul class="mt-4 space-y-2 text-sm text-gray-700">
-                        <li class="flex items-center gap-2"><i class="fas fa-check-circle text-emerald-700"></i> Taux à partir de 6.5%</li>
-                        <li class="flex items-center gap-2"><i class="fas fa-check-circle text-emerald-700"></i> Étude rapide (48h)</li>
-                        <li class="flex items-center gap-2"><i class="fas fa-check-circle text-emerald-700"></i> Accompagnement personnalisé</li>
+                        <li class="flex items-center gap-2"><i class="fas fa-check-circle text-emerald-700"></i> Taux à partir de 12% à 17%</li>
+                        <li class="flex items-center gap-2"><i class="fas fa-check-circle text-emerald-700"></i> Étude du dossier (10jours ouvables)</li>
+                        <li class="flex items-center gap-2"><i class="fas fa-check-circle text-emerald-700"></i> Frais de dossier 1% du prix de voiture</li>
+                        <li class="flex items-center gap-2"><i class="fas fa-check-circle text-emerald-700"></i> Mode de remboursement 1 à 59mois</li>
                     </ul>
-                    <a href="#" class="inline-flex items-center gap-2 text-emerald-700 hover:text-emerald-300 font-medium text-sm mt-4 transition group/link">
+                    <a href="#contact" class="inline-flex items-center gap-2 text-emerald-700 hover:text-emerald-300 font-medium text-sm mt-4 transition group/link">
                         En savoir plus <i class="fas fa-arrow-right text-xs group-hover/link:translate-x-1 transition-transform"></i>
                     </a>
                 </div>
@@ -1289,16 +1283,16 @@
                     <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center shadow-lg shadow-purple-500/25 mb-4">
                         <i class="fas fa-star text-2xl text-white"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-white mb-2">Alios Finance</h3>
+                    <h3 class="text-xl font-bold text-purple-500 mb-2">Alios Finance</h3>
                     <p class="text-gray-400 text-sm leading-relaxed">
                         Partenaire financier spécialiste du crédit automobile. Des offres sur mesure pour tous les budgets.
                     </p>
                     <ul class="mt-4 space-y-2 text-sm text-gray-700">
-                        <li class="flex items-center gap-2"><i class="fas fa-check-circle text-purple-700"></i> Taux à partir de 5.9%</li>
-                        <li class="flex items-center gap-2"><i class="fas fa-check-circle text-purple-700"></i> Financement jusqu'à 80%</li>
-                        <li class="flex items-center gap-2"><i class="fas fa-check-circle text-purple-700"></i> Réponse sous 24h</li>
+                        <li class="flex items-center gap-2"><i class="fas fa-check-circle text-purple-700"></i> Taux à partir de 12% à 17%</li>
+                        <li class="flex items-center gap-2"><i class="fas fa-check-circle text-purple-700"></i> Étude du dossier (10jours ouvables)</li>
+                        <li class="flex items-center gap-2"><i class="fas fa-check-circle text-purple-700"></i> Mode de remboursement 1 à 59mois</li>
                     </ul>
-                    <a href="#" class="inline-flex items-center gap-2 text-purple-700 hover:text-purple-300 font-medium text-sm mt-4 transition group/link">
+                    <a href="#contact" class="inline-flex items-center gap-2 text-purple-700 hover:text-purple-300 font-medium text-sm mt-4 transition group/link">
                         En savoir plus <i class="fas fa-arrow-right text-xs group-hover/link:translate-x-1 transition-transform"></i>
                     </a>
                 </div>
@@ -1905,7 +1899,7 @@
     <!-- ============================================================ -->
     <!-- ==================== FOOTER  ========================        -->
     <!-- ============================================================ -->
-    <footer class="footer sm:footer-horizontal z-1000 relative bg-blue-400 text-neutral-content p-10">
+<footer class="footer sm:footer-horizontal z-1000 relative bg-blue-400 text-neutral-content p-10">
     <aside>
         <svg
         width="50"
@@ -1983,7 +1977,7 @@
         </a>
         </div>
     </nav>
-    </footer>
+</footer>
 
 
         <!-- ========== MODALES ========== -->

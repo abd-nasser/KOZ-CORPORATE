@@ -6,4 +6,5 @@ app_name = "directeur_app"
 urlpatterns = [
     path('dashboard/',views.DirecteurDashboardView.as_view(), name="directeur-view"),
     path('rendez-vous/', views.DirecteurRendezVousListView.as_view(), name='rendez-vous-list'),
+    path("list/utilisateur/", views.AllUserList.as_view(), name="all-users")
 ]

@@ -591,6 +591,24 @@ video {
         
     }
 }
+
+@media (min-width: 1025px) {
+    .hero-section{
+        min-height: 270vh;
+    }
+    .box {
+        width: 50%;
+        transform: translateY(40px);
+        padding: 1rem 1.5rem;
+    }
+     .box-left{
+        top: 10rem;
+    }
+    .box-right{
+        top: 10rem;
+    }
+}
+
 @media (max-width: 1024px) {
 
     .hero-section{

@@ -7,7 +7,7 @@ from auth_app.forms import UserRegisterForm, ChangePasswordForm
 from home_app.models import RendezVous
 from vehicul_app.forms import MarqueForm, VehiculForm, TypeVehiculeForm
 from products_app.forms import CategorieProductsForm, ProductsForm, UniteProduitForm, MarqueProduitForm
-
+from auth_app.models import kozUser
 from services_app.forms import TypesServicesForm, ServicesForm
 from home_app.forms import AvisReseauForm, VideoTemoignageForm, ActualiteForm
 class DirecteurDashboardView(LoginRequiredMixin,UserPassesTestMixin,TemplateView ):
@@ -68,6 +68,15 @@ class DirecteurDashboardView(LoginRequiredMixin,UserPassesTestMixin,TemplateView
             context["actualite_form"] = ActualiteForm()
             
         return context 
+ 
+ 
+class AllUserList(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    def test_func(self):
+         return self.request.user.is_superuser or self.request.user.role == "directeur"
+    model = kozUser
+    template_name="directeur_templates/utilisateurs_list.html"
+    context_object_name = "all_users"
+ 
     
 class DirecteurRendezVousListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     model = RendezVous

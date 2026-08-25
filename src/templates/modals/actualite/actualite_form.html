@@ -1,26 +1,26 @@
-<!-- ============================================================ -->
-<!-- MODAL : AJOUT / MODIFICATION D'ACTUALITÉ                    -->
-<!-- ============================================================ -->
 <dialog id="actualite_modal" class="modal">
-    <div class="modal-box bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden p-0">
+    <div id="modal_content_container" class="modal-box overflow-y-auto bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden p-0 relative">
         
         <!-- En-tête -->
         <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4 flex justify-between items-center">
             <div>
                 <h3 class="text-xl font-bold text-white flex items-center gap-2">
                     <i class="fas fa-newspaper"></i>
-                    {% if actualite %}Modifier l'actualité{% else %}Ajouter une actualité{% endif %}
+                    Ajouter une actualité
                 </h3>
                 <p class="text-blue-100 text-sm mt-0.5">Remplissez les informations ci-dessous</p>
             </div>
             <button type="button" class="text-white/80 hover:text-white text-3xl leading-none transition" 
                     onclick="document.getElementById('actualite_modal').close()">×</button>
         </div>
-
-        <!-- Formulaire -->
+        <div id="actualite_msg_zone"></div>
+        <!-- Formulaire HTMX -->
         <div class="p-6 overflow-y-auto" style="max-height: calc(90vh - 80px);">
-            <form method="post" enctype="multipart/form-data" 
-                  action="{% if actualite %}{% url 'home_app:actualites-update' actualite.pk %}{% else %}{% url 'home_app:actualites-create' %}{% endif %}">
+            <form id="actualite_create_form"
+                  hx-post="{% url 'home_app:actualites-create' %}"
+                  hx-encoding="multipart/form-data"
+                  hx-target="#actualite_msg_zone"
+                  hx-indicator="#upload_overlay">
                 {% csrf_token %}
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -29,6 +29,7 @@
                     <div class="md:col-span-2">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Titre *</label>
                         {{ actualite_form.titre }}
+                        {% if actualite_form.titre.errors %}<span class="text-xs text-error">{{ actualite_form.titre.errors.0 }}</span>{% endif %}
                     </div>
 
                     <!-- Sous-titre -->
@@ -65,9 +66,6 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Image principale *</label>
                         {{ actualite_form.image_principale }}
-                        {% if actualite and actualite.image_principale %}
-                            <p class="text-xs text-gray-400 mt-1">Actuelle : {{ actualite.image_principale.name|truncatechars:30 }}</p>
-                        {% endif %}
                     </div>
 
                     <!-- Ordre -->
@@ -94,26 +92,11 @@
                             <i class="fas fa-images text-blue-600 mr-1"></i> Images supplémentaires
                         </h4>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div>
-                                <label class="text-xs text-gray-500">Image 2</label>
-                                {{ actualite_form.image_1 }}
-                            </div>
-                            <div>
-                                <label class="text-xs text-gray-500">Image 3</label>
-                                {{ actualite_form.image_2 }}
-                            </div>
-                            <div>
-                                <label class="text-xs text-gray-500">Image 4</label>
-                                {{ actualite_form.image_3 }}
-                            </div>
-                            <div>
-                                <label class="text-xs text-gray-500">Image 5</label>
-                                {{ actualite_form.image_4 }}
-                            </div>
-                            <div>
-                                <label class="text-xs text-gray-500">Image 6</label>
-                                {{ actualite_form.image_5 }}
-                            </div>
+                            <div><label class="text-xs text-gray-500">Image 2</label>{{ actualite_form.image_1 }}</div>
+                            <div><label class="text-xs text-gray-500">Image 3</label>{{ actualite_form.image_2 }}</div>
+                            <div><label class="text-xs text-gray-500">Image 4</label>{{ actualite_form.image_3 }}</div>
+                            <div><label class="text-xs text-gray-500">Image 5</label>{{ actualite_form.image_4 }}</div>
+                            <div><label class="text-xs text-gray-500">Image 6</label>{{ actualite_form.image_5 }}</div>
                         </div>
                     </div>
 
@@ -124,8 +107,11 @@
                         </h4>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
-                                <label class="text-xs text-gray-500">Fichier vidéo</label>
+                                <label class="text-xs text-gray-500">Fichier vidéo (Max 50Mo)</label>
                                 {{ actualite_form.video_file }}
+                                {% if actualite_form.video_file.errors %}
+                                    <p class="text-xs text-error mt-1">{{ actualite_form.video_file.errors.0 }}</p>
+                                {% endif %}
                             </div>
                             <div>
                                 <label class="text-xs text-gray-500">Lien YouTube/Vimeo</label>
@@ -140,14 +126,8 @@
                             <i class="fas fa-link text-blue-600 mr-1"></i> Liens
                         </h4>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div>
-                                <label class="text-xs text-gray-500">Lien interne</label>
-                                {{ actualite_form.lien_interne }}
-                            </div>
-                            <div>
-                                <label class="text-xs text-gray-500">Lien externe</label>
-                                {{ actualite_form.lien_externe }}
-                            </div>
+                            <div><label class="text-xs text-gray-500">Lien interne</label>{{ actualite_form.lien_interne }}</div>
+                            <div><label class="text-xs text-gray-500">Lien externe</label>{{ actualite_form.lien_externe }}</div>
                         </div>
                     </div>
 
@@ -170,8 +150,7 @@
                 <!-- Boutons -->
                 <div class="flex gap-3 mt-6 pt-4 border-t border-gray-100">
                     <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-xl transition font-semibold flex items-center justify-center gap-2">
-                        <i class="fas fa-save"></i>
-                        {% if actualite %}Modifier{% else %}Ajouter{% endif %}
+                        <i class="fas fa-plus"></i> Ajouter
                     </button>
                     <button type="button" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2.5 rounded-xl transition font-semibold"
                             onclick="document.getElementById('actualite_modal').close()">
@@ -182,14 +161,82 @@
             </form>
         </div>
 
+        <!-- OVERLAY / TIMELINE DE CHARGEMENT & PROGRESSION (Masqué par défaut) -->
+        <div id="upload_overlay" class="htmx-indicator absolute inset-0 bg-white/95 backdrop-blur-sm z-50 flex flex-col items-center justify-center p-6 text-center">
+            
+            <!-- Spinner Animation -->
+            <div class="relative mb-6">
+                <div class="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+                <i class="fas fa-cloud-upload-alt text-blue-600 text-xl absolute inset-0 flex items-center justify-center"></i>
+            </div>
+
+            <h4 class="text-lg font-bold text-gray-800 mb-1">Envoi en cours...</h4>
+            <p id="upload_status_text" class="text-xs text-gray-500 mb-4">Téléversement des fichiers et des médias</p>
+
+            <!-- Barre de Progression -->
+            <div class="w-full max-w-md bg-gray-200 rounded-full h-3 mb-2 overflow-hidden shadow-inner">
+                <div id="upload_progress_bar" class="bg-gradient-to-r from-blue-500 to-indigo-600 h-3 rounded-full transition-all duration-150 w-0"></div>
+            </div>
+            <span id="upload_percent" class="text-xs font-semibold text-blue-700">0%</span>
+
+            <!-- Timeline des étapes -->
+            <div class="mt-6 w-full max-w-xs text-left space-y-2 text-xs">
+                <div id="step_prep" class="flex items-center gap-2 text-blue-600 font-medium">
+                    <i class="fas fa-check-circle"></i> <span>Préparation de la requête</span>
+                </div>
+                <div id="step_upload" class="flex items-center gap-2 text-gray-400">
+                    <i class="fas fa-circle-notch animate-spin"></i> <span>Téléversement des média (Images/Vidéo)</span>
+                </div>
+                <div id="step_process" class="flex items-center gap-2 text-gray-400">
+                    <i class="far fa-circle"></i> <span>Validation & enregistrement serveur</span>
+                </div>
+            </div>
+        </div>
+
     </div>
 </dialog>
+<script>
+// Écoute l'événement envoyé par HTMX
+document.body.addEventListener('closeActuModal', function() {
+    const modal = document.getElementById('actualite_modal');
+    if (modal) {
+        modal.close();
+    }
+});
+</script>
 
-<!-- Script pour rouvrir la modal si formulaire invalide -->
-{% if open_actualite_modal %}
+
+<!-- JS pour écouter la progression XMLHttpRequest d'HTMX -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        document.getElementById('actualite_modal').showModal();
+        const modal = document.getElementById('actualite_modal');
+        if ({% if open_actualite_modal %}true{% else %}false{% endif %}) {
+            modal.showModal();
+        }
+
+        const progressBar = document.getElementById('upload_progress_bar');
+        const progressPercent = document.getElementById('upload_percent');
+        const stepUpload = document.getElementById('step_upload');
+        const stepProcess = document.getElementById('step_process');
+
+        // Capture la progression de l'upload d'HTMX
+        document.body.addEventListener('htmx:xhr:progress', function(evt) {
+            if (evt.detail.lengthComputable) {
+                let percent = Math.round((evt.detail.loaded / evt.detail.total) * 100);
+                
+                if (progressBar) progressBar.style.width = percent + '%';
+                if (progressPercent) progressPercent.innerText = percent + '%';
+
+                if (percent > 0 && stepUpload) {
+                    stepUpload.className = "flex items-center gap-2 text-blue-600 font-medium";
+                }
+                
+                if (percent === 100 && stepProcess) {
+                    stepProcess.className = "flex items-center gap-2 text-blue-600 font-medium";
+                    stepProcess.querySelector('i').className = "fas fa-spinner animate-spin";
+                    document.getElementById('upload_status_text').innerText = "Traitement par le serveur...";
+                }
+            }
+        });
     });
 </script>
-{% endif %}

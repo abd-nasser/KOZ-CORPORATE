@@ -268,30 +268,55 @@ class ActualiteDetailView(LoginRequiredMixin, DetailView):
         return reverse_lazy('home_app:actualites-list')  # Redirige vers la liste des actualités après la soumission du formulaire
 
 
+import json
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import CreateView
+from django.urls import reverse_lazy
+from django.shortcuts import render
+
 class ActualiteCreateView(LoginRequiredMixin, CreateView):
     model = Actualite
     form_class = ActualiteForm
-    template_name = 'directeur_templates/actualite_form.html'
+    
+    def form_valid(self, form):
+        self.object = form.save()
+        
+            # Rendu de la carte / ligne partial de l'actualité créée
+        response = render(self.request,'partials/actualite/actu_result.html',{'success': True,
+                                                                            "title": "Ajouté",
+                                                                            "message":"Nouvelle actualité ajouté",
+                                                                            "reload_on_close": True })
+            
+        # Triggers JS personnalisés via le header HX-Trigger
+        response['HX-Trigger'] = 'closeActuModal'
+        return response
 
-    def get_success_url(self):
-        return reverse_lazy('home_app:actualites-list')
+
+    def form_invalid(self, form):
+           # Ré-affiche la modal avec les erreurs de validation
+        return render(self.request,'partials/actualite/actu_forms_error.html',{'actualite_form': form})
+       
 
 
 class ActualiteUpdateView(LoginRequiredMixin, UpdateView):
     model = Actualite
     form_class = ActualiteForm
-    success_url = reverse_lazy('home_app:actualites-list')
+  
 
     def form_valid(self, form):
-        response = super().form_valid(form)
-        messages.success(self.request, f"✅ Actualité '{self.object.titre}' modifiée avec succès !")
+        response = render(self.request,'partials/actualite/actu_result.html',{'success': True,
+                                                                            "title": "Mis à jour",
+                                                                            "message":"actualité mis à jour",
+                                                                            "reload_on_close": True}
+                   )
+                   
+                   # Triggers JS personnalisés via le header HX-Trigger
+        response['HX-Trigger'] = 'closeActuModal'
         return response
 
     def form_invalid(self, form):
-        messages.error(self.request, "❌ Erreur dans le formulaire. Vérifiez les champs.")
-        return super().form_invalid(form)
-    def get_success_url(self):
-        return reverse_lazy('home_app:actualites-list')  # Redirige vers la liste des actualités après la soumission du formulaire
+        return render(self.request,'partials/actualite/actu_forms_error.html',{'actualite_form': form})
+   
 
 
 @login_required

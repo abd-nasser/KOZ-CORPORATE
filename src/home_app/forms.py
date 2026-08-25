@@ -71,27 +71,10 @@ class ActualiteForm(forms.ModelForm):
     class Meta:
         model = Actualite
         fields = [
-            'titre',
-            'sous_titre',
-            'description',
-            'description_courte',
-            'type',
-            'image_principale',
-            'image_1',
-            'image_2',
-            'image_3',
-            'image_4',
-            'image_5',
-            'video_file',
-            'video_url',
-            'lien_externe',
-            'lien_interne',
-            'date_evenement',
-            'date_publication',
-            'date_fin',
-            'est_publie',
-            'est_vedette',
-            'ordre',
+            'titre', 'sous_titre', 'description', 'description_courte', 'type',
+            'image_principale', 'image_1', 'image_2', 'image_3', 'image_4', 'image_5',
+            'video_file', 'video_url', 'lien_externe', 'lien_interne',
+            'date_evenement', 'date_publication', 'date_fin', 'est_publie', 'est_vedette', 'ordre',
         ]
         widgets = {
             'titre': forms.TextInput(attrs={'class': 'input input-bordered w-full'}),
@@ -116,3 +99,13 @@ class ActualiteForm(forms.ModelForm):
             'est_vedette': forms.CheckboxInput(attrs={'class': 'checkbox'}),
             'lien_interne': forms.URLInput(attrs={'class': 'input input-bordered w-full'}),
         }
+
+    def clean_video_file(self): # Correction de la coquille sur le nom de la méthode
+        MAX_VIDEO_SIZE = 100 * 1024 * 1024 
+        video = self.cleaned_data.get('video_file')
+        if video and video.size > MAX_VIDEO_SIZE:
+            raise forms.ValidationError(
+                f"La vidéo est trop volumineuse ({video.size / 1024 / 1024:.1f} Mo, maximum {MAX_VIDEO_SIZE / 1024 / 1024:.0f} Mo). "
+                f"Astuce : compressez-la ou téléchargez-la en qualité standard avant l'envoi."
+            )
+        return video

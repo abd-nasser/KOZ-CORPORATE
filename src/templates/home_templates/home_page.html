@@ -1308,182 +1308,239 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- SECTION : TÉMOIGNAGES & RÉSEAUX SOCIAUX                     -->
-    <!-- ============================================================ -->
-    <section class="py-16 sm:py-20 relative bg-gradient-to-br from-gray-50 to-white overflow-hidden temoignage_section">
+<!-- SECTION : TÉMOIGNAGES & RÉSEAUX SOCIAUX                     -->
+<!-- ============================================================ -->
+<section class="py-16 sm:py-24 relative bg-gray-100 overflow-hidden temoignage_section">
+    
+    <!-- Glows & orbes de fond -->
+    <div class="absolute inset-0 pointer-events-none overflow-hidden">
+        <div class="absolute -top-20 -right-20 w-96 h-96 bg-blue-400/10 rounded-full blur-3xl"></div>
+        <div class="absolute top-1/2 -left-20 w-96 h-96 bg-indigo-400/10 rounded-full blur-3xl"></div>
+        <div class="absolute -bottom-20 right-1/3 w-96 h-96 bg-sky-400/10 rounded-full blur-3xl"></div>
+    </div>
+
+    <div class="container relative z-10 mx-auto px-4 sm:px-6 max-w-7xl temoignage_fade">
         
-        <!-- Dégradé de fond -->
-        <div class="absolute inset-0 pointer-events-none">
-            <div class="absolute top-0 right-0 w-96 h-96 bg-blue-50/30 rounded-full blur-3xl"></div>
-            <div class="absolute bottom-0 left-0 w-96 h-96 bg-indigo-50/30 rounded-full blur-3xl"></div>
+        <!-- ===== EN-TÊTE ===== -->
+        <div class="text-center mb-14 sm:mb-20">
+            <span class="inline-flex items-center gap-2 text-xs font-bold text-blue-600 uppercase tracking-widest bg-blue-100/60 backdrop-blur-md px-4 py-2 rounded-full mb-4 border border-blue-200/50 shadow-sm">
+                <span>💬</span> Ils parlent de nous
+            </span>
+            <h2 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight">
+                Ce que disent nos <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-sky-500">clients</span>
+            </h2>
+            <p class="text-slate-500 mt-4 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed">
+                Des avis authentiques, nos apparitions sur les réseaux sociaux et nos retours en vidéo.
+            </p>
         </div>
 
-        <div class="container relative z-10 mx-auto px-4 max-w-7xl temoignage_fade">
-            
-            <!-- ===== EN-TÊTE ===== -->
-            <div class="text-center mb-12">
-                <span class="inline-block text-xs font-semibold text-blue-600 uppercase tracking-[0.2em] bg-blue-50 px-5 py-2 rounded-full mb-4 border border-blue-100">
-                    💬 Ils parlent de nous
+        <!-- ===== TÉMOIGNAGES CLIENTS (Snap Scroll Mobile + Grille Desktop) ===== -->
+        <div class="mb-16">
+            <div class="flex items-center justify-between mb-8 px-1">
+                <h3 class="text-xl font-bold text-slate-900 flex items-center gap-2.5">
+                    <span class="w-8 h-8  bg-amber-100 flex items-center justify-center text-amber-500 shadow-sm">
+                        <i class="fas fa-star"></i>
+                    </span>
+                    Témoignages clients
+                </h3>
+                <span class="text-xs font-semibold text-slate-500 bg-white border border-slate-200/80 px-3.5 py-1.5 rounded-full shadow-sm">
+                    {{ temoignages|length }} avis vérifiés
                 </span>
-                <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-800">
-                    Ce que disent nos <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">clients</span>
-                </h2>
-                <p class="text-gray-500 mt-3 max-w-2xl mx-auto text-sm sm:text-base">
-                    Des avis authentiques de clients satisfaits et des retours sur les réseaux sociaux.
-                </p>
             </div>
 
-            <!-- ===== TÉMOIGNAGES (scroll horizontal) ===== -->
-            <div class="mb-12">
-                <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
-                        <i class="fas fa-star text-yellow-500"></i> Témoignages clients
-                    </h3>
-                    <span class="text-sm text-gray-400">{{ temoignages|length }} avis</span>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {% for temoignage in temoignages|slice:":6" %}
-                    <div class="bg-white  p-6 shadow-sm hover:shadow-xl transition-all duration-300 ">
-                        <div class="flex items-center gap-3 mb-3">
-                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
-                                {% if temoignage.photo %}
-                                    <img src="{{ temoignage.photo.url }}" alt="{{ temoignage.prenom }}" class="w-full h-full rounded-full object-cover">
-                                {% else %}
-                                    {{ temoignage.prenom|slice:":1" }}{{ temoignage.nom|slice:":1" }}
-                                {% endif %}
+            <!-- Swipe mobile / Grille desktop -->
+            <div class="flex md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-x-auto pb-6 md:pb-0 snap-x snap-mandatory -mx-4 px-4 md:mx-0 md:px-0 scrollbar-none">
+                {% for temoignage in temoignages|slice:":6" %}
+                <div class="snap-center shrink-0 w-[5vw] sm:w-[380px] object-contain md:w-auto bg-white rounded-3xl p-6 sm:p-7 border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between relative group">
+                    
+                    <i class="fas fa-quote-right absolute top-6 right-6 text-slate-100 text-4xl group-hover:text-blue-50 transition-colors pointer-events-none"></i>
+
+                    <div>
+                        <!-- Header Profil -->
+                        <div class="flex items-center gap-4 mb-4 relative z-10">
+                            <div class="w-12 h-12  bg-gradient-to-br from-blue-600 to-indigo-600 p-0.5 shadow-md shrink-0">
+                                <div class="w-full h-full rounded-[14px] bg-white overflow-hidden flex items-center justify-center font-bold text-blue-600 text-base">
+                                    {% if temoignage.photo %}
+                                        <img src="{{ temoignage.photo.url }}" alt="{{ temoignage.prenom }}" class="w-full h-full object-cover">
+                                    {% else %}
+                                        {{ temoignage.prenom|slice:":1" }}{{ temoignage.nom|slice:":1" }}
+                                    {% endif %}
+                                </div>
                             </div>
-                            <div>
-                                <p class="font-semibold text-gray-800">{{ temoignage.prenom }} {{ temoignage.nom }}</p>
-                                <div class="text-yellow-500 text-sm">
+                            <div class="flex-1 min-w-0">
+                                <p class="font-bold text-slate-900 truncate text-base leading-snug">{{ temoignage.prenom }} {{ temoignage.nom }}</p>
+                                <div class="flex items-center gap-1 text-amber-400 text-xs mt-0.5">
                                     {% for i in "12345"|make_list %}
-                                        {% if forloop.counter <= temoignage.note %}★{% else %}☆{% endif %}
+                                        {% if forloop.counter <= temoignage.note %}
+                                            <i class="fas fa-star"></i>
+                                        {% else %}
+                                            <i class="far fa-star text-slate-200"></i>
+                                        {% endif %}
                                     {% endfor %}
                                 </div>
                             </div>
-                            <span class="ml-auto text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-full">
-                                {{ temoignage.get_source_display }}
-                            </span>
                         </div>
-                        <p class="text-gray-600 text-sm leading-relaxed">"{{ temoignage.message|truncatechars:120 }}"</p>
+
+                        <!-- Message -->
+                        <p class="text-slate-600 text-sm leading-relaxed relative z-10 italic">
+                            "{{ temoignage.message|truncatechars:130 }}"
+                        </p>
                     </div>
-                    {% empty %}
-                    <p class="col-span-full text-center text-gray-400">Aucun témoignage pour le moment.</p>
-                    {% endfor %}
+
+                    <!-- Footer Badge Source -->
+                    <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
+                        <span class="inline-flex items-center gap-1.5 font-medium text-slate-600 bg-slate-100/80 px-2.5 py-1 rounded-lg">
+                            <i class="fas fa-check-circle text-blue-500 text-[11px]"></i>
+                            {{ temoignage.get_source_display }}
+                        </span>
+                        <span class="text-[11px] text-slate-400">Avis vérifié</span>
+                    </div>
                 </div>
+                {% empty %}
+                <p class="col-span-full text-center py-10 text-slate-400 bg-white rounded-3xl border border-dashed border-slate-200">Aucun témoignage pour le moment.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+       <!-- ===== RÉSEAUX SOCIAUX ===== -->
+<div class="mb-16 socials_fade">
+    <div class="flex items-center justify-between mb-8 px-1">
+        <h3 class="text-xl font-bold text-slate-900 flex items-center gap-2.5">
+            <span class="w-8 h-8 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 shadow-sm">
+                <i class="fas fa-share-alt"></i>
+            </span>
+            Sur les réseaux sociaux
+        </h3>
+        <span class="text-xs font-semibold text-slate-500 bg-white border border-slate-200/80 px-3.5 py-1.5 rounded-full shadow-sm">
+            {{ avis_reseaux|length }} mentions
+        </span>
+    </div>
+
+    <!-- Alignment items-start pour s'adapter à la hauteur variable des captures -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 items-start">
+        {% for avis in avis_reseaux|slice:":8" %}
+        <div class="bg-white  p-4 sm:p-5 border border-slate-100 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between h-full">
+            <div>
+                <!-- Header User & Réseau -->
+                <div class="flex items-center justify-between gap-2 mb-3">
+                    <div class="flex items-center gap-2 min-w-0">
+                        <span class="w-8 h-8 rounded-xl flex items-center justify-center text-sm shrink-0 bg-slate-50 border border-slate-100">
+                            {% if avis.reseau == 'facebook' %}
+                                <i class="fab fa-facebook text-blue-600"></i>
+                            {% elif avis.reseau == 'instagram' %}
+                                <i class="fab fa-instagram text-pink-600"></i>
+                            {% elif avis.reseau == 'google' %}
+                                <i class="fab fa-google text-red-500"></i>
+                            {% elif avis.reseau == 'whatsapp' %}
+                                <i class="fab fa-whatsapp text-emerald-500"></i>
+                            {% elif avis.reseau == 'twitter' %}
+                                <i class="fab fa-twitter text-sky-400"></i>
+                            {% elif avis.reseau == 'tiktok' %}
+                                <i class="fab fa-tiktok text-slate-900"></i>
+                            {% else %}
+                                <i class="fas fa-share-alt text-slate-500"></i>
+                            {% endif %}
+                        </span>
+                        <span class="text-xs font-bold text-slate-800 truncate">{{ avis.nom_utilisateur }}</span>
+                    </div>
+                    <span class="text-[10px] font-medium text-slate-400 shrink-0 bg-slate-50 px-2 py-1 rounded-md">{{ avis.date_publication|date:"d/m/Y" }}</span>
+                </div>
+
+                <!-- Capture d'écran du commentaire (100% visible) -->
+                {% if avis.image %}
+                <div class="mb-3  overflow-hidden bg-slate-900/5 p-1.5 border border-slate-200/60 flex items-center justify-center min-h-[150px] max-h-80 group/img">
+                    <img src="{{ avis.image.url }}" 
+                         alt="Avis {{ avis.nom_utilisateur }}" 
+                         class="w-full max-h-72 object-contain rounded-lg transition-transform duration-300 group-hover/img:scale-[1.01]">
+                </div>
+                {% endif %}
+
+                {% if avis.message %}
+                <p class="text-xs text-slate-600 leading-relaxed mt-2 line-clamp-3">{{ avis.message }}</p>
+                {% endif %}
             </div>
 
-            <!-- ===== RÉSEAUX SOCIAUX (grille d'avis) ===== -->
-            <div class="mb-12 socials_fade">
-                <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
-                        <i class="fas fa-share-alt text-blue-500"></i> Sur les réseaux sociaux
-                    </h3>
-                    <span class="text-sm text-gray-400">{{ avis_reseaux|length }} avis</span>
-                </div>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {% for avis in avis_reseaux|slice:":8" %}
-                    <div class="bg-white min-w-150 p-4 shadow-sm hover:shadow-md transition">
-                        <div class="flex items-center gap-2 mb-2">
-                            <span class="text-lg">
-                                {% if avis.reseau == 'facebook' %}
-                                    <i class="fab fa-facebook text-blue-600"></i>
-                                {% elif avis.reseau == 'instagram' %}
-                                    <i class="fab fa-instagram text-pink-600"></i>
-                                {% elif avis.reseau == 'google' %}
-                                    <i class="fab fa-google text-red-500"></i>
-                                {% elif avis.reseau == 'whatsapp' %}
-                                    <i class="fab fa-whatsapp text-green-500"></i>
-                                {% elif avis.reseau == 'twitter' %}
-                                    <i class="fab fa-twitter text-blue-400"></i>
-                                    {% elif avis.reseau == 'tiktok' %}
-                                    <i class="fab fa-tiktok text-black"></i>
-                                {% else %}
-                                    <i class="fas fa-share-alt text-gray-500"></i>
-                                {% endif %}
-                            </span>
-                            <span class="text-xs font-medium text-gray-600">{{ avis.nom_utilisateur }}</span>
-                            <span class="ml-auto text-[10px] text-gray-400">{{ avis.date_publication|date:"d/m/Y" }}</span>
-                        </div>
-                        {% if avis.image %}
-                            <img src="{{ avis.image.url }}" alt="Avis" class="w-full h-30 object-contain  mb-2">
-                        {% endif %}
-                        <p class="text-xs text-gray-500 line-clamp-3">{{ avis.message|truncatechars:60 }}</p>
-                        {% if avis.lien %}
-                            <a href="{{ avis.lien }}" target="_blank" class="text-xs text-blue-600 hover:text-blue-800 transition mt-1 inline-flex items-center gap-1">
-                                <i class="fas fa-external-link-alt"></i> Voir le post
-                            </a>
-                            {% endif %}
-                    </div>
-                    {% empty %}
-                    <p class="col-span-full text-center text-gray-400">Aucun avis sur les réseaux sociaux.</p>
-                    {% endfor %}
-                </div>
-            </div>
+            {% if avis.lien %}
+            <a href="{{ avis.lien }}" target="_blank" rel="noopener noreferrer" class="text-[11px] font-semibold text-blue-600 hover:text-blue-800 inline-flex items-center gap-1.5 transition-colors mt-4 pt-2.5 border-t border-slate-100">
+                <i class="fas fa-external-link-alt text-[10px]"></i> Voir le post original
+            </a>
+            {% endif %}
+        </div>
+        {% empty %}
+        <p class="col-span-full text-center py-10 text-slate-400 bg-white rounded-3xl border border-dashed border-slate-200">Aucun avis sur les réseaux sociaux.</p>
+        {% endfor %}
+    </div>
+</div>
 
         <!-- ===== VIDÉOS ===== -->
-            <div class="videos_fade">
-                <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
-                        <i class="fas fa-video text-red-500"></i> Vidéos
-                    </h3>
-                    <span class="text-sm text-gray-400">{{ videos|length }} vidéos</span>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {% for video in videos|slice:":6" %}
-                    <div class="group bg-white  overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300">
-                        <!-- Vidéo -->
-                        <div class="relative aspect-video bg-gray-900 overflow-hidden">
-                            {% if video.video_file %}
-                                <!-- ✅ BALISE CORRECTE (SANS POSTER SI PAS DISPO) -->
-                                <video class="w-full h-full object-cover" controls preload="metadata" playsinline>
-                                    <source src="{{ video.video_file.url }}" type="video/mp4">
-                                    Votre navigateur ne supporte pas la vidéo.
-                                </video>
-                            {% elif video.video_url %}
-                                <iframe class="w-full h-full" src="{{ video.video_url }}" frameborder="0" allowfullscreen></iframe>
-                            {% elif video.embed_code %}
-                                {{ video.embed_code|safe }}
-                            {% else %}
-                                <div class="w-full h-full flex items-center justify-center bg-gray-800">
-                                    <i class="fas fa-video text-4xl text-gray-600"></i>
-                                </div>
-                            {% endif %}
-                            
-                            <!-- Badge durée -->
-                            {% if video.duree %}
-                            <div class="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-md">
-                                {{ video.duree_formatee }}
-                            </div>
-                            {% endif %}
-                            
-                            <!-- Bouton play (overlay) -->
-                            <div class="absolute inset-0 bg-black/30 pointer-events-none flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                <div class="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                                    <i class="fas fa-play text-blue-600 text-xl ml-1"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Infos -->
-                        <div class="p-4">
-                            <h4 class="font-semibold text-gray-800 text-sm">{{ video.titre }}</h4>
-                            <p class="text-xs text-gray-500 mt-1 line-clamp-2">{{ video.description|truncatechars:60 }}</p>
-                        </div>
-                    </div>
-                    {% empty %}
-                    <p class="col-span-full text-center text-gray-400">Aucune vidéo disponible.</p>
-                    {% endfor %}
-                </div>
+        <div class="videos_fade">
+            <div class="flex items-center justify-between mb-8 px-1">
+                <h3 class="text-xl font-bold text-slate-900 flex items-center gap-2.5">
+                    <span class="w-8 h-8 rounded-xl bg-rose-100 flex items-center justify-center text-rose-500 shadow-sm">
+                        <i class="fas fa-video"></i>
+                    </span>
+                    Vidéos & Témoignages
+                </h3>
+                <span class="text-xs font-semibold text-slate-500 bg-white border border-slate-200/80 px-3.5 py-1.5 rounded-full shadow-sm">
+                    {{ videos|length }} vidéos
+                </span>
             </div>
 
-            <!-- ===== BOUTON LAISSER UN TÉMOIGNAGE ===== -->
-            <div class="text-center mt-12">
-                <button onclick="document.getElementById('temoignage_textuel_modal').showModal()" class="btn bg-gradient-to-r from-blue-600 to-indigo-800 btn-lg text-white hover:shadow-blue-300 shadow-lg">
-                    <i class="fas fa-comment-dots"></i> Laisser un témoignage
-                </button>
-            </div>  
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for video in videos|slice:":6" %}
+                <div class="group bg-white  overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col">
+                    <!-- Container Vidéo -->
+                    <div class="relative aspect-video bg-slate-950 overflow-hidden">
+                        {% if video.video_file %}
+                            <video class="w-full h-full object-cover" controls preload="metadata" playsinline>
+                                <source src="{{ video.video_file.url }}" type="video/mp4">
+                                Votre navigateur ne supporte pas la vidéo.
+                            </video>
+                        {% elif video.video_url %}
+                            <iframe class="w-full h-full" src="{{ video.video_url }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                        {% elif video.embed_code %}
+                            {{ video.embed_code|safe }}
+                        {% else %}
+                            <div class="w-full h-full flex flex-col items-center justify-center bg-slate-900 text-slate-600 gap-2">
+                                <i class="fas fa-video text-3xl"></i>
+                                <span class="text-xs">Média indisponible</span>
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Badge durée -->
+                        {% if video.duree %}
+                        <div class="absolute bottom-3 right-3 bg-slate-900/80 backdrop-blur-md text-white text-[11px] font-semibold px-2.5 py-1 rounded-lg border border-white/10 shadow-lg pointer-events-none">
+                            {{ video.duree_formatee }}
+                        </div>
+                        {% endif %}
+                    </div>
 
+                    <!-- Description -->
+                    <div class="p-5 flex-1 flex flex-col justify-between bg-white">
+                        <div>
+                            <h4 class="font-bold text-slate-900 text-base group-hover:text-blue-600 transition-colors line-clamp-1">{{ video.titre }}</h4>
+                            <p class="text-xs text-slate-500 mt-1.5 line-clamp-2 leading-relaxed">{{ video.description|truncatechars:90 }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="col-span-full text-center py-10 text-slate-400 bg-white rounded-3xl border border-dashed border-slate-200">Aucune vidéo disponible.</p>
+                {% endfor %}
+            </div>
         </div>
-    </section>
+
+        <!-- ===== BOUTON TÉMOIGNAGE ===== -->
+        <div class="text-center mt-16">
+            <button onclick="document.getElementById('temoignage_textuel_modal').showModal()" 
+                    class="inline-flex items-center gap-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 text-white font-bold px-8 py-4 rounded-2xl shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300">
+                <i class="fas fa-comment-dots text-lg"></i>
+                <span>Laisser un témoignage</span>
+            </button>
+        </div>
+
+    </div>
+</section>
+ 
     <script>
         const player = new Plyr('#player');
     </script>
@@ -1675,7 +1732,7 @@
                             </div>
                             <div class="flex items-center gap-3 text-gray-700">
                                 <i class="fas fa-clock text-blue-600 w-5"></i>
-                                <span>Mardi-Ven : 10h00 - 19h00</span>
+                                <span>Lun-Ven : 10h00 - 19h00</span>
                                 <span>Samedi : 10h00 - 15h00</span>
                             
                             </div>
@@ -1985,7 +2042,7 @@
         {% include 'modals/auth/login_simple_modal.html' %}
         {% include 'modals/home/temoignage_textuel_form.html' %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function() {
     gsap.registerPlugin(ScrollTrigger);
 
     const totalFrames = 76;

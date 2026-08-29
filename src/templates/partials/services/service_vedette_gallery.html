@@ -1,0 +1,115 @@
+{% load static %}
+
+<!-- Micro-CSS pour l'animation Ken Burns (Zoom infini) et l'effet scintillant des flèches -->
+<style>
+    @keyframes ken-burns-infinite {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.15); }
+        100% { transform: scale(1); }
+    }
+    .animate-ken-burns {
+        animation: ken-burns-infinite 16s ease-in-out infinite;
+    }
+
+    @keyframes arrow-glow {
+        0%, 100% { 
+            box-shadow: 0 0 15px rgba(37, 99, 235, 0.6), inset 0 0 10px rgba(59, 130, 246, 0.4);
+            transform: translateY(-50%) scale(1);
+        }
+        50% { 
+            box-shadow: 0 0 30px rgba(59, 130, 246, 1), 0 0 45px rgba(147, 197, 253, 0.8);
+            transform: translateY(-58%) scale(1.08);
+        }
+    }
+    .glow-floating-arrow {
+        animation: arrow-glow 3s ease-in-out infinite;
+    }
+    .hero-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.6) 100%);
+        }
+</style>
+
+<div id="service-gallery-container" class="relative w-full max-w-8xl  h-[550px] md:h-[650px]  overflow-hidden shadow-2xl border border-slate-800/80 group">
+    {% for service in services_page %}
+
+    <!-- 1. IMAGE DE FOND (Full Coverage + Zoom Infini) -->
+    <div class="absolute inset-0 w-full h-full overflow-hidden">
+        {% if service.image_principale %}
+            <img src="{{ service.image_principale.url }}" 
+                 alt="{{ service.nom }}" 
+                 class="w-full h-full object-cover animate-ken-burns">
+        {% else %}
+            <img src="{% static 'images/default_service.jpg' %}" 
+                 alt="Service KOZ" 
+                 class="w-full h-full object-cover animate-ken-burns">
+        {% endif %}
+        
+        <!-- Degradé Sombre (Overlay pour lisibilité du texte) -->
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-slate-950/20"></div>
+    </div>
+
+    <!-- 2. FLÈCHE GAUCHE (Flottante & Scintillante) -->
+    <button 
+        hx-get="{% url 'home_app:services-vedette-partial' %}?page={% if services_page.has_previous %}{{ services_page.previous_page_number }}{% else %}{{ services_total_page }}{% endif %}"
+        hx-target="#service-gallery-container"
+        hx-swap="outerHTML transition:true"
+        aria-label="Service précédent"
+        class="glow-floating-arrow absolute left-4 md:left-8 top-1/2 z-30 p-4 md:p-5 rounded-full img-contain bg-slate-900/80 text-white backdrop-blur-md border border-blue-400/50 hover:bg-blue-600 transition-all duration-300">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 md:h-8 md:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+        </svg>
+    </button>
+
+    <!-- 3. FLÈCHE DROITE (Flottante & Scintillante) -->
+    <button 
+        hx-get="{% url 'home_app:services-vedette-partial' %}?page={% if services_page.has_next %}{{ services_page.next_page_number }}{% else %}1{% endif %}"
+        hx-target="#service-gallery-container"
+        hx-swap="outerHTML transition:true"
+        aria-label="Service suivant"
+        class="glow-floating-arrow absolute right-4 md:right-8 top-1/2 z-30 p-4 md:p-5 rounded-full bg-slate-900/80 text-white backdrop-blur-md border border-blue-400/50 hover:bg-blue-600 transition-all duration-300">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 md:h-8 md:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+        </svg>
+    </button>
+
+    <!-- 4. BADGE NUMÉRO / TOTAL (Haut Gauche) -->
+    <div class="absolute top-6 left-6 md:top-8 md:left-12 z-20">
+        <span class="bg-blue-600/80 backdrop-blur-md text-white font-mono font-bold px-4 py-2 rounded-full text-xs md:text-sm border border-blue-400/40 shadow-lg">
+            0{{ services_page.number }} / 0{{ services_total_page }}
+        </span>
+    </div>
+
+    <!-- 5. CONTENU SUR-IMPOSÉ (Style Hero Banner) -->
+    <div class="absolute bottom-0 left-0 right-0 z-20 p-6 md:p-12 lg:p-16 max-w-3xl space-y-4 text-left">
+        {% if service.categorie %}
+        <span class="inline-block px-3.5 py-1 rounded-md bg-blue-500/20 backdrop-blur-md border border-blue-400/30 text-blue-300 font-semibold text-xs tracking-widest uppercase">
+            {{ service.categorie }}
+        </span>
+        {% endif %}
+
+        <h2 class="text-3xl md:text-5xl font-black text-white leading-tight drop-shadow-md">
+            {{ service.nom }}
+        </h2>
+
+        <p class="text-slate-200 text-base md:text-lg line-clamp-3 leading-relaxed drop-shadow">
+            {{ service.description }}
+        </p>
+
+        <div class="pt-2">
+            <a href="{% url 'services_app:service-detail-public' service.pk %}" class="inline-flex items-center gap-3 bg-blue-600 hover:bg-blue-500 text-white font-bold px-8 py-3.5 rounded-xl shadow-xl shadow-blue-900/40 border border-blue-400/30 transition-all transform hover:-translate-y-1">
+                <span>Découvrir le service</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+            </a>
+        </div>
+    </div>
+
+    {% empty %}
+    <div class="absolute inset-0 flex items-center justify-center bg-slate-900 text-slate-400">
+        <p class="text-xl">Aucun service en vedette pour le moment.</p>
+    </div>
+    {% endfor %}
+</div>

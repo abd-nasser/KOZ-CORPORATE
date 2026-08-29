@@ -1,0 +1,114 @@
+{% load humanize %} {# Si tu utilises humanize pour le formatage des montants, sinon supprime la ligne #}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nouvelle proposition de financement</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f6f9; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; color: #333333;">
+    
+    <!-- Container Principal -->
+    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f4f6f9; padding: 40px 10px;">
+        <tr>
+            <td align="center">
+                
+                <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);">
+                    
+                    <!-- Header -->
+                    <tr>
+                        <td align="center" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 35px 20px; color: #ffffff;">
+                            <h1 style="margin: 0; font-size: 22px; font-weight: 700; tracking: 0.5px; text-transform: uppercase;">
+                                Proposition de Financement
+                            </h1>
+                            <p style="margin: 8px 0 0 0; font-size: 14px; color: #94a3b8;">
+                                Offre N° #{{ offre_id }}
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Corps de l'email -->
+                    <tr>
+                        <td style="padding: 35px 30px;">
+                            
+                            <!-- Salutation -->
+                            <p style="font-size: 16px; line-height: 1.6; margin-top: 0; color: #1e293b;">
+                                Bonjour <strong>{% if client.first_name %}{{ client.first_name }}{% else %}{{ client }}{% endif %}</strong>,
+                            </p>
+
+                            <p style="font-size: 15px; line-height: 1.6; color: #475569;">
+                                Suite à l'étude de votre demande de financement pour le véhicule <strong>{{ vehicule.marque.nom }}-{{ vehicule.modele }}</strong>, notre équipe commerciale a établi une nouvelle proposition personnalisée ajustée à votre profil.
+                            </p>
+
+                            <!-- Carte Recapitulatif de la Contre-Offre -->
+                            <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 20px; margin: 25px 0;">
+                                <h2 style="font-size: 15px; text-transform: uppercase; color: #0284c7; margin-top: 0; margin-bottom: 15px; letter-spacing: 0.5px;">
+                                    Détails de la proposition
+                                </h2>
+
+                                <table border="0" cellpadding="0" cellspacing="0" width="100%" style="font-size: 14px;">
+                                    <tr>
+                                        <td style="padding: 8px 0; color: #64748b; border-bottom: 1px dashed #e2e8f0;">Véhicule concerné</td>
+                                        <td style="padding: 8px 0; color: #0f172a; font-weight: 600; text-align: right; border-bottom: 1px dashed #e2e8f0;">{{ vehicule.marque.nom }}-{{ vehicule.modele }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 8px 0; color: #64748b; border-bottom: 1px dashed #e2e8f0;">Montant financé</td>
+                                        <td style="padding: 8px 0; color: #0f172a; font-weight: 600; text-align: right; border-bottom: 1px dashed #e2e8f0;">{{ montant_finance|floatformat:0|intcomma }} FCFA</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 8px 0; color: #64748b; border-bottom: 1px dashed #e2e8f0;">Apport demandé</td>
+                                        <td style="padding: 8px 0; color: #0f172a; font-weight: 600; text-align: right; border-bottom: 1px dashed #e2e8f0;">{{ apport|floatformat:0|intcomma }} FCFA</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 8px 0; color: #64748b; border-bottom: 1px dashed #e2e8f0;">Durée du remboursement</td>
+                                        <td style="padding: 8px 0; color: #0f172a; font-weight: 600; text-align: right; border-bottom: 1px dashed #e2e8f0;">{{ duree_mois }} mois</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 12px 0 8px 0; color: #0f172a; font-weight: 700; font-size: 15px;">Mensualité estimée</td>
+                                        <td style="padding: 12px 0 8px 0; color: #0284c7; font-weight: 700; font-size: 18px; text-align: right;">{{ mensualite|floatformat:0|intcomma }} FCFA /mois</td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            <!-- Expiration / Warning -->
+                            {% if date_expiration %}
+                            <p style="font-size: 13px; color: #e11d48; background-color: #fff1f2; padding: 10px 14px; border-radius: 6px; border-left: 3px solid #f43f5e; margin-bottom: 25px;">
+                                ⏳ <strong>Attention :</strong> Cette proposition est valable jusqu'au <strong>{{ date_expiration|date:"d/m/Y" }}</strong>.
+                            </p>
+                            {% endif %}
+
+                            <!-- Bouton CTA -->
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 30px; margin-bottom: 20px;">
+                                <tr>
+                                    <td align="center">
+                                        <a href="{{ lien_offre }}" target="_blank" style="background-color: #0284c7; color: #ffffff; display: inline-block; font-size: 15px; font-weight: 600; padding: 14px 28px; text-decoration: none; border-radius: 8px; box-shadow: 0 4px 10px rgba(2, 132, 199, 0.3);">
+                                            Consulter et Valider l'Offre
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <p style="font-size: 13px; color: #94a3b8; text-align: center; margin-top: 15px;">
+                                Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :<br>
+                                <a href="{{ lien_offre }}" style="color: #0284c7; word-break: break-all;">{{ lien_offre }}</a>
+                            </p>
+
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background-color: #f8fafc; padding: 20px 30px; border-top: 1px solid #e2e8f0; text-align: center; font-size: 12px; color: #94a3b8;">
+                            <p style="margin: 0 0 5px 0;">Besoin d'aide ou d'informations complémentaires ? Contactez votre conseiller commercial.</p>
+                            <p style="margin: 0;">&copy; {{ now|date:"Y" }} KOZ SERVICES. Tous droits réservés.</p>
+                        </td>
+                    </tr>
+
+                </table>
+
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>

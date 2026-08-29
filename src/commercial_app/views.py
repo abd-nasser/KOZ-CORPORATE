@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
-from leads_app.utils import generer_echeances_offre, generer_echeances_demande
+from leads_app.utils import generer_echeances_offre, generer_echeances_demande, calculer_mensualite
 from utils.pdf import render_to_pdf
 
 from datetime import datetime
@@ -71,10 +71,12 @@ def creer_offre(request, demande_id=None):
             offre.prix_vehicule = form.cleaned_data['prix_vehicule']
             offre.apport_demande = form.cleaned_data['apport_demande']
             offre.montant_finance = offre.prix_vehicule - offre.apport_demande
-            offre.mensualite = (offre.montant_finance * (offre.taux_interet / 100 / 12)) / (1 - (1 + offre.taux_interet / 100 / 12) ** -offre.duree_mois)
+            offre.mensualite = calculer_mensualite(offre.montant_finance, offre.taux_interet, offre.duree_mois)
             offre.type_offre = "demande"
             offre.statut = "envoyee"
             offre.save()
+            demande.etape = 'convertis_en_offre'
+            demande.save()
             
             # ✉️ EMAIL AU CLIENT
             try:
@@ -87,9 +89,9 @@ def creer_offre(request, demande_id=None):
                     'duree_mois': offre.duree_mois,
                     'apport': offre.apport_demande,
                     'date_expiration': offre.date_expiration,
-                    'lien_offre': request.build_absolute_uri(f"/client/offres/{offre.id}/"),
+                    'lien_offre': request.build_absolute_uri(offre.get_absolute_url()),
                 }
-                html_message = render_to_string('emails/offres/offre_creee_client.html', context_email)
+                html_message = render_to_string('emails/offres/contre_offre_client.html', context_email)
                 plain_message = strip_tags(html_message)
                 
                 send_mail(

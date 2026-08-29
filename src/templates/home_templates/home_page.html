@@ -20,6 +20,7 @@
     <script src="{% static 'js/vendor/lenis.min.js' %}" defer></script>
     <script src="https://cdn.plyr.io/3.7.8/plyr.js" defer></script>
     <script src="{% static 'js/home/gsap_anim.js' %}" defer></script>
+    
 </head>
 <body>
 
@@ -30,10 +31,10 @@
             <!-- ===== LOGO ===== -->
             <div class="flex items-center gap-3">
                 <a href="{% url 'home_app:home-page' %}" class="flex items-center gap-2 group">
-                    <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl flex items-center justify-center shadow-md transition-transform duration-300 group-hover:scale-105">
-                        <img src="{% static 'images/Koz_logo_noBack.png' %}" alt="KOZ" class="w-7 h-7 object-contain">
-                    </div>
-                    <span class="text-xl font-bold text-gray-800 hidden sm:inline">KOZ <span class="text-blue-600">Services</span></span>
+                    
+                        <img src="{% static 'images/Koz_logo_noBack.png' %}" alt="KOZ" class="w-25 h-25 object-contain">
+                    
+                    <span class="text-xl font-bold text-gray-200 hidden sm:inline">KOZ <span class="text-blue-600">SERVICES</span></span>
                 </a>
             </div>
         
@@ -166,71 +167,84 @@
             {% endif %}
     </nav>
 
+<!-- ============================================================ -->
+<!-- ==========         HERO IMMERSIVE (fond fixe)      ========== -->                                
+<!-- ============================================================ -->
+<div class="frame-container">
+    <img id="frame" src="{% static 'hero_frames/frame-0001.jpg' %}" alt="">
+</div>
 
-    <!-- ============================================================ -->
-    <!-- ==========     HERO IMMERSIVE (fond fixe)         ========== -->                                
-    <!-- ============================================================ -->
-    <div class="frame-container">
-        <img id="frame" src="{% static 'frames/ECO_SYS_PROJECTKoz_Flowsrckoz_flowstaticframesframe-0001.jpg' %}" alt="">
+<div id="result-toast-container" class="result-toast-container"></div>
+
+<section class="relative hero-section flex flex-col justify-between items-center overflow-hidden pt-24 pb-16 px-4">
+        
+    <!-- ===== CONTENU PRINCIPAL (Remonté d'un cran) ===== -->
+<div class="hero-main-content hero_fade -top-20 mx-auto text-center text-white relative z-10 max-w-4xl -mt-6 md:-mt-12">
+    <h1 class="text-4xl sm:text-6xl md:text-7xl font-extrabold leading-tight mb-4 tracking-tight" style="position: relative;top: -12rem;">
+        Votre voiture à crédit.<br>
+        <span class="text-blue-400 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-300">Vos pièces en ligne.</span>
+    </h1>
+    <p class="text-lg md:text-xl text-slate-200 max-w-2xl mx-auto mb-6 font-light leading-relaxed" style="position: relative;top: -12rem;">
+        <strong class="font-semibold text-white">KOZ Services</strong> : n'achetez pas seulement une auto, changez votre quotidien.
+    </p>
+    <div class="flex flex-wrap justify-center gap-4" style="position: relative;top: -12rem;">
+        <a href="#section-cta" class="px-7 py-3.5 rounded-full bg-white text-blue-950 font-bold hover:bg-blue-50 shadow-xl hover:scale-105 transition-all duration-300 text-sm md:text-base">
+            Découvrir nos offres
+        </a>
+        <a href="#financement" class="px-7 py-3.5 rounded-full bg-white/10 backdrop-blur-md text-white border border-white/30 font-semibold hover:bg-white/20 hover:scale-105 transition-all duration-300 text-sm md:text-base">
+            Financer mon auto
+        </a>
     </div>
-    <div id="result-toast-container" class="result-toast-container"></div>
-<section class="hero-section  relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
+</div>
+
+<!-- ===== DEUX BOX LATÉRALES GLASS (Remontées aussi) ===== -->
+<div class="w-full top-20 max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4 md:mt-6 relative z-20">
+    
+    <!-- Box 1 : Gauche (Rendez-vous) -->
+    <a href="#infos-rdv" id="hero-box-left" 
+       class="group relative bg-white/10 backdrop-blur-xl border border-white/20 p-5 md:p-6 rounded-3xl shadow-2xl hover:bg-white/20 transition duration-300 flex flex-col justify-between max-w-lg w-full justify-self-start">
         
-        <!-- ===== CONTENU PRINCIPAL ===== -->
-        <div class="container hero_fade mx-auto px-4 text-center text-white relative z-10">
-            <h1 class="text-5xl md:text-7xl font-extrabold leading-tight mb-6">
-                Votre voiture à crédit.<br>
-                <span class="text-blue-200">Vos pièces en ligne.</span>
-            </h1>
-            <p class="text-xl md:text-2xl text-blue-100 max-w-2xl mx-auto mb-8">
-                KOZ Services n'achetez pas une auto, changer votre vie
-            </p>
-            <div class="flex flex-wrap justify-center gap-4">
-                <a href="#section-cta" class="btn btn-white btn-lg text-blue-700 hover:bg-blue-50 shadow-lg">
-                    Découvrir nos offres
-                </a>
-                <a href="#financement" class="btn btn-outline trigger-box btn-lg text-white border-white/50 hover:bg-white/10">
-                    Financer mon auto
-                </a>
+        <div class="flex items-center gap-3.5 mb-2.5">
+            <div class="w-11 h-11 rounded-2xl bg-blue-500/20 border border-blue-400/30 flex items-center justify-center text-blue-300 text-lg">
+                <i class="fas fa-calendar-check"></i>
             </div>
-        </div>
-
-        <!-- ===== TROIS BOX LATÉRALES (apparition au scroll) ===== -->
-        
-        <div class="trois_box">
-            
-    <!-- Box 1 : gauche -->
-            <a href="#infos-rdv"  class="box box-left">
-                <div class="box-icon"><i class="fas fa-calendar-check"></i></div>
-                <h1 class="box-title">Prendre un rendez vous</h1>
-                <p class="box-text">
-                    Acheter une voiture est une décision importante. <br>
-                    avec <strong class= "text-indigo-950">KOZ SERVICES</strong>, évitez les mauvaises surprises <br>
-                    grace à notre expertise automobible.
-                </p>
-            
-            </a>
-
-
-            <!-- Box 2 : droite -->
-            <a href="#financement" class="box box-right">
-                <div class="box-icon"><i class='fas fa-hand-holding-usd' style='font-size:36px'></i></div>
-                <h4 class="box-title">Financement Flexible !</h4>
-                <p class="box-text">
-                    <i class="fas fa-check"></i><strong class= "text-indigo-950">Paiement</strong> en plusieurs fois <br>
-                    <i class="fas fa-check"></i>Adapté à votre budget
-                </p>
-                <p class="box-text">
-                    Decouvrez tout sur les <br>
-                <strong><em  class= "text-indigo-950">Demandes</em></strong> et <strong><em  class= "text-indigo-950">offres</em></strong> <br> 
-                de financement
-                </p>
-
-            </a>
-
+            <h3 class="text-lg md:text-xl font-bold text-white">Prendre un rendez-vous</h3>
         </div>
         
+        <p class="text-xs md:text-sm text-slate-200 leading-relaxed font-light">
+            Acheter une voiture est une décision importante. Avec <strong class="text-white font-semibold">KOZ SERVICES</strong>, évitez les mauvaises surprises grâce à notre expertise automobile.
+        </p>
 
+        <div class="mt-3 flex items-center gap-2 text-xs font-semibold text-blue-300">
+            <span>En savoir plus</span>
+            <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+        </div>
+    </a>
+
+    <!-- Box 2 : Droite (Financement) -->
+    <a href="#financement" id="hero-box-right" 
+       class="group relative bg-white/10 backdrop-blur-xl border border-white/20 p-5 md:p-6 rounded-3xl shadow-2xl hover:bg-white/20 transition duration-300 flex flex-col justify-between max-w-lg w-full justify-self-end">
+        
+        <div class="flex items-center gap-3.5 mb-2.5">
+            <div class="w-11 h-11 rounded-2xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center text-emerald-300 text-lg">
+                <i class="fas fa-hand-holding-usd"></i>
+            </div>
+            <h3 class="text-lg md:text-xl font-bold text-white">Financement Flexible</h3>
+        </div>
+        
+        <div class="space-y-1 text-xs md:text-sm text-slate-200 font-light">
+            <p><i class="fas fa-check text-emerald-400 text-xs mr-2"></i><strong class="text-white font-semibold">Paiement</strong> en plusieurs fois</p>
+            <p><i class="fas fa-check text-emerald-400 text-xs mr-2"></i>Adapté à votre budget</p>
+            <p class="text-xs text-slate-300 pt-0.5">Découvrez tout sur les demandes et offres de financement.</p>
+        </div>
+
+        <div class="mt-3 flex items-center gap-2 text-xs font-semibold text-emerald-300">
+            <span>Voir les détails</span>
+            <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+        </div>
+    </a>
+
+</div>
 </section>
 
 <!-- ============================================================ -->
@@ -378,248 +392,114 @@
     </div>
 </section>
 
-    <!-- ============================================================ -->
-    <!-- SECTION SERVICES – SCROLL IMMERSIF                           -->
-    <!-- ============================================================ -->
-    <section id="services-section" class="services-section   bg-blue-200 relative overflow-hidden">
-            <div class="text-center serv_fade fade-text relative mb-12">
-                <h2 class="text-3xl md:text-4xl font-bold text-black">Nos <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">services</span> </h2>
-                <p class="text-gray-700 mt-2">Des solutions adaptées pour entretenir, financer et équiper votre véhicule en toute sérénité.</p>
-            </div>
-            
-            <div class="services-contain serv_fade relative w-full h-[70vh] sm:h-[60vh] md:h-[70vh] lg:h-[80vh] overflow-hidden">
-                
-                <!-- Image de fond (change au scroll) -->
-                <div class="services-bg-image  " id="services-bg-image">
-                    <img id="services-main-image" src="" alt="Service KOZ" class="w-full  aspect-[16/9] object-cover object-center">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
-                </div>
 
-                <!-- Contenu superposé (change au scroll) -->
-                <div class="services-content-wrapper services-pin-wrapper container mx-auto px-4 relative z-10 h-full flex items-center">
-                    <div class="services-text-content max-w-2xl text-white">
-                        
-                        <!-- Étape (ex: 01 / 03) -->
-                        <span class="services-step" id="services-step">01</span>
-                        
-                        <!-- Badge type -->
-                        <span class="services-type-badge" id="services-type-badge">🔧 Maintenance</span>
-                        
-                        <!-- Titre -->
-                        <h2 class="services-title text-4xl md:text-5xl font-bold mt-3 mb-4" id="services-title">
-                            Vidange complète
-                        </h2>
-                        
-                        <!-- Description -->
-                        <p class="services-description text-lg text-white/80 mb-6" id="services-description">
-                            Une vidange complète pour garantir la longévité de votre moteur.
-                        </p>
-                        
-                        <!-- Prix + Bouton -->
-                        <div class="flex items-center gap-6 flex-wrap">
-                            <span class="services-price text-3xl font-bold text-blue-300" id="services-price">
-                                45 000 FCFA
-                            </span>
-                            <a href="#" class="services-link inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-xl transition shadow-lg">
-                                Voir le service
-                                <i class="fas fa-arrow-right"></i>
-                            </a>
+<!-- ============================================================ -->
+<!-- SECTION SERVICES – SCROLL IMMERSIF                           -->
+<!-- ============================================================ -->
+<section class="relative w-full bg-white services-section overflow-hidden min-h-[600px] flex flex-col items-center justify-center">
+    <div class="service-fade w-full">
+        <!-- En-tête de section adapté aux Services -->
+        <div class="service_vedette_titre text-center mb-12">
+            <span class="inline-block text-xs font-semibold text-blue-600 uppercase tracking-widest bg-blue-50 px-4 py-1.5 rounded-full mb-3">
+                Nos Prestations & Expertise
+            </span>
+            <h2 class="text-4xl md:text-5xl font-bold text-gray-800">
+                Explorez nos <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-indigo-600">services vedettes</span>
+            </h2>
+            <p class="text-gray-500 mt-3 max-w-2xl mx-auto">
+                Du financement sur-mesure à l'approvisionnement en pièces détachées, découvrez des solutions conçues pour vous accompagner en toute sérénité.
+            </p>
+        </div>
+
+        <!-- Galerie HTMX -->
+        
+        {% include 'partials/services/service_vedette_gallery.html' %}
+    </div>
+    
+    
+
+</section>
+
+<!-- ============================================================ -->
+<!-- SECTION : TYPES DE VÉHICULES VEDETTE                         -->
+<!-- ============================================================ -->
+<section class="py-16 relative section_type_vehicul type-vehicul_et_vedette bg-white overflow-hidden">
+    <div class="fade-section relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- ===== EN-TÊTE ===== -->
+        <div class="text-center mb-12">
+            <span class="inline-block text-xs font-semibold text-blue-600 uppercase tracking-widest bg-blue-50 px-4 py-1.5 rounded-full mb-3">
+                Notre Gamme
+            </span>
+            <h2 class="text-4xl md:text-5xl font-bold text-gray-800">
+                Découvrez nos <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-indigo-600">types de véhicules</span>
+            </h2>
+            <p class="text-gray-500 mt-3 max-w-2xl mx-auto">
+                Des SUV aux berlines, en passant par les breaks, trouvez le véhicule qui correspond à votre style de vie.
+            </p>
+        </div>
+
+        <!-- ===== CONTENEUR DES CARTES (GRID DYNAMIQUE) ===== -->
+        <div class="type-contain grid grid-cols-1 md:grid-cols-3 gap-6">
+            {% for type in types_vehicule %}
+                <div class="group type-card relative h-80 overflow-hidden bg-gray-200 shadow-sm rounded-2xl">
+                    {% if type.image %}
+                        <img src="{{ type.image.url }}" 
+                             alt="{{ type.nom }}" 
+                             class="h-80 w-full object-cover transition duration-700 ease-out group-hover:scale-110">
+                    {% else %}
+                        <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+                            <i class="fas {{ type.icone|default:'fa-car' }} text-6xl text-blue-400/50"></i>
                         </div>
+                    {% endif %}
 
-                        <!-- Indicateur de progression -->
-                        <div class="services-progress mt-8 flex gap-2" id="services-progress">
-                            <span class="services-dot active"></span>
-                            <span class="services-dot"></span>
-                            <span class="services-dot"></span>
-                            <span class="services-dot"></span>
-                            <span class="services-dot"></span>
-                        </div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-blue-950/70 via-blue-900/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    
+                    <div class="absolute top-3 right-3 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+                        <i class="fas {{ type.icone|default:'fa-car' }} text-blue-600 text-lg"></i>
                     </div>
-                </div>
-            </div>
 
-            <!-- ===== TRIGGER DE SCROLL (les services défilent ici) ===== -->
-            <div class="services-trigger">
-                <div class="service-item" data-index="0">
-                    <div class="service-item-content">
-                        <div class="service-item-data"
-                            data-image="{{ services_vedette.0.image_principale.url }}"
-                            data-title="{{ services_vedette.0.nom }}"
-                            data-description="{{ services_vedette.0.description_courte|default:services_vedette.0.description|truncatechars:120 }}"
-                            data-price="{% if services_vedette.0.prix %}{{ services_vedette.0.prix|intcomma }} FCFA{% else %}—{% endif %}"
-                            data-type="{{ services_vedette.0.types.nom|default:'Service' }}"
-                            data-link="{% url 'services_app:service-detail-public' services_vedette.0.pk %}"
-                            >
-                        </div>
-                    </div>
-                </div>
-            {% for service in services_vedette|slice:"1:6" %}
-            <div class="service-item" data-index="{{ forloop.counter }}">
-                <div class="service-item-content">
-                    <div class="service-item-data"
-                        data-image="{% if service.image_principale %}{{ service.image_principale.url }}{% else %}{% static 'images/service-placeholder.jpg' %}{% endif %}"
-                        data-title="{{ service.nom|default:'Service sans nom' }}"
-                        data-description="{{ service.description_courte|default:service.description|default:'Aucune description disponible'|truncatechars:120 }}"
-                        data-price="{% if service.prix %}{{ service.prix|intcomma }} FCFA{% else %}—{% endif %}"
-                        data-type="{{ service.types.nom|default:'Non catégorisé' }}"
-                        data-link="{% url 'services_app:service-detail-public' service.pk %}"
-                    >
-                    </div>
-                </div>
-            </div>
-            {% empty %}
-            <div class="text-center py-12 text-gray-400">
-                <i class="fas fa-tools text-4xl mb-3 block"></i>
-                <p>Aucun service disponible pour le moment.</p>
-            </div>
-            {% endfor %}
-                </div>
-
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- SECTION : TYPES DE VÉHICULES VEDETTE                         -->
-    <!-- ============================================================ -->
-    <section class="py-16 relative section_type_vehicul type-vehicul_et_vedette bg-white overflow-hidden">
-            <div class="fade-section relative z-10">
-                
-                <!-- ===== EN-TÊTE ===== -->
-                <div class="text-center mb-12">
-                    <span class="inline-block text-xs font-semibold text-blue-600 uppercase tracking-widest bg-blue-50 px-4 py-1.5 rounded-full mb-3">
-                        Notre Gamme
-                    </span>
-                    <h2 class="text-4xl md:text-5xl font-bold text-gray-800">
-                        Découvrez nos <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-indigo-600">types de véhicules</span>
-                    </h2>
-                    <p class="text-gray-500 mt-3 max-w-2xl mx-auto">
-                        Des SUV aux berlines, en passant par les breaks, trouvez le véhicule qui correspond à votre style de vie.
-                    </p>
-                </div>
-
-                <!-- ===== CONTENEUR DES CARTES ===== -->
-                <div class="type-contain">
-                    <!-- Carte 1 : SUV -->
-                    <div class="group relative h-80 overflow-hidden bg-gray-200 shadow-sm suv">
-                        {% if types_vehicule.0.image %}
-                            <img src="{{ types_vehicule.0.image.url }}" 
-                                alt="{{ types_vehicule.0.nom }}" 
-                                class="h-80 w-full object-cover transition duration-700 ease-out group-hover:scale-110">
+                    <div class="type-contenu absolute inset-x-0 bottom-0 z-20 p-5 bg-gradient-to-t from-white/95 via-white/85 to-transparent">
+                        <h3 class="text-lg font-bold text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
+                            {{ type.nom }}
+                        </h3>
+                        {% if type.description %}
+                            <p class="text-sm text-gray-500 mt-1 line-clamp-2">{{ type.description|truncatechars:60 }}</p>
                         {% else %}
-                            <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-                                <i class="fas {{ types_vehicule.0.icone|default:'fa-car' }} text-6xl text-blue-400/50"></i>
-                            </div>
+                            <p class="text-sm text-gray-400 mt-1">Découvrez notre gamme</p>
                         {% endif %}
-
-                        <div class="absolute inset-0 bg-gradient-to-t from-blue-400 via-white/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity duration-500"></div>
-                        <div class="absolute top-3 right-3 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
-                            <i class="fas {{ types_vehicule.0.icone|default:'fa-car' }} text-blue-600 text-lg"></i>
-                        </div>
-
-                        <div class="type-contenu absolute inset-x-0 bottom-0 z-20 p-5 bg-gradient-to-t from-white/95 via-white/85 to-transparent">
-                            <h3 class="text-lg font-bold text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
-                                {{ types_vehicule.0.nom }}
-                            </h3>
-                            {% if types_vehicule.0.description %}
-                                <p class="text-sm text-gray-500 mt-1 line-clamp-2">{{ types_vehicule.0.description|truncatechars:60 }}</p>
-                            {% else %}
-                                <p class="text-sm text-gray-400 mt-1">Découvrez notre gamme</p>
-                            {% endif %}
-                            <a href="{% url 'vehicul_app:site-vehicul-type-list' types_vehicule.0.pk %}" 
-                            class="inline-flex items-center gap-2 mt-4 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all duration-300 shadow-md hover:shadow-lg text-sm font-medium group/btn">
-                                <span>Parcourir</span>
-                                <i class="fas fa-arrow-right text-xs transition-transform duration-300 group-hover/btn:translate-x-1"></i>
-                            </a>
-                        </div>
-                    </div>
-
-                    <!-- Carte 2 : Berline -->
-                    <div class="group relative h-80 overflow-hidden bg-gray-200 shadow-sm berline">
-                        {% if types_vehicule.1.image %}
-                            <img src="{{ types_vehicule.1.image.url }}" 
-                                alt="{{ types_vehicule.1.nom }}" 
-                                class="h-80 w-full object-cover transition duration-700 ease-out group-hover:scale-110">
-                        {% else %}
-                            <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-                                <i class="fas {{ types_vehicule.1.icone|default:'fa-car' }} text-6xl text-blue-400/50"></i>
-                            </div>
-                        {% endif %}
-
-                        <div class="absolute inset-0 bg-gradient-to-t from-blue-400 via-white/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity duration-500"></div>
-                        <div class="absolute top-3 right-3 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
-                            <i class="fas {{ types_vehicule.1.icone|default:'fa-car' }} text-blue-600 text-lg"></i>
-                        </div>
-
-                        <div class="type-contenu absolute inset-x-0 bottom-0 z-20 p-5 bg-gradient-to-t from-white/95 via-white/85 to-transparent">
-                            <h3 class="text-lg font-bold text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
-                                {{ types_vehicule.1.nom }}
-                            </h3>
-                            {% if types_vehicule.1.description %}
-                                <p class="text-sm text-gray-500 mt-1 line-clamp-2">{{ types_vehicule.1.description|truncatechars:60 }}</p>
-                            {% else %}
-                                <p class="text-sm text-gray-400 mt-1">Découvrez notre gamme</p>
-                            {% endif %}
-                            <a href="{% url 'vehicul_app:site-vehicul-type-list' types_vehicule.1.pk %}"
-                            class="inline-flex items-center gap-2 mt-4 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all duration-300 shadow-md hover:shadow-lg text-sm font-medium group/btn">
-                                <span>Parcourir</span>
-                                <i class="fas fa-arrow-right text-xs transition-transform duration-300 group-hover/btn:translate-x-1"></i>
-                            </a>
-                        </div>
-                    </div>
-
-                    <!-- Carte 3 : Truck -->
-                    <div class="group relative h-80 overflow-hidden bg-gray-200 shadow-sm truck">
-                        {% if types_vehicule.2.image %}
-                            <img src="{{ types_vehicule.2.image.url }}" 
-                                alt="{{ types_vehicule.2.nom }}" 
-                                class="h-80 w-full object-cover transition duration-700 ease-out group-hover:scale-110">
-                        {% else %}
-                            <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-                                <i class="fas {{ types_vehicule.2.icone|default:'fa-car' }} text-6xl text-blue-400/50"></i>
-                            </div>
-                        {% endif %}
-
-                        <div class="absolute inset-0 bg-gradient-to-t from-blue-400 via-white/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity duration-500"></div>
-                        <div class="absolute top-3 right-3 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
-                            <i class="fas {{ types_vehicule.2.icone|default:'fa-car' }} text-blue-600 text-lg"></i>
-                        </div>
-
-                        <div class="type-contenu absolute inset-x-0 bottom-0 z-20 p-5 bg-gradient-to-t from-white/95 via-white/85 to-transparent">
-                            <h3 class="text-lg font-bold text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
-                                {{ types_vehicule.2.nom }}
-                            </h3>
-                            {% if types_vehicule.2.description %}
-                                <p class="text-sm text-gray-500 mt-1 line-clamp-2">{{ types_vehicule.2.description|truncatechars:60 }}</p>
-                            {% else %}
-                                <p class="text-sm text-gray-400 mt-1">Découvrez notre gamme</p>
-                            {% endif %}
-                            <a href="{% url 'vehicul_app:site-vehicul-type-list' types_vehicule.2.pk %}"
-                            class="inline-flex items-center gap-2 mt-4 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all duration-300 shadow-md hover:shadow-lg text-sm font-medium group/btn">
-                                <span>Parcourir</span>
-                                <i class="fas fa-arrow-right text-xs transition-transform duration-300 group-hover/btn:translate-x-1"></i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                <div class="text-center text-anim mt-10">
-                        <a href="{% url 'vehicul_app:site-vehicul-list' %}" 
-                            class="inline-flex items-center gap-2 px-8 py-3.5 border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white rounded-xl transition-all duration-300 font-medium">
-                            <span>Découvrir toute la gamme</span>
+                        <a href="{% url 'vehicul_app:site-vehicul-type-list' type.pk %}" 
+                           class="inline-flex items-center gap-2 mt-4 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all duration-300 shadow-md hover:shadow-lg text-sm font-medium group/btn">
+                            <span>Parcourir</span>
+                            <i class="fas fa-arrow-right text-xs transition-transform duration-300 group-hover/btn:translate-x-1"></i>
                         </a>
                     </div>
+                </div>
+            {% empty %}
+                <div class="col-span-full text-center text-gray-400 py-8">
+                    Aucun type de véhicule disponible pour le moment.
+                </div>
+            {% endfor %}
+        </div>
 
-                    <div class="fleche_anim">
-                        <i class="fas fa-arrow-right fleche relative inline-flex text-blue-500 text-5xl"></i>
-                    </div>
+        <!-- ===== ACTIONS ET ANIMATIONS ===== -->
+        <div class="text-center text-anim mt-10">
+            <a href="{% url 'vehicul_app:site-vehicul-list' %}" 
+               class="inline-flex items-center gap-2 px-8 py-3.5 border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white rounded-xl transition-all duration-300 font-medium">
+                <span>Découvrir toute la gamme</span>
+            </a>
+        </div>
 
-            </div>
-            </div>
-    </section>
+        <div class="fleche_anim flex justify-center mt-6">
+            <i class="fas fa-arrow-right fleche relative inline-flex text-blue-500 text-5xl"></i>
+        </div>
 
-
-    <!-- ============================================================ -->
-    <!-- SECTION :VÉHICULE VEDETTE (avec pagination)                  -->
-    <!-- ============================================================ -->
-    <section class="py-16 relative section_vehicule_vedette bg-white">
+    </div>
+</section>
+<!-- ============================================================ -->
+<!-- SECTION :VÉHICULE VEDETTE (avec pagination)                  -->
+<!-- ============================================================ -->
+<section class="py-16 relative section_vehicule_vedette bg-white">
             <div class="container fade-gallery mx-auto px-4">
                 <div class="gallery-contain w-full">
                     <div class="vehicul_vedette_titre">
@@ -639,7 +519,9 @@
                     
 
             </div>
-    </section>
+</section>
+
+
 
 <!-- ============================================================ -->
 <!-- SECTION MISSION & VALEURS                                     -->
@@ -804,7 +686,7 @@
     <!-- ============================================================ -->
     <!-- SECTION PRODUITS VEDETTE (PREMIUM)                           -->
     <!-- ============================================================ -->
-    <section class="py-16 section_product sm:py-20 relative bg-white overflow-hidden">
+<section class="py-16 section_product sm:py-20 relative bg-white overflow-hidden">
         
         <!-- Dégradé de fond subtil -->
         <div class="absolute inset-0 pointer-events-none">
@@ -961,12 +843,12 @@
             </div>
 
         </div>
-    </section>
+</section>
 
     <!-- ============================================================ -->
     <!-- SECTION : POURQUOI CHOISIR KOZ SERVICES                      -->
     <!-- ============================================================ -->
-    <section class="py-16 section_choisir_koz sm:py-20 relative bg-white overflow-hidden">
+<section class="py-16 section_choisir_koz sm:py-20 relative bg-white overflow-hidden">
         
         <!-- Dégradé de fond subtil -->
         <div class="absolute inset-0 pointer-events-none">
@@ -1119,7 +1001,7 @@
             </div>
 
         </div>
-    </section>
+</section>
 
 
     <!-- ============================================================ -->
@@ -1403,72 +1285,58 @@
         </div>
 
        <!-- ===== RÉSEAUX SOCIAUX ===== -->
-<div class="mb-16 socials_fade">
-    <div class="flex items-center justify-between mb-8 px-1">
-        <h3 class="text-xl font-bold text-slate-900 flex items-center gap-2.5">
-            <span class="w-8 h-8 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 shadow-sm">
-                <i class="fas fa-share-alt"></i>
-            </span>
-            Sur les réseaux sociaux
+<!-- ===== RÉSEAUX SOCIAUX ===== -->
+<div class="mb-12 socials_fade">
+    <div class="flex items-center justify-between mb-6">
+        <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+            <i class="fas fa-share-alt text-blue-500"></i> Sur les réseaux sociaux
         </h3>
-        <span class="text-xs font-semibold text-slate-500 bg-white border border-slate-200/80 px-3.5 py-1.5 rounded-full shadow-sm">
-            {{ avis_reseaux|length }} mentions
-        </span>
+        <div class="flex items-center gap-3">
+            <span class="text-sm text-gray-400">{{ avis_reseaux|length }} avis</span>
+            <span class="text-xs text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full font-medium hidden md:inline-flex items-center gap-1">
+                <i class="fas fa-arrows-left-right text-[20px]"></i> DÉFILER
+            </span>
+        </div>
     </div>
 
-    <!-- Alignment items-start pour s'adapter à la hauteur variable des captures -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 items-start">
+    <!-- Conteneur Scroll Horizontal -->
+    <div class="flex gap-6 overflow-x-auto pb-6 scroll-smooth snap-x snap-mandatory scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
         {% for avis in avis_reseaux|slice:":8" %}
-        <div class="bg-white  p-4 sm:p-5 border border-slate-100 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between h-full">
-            <div>
-                <!-- Header User & Réseau -->
-                <div class="flex items-center justify-between gap-2 mb-3">
-                    <div class="flex items-center gap-2 min-w-0">
-                        <span class="w-8 h-8 rounded-xl flex items-center justify-center text-sm shrink-0 bg-slate-50 border border-slate-100">
-                            {% if avis.reseau == 'facebook' %}
-                                <i class="fab fa-facebook text-blue-600"></i>
-                            {% elif avis.reseau == 'instagram' %}
-                                <i class="fab fa-instagram text-pink-600"></i>
-                            {% elif avis.reseau == 'google' %}
-                                <i class="fab fa-google text-red-500"></i>
-                            {% elif avis.reseau == 'whatsapp' %}
-                                <i class="fab fa-whatsapp text-emerald-500"></i>
-                            {% elif avis.reseau == 'twitter' %}
-                                <i class="fab fa-twitter text-sky-400"></i>
-                            {% elif avis.reseau == 'tiktok' %}
-                                <i class="fab fa-tiktok text-slate-900"></i>
-                            {% else %}
-                                <i class="fas fa-share-alt text-slate-500"></i>
+        <div class="bg-white min-w-150 p-4 shadow-sm hover:shadow-md transition">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-lg">
+                                {% if avis.reseau == 'facebook' %}
+                                    <i class="fab fa-facebook text-blue-600"></i>
+                                {% elif avis.reseau == 'instagram' %}
+                                    <i class="fab fa-instagram text-pink-600"></i>
+                                {% elif avis.reseau == 'google' %}
+                                    <i class="fab fa-google text-red-500"></i>
+                                {% elif avis.reseau == 'whatsapp' %}
+                                    <i class="fab fa-whatsapp text-green-500"></i>
+                                {% elif avis.reseau == 'twitter' %}
+                                    <i class="fab fa-twitter text-blue-400"></i>
+                                    {% elif avis.reseau == 'tiktok' %}
+                                    <i class="fab fa-tiktok text-black"></i>
+                                {% else %}
+                                    <i class="fas fa-share-alt text-gray-500"></i>
+                                {% endif %}
+                            </span>
+                            <span class="text-xs font-medium text-gray-600">{{ avis.nom_utilisateur }}</span>
+                            <span class="ml-auto text-[10px] text-gray-400">{{ avis.date_publication|date:"d/m/Y" }}</span>
+                        </div>
+                        {% if avis.image %}
+                            <img src="{{ avis.image.url }}" alt="Avis" class="w-full h-30 object-contain  mb-2">
+                        {% endif %}
+                        <p class="text-xs text-gray-500 line-clamp-3">{{ avis.message|truncatechars:60 }}</p>
+                        {% if avis.lien %}
+                            <a href="{{ avis.lien }}" target="_blank" class="text-xs text-blue-600 hover:text-blue-800 transition mt-1 inline-flex items-center gap-1">
+                                <i class="fas fa-external-link-alt"></i> Voir le post
+                            </a>
                             {% endif %}
-                        </span>
-                        <span class="text-xs font-bold text-slate-800 truncate">{{ avis.nom_utilisateur }}</span>
                     </div>
-                    <span class="text-[10px] font-medium text-slate-400 shrink-0 bg-slate-50 px-2 py-1 rounded-md">{{ avis.date_publication|date:"d/m/Y" }}</span>
-                </div>
-
-                <!-- Capture d'écran du commentaire (100% visible) -->
-                {% if avis.image %}
-                <div class="mb-3  overflow-hidden bg-slate-900/5 p-1.5 border border-slate-200/60 flex items-center justify-center min-h-[150px] max-h-80 group/img">
-                    <img src="{{ avis.image.url }}" 
-                         alt="Avis {{ avis.nom_utilisateur }}" 
-                         class="w-full max-h-72 object-contain rounded-lg transition-transform duration-300 group-hover/img:scale-[1.01]">
-                </div>
-                {% endif %}
-
-                {% if avis.message %}
-                <p class="text-xs text-slate-600 leading-relaxed mt-2 line-clamp-3">{{ avis.message }}</p>
-                {% endif %}
-            </div>
-
-            {% if avis.lien %}
-            <a href="{{ avis.lien }}" target="_blank" rel="noopener noreferrer" class="text-[11px] font-semibold text-blue-600 hover:text-blue-800 inline-flex items-center gap-1.5 transition-colors mt-4 pt-2.5 border-t border-slate-100">
-                <i class="fas fa-external-link-alt text-[10px]"></i> Voir le post original
-            </a>
-            {% endif %}
-        </div>
-        {% empty %}
-        <p class="col-span-full text-center py-10 text-slate-400 bg-white rounded-3xl border border-dashed border-slate-200">Aucun avis sur les réseaux sociaux.</p>
-        {% endfor %}
+                    {% empty %}
+                    <p class="col-span-full text-center text-gray-400">Aucun avis sur les réseaux sociaux.</p>
+                    {% endfor %}
     </div>
 </div>
 
@@ -2045,8 +1913,8 @@
     document.addEventListener('DOMContentLoaded', function() {
     gsap.registerPlugin(ScrollTrigger);
 
-    const totalFrames = 76;
-    const basePath = "{% static 'frames/ECO_SYS_PROJECTKoz_Flowsrckoz_flowstaticframesframe-' %}";
+    const totalFrames = 126;
+    const basePath = "{% static 'hero_frames/frame-' %}";
     const frameImg = document.getElementById('frame');
 
     // ✅ Précharger toutes les images AVANT de créer le ScrollTrigger
@@ -2094,14 +1962,10 @@
             });
 
             // Disable lag smoothing in GSAP to prevent any delay in scroll animations
-            gsap.ticker.lagSmoothing(0);
+            gsap.ticker.lagSmoothing();
 });
+</script>
 
-     
-
-      
-   
-        </script>
         <script>
             // Burger menu
             document.getElementById('burgerBtn')?.addEventListener('click', function() {

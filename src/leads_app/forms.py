@@ -1,5 +1,6 @@
 # leads_app/forms.py
 from django import forms
+from leads_app.utils import verifier_coherence, calculer_prix_financable
 from django.core.exceptions import ValidationError
 from .models import demande_financement, Vente
 from client_app.models import Documents
@@ -44,9 +45,9 @@ class VenteSimpleForm(forms.ModelForm):
             self.fields["vehicul"].empty_label = "-- Choisir un véhicule --"
         
     
-##POUR LE CLIENT
+
+
 class DemandeFinancementForm(forms.ModelForm):
-    #champs pour simulateur de credit 
     mensualite_souhaitee = forms.DecimalField(
         max_digits=12,
         decimal_places=0,
@@ -55,43 +56,40 @@ class DemandeFinancementForm(forms.ModelForm):
         widget=forms.NumberInput(attrs={
             "class": "input input-bordered w-full",
             'placeholder': 'Entrez la mensualité souhaitée (FCFA)',
-            'hx-get':'/leads/estimer-prix/',                    #URL de la vue qui traite la simulation
-            'hx-target': '#resultat-simulation',                #ID de l'élément où afficher le résultat de la simulation
-            'hx-trigger': 'keyup changed delay:300ms',          #Déclenche la requête après 300ms de pause dans la saisie
-            'hx-include': "#simulation-fields" ,                 #Inclure les champs du formulaire dans la requête HTMX
+            'hx-get': '/leads/estimer-prix/',
+            'hx-target': '#resultat-simulation',
+            'hx-trigger': 'keyup changed delay:300ms',
+            'hx-include': '#simulation-fields',
         })
     )
-    
+
     taux_interet = forms.ChoiceField(
-    choices=[(i, f"{i}%") for i in range(12, 18)],
-    required=False,
-    initial=12,  # Alignée avec les choix (12% à 17%)
-    label="📈 Taux d'intérêt annuel (%)",
-    widget=forms.Select(attrs={
-        "class": "select select-bordered w-full",
-        'hx-get': '/leads/estimer-prix/',
-        'hx-target': '#resultat-simulation',
-        'hx-trigger': 'change changed delay:300ms',
-        'hx-include': '#simulation-fields',
-    })
-)
-    
-    
+        choices=[(i, f"{i}%") for i in range(12, 18)],
+        required=False,
+        initial=12,
+        label="📈 Taux d'intérêt annuel (%)",
+        widget=forms.Select(attrs={
+            "class": "select select-bordered w-full",
+            'hx-get': '/leads/estimer-prix/',
+            'hx-target': '#resultat-simulation',
+            'hx-trigger': 'change changed delay:300ms',
+            'hx-include': '#simulation-fields',
+        })
+    )
+
     class Meta:
         model = demande_financement
-        fields = [
-            'apport',
-            'duree_mois',
-            'revenus_mensuel',
-        ]
+        fields = ['apport', 'duree_mois', 'revenus_mensuel']
         widgets = {
             'apport': forms.NumberInput(attrs={
                 'class': 'input input-bordered w-full',
                 'step': 10000,
-                'placeholder': 'Montant de l’apport (FCFA)'
+                'placeholder': 'Montant de l\'apport (FCFA)'
             }),
-            'duree_mois': forms.Select(choices=[(i, f"{i} mois") for i in range(1, 25)], attrs={'class': 'select select-bordered w-full'}),
-            
+            'duree_mois': forms.Select(
+                choices=[(i, f"{i} mois") for i in range(1, 25)],
+                attrs={'class': 'select select-bordered w-full'}
+            ),
             'revenus_mensuel': forms.NumberInput(attrs={
                 'class': 'input input-bordered w-full',
                 'step': 50000,
@@ -99,21 +97,86 @@ class DemandeFinancementForm(forms.ModelForm):
             }),
         }
 
-    
     def __init__(self, *args, **kwargs):
+        self.Vehicul_interested = kwargs.pop('Vehicul_interested', None)
         super().__init__(*args, **kwargs)
-        
-    
-    
+
+        # Rendre le champ mensualite_souhaitee obligatoire si un véhicule est sélectionné
+        if self.Vehicul_interested:
+            self.fields['mensualite_souhaitee'].required = True
+            self.fields['taux_interet'].required = True
+
     def clean(self):
         cleaned_data = super().clean()
+        
+        # ==========================================
+        # 1. RÉCUPÉRATION DES DONNÉES
+        # ==========================================
         apport = cleaned_data.get('apport')
         revenus = cleaned_data.get('revenus_mensuel')
-        
+        duree_mois = cleaned_data.get('duree_mois')
+        mensualite_souhaitee = cleaned_data.get('mensualite_souhaitee')
+        taux_interet = cleaned_data.get('taux_interet')
+
+        # ==========================================
+        # 2. VALIDATIONS DE BASE
+        # ==========================================
         if apport is None or apport <= 0:
-            raise forms.ValidationError("L'apport ne peut pas être négatif.")
-        if revenus is  None or revenus <= 0:
-            raise forms.ValidationError("Les revenus ne peuvent pas être négatifs")
+            raise forms.ValidationError("L'apport doit être un nombre positif.")
+        
+        if revenus is None or revenus <= 0:
+            raise forms.ValidationError("Les revenus mensuels doivent être un nombre positif.")
+        
+        if not self.Vehicul_interested:
+            raise forms.ValidationError("Aucun véhicule sélectionné.")
+
+        # ==========================================
+        # 3. VALIDATION DE COHÉRENCE FINANCIÈRE
+        # ==========================================
+        prix_reel = self.Vehicul_interested.prix
+
+        # Calcul du prix financable
+        prix_financable = calculer_prix_financable(
+            mensualite=mensualite_souhaitee,
+            duree_mois=duree_mois,
+            taux_annuel=taux_interet,  # taux_interet est déjà en pourcentage (ex: 12)
+            apport=apport
+        )
+
+        # Vérification de la cohérence
+        est_incoherent, prix_financable = verifier_coherence(
+            mensualite=mensualite_souhaitee,
+            duree_mois=duree_mois,
+            taux_annuel=taux_interet,
+            apport=apport,
+            prix_reel=prix_reel
+        )
+
+        # ==========================================
+        # 4. LEVÉE DES ERREURS DE VALIDATION
+        # ==========================================
+        if est_incoherent:
+            if prix_financable < prix_reel * 0.80:
+                # ✅ Le prix financable est trop bas par rapport au prix du véhicule
+                raise forms.ValidationError(
+                    f"⚠️ Avec vos critères, vous pouvez financer environ {prix_financable:,.0f} FCFA, "
+                    f"ce qui est inférieur au prix du véhicule ({prix_reel:,.0f} FCFA). "
+                    f"Augmentez votre mensualité, votre apport ou la durée."
+                )
+            
+            elif prix_financable > prix_reel * 1.50:
+                # ✅ Le prix financable est trop élevé (mensualité trop haute)
+                raise forms.ValidationError(
+                    f"⚠️ Votre mensualité semble trop élevée. Le prix financable estimé "
+                    f"({prix_financable:,.0f} FCFA) dépasse largement le prix du véhicule "
+                    f"({prix_reel:,.0f} FCFA). Réduisez votre mensualité ou la durée."
+                )
+
+        # ==========================================
+        # 5. STOCKER LE PRIX FINANCABLE DANS `cleaned_data`
+        # ==========================================
+        cleaned_data['prix_financable'] = prix_financable
+
         return cleaned_data
 
   
@@ -290,7 +353,6 @@ class DocumentsUploadForm(forms.ModelForm):
         return file
     
     
-
 class DocumentCommentForm(forms.ModelForm):
     class Meta:
         model = Documents

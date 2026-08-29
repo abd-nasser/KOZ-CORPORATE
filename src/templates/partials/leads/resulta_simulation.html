@@ -1,4 +1,47 @@
 {% load humanize %}
-<p class="text-sm text-white mb-1">💡 Prix estimé du véhicule</p>
-<p class="text-2xl font-bold text-blue-700">{{ prix_estime|floatformat:0|intcomma }} FCFA</p>
-<p class="text-xs text-white mt-1">Calcul basé sur votre mensualité souhaitée</p>
+
+<div id="resultat-simulation" class="mt-4 p-4 bg-white rounded-xl shadow-sm border border-blue-200">
+    {% if mensualite_saisie > 0 and duree_mois > 0 %}
+        <p class="text-sm text-gray-500 mb-1">📊 Prix financable estimé</p>
+        <p class="text-2xl font-bold text-blue-700">
+            {{ prix_estime|floatformat:0|intcomma }} FCFA
+        </p>
+        
+        <p class="text-xs text-gray-400 mt-1">
+            Base : {{ mensualite_saisie|floatformat:0|intcomma }} F/mois • {{ duree_mois }} mois • {{ taux_annuel|floatformat:0 }}% • Apport : {{ apport|floatformat:0|intcomma }} F
+        </p>
+
+        {% if prix_reel_vehicule %}
+            <div class="mt-3 pt-3 border-t border-gray-200">
+                <p class="text-sm text-gray-600">
+                    💰 Prix du véhicule : <strong>{{ prix_reel_vehicule|floatformat:0|intcomma }} FCFA</strong>
+                </p>
+                
+                {% if incoherent %}
+                    <div class="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                        <p class="font-medium">⚠️ Attention</p>
+                        <p>
+                            Le budget financable ({{ prix_estime|floatformat:0|intcomma }} FCFA)
+                            {% if prix_estime < prix_reel_vehicule %}
+                                est <strong>inférieur</strong> au prix du véhicule.
+                                <br>➡️ Augmentez votre mensualité, votre apport ou la durée du crédit.
+                            {% else %}
+                                est largement supérieur au prix du véhicule.
+                                <br>➡️ Vous pourriez réduire votre mensualité ou la durée.
+                            {% endif %}
+                        </p>
+                    </div>
+                {% else %}
+                    <div class="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">
+                        ✅ Ce budget est cohérent avec le prix du véhicule.
+                        Vous pouvez poursuivre votre demande de financement.
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+    {% else %}
+        <p class="text-sm text-gray-400 text-center py-2">
+            Renseignez une mensualité et une durée pour estimer votre budget.
+        </p>
+    {% endif %}
+</div>

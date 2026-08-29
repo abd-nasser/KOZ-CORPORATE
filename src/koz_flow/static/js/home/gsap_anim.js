@@ -1,37 +1,46 @@
 
 gsap.registerPlugin(ScrollTrigger);
 
-        // NAVBAR PREMIUM
-        // ============================================
-        const navbar = document.querySelector('.navbar');
 
-        // 1. Apparition au scroll (pure JS)
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 30) {
+// ============================================
+// NAVBAR PREMIUM
+// ============================================
+document.addEventListener('DOMContentLoaded', function() {
+    const navbar = document.querySelector('.navbar');
+    // 1. Apparition au scroll (pure JS)
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 30) {
                 navbar.classList.add('visible');
             } else {
                 navbar.classList.remove('visible');
             }
-            
-            // Fond qui s'intensifie
+                
+                // Fond qui s'intensifie
             if (window.scrollY > 200) {
                 navbar.classList.add('scrolled');
             } else {
-                navbar.classList.remove('scrolled');
-            }
-        });
+                    navbar.classList.remove('scrolled');
+                }
+            });
 
-        // 2. Survol (pour rendre plus réactif)
-        navbar.addEventListener('mouseenter', () => {
-            navbar.classList.add('visible');
-        });
+            // 2. Survol (pour rendre plus réactif)
+            navbar.addEventListener('mouseenter', () => {
+                navbar.classList.add('visible');
+            });
 
-        navbar.addEventListener('mouseleave', () => {
-            navbar.classList.remove('visible');
-        });
+            navbar.addEventListener('mouseleave', () => {
+                navbar.classList.remove('visible');
+            });
+ })
 
 
-    document.addEventListener('DOMContentLoaded', function() {
+
+
+// ============================================
+// ANIMATION HERO SEXTION
+// ============================================
+        
+ document.addEventListener('DOMContentLoaded', function() {
     gsap.from(".hero_fade", {
                 opacity: 0,
                 y: 200,
@@ -39,70 +48,40 @@ gsap.registerPlugin(ScrollTrigger);
             
             });
 
-    });
-
-
-        // ============================================
-        // BOXES LATÉRALES : apparition au scroll
-        // ============================================
+});
+      
+// Animation autonome des deux box
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
         
-
-        // Box 1 : vient de gauche
-        gsap.from(".box-left", {
-            scrollTrigger: {
-                trigger: ".trigger-box",
-                start: "top 50%" ,
-                end: "top 10%",
-                scrub: 1.2,
-                toggleActions: "play none none reverse",
-                id: "box-left"
-            },
-            x: -300,
+        // 1. Box Droite (apparaît d'abord)
+        gsap.from("#hero-box-right", {
+            x: 200,
             opacity: 0,
-            rotationY: 8,
-            duration: 1.5,
-            ease: "power3.out"
-            
-        });
-
-        // Box 2 : vient de droite
-        gsap.from(".box-right", {
-            scrollTrigger: {
-                trigger: ".trigger-box",
-                start: "top 30%",
-                end: "bottom",
-                scrub: 1.2,
-                toggleActions: "play none none reverse",
-                id: "box-right"
-            },
-            x: 300,
-            opacity: 0,
-            rotationX: 8,
-            duration: 1.5,
+            duration: 1,
             ease: "power3.out",
-            
-
+            scrollTrigger: {
+                trigger: "#hero-box-right",
+                start: "top 85%", // Se déclenche quand la box arrive vers le bas de l'écran
+                toggleActions: "play none none reverse"
+            }
         });
 
-        // Box 3 : vient du bas
-        gsap.from(".box-bottom", {
-            scrollTrigger:{
-                trigger: ".box-right",
-                start: "top 50%",
-                end:"bottom 50%",
-                scrub: 1.2,
-                toggleActions: "play none none reverse",
-                id: "box-bottom"
-
-            },
-            y: 300,
+        // 2. Box Gauche (apparaît un peu plus tard au scroll)
+        gsap.from("#hero-box-left", {
+            x: -200,
             opacity: 0,
-            rotationX: 8,
-            duration: 1.5,
+            duration: 1,
             ease: "power3.out",
+            scrollTrigger: {
+                trigger: "#hero-box-left",
+                start: "top 75%", // Se déclenche quand on descend un peu plus
+                toggleActions: "play none none reverse"
+            }
         });
 
-
+    }
+});
         
 // ============================================================
 // ACTUALITES ANIMATIONS GSAP
@@ -188,17 +167,13 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 });
 
-
-
-
-
-    
+  
 // ============================================================
 // SERVICES – PINNED SCROLL ANIMATION
 // ============================================================
 document.addEventListener('DOMContentLoaded', function() {
 
-     gsap.from(".serv_fade", {
+    gsap.from(".service-fade", {
                 scrollTrigger: {
                     trigger: ".services-section",
                     start: "top 60%",
@@ -212,212 +187,135 @@ document.addEventListener('DOMContentLoaded', function() {
                 duration: 1,
                 ease: "power3.out",
                 
+                
             });
+
+   
     
-    gsap.registerPlugin(ScrollTrigger);
-
-    const services = document.querySelectorAll('.service-item');
-    const totalServices = services.length;
-    
-    if (totalServices === 0) return;
-    console.log('Total services:', totalServices);
-
-    // Éléments à mettre à jour
-    const mainImage = document.getElementById('services-main-image');
-    const step = document.getElementById('services-step');
-    const typeBadge = document.getElementById('services-type-badge');
-    const title = document.getElementById('services-title');
-    const description = document.getElementById('services-description');
-    const price = document.getElementById('services-price');
-    const link = document.querySelector('.services-link');
-    const dots = document.querySelectorAll('.services-dot');
-
-    // 1️⃣ Récupérer les données du premier service
-    const firstData = services[0]?.querySelector('.service-item-data');
-    if (firstData) {
-        mainImage.src = firstData.dataset.image;
-        step.textContent = `01 / ${String(totalServices).padStart(2, '0')}`;
-        typeBadge.textContent = `${firstData.dataset.type}`;
-        title.textContent = firstData.dataset.title;
-        description.textContent = firstData.dataset.description;
-        price.textContent = firstData.dataset.price;
-        if (link) link.href = firstData.dataset.link;
-    }
-
-    // ============================================================
-    // 2️⃣ PIN TRIGGER : la section reste fixe
-    // ============================================================
-    ScrollTrigger.create({
-        trigger: ".services-section",
-        start: "top 8%",
-        end: "+=300%",  // ← Plus de hauteur pour voir tous les services
-        pin: true,
-        pinSpacing: true,
-        // ← Passe à false après test
-    });
-
-    // ============================================================
-    // 3️⃣ UPDATE TRIGGERS : chaque service change le contenu
-    // ============================================================
-    services.forEach((service, index) => {
-        const data = service.querySelector('.service-item-data');
-        if (!data) return;
-
-        ScrollTrigger.create({
-            trigger: service,  // ← LE SERVICE, PAS LE LIEN !
-            start: "top center",
-            end: "center center",
-            onEnter: () => updateService(index),
-            onEnterBack: () => updateService(index),
-           
-            
-        }
-      
-    );
-
-    });
-
-    // ============================================================
-    // 4️⃣ FONCTION DE MISE À JOUR
-    // ============================================================
-    function updateService(index) {
-        const data = services[index].querySelector('.service-item-data');
-        if (!data) return;
-
-        // Mettre à jour l'image avec fade
-        gsap.to(mainImage, {
-            opacity: 0,
-            duration: 0.4,
-            onComplete: () => {
-                mainImage.src = data.dataset.image;
-                gsap.to(mainImage, { opacity: 1, duration: 0.4 });
-            }
-        });
-
-        // Mettre à jour les textes
-        step.textContent = `${String(index + 1).padStart(2, '0')} / ${String(totalServices).padStart(2, '0')}`;
-        typeBadge.textContent = `🔧 ${data.dataset.type}`;
-        title.textContent = data.dataset.title;
-        description.textContent = data.dataset.description;
-        price.textContent = data.dataset.price;
-        if (link) link.href = data.dataset.link;
-
-        // Mettre à jour les dots
-        dots.forEach((dot, i) => {
-            dot.classList.toggle('active', i === index);
-        });
-    }
+  
 });
+
 
 
 // ============================================================
 // ANIMATION : TYPES DE VÉHICULES (ESCALIER PREMIUM)
 // ============================================================
 document.addEventListener('DOMContentLoaded', function() {
-
-   
     gsap.registerPlugin(ScrollTrigger);
 
+    let mm = gsap.matchMedia();
 
-     // ============================================================
-    // 2️⃣ PIN TRIGGER : la section reste fixe
-    // ============================================================
-   // ScrollTrigger.create({
-      //  trigger: ".section_type_vehicul",
-      //  start: "top 8%",
-       // end: "+=80%",  // ← Plus de hauteur pour voir tous les services
-     //   pin: true,
-     //   pinSpacing: true,
-        // ← Passe à false après test
-   // });
-    
+    // ==========================================
+    // 💻 DESKTOP (≥ 768px) : EFFET ARC EN ÉVENTAIL
+    // ==========================================
+    mm.add("(min-width: 768px)", () => {
+        
+        // 1ère carte (ex: SUV - vient de la gauche)
+        gsap.from(".type-card:nth-child(1)", {
+            x: -180,
+            opacity: 0,
+            scale: 0.85,
+            rotation: -12,
+            duration: 1.2,
+            ease: "power3.out",
+            scrollTrigger: {
+                trigger: ".type-contain",
+                start: "top 80%",
+                toggleActions: "play none none reverse"
+            }
+        });
 
-    // ===== SUV (vient de la gauche) =====
-    gsap.from(".suv", {
-        x: -200,           // Vient de la gauche
-        opacity: 0,
-        scale: 0.8,
-        rotation: -8,      // Légère rotation
-        duration: 1.2,
-        ease: "power3.out",
-        scrollTrigger: {
-            trigger: ".suv",
-            start: "top 85%",
-            end: "top 40%",
-            toggleActions: "play none none reverse",
-            
-              
-        }
-    });
+        // 2ème carte (ex: Berline - monte du bas)
+        gsap.from(".type-card:nth-child(2)", {
+            y: 100,
+            opacity: 0,
+            scale: 0.85,
+            duration: 1.2,
+            delay: 0.15,
+            ease: "power3.out",
+            scrollTrigger: {
+                trigger: ".type-contain",
+                start: "top 80%",
+                toggleActions: "play none none reverse"
+            }
+        });
 
-    // ===== BERLINE (vient du centre) =====
-    gsap.from(".berline", {
-        y: 80,             // Monte du bas
-        opacity: 0,
-        scale: 0.9,
-        rotation: 2,
-        duration: 1.2,
-        delay: 0.15,       // Un peu après le SUV
-        ease: "power3.out",
-        scrollTrigger: {
-            trigger: ".suv",
-            start: "top 85%",
-            end: "top 40%",
-            toggleActions: "play none none reverse",
-           
-            
-        }
-    });
+        // 3ème carte (ex: Truck - vient de la droite)
+        gsap.from(".type-card:nth-child(3)", {
+            x: 180,
+            opacity: 0,
+            scale: 0.85,
+            rotation: 12,
+            duration: 1.2,
+            delay: 0.3,
+            ease: "power3.out",
+            scrollTrigger: {
+                trigger: ".type-contain",
+                start: "top 80%",
+                toggleActions: "play none none reverse"
+            }
+        });
 
-    // ===== TRUCK (vient de la droite) =====
-    gsap.from(".truck", {
-        x: 200,            // Vient de la droite
-        opacity: 0,
-        scale: 0.8,
-        rotation: 8,
-        duration: 1.2,
-        delay: 0.3,        // Dernier à apparaître
-        ease: "power3.out",
-        scrollTrigger: {
-            trigger: ".suv",
-            start: "top 85%",
-            end: "top 40%",
-            toggleActions: "play none none reverse",
-            
-        }
-    });
+        // Bouton CTA
+        gsap.from(".text-anim", {
+            y: 40,
+            opacity: 0,
+            duration: 1,
+            ease: "power3.out",
+            scrollTrigger: {
+                trigger: ".type-contain",
+                start: "bottom 85%",
+                toggleActions: "play none none reverse"
+            }
+        });
 
-     gsap.from(".text-anim",{
-            x: -150,
+        // Flèche
+        gsap.from(".fleche_anim", {
+            x: -100,
             opacity: 0,
             duration: 1.2,
             ease: "power3.out",
-        scrollTrigger: {
-            trigger: ".suv",
-            start: "75% 85%",
-            end: "top 40%",
-            toggleActions: "play none none reverse",
-            
-        }
-
+            scrollTrigger: {
+                trigger: ".text-anim",
+                start: "top 90%",
+                toggleActions: "play none none reverse"
+            }
+        });
     });
 
-     gsap.from(".fleche_anim",{
-            x: -400,
+    // ==========================================
+    // 📱 MOBILE (< 768px) : ALIGNÉ EN COLONNE
+    // ==========================================
+    mm.add("(max-width: 767px)", () => {
+        
+        // Anime toutes les cartes en cascade (stagger) sans rotation ni overflow
+        gsap.from(".type-card", {
+            y: 50,
             opacity: 0,
-            duration: 1.5,
-            ease: "power3.out",
-        scrollTrigger: {
-            trigger: ".truck",
-            start: "bottom 80%",
-            end: "top 40%",
-            toggleActions: "play none none reverse",
-           
-        }
+            duration: 0.8,
+            stagger: 0.2,
+            ease: "power2.out",
+            scrollTrigger: {
+                trigger: ".type-contain",
+                start: "top 85%",
+                toggleActions: "play none none reverse"
+            }
+        });
 
+        gsap.from(".text-anim", {
+            y: 30,
+            opacity: 0,
+            duration: 0.8,
+            scrollTrigger: {
+                trigger: ".text-anim",
+                start: "top 90%",
+                toggleActions: "play none none reverse"
+            }
+        });
     });
-
 });
+
+
 
 // ============================================================
 // ANIMATION : GALLERY DE VÉHICULES VEDETTE
@@ -437,18 +335,38 @@ document.addEventListener('DOMContentLoaded', function() {
             
             });
     
-    gsap.from(".img-contain", {
-        scrollTrigger: {
-            trigger: ".img-contain",
-            start: "top 55%",
-            end: "top 40%",
-            toggleActions: "play none none reverse",
-            
-        },
-        opacity: 0,
-        x: 200,
-        duration: 1.5,
-        ease: "power3.out",
+    // Cibler chaque carte individuellement dans la boucle Django
+    gsap.registerPlugin(ScrollTrigger);
+
+    const vehicleCards = gsap.utils.toArray('.vedette_gallery_display');
+
+    vehicleCards.forEach((card) => {
+        const ved_img = card.querySelector('.vehicul_ved_anim');
+        const triggerZone = card.querySelector('.img-slide-trigger');
+
+        // Timeline rattachée au ScrollTrigger
+        const tl = gsap.timeline({
+            scrollTrigger: {
+                trigger: '.img-slide-trigger',
+                start: "top 80%",
+                end: "top 40%",
+                toggleActions: "play none none reverse"
+            }
+        });
+
+        // Step 1 : Entrée en slide-in
+        tl.fromTo(".vehicul_ved_anim", 
+            { x: 200, opacity: 0, scale: 1 },
+            { x: 0, opacity: 1, duration: 1.2, ease: "power3.out" }
+        )
+        // Step 2 : Scale infini (effet respiration)
+        .to(ved_img, {
+            scale: 1.75,        // Légère augmentation pour un rendu propre
+            duration: 3.8,      // Vitesse d'un cycle
+            repeat: -1,         // -1 = Boucle infinie
+            yoyo: true,         // Fait l'aller-retour (zoom -> dézoom)
+            ease: "sine.inOut"  // Transition organique et fluide
+        });
     });
 
 });
@@ -804,7 +722,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             });
 
-        })
+})
 
 
 //============================================================
@@ -854,4 +772,4 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     );
 
-        })
+})

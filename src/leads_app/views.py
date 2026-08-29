@@ -25,7 +25,7 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
-from .utils import generer_echeances_demande, generer_echeances_offre
+from .utils import generer_echeances_demande, generer_echeances_offre, calculer_prix_financable, verifier_coherence
 
 
 ###API
@@ -234,7 +234,7 @@ def demande_financement_view(request, vehicul_id):
     if request.method != "POST":
         return redirect("vehicul_app:detail-vehicul", vehicul.pk)
 
-    form = DemandeFinancementForm(request.POST)
+    form = DemandeFinancementForm(request.POST, Vehicul_interested=vehicul)
 
     if not form.is_valid():
         return render(request, "partials/leads/_dmd_fin_form_errors.html", {
@@ -448,51 +448,106 @@ from decimal import Decimal, InvalidOperation
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 
+
+logger = logging.getLogger(__name__)
+
 @login_required
 def estimer_prix_vehicule(request):
-    # 1. Récupération & nettoyage des paramètres GET
+    """
+    Vue HTMX pour estimer le prix financable en fonction des critères saisis.
+    Retourne un fragment HTML avec le résultat de la simulation.
+    """
+    
+    # ==========================================
+    # 1. RÉCUPÉRATION & NETTOYAGE DES PARAMÈTRES
+    # ==========================================
     try:
-        # Accepte 'mensualite_souhaitee' ou 'revenus_mensuel'
-        raw_mensualite = request.GET.get('mensualite_souhaitee') or request.GET.get('revenus_mensuel') or 0
-        mensualite = float(raw_mensualite)
+        mensualite = float(request.GET.get('mensualite_souhaitee', 0) or 0)
     except (TypeError, ValueError):
         mensualite = 0.0
+        logger.warning("Mensualité invalide reçue")
 
     try:
-        taux_annuel = float(request.GET.get('taux_interet', 12) or 12) / 100.0
+        taux_annuel = float(request.GET.get('taux_interet', 12) or 12)  # ✅ en pourcentage (ex: 12)
     except (TypeError, ValueError):
-        taux_annuel = 0.12
+        taux_annuel = 12.0
+        logger.warning("Taux invalide reçu")
 
     try:
-        duree_mois = int(request.GET.get('duree_mois', 36) or 36)
+        duree_mois = int(request.GET.get('duree_mois', 24) or 24)
     except (TypeError, ValueError):
-        duree_mois = 36
+        duree_mois = 24
+        logger.warning("Durée invalide reçue")
 
     try:
         apport = float(request.GET.get('apport', 0) or 0)
     except (TypeError, ValueError):
         apport = 0.0
+        logger.warning("Apport invalide reçu")
 
-    # 2. Calcul du prix estimé
-    if mensualite <= 0 or duree_mois <= 0:
-        prix_vehicule = apport  # Si pas de mensualité renseignée, le budget se limite à l'apport
-    else:
-        taux_mensuel = taux_annuel / 12.0
+    # ==========================================
+    # 2. CALCUL DU PRIX FINANCABLE
+    # ==========================================
+    # ✅ Taux_annuel déjà en pourcentage, pas besoin de multiplier par 100
+    prix_financable = calculer_prix_financable(
+        mensualite=mensualite,
+        duree_mois=duree_mois,
+        taux_annuel=taux_annuel,  # ← 12 pour 12%
+        apport=apport
+    )
+    
+    # ✅ Formatage en Decimal pour plus de précision
+    prix_estime = Decimal(str(prix_financable))
 
-        if taux_mensuel == 0:
-            capital = mensualite * duree_mois
-        else:
-            # Formule de la valeur présente d'une annuité : C = M * (1 - (1 + r)^-n) / r
-            capital = mensualite * (1 - (1 + taux_mensuel) ** (-duree_mois)) / taux_mensuel
+    # ==========================================
+    # 3. VÉRIFICATION DE COHÉRENCE AVEC LE VÉHICULE
+    # ==========================================
+    incoherent = False
+    prix_reel_vehicule = None
+    prix_financable_brut = prix_financable  # pour l'affichage
+    
+    vehicul_id = request.GET.get('vehicul_id')
+    
+    if vehicul_id:
+        try:
+            vehicul = Vehicul.objects.filter(id=vehicul_id).first()
+            if vehicul:
+                prix_reel_vehicule = Decimal(str(vehicul.prix))
+                
+                # ✅ Utilisation de la fonction `verifier_coherence` pour une logique cohérente
+                if mensualite > 0 and duree_mois > 0:
+                    est_incoherent, prix_calcule = verifier_coherence(
+                        mensualite=mensualite,
+                        duree_mois=duree_mois,
+                        taux_annuel=taux_annuel,
+                        apport=apport,
+                        prix_reel=vehicul.prix
+                    )
+                    incoherent = est_incoherent
+                    prix_financable_brut = prix_calcule  # Utiliser le prix calculé par la fonction
+                
+                # ✅ Vérification supplémentaire : mensualité trop basse par rapport au prix
+                if mensualite > 0 and duree_mois > 0 and prix_financable < vehicul.prix * Decimal(0.80) :
+                    incoherent = True
+                    
+        except ValueError:
+            logger.error(f"ID véhicule invalide: {vehicul_id}")
 
-        prix_vehicule = capital + apport
-
-    # Convertir en Decimal/Int pour l'affichage propre dans la template
-    prix_estime_final = Decimal(str(round(prix_vehicule, 2)))
-
-    return render(request, "partials/leads/resulta_simulation.html", {
-        "prix_estime": prix_estime_final
-    })
+    # ==========================================
+    # 4. RÉPONSE HTMX (rendu du template partiel)
+    # ==========================================
+    context = {
+        "prix_estime": prix_estime,
+        "prix_financable_brut": prix_financable_brut,
+        "incoherent": incoherent,
+        "prix_reel_vehicule": prix_reel_vehicule,
+        "mensualite_saisie": mensualite,
+        "duree_mois": duree_mois,
+        "apport": apport,
+        "taux_annuel": taux_annuel,
+    }
+    
+    return render(request, "partials/leads/resulta_simulation.html", context)
 
 class DemandeFinView(LoginRequiredMixin, ListView):
     model = demande_financement

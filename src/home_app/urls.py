@@ -11,6 +11,7 @@ urlpatterns = [
     path("rejeter/temoignage/<int:temoignage_id>/", views.rejeter_temoignage, name="rejeter-temoignage"),
     path("temoignages/delete/<int:pk>/", views.delete_textuel_temoignage, name="delete-temoignage"),
     path("vehicules-vedette/partial/", views.vehicules_partial, name="vehicules-vedette-partial"),
+    path('services-vedette/partial/', views.services_partials, name="services-vedette-partial"),
     
     path("temoignages/ajout/", views.TextuelTemoignageCreateView.as_view(), name="ajout-textuel-temoignage"),
     path("temoignages/", views.TemoignageTextuelListView.as_view(), name="temoignages-textuel-list"),

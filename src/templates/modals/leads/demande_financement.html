@@ -85,7 +85,7 @@
                             </div>
                             <div class="text-rose-500 text-xs mt-1">{{ dmd_fin_form.duree_mois.errors }}</div>
                         </div>
-
+                        <input type="hidden" name="vehicul_id" value="{{ vehicul.id }}">
                         <div class="form-group">
                             <label class="block text-xs font-semibold text-slate-600 mb-1">
                                 {{ dmd_fin_form.revenus_mensuel.label }}
@@ -152,6 +152,15 @@
         </form>
     </div>
 </dialog>
+<script>
+    document.body.addEventListener('htmx:afterSwap', function(evt) {
+        if (evt.target.id === 'resultat-simulation') {
+            const incoherent = evt.target.querySelector('[data-incoherent="true"]');
+            const submitBtn = document.querySelector('#dmd_fin_modal button[type="submit"]');
+            if (submitBtn) submitBtn.disabled = !!incoherent;
+        }
+    });
+</script>
 
 <style>
     /* Style spécifique pour limiter l'indicateur à l'intérieur de la modale */

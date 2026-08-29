@@ -23,11 +23,14 @@ def home_page_view(request):
     C'est une vue Django classique, pas une API
     """
     
+    
+    services_vedettes =  Services.objects.filter(est_vedette = True)
+    services_paginator = Paginator(services_vedettes, 1)
+    services_page_number =  request.GET.get('page', 1)
+    services_page =  services_paginator.get_page(services_page_number)
+    
     #Récuperer tout les vehicules en vedettes
     vehicules_vedette = Vehicul.objects.filter(est_vedette = True).annotate(nb_favoris=Count('favoris_de')).order_by('-nb_favoris')
-    
-    
-    
     # paginator 1 véhicule par page
     paginator = Paginator(vehicules_vedette, 1)
     page_number = request.GET.get('page', 1)
@@ -38,8 +41,16 @@ def home_page_view(request):
         "vehicules_page":vehicules_page,
         "total_pages":paginator.num_pages,
         "current_page":page_number,
+        
+        
+        "services_vedette":services_vedettes,
+        "services_page":services_page,
+        "services_total_page":services_paginator.num_pages,
+        "services_current_page":services_page_number,
+        
+        
         "types_vehicule" : TypeVehicule.objects.all(),
-        "services_vedette": Services.objects.filter(est_vedette = True),
+        
         "produits_vedette": Products.objects.filter(est_vedette = True, est_disponible = True),
         "nouveaux_produits": Products.objects.filter(est_disponible = True,est_nouveau = True),
         "temoignages": Temoignage.objects.filter(est_approuve = True).order_by('-date_creation')[:5],
@@ -68,6 +79,21 @@ def vehicules_partial(request):
     )
 
 
+def services_partials(request):
+    """
+        Vue HTMX pour charger les services paginés
+    """
+    services_vedettes =  Services.objects.filter(est_vedette = True)
+    services_paginator = Paginator(services_vedettes, 1)
+    services_page_number =  request.GET.get('page', 1)
+    services_page =  services_paginator.get_page(services_page_number)
+    return render(request, "partials/services/service_vedette_gallery.html", {
+        "services_page":services_page,
+        'services_total_page':services_paginator.num_pages,
+        "services_current_page":services_page_number
+        
+        }
+                  )
 class TextuelTemoignageCreateView(CreateView):
     model = Temoignage
     template_name = 'home_templates/temoignage_textuel_form.html'

@@ -32,6 +32,7 @@ class demande_financement(models.Model):
     """
     ETAPES = [
         ("nouvelle", "Nouvelle demande de financement"),
+        ("convertis_en_offre", "Convertis en offre de financement"),
         ("en_attente", "en attente de document"),
         ("en_cours", "En cours de traitement"),
         ("demande_accordee_fidelis", "Demande accordée chez Fidelis"),

@@ -155,7 +155,7 @@
                 <!-- ============================================================ -->
 
                 <!-- ✅ SI OFFRE DE FINANCEMENT -->
-                {% if offre.type_offre == "offre_financement" %}
+                {% if offre.type_offre == "offre_financement" or offre.type_offre == "demande" %}
                 
                 <div class="bg-indigo-50/50 border border-indigo-100 rounded-xl p-4 flex items-center gap-3">
                     <i class="fas fa-building text-indigo-600 text-base shrink-0"></i>

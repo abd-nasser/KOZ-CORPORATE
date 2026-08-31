@@ -385,7 +385,7 @@ class DashboardView(LoginRequiredMixin,TemplateView):
                 if mois not in ventes_par_mois:
                     ventes_par_mois[mois] = {
                         'fidelis': 0,
-                        'alios': 0,
+                        #'alios': 0,
                         'maison': 0,
                         'cash': 0,
                         'total': 0,  # ✅ AJOUT
@@ -399,8 +399,8 @@ class DashboardView(LoginRequiredMixin,TemplateView):
                 montant_a_ajouter = int(vente.montant_total_paye) if vente.montant_total_paye else int(vente.montant)
                 if type_vente == 'externe_fidelis':
                     ventes_par_mois[mois]['fidelis'] += montant_a_ajouter
-                elif type_vente == 'externe_alios':
-                    ventes_par_mois[mois]['alios'] += montant_a_ajouter
+                #elif type_vente == 'externe_alios':
+                    #ventes_par_mois[mois]['alios'] += montant_a_ajouter
                     
                 elif type_vente == 'maison':
                     ventes_par_mois[mois]['maison'] += montant_a_ajouter
@@ -413,7 +413,7 @@ class DashboardView(LoginRequiredMixin,TemplateView):
             labels = list(ventes_par_mois.keys())
             context['chart_labels'] = json.dumps(labels)
             context['chart_fidelis'] = json.dumps([ventes_par_mois[m]['fidelis'] for m in labels])
-            context['chart_alios'] = json.dumps([ventes_par_mois[m]['alios'] for m in labels])
+            #context['chart_alios'] = json.dumps([ventes_par_mois[m]['alios'] for m in labels])
             context['chart_maison'] = json.dumps([ventes_par_mois[m]['maison'] for m in labels])
             context['chart_cash'] = json.dumps([ventes_par_mois[m]['cash'] for m in labels])
             context['chart_total'] = json.dumps([ventes_par_mois[m]['total'] for m in labels])  # ✅ AJOUT
@@ -441,8 +441,8 @@ class DashboardView(LoginRequiredMixin,TemplateView):
                 montant_a_ajouter = int(vente.montant_total_paye) if vente.montant_total_paye else int(vente.montant)
                 if type_vente == 'externe_fidelis':
                     ventes_par_jour[jour]['fidelis'] += montant_a_ajouter
-                elif type_vente == 'externe_alios':
-                    ventes_par_jour[jour]['alios'] += montant_a_ajouter
+                #elif type_vente == 'externe_alios':
+                    #ventes_par_jour[jour]['alios'] += montant_a_ajouter
                 elif type_vente == 'maison':
                     ventes_par_jour[jour]['maison'] += montant_a_ajouter
                 elif type_vente == 'cash':
@@ -452,7 +452,7 @@ class DashboardView(LoginRequiredMixin,TemplateView):
             labels = list(ventes_par_jour.keys())
             context['chart_labels'] = json.dumps(labels)
             context['chart_fidelis'] = json.dumps([ventes_par_jour[j]['fidelis'] for j in labels])
-            context['chart_alios'] = json.dumps([ventes_par_jour[j]['alios'] for j in labels])
+            #context['chart_alios'] = json.dumps([ventes_par_jour[j]['alios'] for j in labels])
             context['chart_maison'] = json.dumps([ventes_par_jour[j]['maison'] for j in labels])
             context['chart_cash'] = json.dumps([ventes_par_jour[j]['cash'] for j in labels])
             context['chart_total'] = json.dumps([ventes_par_jour[j]['total'] for j in labels])  # ✅ AJOUT

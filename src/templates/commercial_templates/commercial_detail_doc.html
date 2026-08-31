@@ -317,7 +317,7 @@
                         <div class="flex justify-between py-1 border-b border-slate-100">
                             <span class="text-slate-500">Montant :</span>
                             <span class="font-bold text-emerald-600 text-sm">
-                                {% if document.offre_financement.type_offre == 'offre_financement' %}
+                                {% if document.offre_financement.type_offre == 'offre_financement' or document.offre_financement.type_offre == 'demande'%}
                                     {{ document.offre_financement.montant_finance|intcomma }} FCFA
                                 {% else %}
                                     {{ document.offre_financement.montant_propose|intcomma }} FCFA

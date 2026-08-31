@@ -48,7 +48,8 @@ class demande_financement(models.Model):
     
     ENTREPRISE_FINANCE = [
                             ("fidelis", "Fidelis"),
-                            ('alios', "Alios")
+                            #('alios', "Alios"),
+                            ('koz', "KOZ SERVICES")
                                     ]
     
     # Le client qui a fait la demande

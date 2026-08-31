@@ -244,36 +244,36 @@
 <!-- ==========        SCRIPT FILTRAGE DYNAMIQUE        ========== -->
 <!-- ============================================================ -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const filterBtns = document.querySelectorAll('.filter-btn');
-    const cards = document.querySelectorAll('.actualite-card');
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const cards = document.querySelectorAll('.actualite-card');
 
-    filterBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            filterBtns.forEach(b => {
-                b.classList.remove('active', 'bg-blue-600', 'text-white', 'shadow-lg', 'shadow-blue-600/25');
-                b.classList.add('bg-white', 'border', 'border-slate-200', 'text-slate-700');
-            });
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                filterBtns.forEach(b => {
+                    b.classList.remove('active', 'bg-blue-600', 'text-white', 'shadow-lg', 'shadow-blue-600/25');
+                    b.classList.add('bg-white', 'border', 'border-slate-200', 'text-slate-700');
+                });
 
-            this.classList.add('active', 'bg-blue-600', 'text-white', 'shadow-lg', 'shadow-blue-600/25');
-            this.classList.remove('bg-white', 'border', 'border-slate-200', 'text-slate-700');
+                this.classList.add('active', 'bg-blue-600', 'text-white', 'shadow-lg', 'shadow-blue-600/25');
+                this.classList.remove('bg-white', 'border', 'border-slate-200', 'text-slate-700');
 
-            const filter = this.getAttribute('data-filter');
+                const filter = this.getAttribute('data-filter');
 
-            cards.forEach(card => {
-                const cardType = card.getAttribute('data-type');
-                
-                if (filter === 'all' || cardType === filter) {
-                    card.style.display = 'flex';
-                    if (typeof gsap !== 'undefined') {
-                        gsap.fromTo(card, { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.35 });
+                cards.forEach(card => {
+                    const cardType = card.getAttribute('data-type');
+                    
+                    if (filter === 'all' || cardType === filter) {
+                        card.style.display = 'flex';
+                        if (typeof gsap !== 'undefined') {
+                            gsap.fromTo(card, { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.35 });
+                        }
+                    } else {
+                        card.style.display = 'none';
                     }
-                } else {
-                    card.style.display = 'none';
-                }
+                });
             });
         });
     });
-});
 </script>
 {% endblock %}

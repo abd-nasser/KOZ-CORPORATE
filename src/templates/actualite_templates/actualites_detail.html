@@ -137,7 +137,7 @@
                 Contactez nos conseillers KOZ Services dès maintenant pour plus d'informations ou pour réserver un rendez-vous.
             </p>
             <div class="flex flex-wrap justify-center items-center gap-4 pt-2">
-                <a href="#contact" class="px-8 py-3.5 rounded-full bg-white text-blue-600 font-bold text-sm shadow-lg hover:bg-blue-50 transition-all hover:scale-105">
+                <a href="{% url 'home_app:home-page' %}#contact" class="px-8 py-3.5 rounded-full bg-white text-blue-600 font-bold text-sm shadow-lg hover:bg-blue-50 transition-all hover:scale-105">
                     Nous Contacter
                 </a>
             </div>
@@ -153,40 +153,40 @@
 <script src="https://unpkg.com/splitting/dist/splitting.min.js"></script>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // 1. Initialisation de Splitting.js sur la description
-    Splitting();
+    document.addEventListener('DOMContentLoaded', function() {
+        // 1. Initialisation de Splitting.js sur la description
+        Splitting();
 
-    // 2. Animation GSAP ScrollTrigger sur les mots
-    if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
-        gsap.registerPlugin(ScrollTrigger);
+        // 2. Animation GSAP ScrollTrigger sur les mots
+        if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+            gsap.registerPlugin(ScrollTrigger);
 
-        const words = document.querySelectorAll('.splitting-description .word');
+            const words = document.querySelectorAll('.splitting-description .word');
 
-        if (words.length > 0) {
-            gsap.fromTo(words, 
-                { 
-                    opacity: 0.15,
-                    y: 8,
-                    filter: 'blur(2px)'
-                },
-                {
-                    opacity: 1,
-                    y: 0,
-                    filter: 'blur(0px)',
-                    duration: 0.4,
-                    stagger: 0.03,
-                    ease: "power2.out",
-                    scrollTrigger: {
-                        trigger: ".splitting-description",
-                        start: "top 75%",
-                        end: "bottom 35%",
-                        scrub: 0.8
+            if (words.length > 0) {
+                gsap.fromTo(words, 
+                    { 
+                        opacity: 0.15,
+                        y: 8,
+                        filter: 'blur(2px)'
+                    },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        filter: 'blur(0px)',
+                        duration: 0.4,
+                        stagger: 0.03,
+                        ease: "power2.out",
+                        scrollTrigger: {
+                            trigger: ".splitting-description",
+                            start: "top 75%",
+                            end: "bottom 35%",
+                            scrub: 0.8
+                        }
                     }
-                }
-            );
+                );
+            }
         }
-    }
-});
+    });
 </script>
 {% endblock %}

@@ -308,15 +308,13 @@
                         </button>
                         {% endif %}
 
-                        {% comment %}
-                        {% if not demande.client.offre %}
+                        {% if not demande.client.offre and demande.etape == "nouvelle" %}
                         <button onclick="document.getElementById('offreModal').showModal()" 
                                 class="w-full py-3.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs transition-all shadow-md flex items-center justify-center gap-2.5">
                             <i class="fas fa-file-signature"></i> 
-                            <span>Générer une offre</span>
+                            <span>Contre offre</span>
                         </button>
                         {% endif %}
-                        {% endcomment %}
                     </div>
 
                     <div class="pt-4 border-t border-slate-100 space-y-3 text-xs text-slate-500">
@@ -340,7 +338,7 @@
     <!-- Footer Corporate -->
     <footer class="bg-white border-t border-slate-200/80 py-6 mt-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-slate-500">
-            <p>&copy; {% now "Y" %} KOZ Services • Plateforme ERP Commerciale</p>
+            <p>&copy; {% now "Y" %} KOZ Services • Plateforme ERP Direction</p>
             <p class="font-medium text-slate-700">Conçu par <strong>SPIRIT-DIGIT Agency</strong></p>
         </div>
     </footer>

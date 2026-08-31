@@ -6,15 +6,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="google-site-verification" content="8zepDTq803R8qsLctGCJ5kqWdBvS4pCEkoOgm_bwkQo"/>
     {% tailwind_css %}
-    <script src="{% static 'js/htmx.min.js' %}" defer></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <title>Nos produits - KOZ Services</title>
-    <style>
+    <link rel="stylesheet" href="{% static 'css/home/home_style.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="alternate" href="https://koz-corporate.pro/" hreflang="fr" />
+    <link rel="alternate" href="https://koz-corporate.pro/" hreflang="x-default" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script src="{% static 'js/htmx.min.js' %}" defer></script>
+    <script src="{% static 'js/vendor/gsap.min.js' %}" defer></script>
+    <script src="{% static 'js/vendor/ScrollTrigger.min.js' %}" defer></script>
+    <script src="{% static 'js/vendor/lenis.min.js' %}" defer></script>
+    <script src="https://cdn.plyr.io/3.7.8/plyr.js" defer></script>
+    <script src="{% static 'js/home/gsap_anim.js' %}" defer></script>
+     <script defer>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        heading: ['Urbanist', 'sans-serif'],
+                        body: ['Plus Jakarta Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    {% block extra_css %}{% endblock %}
+     <style>
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+         body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+           
+        }
+        
+        h1, h2, h3, h4, .font-heading {
+            font-family: 'Urbanist', sans-serif;
+            letter-spacing: -0.02em;
         }
         .animate-fade-in-up { animation: fadeInUp 0.5s ease-out forwards; }
         .glass-nav {
@@ -109,46 +140,173 @@
         .badge-stock.rupture { background: #fee2e2; color: #991b1b; }
     </style>
 </head>
-<body class="bg-gray-50 font-inter">
+<body>
+ 
 
-    <!-- ===== NAVBAR ===== -->
-    <nav class="glass-nav sticky top-0 z-40 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+ 
+ <!-- ========== NAVBAR PREMIUM ========== -->
+<nav class="navbar fixed top-0 z-50 w-full bg-white/90 backdrop-blur-md border-b border-gray-200/50 shadow-sm transition-all duration-300">
+        <div class="container mx-auto px-4 flex justify-between items-center h-16">
+            
+            <!-- ===== LOGO ===== -->
             <div class="flex items-center gap-3">
-                <a href="{% url 'home_app:home-page' %}" class="font-bold text-2xl text-blue-600">
-                    KOZ Services
-                </a>
-                <a href="{% url 'home_app:home-page' %}" class="text-gray-500 hover:text-blue-600 transition text-sm flex items-center gap-1 ml-4">
-                    <i class="fas fa-arrow-left text-xs"></i> Accueil
+                <a href="{% url 'home_app:home-page' %}" class="flex items-center gap-2 group">
+                    
+                        <img src="{% static 'images/Koz_logo_noBack.png' %}" alt="KOZ" class="w-25 h-25 object-contain">
+                    
+                    <span class="text-xl font-bold text-gray-200 hidden sm:inline">KOZ <span class="text-blue-600">SERVICES</span></span>
                 </a>
             </div>
-            <div class="flex items-center gap-4">
-                <a href="{% url 'order_app:panier' %}" class="relative text-gray-700 hover:text-blue-600 transition">
-                    <i class="fas fa-shopping-cart text-xl"></i>
-                    <span class="absolute -top-2 -right-3 bg-blue-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-md">
-                        {{ user.panier.articles.count|default:0 }}
-                    </span>
+        
+            <!-- ===== LIENS CENTRAUX ===== -->
+            <div class="hidden md:flex items-center gap-1 lg:gap-2">
+                <a href="{% url 'home_app:home-page' %}" 
+                class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                    Accueil
                 </a>
+                <a href="{% url 'vehicul_app:site-vehicul-list' %}" 
+                class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                    Catalogue
+                </a>
+                <a href="{% url 'home_app:actualites-list' %}" 
+                class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                    Actualités
+                </a>
+                <a href="{% url 'services_app:services-list-public' %}" 
+                class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                    Services
+                </a>
+                <a href="{% url 'products_app:products-list' %}" 
+                class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                    Produits
+                </a>
+                <a href="#financement" 
+                class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                    Financement
+                </a>
+                <a href="#contact" 
+                class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                    Contact
+                </a>
+            </div>
+
+            <!-- ===== ACTIONS ===== -->
+            <div class="flex items-center gap-2 sm:gap-3">
                 {% if user.is_authenticated %}
-                    <span class="text-sm text-gray-600">{{ user.nom_complet }}</span>
+                    
+                    
+                    {% if user.role == "client" %}
+                    <a href="{% url 'client_app:client-view' %}" 
+                    class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                        <i class="fas fa-chart-simple text-blue-500"></i>
+                        <span class="hidden lg:inline">Tableau de bord</span>
+                    </a>
+
+                    <!-- Panier -->
+                    <a href="{% url 'order_app:panier' %}" 
+                    class="relative p-2 rounded-lg text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                        <i class="fas fa-shopping-cart text-lg"></i>
+                        {% if user.panier.articles.count > 0 %}
+                        <span class="absolute -top-1 -right-1 bg-blue-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-md ring-2 ring-white">
+                            {{ user.panier.articles.count }}
+                        </span>
+                        {% endif %}
+                    </a>
+                    {% elif user.role == "commercial" %}
+                    <a href="{% url 'commercial_app:commercial-view' %}" 
+                    class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                        <i class="fas fa-chart-simple text-blue-500"></i>
+                        <span class="hidden lg:inline">Tableau de bord</span>
+                    </a>
+                    {% else %}
+                    <a href="{% url 'directeur_app:directeur-view' %}" 
+                    class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                        <i class="fas fa-chart-simple text-blue-500"></i>
+                        <span class="hidden lg:inline">Tableau de bord</span>
+                    </a>
+                    {% endif %}
+                        
+                    
+
+                    <!-- Utilisateur -->
+                    <div class="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-gray-50/50 border border-gray-100">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white text-sm font-bold shadow-sm">
+                            {{ user.nom_complet|slice:":1"|upper }}
+                        </div>
+                        <span class="text-sm font-medium text-gray-700 hidden sm:inline">
+                            {{ user.nom_complet|truncatechars:15 }}
+                        </span>
+                    </div>
+
+                    <!-- Déconnexion -->
+                    <a href="{% url 'auth_app:logout-simple-sur-home-page' %}" 
+                    class="btn btn-error btn-sm text-white hover:bg-red-700 transition shadow-sm flex items-center gap-1.5">
+                        <i class="fas fa-sign-out-alt text-xs"></i>
+                        <span class="hidden sm:inline">Déconnexion</span>
+                    </a>
+
+                {% else %}
+                    
+                    <!-- Connexion -->
+                    <button onclick="document.getElementById('login_simple_modal').showModal()" 
+                            class="btn btn-ghost btn-sm  sm:inline-flex hover:bg-gray-100 transition">
+                        Connexion
+                    </button>
+                    
+                    <!-- Inscription -->
+                    <button onclick="document.getElementById('register_modal').showModal()" 
+                            class="btn btn-sm bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg transition flex items-center gap-2">
+                        <i class="fas fa-user-plus"></i>
+                        <span class="hidden sm:inline">Inscription</span>
+                    </button>
+
                 {% endif %}
+
+                <!-- Burger -->
+                <button id="burgerBtn" class="md:hidden btn btn-ghost btn-sm hover:bg-gray-100 transition">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
             </div>
         </div>
-        {% if messages %}
-        <div class="fixed top-20 right-5 z-50 space-y-2">
-            {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} shadow-xl rounded-xl animate-slide-in-right">
-                <span>{{ message }}</span>
+
+        <!-- ===== MENU MOBILE ===== -->
+        <div id="mobileMenu" class="hidden md:hidden bg-white border-t border-gray-200 p-4 shadow-lg">
+            <div class="flex flex-col gap-2 text-gray-600 text-sm">
+                <a href="{% url 'home_app:home-page' %}" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Accueil</a>
+                <a href="{% url 'vehicul_app:site-vehicul-list' %}" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Catalogue</a>
+                <a href="{% url 'home_app:actualites-list' %}" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Actualités</a>
+                <a href="{% url 'services_app:services-list-public' %}" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Services</a>
+                <a href="{% url 'products_app:products-list' %}" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Produits</a>
+                <a href="{% url 'home_app:home-page' %}#financement" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Financement</a>
+                <a href="{% url 'home_app:home-page' %}#contact" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Contact</a>
+                <hr class="my-2">
+                
+                {% if user.is_authenticated %}
+                    <a href="#" class="px-4 py-2.5 rounded-lg text-blue-600 font-medium hover:bg-blue-50 transition">
+                    <i class="fas fa-shopping-cart mr-2"></i> Panier ({{ user.panier.nb_articles|default:0 }})
+                </a>
+                {% endif %}
+                    
+                
             </div>
-            {% endfor %}
         </div>
-        {% endif %}
-    </nav>
+        <!-- Messages flash -->
+            {% if messages %}
+            <div class="fixed top-20 right-5 z-50 space-y-2">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} shadow-xl rounded-xl animate-slide-in-right">
+                    <span>{{ message }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+</nav>
+
 
     <!-- ============================================================ -->
     <!-- MAIN CONTENT                                                 -->
     <!-- ============================================================ -->
-    <main class="max-w-7xl mx-auto px-4 py-8">
+    <main class="max-w-7xl mx-auto mt-28 bg-white px-4 py-8">
 
         <!-- ===== EN-TÊTE ===== -->
         <div class="mb-8 animate-fade-in-up">

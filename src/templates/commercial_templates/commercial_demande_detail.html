@@ -309,11 +309,11 @@
                         {% endif %}
 
                         
-                        {% if not demande.client.offre %}
+                        {% if not demande.client.offre and demande.etape == "nouvelle" %}
                         <button onclick="document.getElementById('offreModal').showModal()" 
                                 class="w-full py-3.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs transition-all shadow-md flex items-center justify-center gap-2.5">
                             <i class="fas fa-file-signature"></i> 
-                            <span>Générer une offre</span>
+                            <span>Contre offre</span>
                         </button>
                         {% endif %}
                     

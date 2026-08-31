@@ -146,13 +146,13 @@
                             <div class="flex items-center gap-1.5 w-full">
                                 
                                 <!-- Action 1 : Détails -->
-                                {% if u.role == 'client' or not u.role == "commercial" and not u.is_superuser %}
+                                {% if u.role == 'client' or not u.role == "commercial" and not u.role == "directeur" %}
                                 <a href='{% url "client_app:client-detail" u.id  %}' title="Voir les détails" class="flex-1 inline-flex items-center justify-center gap-1.5 bg-slate-100 hover:bg-slate-900 hover:text-white text-slate-700 font-bold px-3 py-2 rounded-xl text-xs transition-all">
                                     <i class="fas fa-eye text-[11px]"></i>
                                     <span>Détails</span>
                                 </a>
                                 {% endif %}
-                                {% if u.role == 'client' or not  u.role == "commercial" and not u.is_superuser %}
+                                {% if u.role == 'client' or not  u.role == "commercial" and not u.role == "directeur" %}
                                 <!-- Action 2 : Chat -->
                                 <a href="{% url 'chat_app:chat-view' u.id %}" title="Démarrer une discussion" class="flex-1 inline-flex items-center justify-center gap-1.5 bg-blue-50 hover:bg-blue-600 hover:text-white text-blue-600 font-bold px-3 py-2 rounded-xl text-xs transition-all">
                                     <i class="fas fa-comments text-[11px]"></i>

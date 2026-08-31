@@ -296,24 +296,31 @@ class ActualiteListView(ListView):
         return context
 
 
+from django.db.models import F
+
 class ActualiteDetailView(DetailView):
     model = Actualite
     context_object_name = 'actualite'
 
     def get_template_names(self):
         user_role = getattr(self.request.user, 'role', None)
-        
         if user_role in ['directeur', 'commercial']:
             return ['directeur_templates/actualite_detail.html']
-        
         return ['actualite_templates/actualites_detail.html']
+
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        # ✅ Incrémentation atomique, une seule fois, au bon endroit
+        Actualite.objects.filter(pk=obj.pk).update(vues=F('vues') + 1)
+        obj.refresh_from_db(fields=['vues'])
+        return obj
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if 'update_actualite_form' not in context:
             context['update_actualite_form'] = ActualiteForm(instance=self.object)
         return context
-    
+
     def get_success_url(self):
         return reverse_lazy('home_app:actualites-list')
 

@@ -44,11 +44,11 @@
             font-family: 'Urbanist', sans-serif;
             letter-spacing: -0.02em;
         }
-    </style>
+</style>
 <body>
 
-    <!-- ========== NAVBAR PREMIUM ========== -->
-    <nav class="navbar fixed top-0 z-50 w-full bg-white/90 backdrop-blur-md border-b border-gray-200/50 shadow-sm transition-all duration-300">
+<!-- ========== NAVBAR PREMIUM ========== -->
+<nav class="navbar fixed top-0 z-50 w-full bg-white/90 backdrop-blur-md border-b border-gray-200/50 shadow-sm transition-all duration-300">
         <div class="container mx-auto px-4 flex justify-between items-center h-16">
             
             <!-- ===== LOGO ===== -->
@@ -78,6 +78,10 @@
                 <a href="{% url 'services_app:services-list-public' %}" 
                 class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
                     Services
+                </a>
+                <a href="{% url 'products_app:products-list' %}" 
+                class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                    Produits
                 </a>
                 <a href="#financement" 
                 class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
@@ -175,6 +179,7 @@
                 <a href="{% url 'vehicul_app:site-vehicul-list' %}" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Catalogue</a>
                 <a href="{% url 'home_app:actualites-list' %}" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Actualités</a>
                 <a href="{% url 'services_app:services-list-public' %}" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Services</a>
+                <a href="{% url 'products_app:products-list' %}" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Produits</a>
                 <a href="#financement" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Financement</a>
                 <a href="#contact" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Contact</a>
                 <hr class="my-2">
@@ -198,7 +203,7 @@
                 {% endfor %}
             </div>
             {% endif %}
-    </nav>
+</nav>
 
 <!-- ============================================================ -->
 <!-- ==========         HERO IMMERSIVE (fond fixe)      ========== -->                                
@@ -381,7 +386,7 @@
                     </div>
                     
                     <div class="mt-6 pt-4 border-t border-blue-100/80">
-                        <a href="{% url 'home_app:actualites-list'  %}" class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-semibold text-sm group/link transition">
+                        <a href="{% url 'home_app:actualites-detail' actu.pk %}" class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-semibold text-sm group/link transition">
                             En savoir plus
                             <i class="fas fa-arrow-right text-xs group-hover/link:translate-x-1 transition-transform"></i>
                         </a>
@@ -409,7 +414,10 @@
 
             </div>
         </div>
+        
         {% endwith %}
+
+        
         {% else %}
         
         <!-- ===== AUCUNE ACTUALITÉ ===== -->
@@ -493,7 +501,7 @@
                     </div>
 
                     <div class="type-contenu absolute inset-x-0 bottom-0 z-20 p-5 bg-gradient-to-t from-white/95 via-white/85 to-transparent">
-                        <h3 class="text-lg font-bold text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
+                        <h3 class="text-2xl font-bold text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
                             {{ type.nom }}
                         </h3>
                         {% if type.description %}
@@ -717,9 +725,9 @@
     </div>
 </section>
 
-    <!-- ============================================================ -->
-    <!-- SECTION PRODUITS VEDETTE (PREMIUM)                           -->
-    <!-- ============================================================ -->
+<!-- ============================================================ -->
+<!-- SECTION PRODUITS VEDETTE (PREMIUM)                           -->
+<!-- ============================================================ -->
 <section class="py-16 section_product sm:py-20 relative bg-white overflow-hidden">
         
         <!-- Dégradé de fond subtil -->
@@ -747,7 +755,7 @@
             <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
                 {% for produit in produits_vedette %}
                 
-                <div class="group relative bg-white shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1  border-gray-100/50 overflow-hidden">
+                <div class="group relative rounded-2xl bg-white shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1  border-gray-100/50 overflow-hidden">
                     
                     <!-- ===== BADGES ===== -->
                     <div class="absolute top-2 left-2 z-10 flex flex-col gap-1">
@@ -1440,14 +1448,14 @@
         </div>
 </section>
  
-    <script>
-        const player = new Plyr('#player');
-    </script>
+<script>
+    const player = new Plyr('#player');
+</script>
 
-    <!-- ============================================================ -->
-    <!-- SECTION 3 : À PROPOS DE KOZ SERVICES                          -->
-    <!-- ============================================================ -->
-    <section class="py-16 sm:py-20 relative section_propos bg-gradient-to-br from-gray-50 to-white overflow-hidden">
+<!-- ============================================================ -->
+<!-- SECTION 3 : À PROPOS DE KOZ SERVICES                          -->
+<!-- ============================================================ -->
+<section class="py-16 sm:py-20 relative section_propos bg-gradient-to-br from-gray-50 to-white overflow-hidden">
         
         <div class="container propos_fade mx-auto px-4 max-w-7xl">
             
@@ -1531,12 +1539,12 @@
             </div>
 
         </div>
-    </section>
+</section>
 
-    <!-- ============================================================ -->
-    <!-- SECTION 2 : NOUS CONTACTER + PRISE DE RENDEZ-VOUS             -->
-    <!-- ============================================================ -->
-    <section id="contact" class="py-16 sm:py-20 section-contact relative bg-white overflow-hidden">
+<!-- ============================================================ -->
+<!-- SECTION 2 : NOUS CONTACTER + PRISE DE RENDEZ-VOUS             -->
+<!-- ============================================================ -->
+<section id="contact" class="py-16 sm:py-20 section-contact relative bg-white overflow-hidden">
         
         <div class="container contact_fade mx-auto px-4 max-w-7xl">
             
@@ -1623,7 +1631,7 @@
                             </div>
                             <div class="flex items-center gap-3 text-gray-700">
                                 <i class="fas fa-envelope text-blue-600 w-5"></i>
-                                <span>https://koz.corporate@gmail.com</span>
+                                <span>koz.corporate@gmail.com</span>
                             </div>
                             <div class="flex items-center gap-3 text-gray-700">
                                 <i class="fas fa-map-marker-alt text-blue-600 w-5"></i>
@@ -1631,9 +1639,11 @@
                             </div>
                             <div class="flex items-center gap-3 text-gray-700">
                                 <i class="fas fa-clock text-blue-600 w-5"></i>
-                                <span>Lun-Ven : 10h00 - 19h00</span>
-                                <span>Samedi : 10h00 - 15h00</span>
-                            
+                                <ul>
+                                    <li>Lun-Ven : 10h00 - 19h00</li>
+                                    <li>Samedi : 10h00 - 15h00</li>
+                                    <li>Dimanche : Fermé</li>
+                                </ul>
                             </div>
                         </div>
                         
@@ -1724,13 +1734,13 @@
             </div>
 
         </div>
-    </section>
+</section>
         
 
-    <!-- ============================================================ -->
-    <!-- CTA : PRÊT À ROULER AVEC KOZ ?                               -->
-    <!-- ============================================================ -->
-    <section id="section-cta" class="py-16 sm:py-20 relative section-cta overflow-hidden bg-white ">
+<!-- ============================================================ -->
+<!-- CTA : PRÊT À ROULER AVEC KOZ ?                               -->
+<!-- ============================================================ -->
+<section id="section-cta" class="py-16 sm:py-20 relative section-cta overflow-hidden bg-white ">
         
         <!-- Effet de fond animé -->
         <div class="absolute inset-0 opacity-20">
@@ -1850,13 +1860,13 @@
             </div>
 
         </div>
-    </section>
+</section>
 
-    <!-- ============================================================ -->
-    <!-- ==========                 FOOTER                  ========== -->
-    <!-- ============================================================ -->
+<!-- ============================================================ -->
+<!-- ==========                 FOOTER                  ========== -->
+<!-- ============================================================ -->
   
-    <footer class="bg-slate-950 border-t relative border-white/10 pt-16 pb-8 text-slate-400 text-sm">
+<footer class="bg-slate-950 border-t relative border-white/10 pt-16 pb-8 text-slate-400 text-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
             
             <div class="space-y-4">
@@ -1912,7 +1922,7 @@
             <p>&copy; {% now "Y" %} KOZ Services. Tous droits réservés.</p>
             <p class="font-medium text-slate-700">Conçu par <strong>SPIRIT-DIGIT Agency</strong></p>
         </div>
-    </footer>
+</footer>
 
  
 <!-- ========== MODALES ========== -->

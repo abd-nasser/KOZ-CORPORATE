@@ -28,7 +28,8 @@ class Offre(models.Model):
     
     ENTREPRISE_FINANCE = [
                             ("fidelis", "Fidelis"),
-                            ('alios', "Alios")
+                            #('alios', "Alios"),
+                            ("Koz", "KOZ SERVICES")
                                     ]
     
     financement_type = models.CharField(
@@ -51,7 +52,7 @@ class Offre(models.Model):
         ('offre_document_rejete', 'Documents de l\'offre réjeté'),
         ('offre_document_valide', 'Documents de l\'offre validés'),
         ("offre_financement_fidelis", "offre financement chez Fidelis"),
-        ("offre_financement_alios", "offre financement chez Alios"),
+        #("offre_financement_alios", "offre financement chez Alios"),
         ("offre_financement_maison", "offre financement KOZ Services"),
         ('envoyee', 'Envoyée'),
         ('acceptee', 'Acceptée'),

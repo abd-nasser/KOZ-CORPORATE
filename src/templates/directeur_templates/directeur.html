@@ -75,9 +75,7 @@
                             <div class="py-1">
                                 <span class="px-3 py-1 text-[10px] font-bold tracking-wider text-slate-400 uppercase block">Administration</span>
 
-                                <a href="{% url 'directeur_app:all-users' %}"class="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition flex items-center gap-2">
-                                    <i class="fas fa-users text-blue-600 w-4"></i> Tous les utilisateurs
-                                </a>
+                                
                                 <button onclick="document.getElementById('userregister_modal').showModal()" class="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition flex items-center gap-2">
                                     <i class="fas fa-user-plus text-blue-600 w-4"></i> Ajouter un utilisateur
                                 </button>
@@ -263,6 +261,12 @@
                         </div>
                     </div>
                     <div class="space-y-2 pt-2">
+
+                        <a href="{% url 'directeur_app:all-users' %}" class="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-blue-50/60 border border-slate-200/60 hover:border-blue-200 transition text-xs font-medium text-slate-700 hover:text-blue-700">
+                            <span class="flex items-center gap-2"><i class="fas fa-users text-blue-600 w-4"></i> Tous les utilisateurs</span>
+                            <i class="fas fa-chevron-right text-[10px] text-slate-400"></i>
+                        </a>
+
                         <a href="{% url 'directeur_app:rendez-vous-list' %}" class="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-blue-50/60 border border-slate-200/60 hover:border-blue-200 transition text-xs font-medium text-slate-700 hover:text-blue-700">
                             <span class="flex items-center gap-2"><i class="fas fa-calendar-alt text-blue-600"></i> Planning des Rendez-vous</span>
                             <i class="fas fa-chevron-right text-[10px] text-slate-400"></i>

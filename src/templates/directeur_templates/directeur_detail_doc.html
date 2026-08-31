@@ -38,9 +38,18 @@
         .btn-glow:hover {
             background: linear-gradient(135deg, #1d4ed8, #1e40af);
             transform: translateY(-1px);
-            box-shadow: 0 6px 20px 0 rgba(37, 99, 235, 0.5);
+            
         }
-
+        .btn-glow-warning{
+            background: linear-gradient(90deg,rgba(212, 165, 38, 0.76) 55%, rgba(208, 178, 62, 1) 71%);;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 6px 20px 0 rgba(212, 165, 38, 0.5);
+        }
+         .btn-glow-warning:hover {
+            background: linear-gradient(90deg,rgba(212, 165, 38, 0.76) 55%, rgba(208, 178, 62, 1) 71%);;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px 0 rgba(212, 165, 38, 0.5);
+        }
         .doc-card {
             transition: all 0.2s ease;
         }
@@ -90,6 +99,15 @@
                 </a>
                 <button onclick="document.getElementById('gestion_doc_modal').showModal()" class="btn-glow text-white text-xs font-semibold px-4 py-2 rounded-lg flex items-center gap-2">
                     <i class="fas fa-sliders"></i> Gérer le dossier
+                </button>
+                <!-- 1. BOUTON DECLENCHEUR -->
+                <button type="button" 
+                        onclick="modal_commentaire.showModal()" 
+                        class="btn-glow-warning  text-gray-700 text-xs font-semibold px-4 py-2 rounded-lg flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    {% if document.commentaire_rejet %}Modifier la remarque{% else %}Demander des modifications{% endif %}
                 </button>
             </div>
         </div>
@@ -299,7 +317,7 @@
                         <div class="flex justify-between py-1 border-b border-slate-100">
                             <span class="text-slate-500">Montant :</span>
                             <span class="font-bold text-emerald-600 text-sm">
-                                {% if document.offre_financement.type_offre == 'offre_financement' %}
+                                {% if document.offre_financement.type_offre == 'offre_financement' or document.offre_financement.type_offre == 'demande'%}
                                     {{ document.offre_financement.montant_finance|intcomma }} FCFA
                                 {% else %}
                                     {{ document.offre_financement.montant_propose|intcomma }} FCFA
@@ -319,6 +337,15 @@
                     <button onclick="document.getElementById('gestion_doc_modal').showModal()" 
                             class="w-full btn-glow text-white font-semibold py-3 px-4 rounded-xl flex items-center justify-center gap-2 text-sm">
                         <i class="fas fa-cog"></i> Gérer le dossier
+                    </button>
+                    <!-- 1. BOUTON DECLENCHEUR -->
+                    <button type="button" 
+                            onclick="modal_commentaire.showModal()" 
+                            class=" w-full btn-glow-warning text-gray-700 font-semibold py-3 px-4 rounded-xl flex items-center justify-center gap-2 text-sm"">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        {% if document.commentaire_rejet %}Modifier la remarque{% else %}Demander des modifications{% endif %}
                     </button>
                     <a href="{% url 'leads_app:documents-list' %}" 
                        class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 px-4 rounded-xl transition flex items-center justify-center gap-2 text-sm">
@@ -530,100 +557,101 @@
                         </div>
                     </div>
                 </div>
-                !-- BLOC GEOLOCALISATION -  -->
-<div class="card bg-base-100 border border-base-300 shadow-sm overflow-hidden">
-    <div class="card-body p-5">
-        
-        <!-- En-tête du bloc -->
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-base-200">
-            <div>
-                <span class="badge badge-primary badge-outline text-xs font-semibold mb-1">Localisation vérifiée</span>
-                <h3 class="card-title text-base text-base-content flex items-center gap-2">
-                    📍 Domicile du client
-                </h3>
-            </div>
-            
-            <!-- Actions externes -->
-            <div class="flex items-center gap-2 flex-wrap">
-                {% if document.google_maps_url %}
-                    <a href="{{ document.google_maps_url }}" target="_blank" rel="noopener noreferrer" 
-                       class="btn btn-sm btn-outline btn-primary gap-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                        </svg>
-                        Google Maps
-                    </a>
-                    <a href="https://waze.com/ul?ll={{ document.latitude }},{{ document.longitude }}&navigate=yes" target="_blank" rel="noopener noreferrer" 
-                       class="btn btn-sm btn-ghost gap-1 text-base-content/70">
-                        Waze
-                    </a>
-                {% endif %}
-            </div>
-        </div>
-
-        {% if document.latitude and document.longitude %}
-            <!-- Carte Leaflet interactive (Lecture seule) -->
-            <div id="dg-map-detail" class="w-full h-64 rounded-box border border-base-300 my-3 z-0"></div>
-
-            <!-- Meta d'information & Coordonnées -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-base-200/50 p-3 rounded-lg text-xs">
-                <div>
-                    <span class="text-base-content/60 block">Coordonnées GPS</span>
-                    <span class="font-mono font-bold text-base-content">
-                        {{ document.latitude }}, {{ document.longitude }}
-                    </span>
-                </div>
-                <div>
-                    <span class="text-base-content/60 block">Plan papier joint</span>
-                    {% if document.plan_geolocalisation %}
-                        <a href="{{ document.plan_geolocalisation.url }}" target="_blank" class="text-primary underline font-medium flex items-center gap-1 mt-0.5">
-                            📄 Télécharger le document annexé
-                        </a>
-                    {% else %}
-                        <span class="text-base-content/40 italic">Aucun fichier scanné fourni</span>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- JS Initialisation Carte en Mode Lecture Seule -->
-            <script>
-                document.addEventListener("DOMContentLoaded", function () {
-                    const lat = parseFloat("{{ document.latitude }}");
-                    const lng = parseFloat("{{ document.longitude }}");
-
-                    // Initialisation et centrage sur les coordonnées du client
-                    const mapDg = L.map('dg-map-detail', {
-                        scrollWheelZoom: false // Évite le zoom accidentel lors du scroll de page
-                    }).setView([lat, lng], 16);
-
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        maxZoom: 19,
-                        attribution: '© OpenStreetMap'
-                    }).addTo(mapDg);
-
-                    // Marqueur principal avec Popup d'information
-                    const marker = L.marker([lat, lng]).addTo(mapDg);
-                    marker.bindPopup(`
-                        <div class="text-xs p-1">
-                            <strong>{{ document.client.nom_complet|default:"Client KOZ" }}</strong><br/>
-                            Dossier N° {{ document.pk }}
+                
+                <div class="card bg-base-100 border border-base-300 shadow-sm overflow-hidden">
+                     
+                    <div class="card-body p-5">
+                        
+                        <!-- En-tête du bloc -->
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-base-200">
+                            <div>
+                                <span class="badge badge-primary badge-outline text-xs font-semibold mb-1">Localisation vérifiée</span>
+                                <h3 class="card-title text-base text-base-content flex items-center gap-2">
+                                    📍 Domicile du client
+                                </h3>
+                            </div>
+                            
+                            <!-- Actions externes -->
+                            <div class="flex items-center gap-2 flex-wrap">
+                                {% if document.google_maps_url %}
+                                    <a href="{{ document.google_maps_url }}" target="_blank" rel="noopener noreferrer" 
+                                    class="btn btn-sm btn-outline btn-primary gap-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                        </svg>
+                                        Google Maps
+                                    </a>
+                                    <a href="https://waze.com/ul?ll={{ document.latitude }},{{ document.longitude }}&navigate=yes" target="_blank" rel="noopener noreferrer" 
+                                    class="btn btn-sm btn-ghost gap-1 text-base-content/70">
+                                        Waze
+                                    </a>
+                                {% endif %}
+                            </div>
                         </div>
-                    `).openPopup();
-                });
-            </script>
 
-        {% else %}
-            <!-- Fallback si la géolocalisation n'a pas encore été renseignée -->
-            <div class="alert alert-warning text-xs mt-3">
-                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-5 w-5" fill="none" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-                <span>Aucune coordonnée GPS enregistrée pour ce dossier.</span>
-            </div>
-        {% endif %}
+                        {% if document.latitude and document.longitude %}
+                            <!-- Carte Leaflet interactive (Lecture seule) -->
+                            <div id="dg-map-detail" class="w-full h-64 rounded-box border border-base-300 my-3 z-0"></div>
 
-    </div>
-</div>
+                            <!-- Meta d'information & Coordonnées -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-base-200/50 p-3 rounded-lg text-xs">
+                                <div>
+                                    <span class="text-base-content/60 block">Coordonnées GPS</span>
+                                    <span class="font-mono font-bold text-base-content">
+                                        {{ document.latitude }}, {{ document.longitude }}
+                                    </span>
+                                </div>
+                                <div>
+                                    <span class="text-base-content/60 block">Plan papier joint</span>
+                                    {% if document.plan_geolocalisation %}
+                                        <a href="{{ document.plan_geolocalisation.url }}" target="_blank" class="text-primary underline font-medium flex items-center gap-1 mt-0.5">
+                                            📄 Télécharger le document annexé
+                                        </a>
+                                    {% else %}
+                                        <span class="text-base-content/40 italic">Aucun fichier scanné fourni</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- JS Initialisation Carte en Mode Lecture Seule -->
+                            <script>
+                                document.addEventListener("DOMContentLoaded", function () {
+                                    const lat = parseFloat("{{ document.latitude }}");
+                                    const lng = parseFloat("{{ document.longitude }}");
+
+                                    // Initialisation et centrage sur les coordonnées du client
+                                    const mapDg = L.map('dg-map-detail', {
+                                        scrollWheelZoom: false // Évite le zoom accidentel lors du scroll de page
+                                    }).setView([lat, lng], 16);
+
+                                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                                        maxZoom: 19,
+                                        attribution: '© OpenStreetMap'
+                                    }).addTo(mapDg);
+
+                                    // Marqueur principal avec Popup d'information
+                                    const marker = L.marker([lat, lng]).addTo(mapDg);
+                                    marker.bindPopup(`
+                                        <div class="text-xs p-1">
+                                            <strong>{{ document.client.nom_complet|default:"Client KOZ" }}</strong><br/>
+                                            Dossier N° {{ document.pk }}
+                                        </div>
+                                    `).openPopup();
+                                });
+                            </script>
+
+                        {% else %}
+                            <!-- Fallback si la géolocalisation n'a pas encore été renseignée -->
+                            <div class="alert alert-warning text-xs mt-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-5 w-5" fill="none" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                                <span>Aucune coordonnée GPS enregistrée pour ce dossier.</span>
+                            </div>
+                        {% endif %}
+
+                    </div>
+                </div>
 
                 <!-- SECTION 4: Autres Justificatifs (Optionnels) -->
                 <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
@@ -709,6 +737,62 @@
 
     <!-- Modale de Gestion du dossier -->
     {% include 'modals/leads/gestion_doc.html' %}
+    <!-- 2. MODAL DAISYUI -->
+<dialog id="modal_commentaire" class="modal modal-bottom sm:modal-middle">
+  <div class="modal-box border border-warning/30">
+    
+    <!-- Bouton fermeture X -->
+    <form method="dialog">
+      <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+    </form>
 
+    <!-- Titre Modal -->
+    <h3 class="font-bold text-lg text-warning flex items-center gap-2">
+        ⚠️ Motifs de rejet / modification
+    </h3>
+    <p class="py-2 text-xs text-base-content/70">
+        Indiquez précisément au client les documents manquants ou les corrections à apporter à son dossier.
+    </p>
+     
+    <!-- Formulaire -->
+    <div id="modif-doc-message-zone"></div>
+    <form 
+    hx-post="{% url 'leads_app:document-comment-update' document.pk %}"
+    hx-target="#modif-doc-message-zone"
+    hx-indicator="#modif-doc-indicator"
+    >
+    {% csrf_token %}
+        
+        <div class="form-control my-3">
+            <label class="label py-1"><span class="label-text-alt font-bold">Commentaire / Remarques pour le client</span></label>
+            <textarea name="commentaire_rejet" class="textarea textarea-bordered w-full h-32 focus:textarea-warning text-sm" placeholder="Ex: La CNIB est illisible, merci de charger un document plus clair...">{{ document.commentaire_rejet|default:'' }}</textarea>
+        </div>
+        <div id="modif-doc-indicator" class="htmx-indicator absolute inset-0 bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center z-50 rounded-2xl transition-all">
+            <div class="p-6 text-center flex flex-col items-center">
+                <img src="{% static 'images/Loading_animation.svg' %}" class="w-16 h-16 mb-3 object-contain animate-pulse" alt="Chargement...">
+                <p class="text-sm font-bold text-slate-800"> Traitement cours...</p>
+            </div>
+            </div>
+        <div class="modal-action">
+            <button type="button" class="btn btn-ghost btn-sm" onclick="modal_commentaire.close()">Annuler</button>
+            <button type="submit" class="btn btn-warning btn-sm gap-2">
+                💾 Enregistrer la remarque
+            </button>
+        </div>
+    </form>
+  </div>
+  
+  <!-- Backdrop pour fermer en cliquant à côté -->
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>
+<script>
+   
+    document.addEventListener('closeGestionDocModal', function() {
+        document.getElementById('modal_commentaire').close();
+    });
+
+</script>
 </body>
 </html>

@@ -1,4 +1,6 @@
 # leads_app/forms.py
+from decimal import Decimal
+
 from django import forms
 from leads_app.utils import verifier_coherence, calculer_prix_financable
 from django.core.exceptions import ValidationError
@@ -87,7 +89,7 @@ class DemandeFinancementForm(forms.ModelForm):
                 'placeholder': 'Montant de l\'apport (FCFA)'
             }),
             'duree_mois': forms.Select(
-                choices=[(i, f"{i} mois") for i in range(1, 25)],
+                choices=[(i, f"{i} mois") for i in range(1, 60)],
                 attrs={'class': 'select select-bordered w-full'}
             ),
             'revenus_mensuel': forms.NumberInput(attrs={
@@ -156,7 +158,7 @@ class DemandeFinancementForm(forms.ModelForm):
         # 4. LEVÉE DES ERREURS DE VALIDATION
         # ==========================================
         if est_incoherent:
-            if prix_financable < prix_reel * 0.80:
+            if prix_financable < prix_reel * Decimal('0.80'):
                 # ✅ Le prix financable est trop bas par rapport au prix du véhicule
                 raise forms.ValidationError(
                     f"⚠️ Avec vos critères, vous pouvez financer environ {prix_financable:,.0f} FCFA, "
@@ -164,7 +166,7 @@ class DemandeFinancementForm(forms.ModelForm):
                     f"Augmentez votre mensualité, votre apport ou la durée."
                 )
             
-            elif prix_financable > prix_reel * 1.50:
+            elif prix_financable > prix_reel * Decimal('1.50'):
                 # ✅ Le prix financable est trop élevé (mensualité trop haute)
                 raise forms.ValidationError(
                     f"⚠️ Votre mensualité semble trop élevée. Le prix financable estimé "
@@ -271,7 +273,6 @@ class DocumentsUploadForm(forms.ModelForm):
             ('bulletin_3', 'Bulletin de paie (mois -1)'),
             ('relevé_bancaire', 'Relevé bancaire (12 mois) + RIB'),
             ('specimen_signature', 'Spécimen de signature'),
-            ('plan_geolocalisation', 'plan de géolocalisation')
         ]
         
         for field_name, field_label in required_fields:

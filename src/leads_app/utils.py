@@ -37,33 +37,48 @@ def generer_echeances_offre(offre):
     return echeances
 
 
+from decimal import Decimal
+
 def calculer_prix_financable(mensualite, duree_mois, taux_annuel, apport):
-    taux_mensuel = (taux_annuel / 100.0) / 12.0
+    mensualite = Decimal(str(mensualite))
+    duree_mois = int(duree_mois)
+    taux_annuel = Decimal(str(taux_annuel))
+    apport = Decimal(str(apport))
+
+    taux_mensuel = taux_annuel / Decimal('1200')
+
     if taux_mensuel == 0:
         capital = mensualite * duree_mois
     else:
-        capital = mensualite * (1 - (1 + taux_mensuel) ** (-duree_mois)) / taux_mensuel
+        # (1 + taux_mensuel) ** (-duree_mois) — éviter l'exposant négatif direct sur Decimal
+        facteur = (1 + taux_mensuel) ** duree_mois
+        capital = mensualite * (1 - (1 / facteur)) / taux_mensuel
+
     return capital + apport
 
 
-MARGE_BASSE = Decimal('0.80')   # ← ✅ DECIMAL
-MARGE_HAUTE = Decimal('1.50')   # ← ✅ DECIMAL # ni dépasser 150% du prix réel (mensualité trop grosse pour la durée)
+MARGE_BASSE = Decimal('0.80')
+MARGE_HAUTE = Decimal('1.50')
 
 def verifier_coherence(mensualite, duree_mois, taux_annuel, apport, prix_reel):
     prix_financable = calculer_prix_financable(mensualite, duree_mois, taux_annuel, apport)
+    prix_reel = Decimal(str(prix_reel))
+
     trop_bas = prix_financable < prix_reel * MARGE_BASSE
     trop_haut = prix_financable > prix_reel * MARGE_HAUTE
-    return trop_bas or trop_haut, prix_financable
-
+    return (trop_bas or trop_haut), prix_financable
 
 # utils.py
 def calculer_mensualite(montant, taux_annuel, duree_mois):
-    from decimal import Decimal
+    duree_mois = int(duree_mois) if duree_mois else 0
+    montant = Decimal(str(montant)) if montant else Decimal('0')
+
     if not montant or not duree_mois:
         return Decimal('0')
+
     if not taux_annuel or taux_annuel <= 0:
-        return Decimal(str(montant)) / Decimal(str(duree_mois))
-    
+        return montant / duree_mois
+
     taux_mensuel = Decimal(str(taux_annuel)) / Decimal('1200')
-    facteur = (1 + taux_mensuel) ** (-Decimal(str(duree_mois)))
-    return montant * (taux_mensuel / (1 - facteur))
+    facteur = (1 + taux_mensuel) ** duree_mois  # exposant positif, sûr
+    return montant * (taux_mensuel / (1 - (1 / facteur)))

@@ -153,7 +153,7 @@
                         {% endif %}
                         
                         <!-- ===== COMMENTAIRE DE REJET ===== -->
-                        {% if doc.commentaire_rejet %}
+                        {% if doc.commentaire_rejet and doc.statut_dossier == "modification" or doc.statut_dossier == "rejete" %}
                         <div class="mt-3 bg-red-50 rounded-lg p-2 text-sm text-red-700 flex items-start gap-2">
                             <i class="fas fa-exclamation-triangle text-red-500 mt-0.5"></i>
                             <span><strong>Motif du rejet :</strong> {{ doc.commentaire_rejet }}</span>

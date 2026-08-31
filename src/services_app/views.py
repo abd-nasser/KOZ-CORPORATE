@@ -185,7 +185,7 @@ class ERP_ServiceImagesCreateView(LoginRequiredMixin, UserPassesTestMixin, Creat
 
 class SITE_ServicesListView(ListView):
     model = Services
-    context_object_name = "services_list"
+    context_object_name = "services"
     template_name = "services_templates/services_list.html"
     
 class SITE_ServiceDetailView(DetailView):

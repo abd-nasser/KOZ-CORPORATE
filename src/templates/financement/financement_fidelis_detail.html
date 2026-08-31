@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Partenariat Fidelis Finance | KOZ Services{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/splitting/dist/splitting.css" />
+<style>
+    .splitting .word {
+        display: inline-block;
+        will-change: transform, opacity;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="min-h-screen bg-slate-50 text-slate-900 pt-28 pb-20 px-4 sm:px-6 lg:px-8 overflow-x-hidden">
+
+    <div class="max-w-4xl mx-auto mb-8">
+        <a href="javascript:history.back()" class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-slate-200 text-slate-700 text-xs font-bold hover:bg-blue-50 hover:text-blue-600 transition-all">
+            <i class="fas fa-arrow-left"></i>
+            <span>Retour</span>
+        </a>
+    </div>
+
+    <article class="max-w-4xl mx-auto space-y-12">
+
+        <!-- HEADER HERO -->
+        <header class="text-center space-y-6">
+            <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-900 text-white text-xs font-bold uppercase tracking-wider shadow-sm">
+                <i class="fas fa-building text-blue-400"></i> Partenariat Institutionnel
+            </span>
+
+            <h1 class="text-4xl sm:text-6xl font-black font-heading tracking-tight text-slate-900 leading-tight">
+                Financement via <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">Fidelis Finance</span>
+            </h1>
+
+            <p class="text-lg sm:text-xl font-medium text-slate-700 max-w-2xl mx-auto leading-relaxed split-text" data-splitting="words">
+                Bénéficiez de la puissance et de la sécurité d'un établissement financier de premier plan pour concrétiser vos projets automobiles professionnels et personnels.
+            </p>
+        </header>
+
+        <!-- PRESENTATION DU PARTENARIAT -->
+        <div class="bg-white rounded-3xl border border-slate-200/80 p-8 sm:p-12 shadow-xl space-y-8">
+            <h2 class="text-2xl font-bold font-heading text-slate-900 border-l-4 border-indigo-600 pl-4">
+                Une solution de crédit-bail & prêt sur-mesure
+            </h2>
+
+            <div class="split-paragraph text-slate-700 text-base sm:text-lg leading-relaxed space-y-6" data-splitting="words">
+                Grâce au partenariat stratégique entre KOZ Services et Fidelis Finance, nos clients profitent de taux préférentiels et de formules de leasing adaptées (Crédit-Bail automobile). Que vous soyez un particulier ou une entreprise renforçant sa flotte de véhicules, l'accompagnement est structuré de bout en bout.
+            </div>
+
+            <!-- ETAPES DU PROCESSUS -->
+            <div class="pt-6 border-t border-slate-100 space-y-6">
+                <h3 class="font-bold text-slate-900 text-lg">Le parcours de financement :</h3>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200/60 space-y-2">
+                        <span class="w-8 h-8 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center">1</span>
+                        <h4 class="font-bold text-slate-900 text-sm">Choix du Véhicule</h4>
+                        <p class="text-slate-600 text-xs">Sélectionnez votre modèle dans le catalogue KOZ Services.</p>
+                    </div>
+
+                    <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200/60 space-y-2">
+                        <span class="w-8 h-8 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center">2</span>
+                        <h4 class="font-bold text-slate-900 text-sm">Montage du Dossier</h4>
+                        <p class="text-slate-600 text-xs">Transmission accélérée des pièces à l'équipe Fidelis Finance.</p>
+                    </div>
+
+                    <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200/60 space-y-2">
+                        <span class="w-8 h-8 rounded-full bg-emerald-600 text-white font-bold text-xs flex items-center justify-center">3</span>
+                        <h4 class="font-bold text-slate-900 text-sm">Livraison</h4>
+                        <p class="text-slate-600 text-xs">Validation de l'accord et remise des clés de votre véhicule.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="rounded-3xl bg-slate-900 p-8 text-white text-center shadow-xl space-y-4">
+            <h3 class="text-2xl font-bold font-heading">Soumettre une étude de financement</h3>
+            <p class="text-slate-300 text-sm max-w-lg mx-auto">Nos conseillers sont à votre disposition pour réaliser une simulation avec Fidelis Finance.</p>
+            <a href="#contact" class="inline-block px-8 py-3.5 rounded-full bg-blue-600 text-white font-bold text-sm shadow-lg hover:bg-blue-700 transition-all hover:scale-105">
+                Demander une étude
+            </a>
+        </div>
+
+    </article>
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/splitting/dist/splitting.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    Splitting();
+
+    if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+        gsap.registerPlugin(ScrollTrigger);
+
+        document.querySelectorAll('[data-splitting="words"]').forEach(el => {
+            const words = el.querySelectorAll('.word');
+            gsap.fromTo(words, 
+                { opacity: 0.15, y: 6, filter: 'blur(2px)' },
+                {
+                    opacity: 1,
+                    y: 0,
+                    filter: 'blur(0px)',
+                    duration: 0.35,
+                    stagger: 0.025,
+                    ease: "power2.out",
+                    scrollTrigger: {
+                        trigger: el,
+                        start: "top 80%",
+                        end: "bottom 40%",
+                        scrub: 0.6
+                    }
+                }
+            );
+        });
+    }
+});
+</script>
+{% endblock %}

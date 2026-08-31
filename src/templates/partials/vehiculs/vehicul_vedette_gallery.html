@@ -24,7 +24,7 @@
     
     {% for vehicule in vehicules_page %}
     <!-- Carte Unifiée du Véhicule Vedette -->
-    <div class="group vedette_gallery_display relative w-full max-w-4xl rounded-3xl  p-6 md:p-8 shadow-xl border border-gray-100/80 flex flex-col gap-6  transition-all duration-300 hover:shadow-2xl">
+    <div class="group vedette_gallery_display relative w-full max-w-4xl rounded-2xl  p-6 md:p-8 shadow-xl border border-gray-100/80 flex flex-col gap-6  transition-all duration-300 hover:shadow-2xl">
         
         <!-- Badge Likes (Haut Gauche) -->
         <div class="absolute top-12 left-12 z-20 flex items-center gap-2 rounded-full bg-white/90 backdrop-blur-md px-4 py-1.5 text-sm font-semibold text-gray-700 shadow-sm border border-gray-100">
@@ -38,7 +38,7 @@
         </div>
 
         <!-- Zone d'Exposition du Véhicule (Effet Podium / Ancrage au sol) -->
-        <div class="relative w-full flex justify-center items-center py-8 px-4 rounded-3xl  img-slide-trigger">
+        <div class="relative w-full flex justify-center items-center py-8 px-4 rounded-xl  img-slide-trigger">
             <div class=" ved-overlay rounded-3xl"></div>
             <!-- Ombre Elliptique au sol (Empêche la voiture de "flotter") -->
             <div class="absolute bottom-20 w-3/4 h-6 bg-black rounded-[100%]  blur-md pointer-events-none transform scale-y-75 group-hover:scale-105 transition-transform duration-500"></div>

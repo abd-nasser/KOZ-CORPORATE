@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Nos Services & Offres | KOZ Services{% endblock %}
+
+{% block content %}
+<main class="min-h-screen bg-slate-50 text-slate-900 pt-28 pb-20 px-4 sm:px-6 lg:px-8 overflow-x-hidden">
+
+    <!-- ============================================================ -->
+    <!-- ==========           HEADER DE LA PAGE            ========== -->
+    <!-- ============================================================ -->
+    <div class="max-w-7xl mx-auto text-center mb-14 relative">
+        <!-- Glow bleu subtil -->
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-400/15 blur-[120px] rounded-full pointer-events-none"></div>
+
+        <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-600 text-xs font-bold uppercase tracking-widest mb-4 shadow-sm">
+            <i class="fas fa-wrench text-blue-600"></i> Expertise & Entretien
+        </span>
+        
+        <h1 class="text-4xl sm:text-6xl font-black tracking-tight text-slate-900 mb-6 font-heading">
+            Nos Services & <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">Offres Sur-Mesure</span>
+        </h1>
+        
+        <p class="text-slate-600 text-base sm:text-lg max-w-2xl mx-auto font-normal leading-relaxed">
+            Découvrez l'ensemble de nos prestations d'entretien, de diagnostic et de forfaits d'assistance dédiés à votre véhicule.
+        </p>
+
+        <!-- Filtres par Type de Service -->
+        {% if types_services %}
+        <div class="flex flex-wrap justify-center items-center gap-2 sm:gap-3 mt-10">
+            <button class="filter-btn active px-5 py-2.5 rounded-full text-xs sm:text-sm font-semibold bg-blue-600 text-white shadow-lg shadow-blue-600/25 transition-all duration-300 hover:bg-blue-700" data-filter="all">
+                Tous les services
+            </button>
+            {% for type in types_services %}
+            <button class="filter-btn px-5 py-2.5 rounded-full text-xs sm:text-sm font-medium bg-white border border-slate-200 text-slate-700 shadow-sm hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all duration-300" data-filter="type-{{ type.id }}">
+                {{ type.nom }}
+            </button>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+
+    <div class="max-w-7xl mx-auto space-y-12">
+
+        <!-- ============================================================ -->
+        <!-- ==========          GRILLE DES SERVICES           ========== -->
+        <!-- ============================================================ -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="services-grid">
+            
+            {% for service in services %}
+                {% if service.est_disponible %}
+                <div class="service-card group flex flex-col justify-between rounded-3xl bg-white border border-slate-200/80 overflow-hidden hover:border-blue-400 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 shadow-md shadow-slate-200/50" data-type="type-{{ service.types.id|default:'none' }}">
+                    
+                    <div>
+                        <!-- Media Header / Badge Stack -->
+                        <div class="relative h-48 w-full overflow-hidden bg-slate-100">
+                            {% if service.image_principale %}
+                                <img src="{{ service.image_principale.url }}" alt="{{ service.nom }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out">
+                            {% else %}
+                                <div class="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-100 to-blue-50/50 text-slate-400">
+                                    <i class="fas fa-car-crash text-4xl mb-2 text-blue-200"></i>
+                                    <span class="text-xs font-medium text-slate-400">KOZ Services</span>
+                                </div>
+                            {% endif %}
+
+                            <!-- Badges Overlay -->
+                            <div class="absolute top-3 left-3 flex flex-wrap gap-2">
+                                {% if service.est_vedette %}
+                                    <span class="px-3 py-1 rounded-full bg-amber-500 text-white text-[10px] font-extrabold uppercase tracking-wider shadow-md flex items-center gap-1">
+                                        <i class="fas fa-star text-[9px]"></i> Vedette
+                                    </span>
+                                {% endif %}
+                                
+                                {% if service.est_forfait %}
+                                    <span class="px-3 py-1 rounded-full bg-indigo-600 text-white text-[10px] font-bold uppercase tracking-wider shadow-md">
+                                        <i class="fas fa-box text-[9px] mr-1"></i> Forfait
+                                    </span>
+                                {% endif %}
+
+                                {% if service.est_en_promo %}
+                                    <span class="px-3 py-1 rounded-full bg-rose-500 text-white text-[10px] font-extrabold uppercase tracking-wider shadow-md animate-pulse">
+                                        Promo
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                            {% if service.types %}
+                            <span class="absolute bottom-3 left-3 px-3 py-1 rounded-full bg-slate-900/80 backdrop-blur-md text-[11px] font-medium text-white shadow-sm">
+                                {{ service.types.nom }}
+                            </span>
+                            {% endif %}
+                        </div>
+
+                        <!-- Contenu Carte -->
+                        <div class="p-6 space-y-4">
+                            
+                            <!-- Titre -->
+                            <h3 class="text-xl font-bold font-heading text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-1">
+                                {{ service.nom }}
+                            </h3>
+
+                            <!-- Description courte / Description -->
+                            <p class="text-slate-600 text-sm font-normal line-clamp-2 leading-relaxed">
+                                {% if service.description_courte %}
+                                    {{ service.description_courte }}
+                                {% else %}
+                                    {{ service.description|truncatewords:18 }}
+                                {% endif %}
+                            </p>
+
+                            <!-- Spécifications techniques (Durée, Périodicité) -->
+                            <div class="pt-2 flex flex-wrap items-center gap-4 text-xs font-medium text-slate-500 border-t border-slate-100">
+                                {% if service.duree_estimee %}
+                                <span class="flex items-center gap-1.5" title="Durée estimée">
+                                    <i class="far fa-clock text-blue-600"></i> ~{{ service.duree_estimee }} min
+                                </span>
+                                {% endif %}
+
+                                <span class="flex items-center gap-1.5">
+                                    <i class="fas fa-sync-alt text-slate-400"></i> {{ service.get_periodicite_display }}
+                                </span>
+                            </div>
+
+                            <!-- Compatible véhicules preview -->
+                            {% if service.compatible_vehicules %}
+                            <div class="text-xs text-slate-500 flex items-center gap-1.5 bg-slate-50 p-2 rounded-xl border border-slate-100">
+                                <i class="fas fa-check-circle text-emerald-500 shrink-0"></i>
+                                <span class="truncate"><strong>Compatible:</strong> {{ service.compatible_vehicules }}</span>
+                            </div>
+                            {% endif %}
+
+                        </div>
+                    </div>
+
+                    <!-- Footer Carte : Prix + CTA -->
+                    <div class="px-6 pb-6 pt-4 border-t border-slate-100 flex items-center justify-between mt-auto">
+                        <!-- Tarif -->
+                        <div class="flex flex-col">
+                            {% if service.est_en_promo %}
+                                <span class="text-xs text-slate-400 line-through font-medium">
+                                    {{ service.prix|floatformat:0 }} FCFA
+                                </span>
+                                <span class="text-lg font-black text-rose-600">
+                                    {{ service.prix_promo|floatformat:0 }} <span class="text-xs font-bold text-slate-600">FCFA / {{ service.unite }}</span>
+                                </span>
+                            {% else %}
+                                <span class="text-xs text-slate-400 font-medium">Tarif</span>
+                                <span class="text-lg font-black text-blue-600">
+                                    {% if service.prix > 0 %}
+                                        {{ service.prix|floatformat:0 }} <span class="text-xs font-bold text-slate-600">FCFA / {{ service.unite }}</span>
+                                    {% else %}
+                                        Sur devis
+                                    {% endif %}
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        <!-- Bouton Détails -->
+                        <a href="{% url 'services_app:service-detail-public' service.pk %}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-blue-50 text-blue-600 font-bold text-xs hover:bg-blue-600 hover:text-white transition-all duration-300 shadow-sm">
+                            <span>Détails</span>
+                            <i class="fas fa-arrow-right text-[10px]"></i>
+                        </a>
+                    </div>
+
+                </div>
+                {% endif %}
+            {% empty %}
+                <!-- State vide -->
+                <div class="col-span-full py-16 text-center space-y-4 bg-white rounded-3xl border border-slate-200">
+                    <div class="w-16 h-16 mx-auto rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 text-2xl">
+                        <i class="fas fa-wrench"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 font-heading">Aucun service disponible</h3>
+                    <p class="text-slate-500 text-sm max-w-sm mx-auto">Nos offres de services sont actuellement en cours de mise à jour. Revenez très bientôt !</p>
+                </div>
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+</main>
+
+<!-- ============================================================ -->
+<!-- ==========        SCRIPT FILTRAGE PAR CATEGORIE      ========== -->
+<!-- ============================================================ -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const cards = document.querySelectorAll('.service-card');
+
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            filterBtns.forEach(b => {
+                b.classList.remove('active', 'bg-blue-600', 'text-white', 'shadow-lg', 'shadow-blue-600/25');
+                b.classList.add('bg-white', 'border', 'border-slate-200', 'text-slate-700');
+            });
+
+            this.classList.add('active', 'bg-blue-600', 'text-white', 'shadow-lg', 'shadow-blue-600/25');
+            this.classList.remove('bg-white', 'border', 'border-slate-200', 'text-slate-700');
+
+            const filter = this.getAttribute('data-filter');
+
+            cards.forEach(card => {
+                const cardType = card.getAttribute('data-type');
+                
+                if (filter === 'all' || cardType === filter) {
+                    card.style.display = 'flex';
+                    if (typeof gsap !== 'undefined') {
+                        gsap.fromTo(card, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.3 });
+                    }
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

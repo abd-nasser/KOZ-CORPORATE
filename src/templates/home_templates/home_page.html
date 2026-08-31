@@ -20,8 +20,31 @@
     <script src="{% static 'js/vendor/lenis.min.js' %}" defer></script>
     <script src="https://cdn.plyr.io/3.7.8/plyr.js" defer></script>
     <script src="{% static 'js/home/gsap_anim.js' %}" defer></script>
-    
+     <script defer>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        heading: ['Urbanist', 'sans-serif'],
+                        body: ['Plus Jakarta Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    {% block extra_css %}{% endblock %}
 </head>
+ <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #020617; /* slate-950 */
+            color: #f8fafc;
+        }
+        h1, h2, h3, h4, .font-heading {
+            font-family: 'Urbanist', sans-serif;
+            letter-spacing: -0.02em;
+        }
+    </style>
 <body>
 
     <!-- ========== NAVBAR PREMIUM ========== -->
@@ -47,6 +70,14 @@
                 <a href="{% url 'vehicul_app:site-vehicul-list' %}" 
                 class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
                     Catalogue
+                </a>
+                <a href="{% url 'home_app:actualites-list' %}" 
+                class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                    Actualités
+                </a>
+                <a href="{% url 'services_app:services-list-public' %}" 
+                class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                    Services
                 </a>
                 <a href="#financement" 
                 class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
@@ -142,6 +173,8 @@
             <div class="flex flex-col gap-2 text-gray-600 text-sm">
                 <a href="{% url 'home_app:home-page' %}" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Accueil</a>
                 <a href="{% url 'vehicul_app:site-vehicul-list' %}" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Catalogue</a>
+                <a href="{% url 'home_app:actualites-list' %}" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Actualités</a>
+                <a href="{% url 'services_app:services-list-public' %}" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Services</a>
                 <a href="#financement" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Financement</a>
                 <a href="#contact" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Contact</a>
                 <hr class="my-2">
@@ -179,72 +212,72 @@
 <section class="relative hero-section flex flex-col justify-between items-center overflow-hidden pt-24 pb-16 px-4">
         
     <!-- ===== CONTENU PRINCIPAL (Remonté d'un cran) ===== -->
-<div class="hero-main-content hero_fade -top-20 mx-auto text-center text-white relative z-10 max-w-4xl -mt-6 md:-mt-12">
-    <h1 class="text-4xl sm:text-6xl md:text-7xl font-extrabold leading-tight mb-4 tracking-tight" style="position: relative;top: -12rem;">
-        Votre voiture à crédit.<br>
-        <span class="text-blue-400 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-300">Vos pièces en ligne.</span>
-    </h1>
-    <p class="text-lg md:text-xl text-slate-200 max-w-2xl mx-auto mb-6 font-light leading-relaxed" style="position: relative;top: -12rem;">
-        <strong class="font-semibold text-white">KOZ Services</strong> : n'achetez pas seulement une auto, changez votre quotidien.
-    </p>
-    <div class="flex flex-wrap justify-center gap-4" style="position: relative;top: -12rem;">
-        <a href="#section-cta" class="px-7 py-3.5 rounded-full bg-white text-blue-950 font-bold hover:bg-blue-50 shadow-xl hover:scale-105 transition-all duration-300 text-sm md:text-base">
-            Découvrir nos offres
-        </a>
-        <a href="#financement" class="px-7 py-3.5 rounded-full bg-white/10 backdrop-blur-md text-white border border-white/30 font-semibold hover:bg-white/20 hover:scale-105 transition-all duration-300 text-sm md:text-base">
-            Financer mon auto
-        </a>
-    </div>
-</div>
-
-<!-- ===== DEUX BOX LATÉRALES GLASS (Remontées aussi) ===== -->
-<div class="w-full top-20 max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4 md:mt-6 relative z-20">
-    
-    <!-- Box 1 : Gauche (Rendez-vous) -->
-    <a href="#infos-rdv" id="hero-box-left" 
-       class="group relative bg-white/10 backdrop-blur-xl border border-white/20 p-5 md:p-6 rounded-3xl shadow-2xl hover:bg-white/20 transition duration-300 flex flex-col justify-between max-w-lg w-full justify-self-start">
-        
-        <div class="flex items-center gap-3.5 mb-2.5">
-            <div class="w-11 h-11 rounded-2xl bg-blue-500/20 border border-blue-400/30 flex items-center justify-center text-blue-300 text-lg">
-                <i class="fas fa-calendar-check"></i>
-            </div>
-            <h3 class="text-lg md:text-xl font-bold text-white">Prendre un rendez-vous</h3>
-        </div>
-        
-        <p class="text-xs md:text-sm text-slate-200 leading-relaxed font-light">
-            Acheter une voiture est une décision importante. Avec <strong class="text-white font-semibold">KOZ SERVICES</strong>, évitez les mauvaises surprises grâce à notre expertise automobile.
+    <div class="hero-main-content hero_fade -top-20 mx-auto text-center text-white relative z-10 max-w-4xl -mt-6 md:-mt-12">
+        <h1 class="text-4xl sm:text-6xl md:text-7xl font-extrabold leading-tight mb-4 tracking-tight" style="position: relative;top: -12rem;">
+            Votre voiture à crédit.<br>
+            <span class="text-blue-400 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-300">Vos pièces en ligne.</span>
+        </h1>
+        <p class="text-lg md:text-xl text-slate-200 max-w-2xl mx-auto mb-6 font-light leading-relaxed" style="position: relative;top: -12rem;">
+            <strong class="font-semibold text-white">KOZ Services</strong> : n'achetez pas seulement une auto, changez votre vie.
         </p>
-
-        <div class="mt-3 flex items-center gap-2 text-xs font-semibold text-blue-300">
-            <span>En savoir plus</span>
-            <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+        <div class="flex flex-wrap justify-center gap-4" style="position: relative;top: -12rem;">
+            <a href="#section-cta" class="px-7 py-3.5 rounded-full bg-white text-blue-950 font-bold hover:bg-blue-50 shadow-xl hover:scale-105 transition-all duration-300 text-sm md:text-base">
+                Découvrir nos offres
+            </a>
+            <a href="#financement" class="px-7 py-3.5 rounded-full bg-white/10 backdrop-blur-md text-white border border-white/30 font-semibold hover:bg-white/20 hover:scale-105 transition-all duration-300 text-sm md:text-base">
+                Financer mon auto
+            </a>
         </div>
-    </a>
+    </div>
 
-    <!-- Box 2 : Droite (Financement) -->
-    <a href="#financement" id="hero-box-right" 
-       class="group relative bg-white/10 backdrop-blur-xl border border-white/20 p-5 md:p-6 rounded-3xl shadow-2xl hover:bg-white/20 transition duration-300 flex flex-col justify-between max-w-lg w-full justify-self-end">
+    <!-- ===== DEUX BOX LATÉRALES GLASS (Remontées aussi) ===== -->
+    <div class="w-full top-20 max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4 md:mt-6 relative z-20">
         
-        <div class="flex items-center gap-3.5 mb-2.5">
-            <div class="w-11 h-11 rounded-2xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center text-emerald-300 text-lg">
-                <i class="fas fa-hand-holding-usd"></i>
+        <!-- Box 1 : Gauche (Rendez-vous) -->
+        <a href="#infos-rdv" id="hero-box-left" 
+        class="group relative bg-white/10 backdrop-blur-xl border border-white/20 p-5 md:p-6 rounded-3xl shadow-2xl hover:bg-white/20 transition duration-300 flex flex-col justify-between max-w-lg w-full justify-self-start">
+            
+            <div class="flex items-center gap-3.5 mb-2.5">
+                <div class="w-11 h-11 rounded-2xl bg-blue-500/20 border border-blue-400/30 flex items-center justify-center text-blue-300 text-lg">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <h3 class="text-lg md:text-xl font-bold text-white">Prendre un rendez-vous</h3>
             </div>
-            <h3 class="text-lg md:text-xl font-bold text-white">Financement Flexible</h3>
-        </div>
-        
-        <div class="space-y-1 text-xs md:text-sm text-slate-200 font-light">
-            <p><i class="fas fa-check text-emerald-400 text-xs mr-2"></i><strong class="text-white font-semibold">Paiement</strong> en plusieurs fois</p>
-            <p><i class="fas fa-check text-emerald-400 text-xs mr-2"></i>Adapté à votre budget</p>
-            <p class="text-xs text-slate-300 pt-0.5">Découvrez tout sur les demandes et offres de financement.</p>
-        </div>
+            
+            <p class="text-xs md:text-sm text-slate-200 leading-relaxed font-light">
+                Acheter une voiture est une décision importante. Avec <strong class="text-white font-semibold">KOZ SERVICES</strong>, évitez les mauvaises surprises grâce à notre expertise automobile.
+            </p>
 
-        <div class="mt-3 flex items-center gap-2 text-xs font-semibold text-emerald-300">
-            <span>Voir les détails</span>
-            <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
-        </div>
-    </a>
+            <div class="mt-3 flex items-center gap-2 text-xs font-semibold text-blue-300">
+                <span>En savoir plus</span>
+                <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+            </div>
+        </a>
 
-</div>
+        <!-- Box 2 : Droite (Financement) -->
+        <a href="#financement" id="hero-box-right" 
+        class="group relative bg-white/10 backdrop-blur-xl border border-white/20 p-5 md:p-6 rounded-3xl shadow-2xl hover:bg-white/20 transition duration-300 flex flex-col justify-between max-w-lg w-full justify-self-end">
+            
+            <div class="flex items-center gap-3.5 mb-2.5">
+                <div class="w-11 h-11 rounded-2xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center text-emerald-300 text-lg">
+                    <i class="fas fa-hand-holding-usd"></i>
+                </div>
+                <h3 class="text-lg md:text-xl font-bold text-white">Financement Flexible</h3>
+            </div>
+            
+            <div class="space-y-1 text-xs md:text-sm text-slate-200 font-light">
+                <p><i class="fas fa-check text-emerald-400 text-xs mr-2"></i><strong class="text-white font-semibold">Paiement</strong> en plusieurs fois</p>
+                <p><i class="fas fa-check text-emerald-400 text-xs mr-2"></i>Adapté à votre budget</p>
+                <p class="text-xs text-slate-300 pt-0.5">Découvrez tout sur les demandes et offres de financement.</p>
+            </div>
+
+            <div class="mt-3 flex items-center gap-2 text-xs font-semibold text-emerald-300">
+                <span>Voir les détails</span>
+                <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+            </div>
+        </a>
+
+    </div>
 </section>
 
 <!-- ============================================================ -->
@@ -348,7 +381,7 @@
                     </div>
                     
                     <div class="mt-6 pt-4 border-t border-blue-100/80">
-                        <a href="#" class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-semibold text-sm group/link transition">
+                        <a href="{% url 'home_app:actualites-list'  %}" class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-semibold text-sm group/link transition">
                             En savoir plus
                             <i class="fas fa-arrow-right text-xs group-hover/link:translate-x-1 transition-transform"></i>
                         </a>
@@ -496,6 +529,7 @@
 
     </div>
 </section>
+
 <!-- ============================================================ -->
 <!-- SECTION :VÉHICULE VEDETTE (avec pagination)                  -->
 <!-- ============================================================ -->
@@ -1004,98 +1038,95 @@
 </section>
 
 
-    <!-- ============================================================ -->
-    <!-- SECTION STATS – STYLE ANIME                                  -->
-    <!-- ============================================================ -->
-    <section class="py-20 relative bg-white section-stats overflow-hidden section_stati">
-        
-        <!-- Effet de fond "aura" -->
-        <div class="absolute inset-0 opacity-30">
-            <div class="absolute top-0 left-1/4 w-96 h-96 bg-blue-600 rounded-full blur-3xl"></div>
-            <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-indigo-800 rounded-full blur-3xl"></div>
+<!-- ============================================================ -->
+<!-- SECTION STATS – STYLE ANIME                                  -->
+<!-- ============================================================ -->
+<section class="py-20 relative bg-white section-stats overflow-hidden section_stati">
+    <!-- Aura de fond -->
+    <div class="absolute inset-0 opacity-30 pointer-events-none">
+        <div class="absolute top-0 left-1/4 w-96 h-96 bg-blue-600 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-indigo-800 rounded-full blur-3xl"></div>
+    </div>
+
+    <div class="container stats_fade mx-auto px-4 relative z-10">
+        <!-- Titre -->
+        <div class="text-center mb-16">
+            <span class="inline-block text-xs font-semibold text-blue-500 uppercase tracking-widest bg-blue-500/20 px-4 py-1.5 rounded-full mb-3 border border-blue-400/30">
+                ⚡ KOZ EN ENGAGEMENTS
+            </span>
+            <h2 class="text-4xl md:text-5xl font-bold text-black">
+                L'excellence <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-800">au quotidien</span>
+            </h2>
+            <p class="text-gray-400 mt-3 max-w-2xl mx-auto">
+                Des solutions concrètes et un accompagnement sur-mesure à chaque étape de votre projet.
+            </p>
         </div>
 
-        <div class="container stats_fade mx-auto px-4 relative z-10">
+        <!-- Grille de stats / métriques qualitative -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 text-center">
             
-            <!-- Titre -->
-            <div class="text-center mb-16">
-                <span class="inline-block text-xs font-semibold text-blue-500 uppercase tracking-widest bg-blue-500/20 px-4 py-1.5 rounded-full mb-3 border border-blue-400/30">
-                    ⚡ KOZ EN CHIFFRES
-                </span>
-                <h2 class="text-4xl md:text-5xl font-bold text-black">
-                    La <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-800">légende</span> en construction
-                </h2>
-                <p class="text-gray-400 mt-3 max-w-2xl mx-auto">
-                    Des chiffres qui parlent d'eux-mêmes. Notre mission : vous accompagner à chaque étape.
-                </p>
+            <!-- Stat 1 : Satisfactions -->
+            <div class="stat-card group bg-blue-400/8 backdrop-blur-sm p-6 border border-indigo-800/10 hover:border-blue-400/50 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-500/10 rounded-xl">
+                <div class="text-4xl mb-3 text-black group-hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-number text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-800" data-target="100" data-prefix="+" data-suffix=" %">
+                    0
+                </div>
+                <p class="text-sm text-gray-500 mt-2 font-medium">Engagement & Satisfaction</p>
+                <div class="w-12 h-1 mx-auto mt-3 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full"></div>
             </div>
 
-            <!-- Grille de stats -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-                
-                <!-- Stat 1 : Clients -->
-                <div class="stat-card stat-card_1 group bg-blue-400/8 backdrop-blur-sm  p-6 border border-indigo-800/10 hover:border-blue-400/50 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-500/10">
-                    <div class="text-4xl mb-3 text-black group-hover:scale-110 transition-transform duration-300">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div class="stat-number text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-800" data-target="15">
-                        0
-                    </div>
-                    <p class="text-sm text-gray-400 mt-2 font-medium">Clients satisfaits</p>
-                    <div class="w-12 h-1 mx-auto mt-3 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full"></div>
+            <!-- Stat 2 : Dispo Véhicules -->
+            <div class="stat-card group bg-blue-400/8 backdrop-blur-sm p-6 border border-indigo-800/10 hover:border-blue-400/50 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-500/10 rounded-xl">
+                <div class="text-4xl mb-3 text-black group-hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-car"></i>
                 </div>
-
-                <!-- Stat 2 : Véhicules -->
-                <div class="stat-card stat-card_2 group bg-blue-400/8 backdrop-blur-sm  p-6 border border-indigo-800/10 hover:border-blue-400/50 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-500/10">
-                    <div class="text-4xl mb-3 text-black group-hover:scale-110 transition-transform duration-300">
-                        <i class="fas fa-car"></i>
-                    </div>
-                    <div class="stat-number text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-800" data-target="320">
-                        0
-                    </div>
-                    <p class="text-sm text-gray-400 mt-2 font-medium">Véhicules en stock</p>
-                    <div class="w-12 h-1 mx-auto mt-3 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full"></div>
+                <div class="stat-text text-xl md:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-800 min-h-[48px] flex items-center justify-center">
+                    En Stock & Sur Commande
                 </div>
-
-                <!-- Stat 3 : Financements -->
-                <div class="stat-card stat-card_3 group bg-blue-400/8 backdrop-blur-sm  p-6 border border-indigo-800/10 hover:border-blue-400/50 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-500/10">
-                    <div class="text-4xl mb-3 text-black group-hover:scale-110 transition-transform duration-300">
-                        <i class="fas fa-hand-holding-usd"></i>
-                    </div>
-                    <div class="stat-number text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-800" data-target="850">
-                        0
-                    </div>
-                    <p class="text-sm text-gray-400 mt-2 font-medium">Financements accordés</p>
-                    <div class="w-12 h-1 mx-auto mt-3 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full"></div>
-                </div>
-
-                <!-- Stat 4 : Services -->
-                <div class="stat-card stat-card_4 group bg-blue-400/8 backdrop-blur-sm  p-6 border border-indigo-800/10 hover:border-blue-400/50 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-500/10">
-                    <div class="text-4xl mb-3 text-black group-hover:scale-110 transition-transform duration-300">
-                        <i class="fas fa-wrench"></i>
-                    </div>
-                    <div class="stat-number text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-800" data-target="1200">
-                        0
-                    </div>
-                    <p class="text-sm text-gray-400 mt-2 font-medium">Services réalisés</p>
-                    <div class="w-12 h-1 mx-auto mt-3 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full"></div>
-                </div>
-
+                <p class="text-sm text-gray-500 mt-2 font-medium">Large choix de véhicules</p>
+                <div class="w-12 h-1 mx-auto mt-3 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full"></div>
             </div>
 
-            <!-- Ligne d'énergie (style anime) -->
-            <div class="mt-12 flex justify-center">
-                <div class="w-64 h-1 bg-gradient-to-r from-transparent via-blue-400 to-transparent rounded-full animate-pulse"></div>
+            <!-- Stat 3 : Financement -->
+            <div class="stat-card group bg-blue-400/8 backdrop-blur-sm p-6 border border-indigo-800/10 hover:border-blue-400/50 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-500/10 rounded-xl">
+                <div class="text-4xl mb-3 text-black group-hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-hand-holding-usd"></i>
+                </div>
+                <div class="stat-text text-xl md:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-800 min-h-[48px] flex items-center justify-center">
+                    Financements Sur-Mesure
+                </div>
+                <p class="text-sm text-gray-500 mt-2 font-medium">Solutions 100% flexibles</p>
+                <div class="w-12 h-1 mx-auto mt-3 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full"></div>
+            </div>
+
+            <!-- Stat 4 : Réactivité -->
+            <div class="stat-card group bg-blue-400/8 backdrop-blur-sm p-6 border border-indigo-800/10 hover:border-blue-400/50 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-500/10 rounded-xl">
+                <div class="text-4xl mb-3 text-black group-hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-number text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-800" data-target="24" data-suffix="/7">
+                    0
+                </div>
+                <p class="text-sm text-gray-500 mt-2 font-medium">Assistance & Suivi client</p>
+                <div class="w-12 h-1 mx-auto mt-3 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full"></div>
             </div>
 
         </div>
-    </section>
+
+        <!-- Ligne d'énergie anime -->
+        <div class="mt-12 flex justify-center">
+            <div class="w-64 h-1 bg-gradient-to-r from-transparent via-blue-400 to-transparent rounded-full animate-pulse"></div>
+        </div>
+    </div>
+</section>
 
 
-    <!-- ============================================================ -->
-    <!-- SECTION 1 : MODÈLES DE FINANCEMENT                            -->
-    <!-- ============================================================ -->
-    <section id="financement" class="py-16 sm:py-20 relative bg-white overflow-hidden">
+<!-- ============================================================ -->
+<!-- SECTION 1 : MODÈLES DE FINANCEMENT                            -->
+<!-- ============================================================ -->
+<section id="financement" class="py-16 sm:py-20 relative bg-white overflow-hidden">
         
         <!-- Effet de fond -->
         <div class="absolute inset-0 opacity-20">
@@ -1119,10 +1150,10 @@
             </div>
 
             <!-- Grille -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 
                 <!-- Financement KOZ -->
-                <div class="group bg-white/5 backdrop-blur-sm  p-6 border border-white/10 hover:border-blue-400/50 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-500/10">
+                <div class="group bg-white/5 backdrop-blur-sm hover:rounded-2xl p-6 border border-white/10 hover:border-blue-400/50 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-500/10">
                     <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center shadow-lg shadow-blue-500/25 mb-4">
                         <i class="fas fa-building text-2xl text-white"></i>
                     </div>
@@ -1135,13 +1166,13 @@
                         <li class="flex items-center gap-2"><i class="fas fa-check-circle text-blue-700"></i> Taux de 25% à l'arrivé ou en (6mois) d'étalage</li>
                         <li class="flex items-center gap-2"><i class="fas fa-check-circle text-blue-700"></i> Zéro frais de dossier</li>
                     </ul>
-                    <a href="#contact" class="inline-flex items-center gap-2 text-blue-700 hover:text-blue-300 font-medium text-sm mt-4 transition group/link">
+                    <a href="{% url 'home_app:koz-detail' %}" class="inline-flex items-center gap-2 text-blue-700 hover:text-blue-300 font-medium text-sm mt-4 transition group/link">
                         En savoir plus <i class="fas fa-arrow-right text-xs group-hover/link:translate-x-1 transition-transform"></i>
                     </a>
                 </div>
 
                 <!-- Fidelis -->
-                <div class="group bg-white/5 backdrop-blur-sm  p-6 border border-white/10 hover:border-blue-400/50 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-500/10">
+                <div class="group bg-white/5 backdrop-blur-sm hover:rounded-2xl p-6 border border-white/10 hover:border-blue-400/50 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-500/10">
                     <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center shadow-lg shadow-emerald-500/25 mb-4">
                         <i class="fas fa-handshake text-2xl text-white"></i>
                     </div>
@@ -1155,12 +1186,12 @@
                         <li class="flex items-center gap-2"><i class="fas fa-check-circle text-emerald-700"></i> Frais de dossier 1% du prix de voiture</li>
                         <li class="flex items-center gap-2"><i class="fas fa-check-circle text-emerald-700"></i> Mode de remboursement 1 à 59mois</li>
                     </ul>
-                    <a href="#contact" class="inline-flex items-center gap-2 text-emerald-700 hover:text-emerald-300 font-medium text-sm mt-4 transition group/link">
+                    <a href="{% url 'home_app:fidelis-detail' %}" class="inline-flex items-center gap-2 text-emerald-700 hover:text-emerald-300 font-medium text-sm mt-4 transition group/link">
                         En savoir plus <i class="fas fa-arrow-right text-xs group-hover/link:translate-x-1 transition-transform"></i>
                     </a>
                 </div>
 
-                <!-- Alios -->
+                <!-- Alios 
                 <div class="group bg-white/5 backdrop-blur-sm  p-6 border border-white/10 hover:border-blue-400/50 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-500/10">
                     <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center shadow-lg shadow-purple-500/25 mb-4">
                         <i class="fas fa-star text-2xl text-white"></i>
@@ -1179,7 +1210,7 @@
                     </a>
                 </div>
 
-            </div>
+            </div>-->
 
             <!-- Mention -->
             <div class="mt-8 text-center text-xs text-gray-500 border-t border-white/5 pt-6">
@@ -1187,9 +1218,9 @@
             </div>
 
         </div>
-    </section>
+</section>
 
-    <!-- ============================================================ -->
+<!-- ============================================================ -->
 <!-- SECTION : TÉMOIGNAGES & RÉSEAUX SOCIAUX                     -->
 <!-- ============================================================ -->
 <section class="py-16 sm:py-24 relative bg-gray-100 overflow-hidden temoignage_section">
@@ -1285,128 +1316,128 @@
         </div>
 
        <!-- ===== RÉSEAUX SOCIAUX ===== -->
-<!-- ===== RÉSEAUX SOCIAUX ===== -->
-<div class="mb-12 socials_fade">
-    <div class="flex items-center justify-between mb-6">
-        <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
-            <i class="fas fa-share-alt text-blue-500"></i> Sur les réseaux sociaux
-        </h3>
-        <div class="flex items-center gap-3">
-            <span class="text-sm text-gray-400">{{ avis_reseaux|length }} avis</span>
-            <span class="text-xs text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full font-medium hidden md:inline-flex items-center gap-1">
-                <i class="fas fa-arrows-left-right text-[20px]"></i> DÉFILER
-            </span>
-        </div>
-    </div>
-
-    <!-- Conteneur Scroll Horizontal -->
-    <div class="flex gap-6 overflow-x-auto pb-6 scroll-smooth snap-x snap-mandatory scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-        {% for avis in avis_reseaux|slice:":8" %}
-        <div class="bg-white min-w-150 p-4 shadow-sm hover:shadow-md transition">
-                        <div class="flex items-center gap-2 mb-2">
-                            <span class="text-lg">
-                                {% if avis.reseau == 'facebook' %}
-                                    <i class="fab fa-facebook text-blue-600"></i>
-                                {% elif avis.reseau == 'instagram' %}
-                                    <i class="fab fa-instagram text-pink-600"></i>
-                                {% elif avis.reseau == 'google' %}
-                                    <i class="fab fa-google text-red-500"></i>
-                                {% elif avis.reseau == 'whatsapp' %}
-                                    <i class="fab fa-whatsapp text-green-500"></i>
-                                {% elif avis.reseau == 'twitter' %}
-                                    <i class="fab fa-twitter text-blue-400"></i>
-                                    {% elif avis.reseau == 'tiktok' %}
-                                    <i class="fab fa-tiktok text-black"></i>
-                                {% else %}
-                                    <i class="fas fa-share-alt text-gray-500"></i>
-                                {% endif %}
-                            </span>
-                            <span class="text-xs font-medium text-gray-600">{{ avis.nom_utilisateur }}</span>
-                            <span class="ml-auto text-[10px] text-gray-400">{{ avis.date_publication|date:"d/m/Y" }}</span>
-                        </div>
-                        {% if avis.image %}
-                            <img src="{{ avis.image.url }}" alt="Avis" class="w-full h-30 object-contain  mb-2">
-                        {% endif %}
-                        <p class="text-xs text-gray-500 line-clamp-3">{{ avis.message|truncatechars:60 }}</p>
-                        {% if avis.lien %}
-                            <a href="{{ avis.lien }}" target="_blank" class="text-xs text-blue-600 hover:text-blue-800 transition mt-1 inline-flex items-center gap-1">
-                                <i class="fas fa-external-link-alt"></i> Voir le post
-                            </a>
-                            {% endif %}
-                    </div>
-                    {% empty %}
-                    <p class="col-span-full text-center text-gray-400">Aucun avis sur les réseaux sociaux.</p>
-                    {% endfor %}
-    </div>
-</div>
-
-        <!-- ===== VIDÉOS ===== -->
-        <div class="videos_fade">
-            <div class="flex items-center justify-between mb-8 px-1">
-                <h3 class="text-xl font-bold text-slate-900 flex items-center gap-2.5">
-                    <span class="w-8 h-8 rounded-xl bg-rose-100 flex items-center justify-center text-rose-500 shadow-sm">
-                        <i class="fas fa-video"></i>
-                    </span>
-                    Vidéos & Témoignages
-                </h3>
-                <span class="text-xs font-semibold text-slate-500 bg-white border border-slate-200/80 px-3.5 py-1.5 rounded-full shadow-sm">
-                    {{ videos|length }} vidéos
+    <!-- ===== RÉSEAUX SOCIAUX ===== -->
+    <div class="mb-12 socials_fade">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                <i class="fas fa-share-alt text-blue-500"></i> Sur les réseaux sociaux
+            </h3>
+            <div class="flex items-center gap-3">
+                <span class="text-sm text-gray-400">{{ avis_reseaux|length }} avis</span>
+                <span class="text-xs text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full font-medium hidden md:inline-flex items-center gap-1">
+                    <i class="fas fa-arrows-left-right text-[20px]"></i> DÉFILER
                 </span>
             </div>
+        </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {% for video in videos|slice:":6" %}
-                <div class="group bg-white  overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col">
-                    <!-- Container Vidéo -->
-                    <div class="relative aspect-video bg-slate-950 overflow-hidden">
-                        {% if video.video_file %}
-                            <video class="w-full h-full object-cover" controls preload="metadata" playsinline>
-                                <source src="{{ video.video_file.url }}" type="video/mp4">
-                                Votre navigateur ne supporte pas la vidéo.
-                            </video>
-                        {% elif video.video_url %}
-                            <iframe class="w-full h-full" src="{{ video.video_url }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                        {% elif video.embed_code %}
-                            {{ video.embed_code|safe }}
-                        {% else %}
-                            <div class="w-full h-full flex flex-col items-center justify-center bg-slate-900 text-slate-600 gap-2">
-                                <i class="fas fa-video text-3xl"></i>
-                                <span class="text-xs">Média indisponible</span>
+        <!-- Conteneur Scroll Horizontal -->
+        <div class="flex gap-6 overflow-x-auto pb-6 scroll-smooth snap-x snap-mandatory scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+            {% for avis in avis_reseaux|slice:":8" %}
+            <div class="bg-white min-w-150 rounded-xl p-4 shadow-sm hover:shadow-md transition">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-lg">
+                                    {% if avis.reseau == 'facebook' %}
+                                        <i class="fab fa-facebook text-blue-600"></i>
+                                    {% elif avis.reseau == 'instagram' %}
+                                        <i class="fab fa-instagram text-pink-600"></i>
+                                    {% elif avis.reseau == 'google' %}
+                                        <i class="fab fa-google text-red-500"></i>
+                                    {% elif avis.reseau == 'whatsapp' %}
+                                        <i class="fab fa-whatsapp text-green-500"></i>
+                                    {% elif avis.reseau == 'twitter' %}
+                                        <i class="fab fa-twitter text-blue-400"></i>
+                                        {% elif avis.reseau == 'tiktok' %}
+                                        <i class="fab fa-tiktok text-black"></i>
+                                    {% else %}
+                                        <i class="fas fa-share-alt text-gray-500"></i>
+                                    {% endif %}
+                                </span>
+                                <span class="text-xs font-medium text-gray-600">{{ avis.nom_utilisateur }}</span>
+                                <span class="ml-auto text-[10px] text-gray-400">{{ avis.date_publication|date:"d/m/Y" }}</span>
                             </div>
-                        {% endif %}
-                        
-                        <!-- Badge durée -->
-                        {% if video.duree %}
-                        <div class="absolute bottom-3 right-3 bg-slate-900/80 backdrop-blur-md text-white text-[11px] font-semibold px-2.5 py-1 rounded-lg border border-white/10 shadow-lg pointer-events-none">
-                            {{ video.duree_formatee }}
+                            {% if avis.image %}
+                                <img src="{{ avis.image.url }}" alt="Avis" class="w-full  h-30 object-contain  mb-2">
+                            {% endif %}
+                            <p class="text-xs text-gray-500 line-clamp-3">{{ avis.message|truncatechars:60 }}</p>
+                            {% if avis.lien %}
+                                <a href="{{ avis.lien }}" target="_blank" class="text-xs text-blue-600 hover:text-blue-800 transition mt-1 inline-flex items-center gap-1">
+                                    <i class="fas fa-external-link-alt"></i> Voir le post
+                                </a>
+                                {% endif %}
                         </div>
-                        {% endif %}
-                    </div>
-
-                    <!-- Description -->
-                    <div class="p-5 flex-1 flex flex-col justify-between bg-white">
-                        <div>
-                            <h4 class="font-bold text-slate-900 text-base group-hover:text-blue-600 transition-colors line-clamp-1">{{ video.titre }}</h4>
-                            <p class="text-xs text-slate-500 mt-1.5 line-clamp-2 leading-relaxed">{{ video.description|truncatechars:90 }}</p>
-                        </div>
-                    </div>
-                </div>
-                {% empty %}
-                <p class="col-span-full text-center py-10 text-slate-400 bg-white rounded-3xl border border-dashed border-slate-200">Aucune vidéo disponible.</p>
-                {% endfor %}
-            </div>
+                        {% empty %}
+                        <p class="col-span-full text-center text-gray-400">Aucun avis sur les réseaux sociaux.</p>
+                        {% endfor %}
         </div>
-
-        <!-- ===== BOUTON TÉMOIGNAGE ===== -->
-        <div class="text-center mt-16">
-            <button onclick="document.getElementById('temoignage_textuel_modal').showModal()" 
-                    class="inline-flex items-center gap-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 text-white font-bold px-8 py-4 rounded-2xl shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300">
-                <i class="fas fa-comment-dots text-lg"></i>
-                <span>Laisser un témoignage</span>
-            </button>
-        </div>
-
     </div>
+
+            <!-- ===== VIDÉOS ===== -->
+            <div class="videos_fade">
+                <div class="flex items-center justify-between mb-8 px-1">
+                    <h3 class="text-xl font-bold text-slate-900 flex items-center gap-2.5">
+                        <span class="w-8 h-8 rounded-xl bg-rose-100 flex items-center justify-center text-rose-500 shadow-sm">
+                            <i class="fas fa-video"></i>
+                        </span>
+                        Vidéos & Témoignages
+                    </h3>
+                    <span class="text-xs font-semibold text-slate-500 bg-white border border-slate-200/80 px-3.5 py-1.5 rounded-full shadow-sm">
+                        {{ videos|length }} vidéos
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {% for video in videos|slice:":6" %}
+                    <div class="group bg-white  overflow-hidden border border-slate-100 rounded-xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col">
+                        <!-- Container Vidéo -->
+                        <div class="relative aspect-video bg-slate-950 overflow-hidden">
+                            {% if video.video_file %}
+                                <video class="w-full h-full object-contain" controls preload="metadata" playsinline>
+                                    <source src="{{ video.video_file.url }}" type="video/mp4">
+                                    Votre navigateur ne supporte pas la vidéo.
+                                </video>
+                            {% elif video.video_url %}
+                                <iframe class="w-full h-full" src="{{ video.video_url }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                            {% elif video.embed_code %}
+                                {{ video.embed_code|safe }}
+                            {% else %}
+                                <div class="w-full h-full flex flex-col items-center justify-center bg-slate-900 text-slate-600 gap-2">
+                                    <i class="fas fa-video text-3xl"></i>
+                                    <span class="text-xs">Média indisponible</span>
+                                </div>
+                            {% endif %}
+                            
+                            <!-- Badge durée -->
+                            {% if video.duree %}
+                            <div class="absolute bottom-3 right-3 bg-slate-900/80 backdrop-blur-md text-white text-[11px] font-semibold px-2.5 py-1 rounded-lg border border-white/10 shadow-lg pointer-events-none">
+                                {{ video.duree_formatee }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Description -->
+                        <div class="p-5 flex-1 flex flex-col justify-between bg-white/10">
+                            <div>
+                                <h4 class="font-bold text-slate-900 text-base group-hover:text-blue-600 transition-colors line-clamp-1">{{ video.titre }}</h4>
+                                <p class="text-xs text-slate-500 mt-1.5 line-clamp-2 leading-relaxed">{{ video.description|truncatechars:90 }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="col-span-full text-center py-10 text-slate-400 bg-white rounded-3xl border border-dashed border-slate-200">Aucune vidéo disponible.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- ===== BOUTON TÉMOIGNAGE ===== -->
+            <div class="text-center mt-16">
+                <button onclick="document.getElementById('temoignage_textuel_modal').showModal()" 
+                        class="inline-flex items-center gap-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 text-white font-bold px-8 py-4 rounded-2xl shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300">
+                    <i class="fas fa-comment-dots text-lg"></i>
+                    <span>Laisser un témoignage</span>
+                </button>
+            </div>
+
+        </div>
 </section>
  
     <script>
@@ -1469,7 +1500,7 @@
                         {% if actualites.0 and actualites.0.image_principale %}
                             <img src="{{ actualites.0.image_principale.url }}" 
                                 alt="KOZ Services" 
-                                class="w-full h-96 object-cover">
+                                class="w-full h-96 object-contain">
                         {% else %}
                             <div class="w-full h-96 bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
                                 <i class="fas fa-car text-6xl text-blue-400/50"></i>
@@ -1737,7 +1768,7 @@
                 <!-- ===== AVANTAGES ===== -->
                 <div class="grid grid-cols-1 avantages sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
                     
-                    <div class="group bg-white/10 backdrop-blur-sm  p-4 border border-blue-600/10 hover:border-blue/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/10">
+                    <div class="group bg-white/10 backdrop-blur-sm  rounded-2xl p-4 border border-blue-600/10 hover:border-blue/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/10">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/25 flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
                                 <i class="fas fa-car text-white text-sm"></i>
@@ -1749,7 +1780,7 @@
                         </div>
                     </div>
 
-                    <div class="group bg-white/10 backdrop-blur-sm  p-4 border border-blue-600/10 hover:border-blue/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/10">
+                    <div class="group bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-blue-600/10 hover:border-blue/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/10">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/25 flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
                                 <i class="fas fa-hand-holding-usd text-gray-600 text-sm"></i>
@@ -1761,7 +1792,7 @@
                         </div>
                     </div>
 
-                    <div class="group bg-white/10 backdrop-blur-sm  p-4 border border-blue-600/10 hover:border-blue/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/10">
+                    <div class="group bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-blue-600/10 hover:border-blue/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/10">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-500/25 flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
                                 <i class="fas fa-headset text-gray-600 text-sm"></i>
@@ -1773,7 +1804,7 @@
                         </div>
                     </div>
 
-                    <div class="group bg-white/10 backdrop-blur-sm  p-4 border border-blue-600/10 hover:border-blue/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/10">
+                    <div class="group bg-white/10 backdrop-blur-sm rounded-2xl  p-4 border border-blue-600/10 hover:border-blue/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/10">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-lg shadow-amber-500/25 flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
                                 <i class="fas fa-gift text-gray-600 text-sm"></i>
@@ -1822,93 +1853,72 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- ==================== FOOTER  ========================        -->
+    <!-- ==========                 FOOTER                  ========== -->
     <!-- ============================================================ -->
-<footer class="footer sm:footer-horizontal z-1000 relative bg-blue-400 text-neutral-content p-10">
-    <aside>
-        <svg
-        width="50"
-        height="50"
-        viewBox="0 0 24 24"
-        xmlns="http://www.w3.org/2000/svg"
-        fill-rule="evenodd"
-        clip-rule="evenodd"
-        class="fill-current">
-        <path
-            d="M22.672 15.226l-2.432.811.841 2.515c.33 1.019-.209 2.127-1.23 2.456-1.15.325-2.148-.321-2.463-1.226l-.84-2.518-5.013 1.677.84 2.517c.391 1.203-.434 2.542-1.831 2.542-.88 0-1.601-.564-1.86-1.314l-.842-2.516-2.431.809c-1.135.328-2.145-.317-2.463-1.229-.329-1.018.211-2.127 1.231-2.456l2.432-.809-1.621-4.823-2.432.808c-1.355.384-2.558-.59-2.558-1.839 0-.817.509-1.582 1.327-1.846l2.433-.809-.842-2.515c-.33-1.02.211-2.129 1.232-2.458 1.02-.329 2.13.209 2.461 1.229l.842 2.515 5.011-1.677-.839-2.517c-.403-1.238.484-2.553 1.843-2.553.819 0 1.585.509 1.85 1.326l.841 2.517 2.431-.81c1.02-.33 2.131.211 2.461 1.229.332 1.018-.21 2.126-1.23 2.456l-2.433.809 1.622 4.823 2.433-.809c1.242-.401 2.557.484 2.557 1.838 0 .819-.51 1.583-1.328 1.847m-8.992-6.428l-5.01 1.675 1.619 4.828 5.011-1.674-1.62-4.829z"></path>
-        </svg>
-        <p>
-        KOZ Services.
-        <br />
-        Concessionnaire automobile.
-        </p>
-        <p class="font-medium text-slate-700">Conçu par <strong>SPIRIT-DIGIT Agency</strong></p>
-    </aside>
-    <nav>
-        <h6 class="footer-title">Social</h6>
-        <div class="grid grid-flow-col gap-4">
-        <a>
-            <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            class="fill-current">
-            <path
-                d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"></path>
-            </svg>
-        </a>
-        <a>
-            <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            class="fill-current">
-            <path
-                d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"></path>
-            </svg>
-        </a>
-        <a>
-            <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            class="fill-current">
-            <path
-                d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"></path>
-            </svg>
-        </a>
-        <a href="#" aria-label="TikTok" class="transition hover:text-white">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="24" height="24" class="fill-current">
-            <path d="M186.7 64.2c0 10.4-8.4 18.8-18.8 18.8s-18.8-8.4-18.8-18.8V32.7h-31.2v136.6c0 38.2-31 69.2-69.2 69.2S-20 207.5-20 169.3s31-69.2 69.2-69.2c14.2 0 27.3 4.3 38.6 11.7v-35.4c-12.7-8.3-27.6-13.1-43.7-13.1C12.9 63.3-20 96.2-20 136.3s32.9 73 73 73 73-32.9 73-73V32.7h31.2v31.5c9.7-8.2 21.6-13.2 34.8-13.2 30.1 0 54.6 24.5 54.6 54.6z"></path>
-            </svg>
-        </a>
-        <a href="#" aria-label="WhatsApp" class="transition hover:text-white">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="24" height="24" class="fill-current">
-            <path d="M380.9 97.1C339 55.2 283.2 32 224 32 100.3 32 0 132.3 0 256c0 45.1 12.1 89.3 35.1 127.9L0 480l98.5-32.3c36.8 20.1 78.5 30.6 125.5 30.6 123.7 0 224-100.3 224-224 0-59.3-23.2-115.1-65.1-157zM224 400c-36.8 0-71.7-10.2-101.5-29.4l-7.3-4.4-58.4 19.2 19.6-57.1-4.7-7.5C70.4 296.7 60 257.9 60 224 60 141.9 141.9 60 224 60s164 81.9 164 164-81.9 164-164 164zm90.3-124.3c-5-2.5-29.4-14.5-34-16.1-4.6-1.6-8-2.5-11.4 2.5s-13.1 16.1-16.1 19.4c-3 3.3-6 3.7-11 1.2-29.4-14.7-48.7-26.4-68.3-59.6-5.1-8.8 5.1-8.2 14.7-27.2 1.6-3.3.8-6.1-.4-8.5-1.2-2.5-11.4-27.4-15.6-37.6-4.1-9.8-8.3-8.5-11.4-8.7-2.9-.2-6.3-.2-9.6-.2s-8.5 1.2-13 6.1c-4.6 4.8-17.6 17.2-17.6 41.9s18 48.7 20.5 52c2.5 3.3 35.5 54.2 86 76 12 5.1 21.3 8.2 28.6 10.5 12 3.7 22.9 3.2 31.5 1.9 9.6-1.4 29.4-12 33.5-23.6 4.1-11.4 4.1-21.2 2.9-23.6-1.2-2.5-4.6-3.8-9.6-6.3z"></path>
-            </svg>
-        </a>
-        <a href="#" aria-label="Instagram" class="transition hover:text-white">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="24" height="24" class="fill-current">
-            <path d="M224 141c-63.6 0-115 51.4-115 115s51.4 115 115 115 115-51.4 115-115-51.4-115-115-115zm0 190c-41.4 0-75-33.6-75-75s33.6-75 75-75 75 33.6 75 75-33.6 75-75 75zm146.4-194.7c0 14.9-12.1 27-27 27h-27c-14.9 0-27-12.1-27-27v-27c0-14.9 12.1-27 27-27h27c14.9 0 27 12.1 27 27v27zm76.1 27.2c-.6-63.6-16.9-120-92.4-145.4C327.8 2.4 282.3 0 224 0 165.7 0 120.2 2.4 90 18.9 14.5 44.3-1.8 100.7-2.4 164.3-2.9 190.7-2.9 221.3-2.4 247.7c.6 63.6 16.9 120 92.4 145.4 30.2 16.5 75.7 18.9 134 18.9s103.8-2.4 134-18.9c75.5-25.4 91.8-81.8 92.4-145.4.6-26.4.6-57-0-83.4zM398.8 388.3c-16.3 40.8-47.9 72.4-88.7 88.7-61.4 24.6-207.3 19-268.7 0-40.8-16.3-72.4-47.9-88.7-88.7-24.6-61.4-19-207.3 0-268.7 16.3-40.8 47.9-72.4 88.7-88.7C132.7 14 278.6 19.6 340 44.2c40.8 16.3 72.4 47.9 88.7 88.7 24.6 61.4 19 207.3 0 268.7z"></path>
-            </svg>
-        </a>
-        <a href="#" aria-label="LinkedIn" class="transition hover:text-white">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="24" height="24" class="fill-current">
-            <path d="M100.28 448H7.4V148.9h92.88zM53.79 108.1C24.09 108.1 0 83.9 0 54.2 0 24.6 24.2.4 54.1.4s54 24.2 54 53.8c0 29.7-24.1 53.9-54.3 53.9zM447.8 448h-92.7V302.4c0-34.7-12.4-58.4-43.3-58.4-23.6 0-37.7 15.8-43.9 31.1-2.3 5.7-2.8 13.6-2.8 21.5V448h-92.8s1.2-242.9 0-268h92.8v38c12.3-19 34.3-46.1 83.4-46.1 60.8 0 106.4 39.7 106.4 125.1V448z"></path>
-            </svg>
-        </a>
+  
+    <footer class="bg-slate-950 border-t relative border-white/10 pt-16 pb-8 text-slate-400 text-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
+            
+            <div class="space-y-4">
+                <a href="{% url 'home_app:home-page' %}" class="flex items-center gap-2 group">
+                    
+                        <img src="{% static 'images/Koz_logo_noBack.png' %}" alt="KOZ" class="w-50 h-50 object-contain">
+
+                </a>
+                <p class="text-xs font-light text-slate-400 leading-relaxed">
+                    N'achetez pas seulement une auto, changez votre vie. Solutions d'achat à crédit, pièces détachées et accompagnement sur-mesure.
+                </p>
+            </div>
+
+            <div>
+                <h4 class="text-white font-bold font-heading mb-4">Navigation</h4>
+                <ul class="space-y-2 text-xs">
+                    <li><a href="{% url 'home_app:home-page' %}" class="hover:text-white transition-colors">Accueil</a></li>
+                    <li><a href="{% url 'home_app:actualites-list' %}" class="hover:text-white transition-colors">Actualités & Événements</a></li>
+                    <li><a href="#financement" class="hover:text-white transition-colors">Demande de crédit</a></li>
+                </ul>
+            </div>
+
+                <div>
+            <h4 class="text-white font-bold font-heading mb-4">Services</h4>
+            <!-- 1. Ajout de la couleur de texte par défaut (ex: text-slate-400) -->
+            <ul class="space-y-2.5 text-xs text-slate-400">
+                <!-- 2. Utilisation de slice pour ne pas rallonger indéfiniment le footer -->
+                {% for serv in services_vedette|slice:":6" %}
+                    <li>
+                        <a href="{% url 'services_app:service-detail-public' serv.pk %}" 
+                        class="inline-flex items-center hover:text-white hover:translate-x-1 transition-all duration-200">
+                            <span>{{ serv.nom }}</span>
+                        </a>
+                    </li>
+                {% empty %}
+                    <li class="text-slate-500 italic">Aucun service disponible</li>
+                {% endfor %}
+            </ul>
         </div>
-    </nav>
-</footer>
 
+            <div>
+                <h4 class="text-white font-bold font-heading mb-4">Contact</h4>
+                <ul class="space-y-2 text-xs">
+                    <li><i class="fas fa-envelope mr-2 text-blue-400"></i> koz.corporate@gmail.com</li>
+                    <li><i class="fas fa-phone mr-2 text-blue-400"></i> +226-06-59-15-23 / 226 76-20-80-08</li>
+                    <li><i class="fas fa-map-marker-alt mr-2 text-blue-400"></i> Ouagadougou, Burkina Faso</li>
+                </ul>
+            </div>
 
-        <!-- ========== MODALES ========== -->
-        {% include 'modals/home/register.html' %}
-        {% include 'modals/auth/login_simple_modal.html' %}
-        {% include 'modals/home/temoignage_textuel_form.html' %}
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 border-t border-white/5 text-center text-xs text-slate-500">
+            <p>&copy; {% now "Y" %} KOZ Services. Tous droits réservés.</p>
+            <p class="font-medium text-slate-700">Conçu par <strong>SPIRIT-DIGIT Agency</strong></p>
+        </div>
+    </footer>
+
+ 
+<!-- ========== MODALES ========== -->
+{% include 'modals/home/register.html' %}
+{% include 'modals/auth/login_simple_modal.html' %}
+{% include 'modals/home/temoignage_textuel_form.html' %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
     gsap.registerPlugin(ScrollTrigger);
@@ -1963,16 +1973,15 @@
 
             // Disable lag smoothing in GSAP to prevent any delay in scroll animations
             gsap.ticker.lagSmoothing();
-});
+    });
 </script>
 
-        <script>
-            // Burger menu
-            document.getElementById('burgerBtn')?.addEventListener('click', function() {
-                document.getElementById('mobileMenu').classList.toggle('hidden');
-            });
-        </script>
+<script>
+    // Burger menu
+    document.getElementById('burgerBtn')?.addEventListener('click', function() {
+         document.getElementById('mobileMenu').classList.toggle('hidden');
+        });
+</script>
 
- 
 </body>
 </html>

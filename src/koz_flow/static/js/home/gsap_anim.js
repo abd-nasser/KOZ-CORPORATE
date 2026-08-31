@@ -655,51 +655,61 @@ document.addEventListener('DOMContentLoaded', function() {
                 ease: "power3.out",
             
             });
+    
+});
 
-        
-    
-    const stats = document.querySelectorAll('.stat-number');
-    
-    if (stats.length === 0) return;
-    
-    // Fonction d'animation du compteur
+document.addEventListener('DOMContentLoaded', () => {
+    const statNumbers = document.querySelectorAll('.stat-number');
+    const statTexts = document.querySelectorAll('.stat-text');
+
+    // 1. Animation des compteurs numériques (avec prefix/suffix)
     function animateCounter(el) {
-        const target = parseInt(el.getAttribute('data-target'));
-        const duration = 2000; // 2 secondes
+        const target = parseInt(el.getAttribute('data-target'), 10);
+        const prefix = el.getAttribute('data-prefix') || '';
+        const suffix = el.getAttribute('data-suffix') || '';
+        const duration = 1800;
         const startTime = performance.now();
-        
+
         function updateCounter(currentTime) {
             const elapsed = currentTime - startTime;
             const progress = Math.min(elapsed / duration, 1);
-            const eased = 1 - Math.pow(1 - progress, 3); // easing cubic-out
-            
+            const eased = 1 - Math.pow(1 - progress, 3); // Easing cubic-out
+
             const currentValue = Math.floor(eased * target);
-            el.textContent = currentValue.toLocaleString();
-            
+            el.textContent = `${prefix}${currentValue.toLocaleString()}${suffix}`;
+
             if (progress < 1) {
                 requestAnimationFrame(updateCounter);
             } else {
-                el.textContent = target.toLocaleString();
+                el.textContent = `${prefix}${target.toLocaleString()}${suffix}`;
             }
         }
-        
+
         requestAnimationFrame(updateCounter);
     }
-    
-    // Utiliser IntersectionObserver pour déclencher l'animation
+
+    // 2. Observer global pour l'ensemble des cartes
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                const el = entry.target;
-                animateCounter(el);
-                observer.unobserve(el); // Une seule fois
+                const card = entry.target;
+                
+                // Si la carte contient un chiffre à animer
+                const numEl = card.querySelector('.stat-number');
+                if (numEl) animateCounter(numEl);
+
+                // Si la carte contient du texte, on applique une petite transition d'apparition
+                const textEl = card.querySelector('.stat-text');
+                if (textEl) {
+                    textEl.classList.add('animate-fade-in-up');
+                }
+
+                observer.unobserve(card);
             }
         });
-    }, { threshold: 0.5 });
-    
-    stats.forEach(stat => observer.observe(stat));
+    }, { threshold: 0.3 });
 
-
+    document.querySelectorAll('.stat-card').forEach(card => observer.observe(card));
 });
 
 // ============================================================
@@ -773,3 +783,25 @@ document.addEventListener('DOMContentLoaded', function() {
     );
 
 })
+
+// Initialize a new Lenis instance for smooth scrolling
+document.addEventListener('DOMContentLoaded', function() {
+// Initialize a new Lenis instance for smooth scrolling
+        const lenis = new Lenis();
+
+            // Synchronize Lenis scrolling with GSAP's ScrollTrigger plugin
+            lenis.on('scroll', ScrollTrigger.update);
+
+            // Add Lenis's requestAnimationFrame (raf) method to GSAP's ticker
+            // This ensures Lenis's smooth scroll animation updates on each GSAP tick
+            gsap.ticker.add((time) => {
+            lenis.raf(time * 500); // Convert time from seconds to milliseconds
+            });
+
+            // Disable lag smoothing in GSAP to prevent any delay in scroll animations
+            gsap.ticker.lagSmoothing();
+
+
+})
+
+  

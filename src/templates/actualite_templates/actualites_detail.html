@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ actualite.titre }} | KOZ Services{% endblock %}
+
+{% block extra_css %}
+<!-- Splitting.js CSS -->
+<link rel="stylesheet" href="https://unpkg.com/splitting/dist/splitting.css" />
+<link rel="stylesheet" href="https://unpkg.com/splitting/dist/splitting-cells.css" />
+
+<style>
+    /* Effet d'apparition des mots pour Splitting.js */
+    .splitting-description .word {
+        display: inline-block;
+        will-change: transform, opacity;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="min-h-screen bg-slate-50 text-slate-900 pt-28 pb-20 px-4 sm:px-6 lg:px-8 overflow-x-hidden">
+
+    <!-- Bouton Retour -->
+    <div class="max-w-5xl mx-auto mb-8">
+        <a href="{% url 'home_app:actualites-list' %}" class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-slate-200 text-slate-700 text-xs font-bold hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 shadow-sm transition-all">
+            <i class="fas fa-arrow-left"></i>
+            <span>Retour aux actualités</span>
+        </a>
+    </div>
+
+    <article class="max-w-5xl mx-auto space-y-12">
+
+        <!-- ============================================================ -->
+        <!-- ==========              HEADER ARTICLE             ========== -->
+        <!-- ============================================================ -->
+        <header class="text-center space-y-6 relative">
+            <!-- Badge Catégorie & Statut -->
+            <div class="flex flex-wrap items-center justify-center gap-3">
+                <span class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-600 text-xs font-bold uppercase tracking-wider shadow-sm">
+                    <i class="fas {{ actualite.type_icone }}"></i> {{ actualite.get_type_display }}
+                </span>
+
+                {% if actualite.est_en_cours %}
+                    <span class="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> En cours
+                    </span>
+                {% elif actualite.est_a_venir %}
+                    <span class="inline-flex items-center gap-1.5 text-xs font-bold text-blue-700 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-200">
+                        <i class="fas fa-clock"></i> À venir
+                    </span>
+                {% endif %}
+            </div>
+
+            <!-- Titre Principal -->
+            <h1 class="text-3xl sm:text-5xl font-black font-heading text-slate-900 tracking-tight leading-tight max-w-4xl mx-auto">
+                {{ actualite.titre }}
+            </h1>
+
+            {% if actualite.sous_titre %}
+                <p class="text-lg sm:text-xl font-semibold text-blue-600 max-w-2xl mx-auto">
+                    {{ actualite.sous_titre }}
+                </p>
+            {% endif %}
+
+            <!-- Métadonnées (Date, Vues, Auteur) -->
+            <div class="flex items-center justify-center gap-6 text-xs sm:text-sm font-medium text-slate-500 pt-2 border-t border-slate-200/60 max-w-md mx-auto">
+                <span class="flex items-center gap-1.5">
+                    <i class="far fa-calendar-alt text-blue-600"></i> {{ actualite.date_evenement|date:"d M Y à H:i" }}
+                </span>
+                <span>•</span>
+                <span class="flex items-center gap-1.5">
+                    <i class="far fa-eye text-slate-400"></i> {{ actualite.vues }} vues
+                </span>
+            </div>
+        </header>
+
+        <!-- ============================================================ -->
+        <!-- ==========          MEDIA PRINCIPAL / BANNIÈRE     ========== -->
+        <!-- ============================================================ -->
+        <div class="relative w-full rounded-3xl overflow-hidden bg-slate-100 border border-slate-200/80 shadow-2xl shadow-blue-900/5 aspect-video max-h-[520px]">
+            {% if actualite.video_file %}
+                <video controls class="w-full h-full object-cover rounded-3xl">
+                    <source src="{{ actualite.video_file.url }}" type="video/mp4">
+                    Votre navigateur ne supporte pas la lecture vidéo.
+                </video>
+            {% elif actualite.image_principale %}
+                <img src="{{ actualite.image_principale.url }}" alt="{{ actualite.titre }}" class="w-full h-full object-cover">
+            {% else %}
+                <div class="w-full h-full flex items-center justify-center text-slate-400">
+                    <i class="fas fa-newspaper text-6xl"></i>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- ==========      TEXTE AVEC SPLITTING.JS + GSAP    ========== -->
+        <!-- ============================================================ -->
+        <div class="bg-white rounded-3xl border border-slate-200/80 p-8 sm:p-12 shadow-xl shadow-slate-200/50 space-y-8">
+            
+            {% if actualite.description_courte %}
+                <!-- Introduction en mise en avant -->
+                <div class="text-lg sm:text-xl font-medium text-slate-800 leading-relaxed border-l-4 border-blue-600 pl-6 py-1 italic bg-blue-50/50 rounded-r-2xl">
+                    {{ actualite.description_courte }}
+                </div>
+            {% endif %}
+
+            <!-- Bloc Description Animé mot par mot au Scroll -->
+            <div class="splitting-description text-slate-700 text-base sm:text-lg leading-relaxed font-normal space-y-6" data-splitting="words">
+                {{ actualite.description|linebreaks }}
+            </div>
+
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- ==========          GALERIE D'IMAGES / MEDIA         ========== -->
+        <!-- ============================================================ -->
+        {% if actualite.images.all or actualite.images_list %}
+        <section class="space-y-6">
+            <h3 class="text-2xl font-bold font-heading text-slate-900 flex items-center gap-2">
+                <i class="fas fa-images text-blue-600"></i> Galerie Multimédia
+            </h3>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for img in actualite.images.all %}
+                <div class="group relative rounded-2xl overflow-hidden border border-slate-200/80 bg-slate-100 aspect-4/3 shadow-md hover:shadow-xl transition-all duration-300">
+                    <img src="{{ img.image.url }}" alt="Galerie image" class="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500">
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- CTA Action (Rendez-vous / Contact) -->
+        <div class="rounded-3xl bg-gradient-to-br from-blue-600 to-indigo-700 p-8 sm:p-10 text-white text-center shadow-xl space-y-6">
+            <h3 class="text-2xl sm:text-3xl font-black font-heading">Interessé par cet événement ou véhicule ?</h3>
+            <p class="text-blue-100 text-sm sm:text-base max-w-xl mx-auto font-light">
+                Contactez nos conseillers KOZ Services dès maintenant pour plus d'informations ou pour réserver un rendez-vous.
+            </p>
+            <div class="flex flex-wrap justify-center items-center gap-4 pt-2">
+                <a href="#contact" class="px-8 py-3.5 rounded-full bg-white text-blue-600 font-bold text-sm shadow-lg hover:bg-blue-50 transition-all hover:scale-105">
+                    Nous Contacter
+                </a>
+            </div>
+        </div>
+
+    </article>
+
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Splitting.js JS -->
+<script src="https://unpkg.com/splitting/dist/splitting.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 1. Initialisation de Splitting.js sur la description
+    Splitting();
+
+    // 2. Animation GSAP ScrollTrigger sur les mots
+    if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+        gsap.registerPlugin(ScrollTrigger);
+
+        const words = document.querySelectorAll('.splitting-description .word');
+
+        if (words.length > 0) {
+            gsap.fromTo(words, 
+                { 
+                    opacity: 0.15,
+                    y: 8,
+                    filter: 'blur(2px)'
+                },
+                {
+                    opacity: 1,
+                    y: 0,
+                    filter: 'blur(0px)',
+                    duration: 0.4,
+                    stagger: 0.03,
+                    ease: "power2.out",
+                    scrollTrigger: {
+                        trigger: ".splitting-description",
+                        start: "top 75%",
+                        end: "bottom 35%",
+                        scrub: 0.8
+                    }
+                }
+            );
+        }
+    }
+});
+</script>
+{% endblock %}

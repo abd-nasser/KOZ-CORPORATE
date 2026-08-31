@@ -1,0 +1,279 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Actualités & Événements | KOZ Services{% endblock %}
+
+{% block content %}
+<main class="min-h-screen bg-slate-50 text-slate-900 pt-28 pb-20 px-4 sm:px-6 lg:px-8 overflow-x-hidden">
+
+    <!-- ============================================================ -->
+    <!-- ==========           HEADER DE LA PAGE            ========== -->
+    <!-- ============================================================ -->
+    <div class="max-w-7xl mx-auto text-center mb-16 relative">
+        <!-- Halo lumineux bleu en arrière-plan -->
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-400/15 blur-[120px] rounded-full pointer-events-none"></div>
+        
+        <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-600 text-xs font-bold uppercase tracking-widest mb-4 shadow-sm">
+            <i class="fas fa-newspaper"></i> Fil d'actualité
+        </span>
+        <h1 class="text-4xl sm:text-6xl font-black tracking-tight text-slate-900 mb-6 font-heading">
+            Actualités & <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">Événements</span>
+        </h1>
+        <p class="text-slate-600 text-base sm:text-lg max-w-2xl mx-auto font-normal leading-relaxed">
+            Restez informé des derniers arrivages, ventes flash, inaugurations et offres privilèges chez KOZ Services.
+        </p>
+
+        <!-- Filtres par catégorie (Barre de pills) -->
+        <div class="flex flex-wrap justify-center items-center gap-2 sm:gap-3 mt-10">
+            <button class="filter-btn active px-5 py-2.5 rounded-full text-xs sm:text-sm font-semibold bg-blue-600 text-white shadow-lg shadow-blue-600/25 transition-all duration-300 hover:bg-blue-700" data-filter="all">
+                Tous
+            </button>
+            <button class="filter-btn px-5 py-2.5 rounded-full text-xs sm:text-sm font-medium bg-white border border-slate-200 text-slate-700 shadow-sm hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all duration-300" data-filter="evenement">
+                <i class="fas fa-calendar-day mr-1.5 text-blue-600"></i> Événements
+            </button>
+            <button class="filter-btn px-5 py-2.5 rounded-full text-xs sm:text-sm font-medium bg-white border border-slate-200 text-slate-700 shadow-sm hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200 transition-all duration-300" data-filter="nouveaute">
+                <i class="fas fa-sparkles mr-1.5 text-emerald-500"></i> Nouveautés
+            </button>
+            <button class="filter-btn px-5 py-2.5 rounded-full text-xs sm:text-sm font-medium bg-white border border-slate-200 text-slate-700 shadow-sm hover:bg-amber-50 hover:text-amber-600 hover:border-amber-200 transition-all duration-300" data-filter="offre">
+                <i class="fas fa-tag mr-1.5 text-amber-500"></i> Offres
+            </button>
+            <button class="filter-btn px-5 py-2.5 rounded-full text-xs sm:text-sm font-medium bg-white border border-slate-200 text-slate-700 shadow-sm hover:bg-purple-50 hover:text-purple-600 hover:border-purple-200 transition-all duration-300" data-filter="communique">
+                <i class="fas fa-bullhorn mr-1.5 text-purple-500"></i> Communiqués
+            </button>
+        </div>
+    </div>
+
+
+    <div class="max-w-7xl mx-auto space-y-16">
+
+        <!-- ============================================================ -->
+        <!-- ==========      SECTION ARTICLE EN VEDETTE       ========== -->
+        <!-- ============================================================ -->
+        {% for actualite in actualites %}
+            {% if actualite.est_vedette and forloop.first %}
+            <div class="actualite-card relative group overflow-hidden rounded-3xl bg-white border border-slate-200/80 p-6 lg:p-8 shadow-xl shadow-blue-900/5 transition-all duration-500 hover:border-blue-400 hover:shadow-2xl" data-type="{{ actualite.type }}">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                    
+                    <!-- Image Principale Vedette -->
+                    <div class="lg:col-span-7 relative h-72 sm:h-96 w-full rounded-2xl overflow-hidden bg-slate-100">
+                        {% if actualite.image_principale %}
+                            <img src="{{ actualite.image_principale.url }}" alt="{{ actualite.titre }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out">
+                        {% else %}
+                            <div class="w-full h-full flex items-center justify-center text-slate-400">
+                                <i class="fas fa-image text-5xl"></i>
+                            </div>
+                        {% endif %}
+
+                        <!-- Badge "En Vedette" -->
+                        <span class="absolute top-4 left-4 px-3.5 py-1.5 rounded-full bg-amber-500 text-white text-xs font-extrabold uppercase tracking-wider shadow-md flex items-center gap-1.5">
+                            <i class="fas fa-star"></i> À la une
+                        </span>
+
+                        <!-- Badge Type -->
+                        <span class="absolute bottom-4 left-4 px-3.5 py-1.5 rounded-full bg-slate-900/80 backdrop-blur-md text-xs font-semibold text-white flex items-center gap-2">
+                            <i class="fas {{ actualite.type_icone }}"></i> {{ actualite.get_type_display }}
+                        </span>
+                    </div>
+
+                    <!-- Contenu Vedette -->
+                    <div class="lg:col-span-5 flex flex-col justify-between h-full space-y-6">
+                        <div class="space-y-4">
+                            <!-- Métadonnées & Dates -->
+                            <div class="flex items-center gap-3 text-xs text-slate-500 font-medium">
+                                <span class="flex items-center gap-1">
+                                    <i class="far fa-calendar-alt text-blue-600"></i> {{ actualite.date_evenement|date:"d M Y à H:i" }}
+                                </span>
+                                <span>•</span>
+                                <span class="flex items-center gap-1">
+                                    <i class="far fa-eye text-slate-400"></i> {{ actualite.vues }} vues
+                                </span>
+                            </div>
+
+                            <h2 class="text-2xl sm:text-3xl font-bold font-heading text-slate-900 group-hover:text-blue-600 transition-colors">
+                                {{ actualite.titre }}
+                            </h2>
+
+                            {% if actualite.sous_titre %}
+                                <h3 class="text-base text-blue-600 font-semibold leading-snug">
+                                    {{ actualite.sous_titre }}
+                                </h3>
+                            {% endif %}
+
+                            <p class="text-slate-600 text-sm font-normal line-clamp-3 leading-relaxed">
+                                {% if actualite.description_courte %}
+                                    {{ actualite.description_courte }}
+                                {% else %}
+                                    {{ actualite.description|truncatewords:30 }}
+                                {% endif %}
+                            </p>
+                        </div>
+
+                        <!-- Statut (En cours / À venir) + Bouton -->
+                        <div class="pt-4 border-t border-slate-100 flex items-center justify-between gap-4">
+                            {% if actualite.est_en_cours %}
+                                <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> En cours
+                                </span>
+                            {% elif actualite.est_a_venir %}
+                                <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-700 bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
+                                    <i class="fas fa-clock text-blue-600"></i> À venir
+                                </span>
+                            {% else %}
+                                <span class="text-xs text-slate-400 font-medium">Terminé</span>
+                            {% endif %}
+
+                            <a href="{% url 'home_app:actualites-detail' actualite.pk %}" class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold shadow-lg shadow-blue-600/25 hover:scale-105 transition-all">
+                                <span>Lire la suite</span>
+                                <i class="fas fa-arrow-right text-xs"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            {% endif %}
+        {% endfor %}
+
+
+        <!-- ============================================================ -->
+        <!-- ==========         GRILLE DE TOUTES LES NEWS       ========== -->
+        <!-- ============================================================ -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="actualites-grid">
+            
+            {% for actualite in actualites %}
+                <div class="actualite-card group flex flex-col justify-between rounded-3xl bg-white border border-slate-200/80 overflow-hidden hover:border-blue-300 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 shadow-md shadow-slate-200/50" data-type="{{ actualite.type }}">
+                    
+                    <div>
+                        <!-- Header Carte : Image -->
+                        <div class="relative h-52 w-full overflow-hidden bg-slate-100">
+                            {% if actualite.image_principale %}
+                                <img src="{{ actualite.image_principale.url }}" alt="{{ actualite.titre }}" class="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500 ease-out">
+                            {% else %}
+                                <div class="w-full h-full flex items-center justify-center text-slate-400">
+                                    <i class="fas fa-newspaper text-4xl"></i>
+                                </div>
+                            {% endif %}
+
+                            <!-- Gradient overlay très léger en bas de l'image -->
+                            <div class="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent"></div>
+
+                            <!-- Badge Type -->
+                            <div class="absolute top-4 left-4">
+                                <span class="px-3 py-1 rounded-full bg-white/95 backdrop-blur-md border border-slate-100 text-xs font-bold text-slate-800 flex items-center gap-1.5 shadow-sm">
+                                    <i class="fas {{ actualite.type_icone }} text-blue-600"></i>
+                                    {{ actualite.get_type_display }}
+                                </span>
+                            </div>
+
+                            <!-- Indication Multimédia -->
+                            <div class="absolute top-4 right-4 flex gap-1">
+                                {% if actualite.nb_images > 1 %}
+                                    <span class="w-7 h-7 rounded-full bg-slate-900/80 backdrop-blur-md text-white text-xs flex items-center justify-center" title="{{ actualite.nb_images }} images">
+                                        <i class="fas fa-images"></i>
+                                    </span>
+                                {% endif %}
+                                {% if actualite.video_file or actualite.video_url %}
+                                    <span class="w-7 h-7 rounded-full bg-blue-600 text-white text-xs flex items-center justify-center shadow-md" title="Vidéo disponible">
+                                        <i class="fas fa-play text-[10px]"></i>
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Contenu Texte -->
+                        <div class="p-6 space-y-3">
+                            <!-- Date -->
+                            <div class="flex items-center justify-between text-xs text-slate-500 font-medium">
+                                <span><i class="far fa-calendar-alt mr-1 text-blue-600"></i> {{ actualite.date_evenement|date:"d M Y" }}</span>
+                                <span><i class="far fa-eye mr-1"></i> {{ actualite.vues }}</span>
+                            </div>
+
+                            <!-- Titre -->
+                            <h3 class="text-lg font-bold font-heading text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-2">
+                                {{ actualite.titre }}
+                            </h3>
+
+                            <!-- Extrait -->
+                            <p class="text-slate-600 text-xs sm:text-sm font-normal line-clamp-3 leading-relaxed">
+                                {% if actualite.description_courte %}
+                                    {{ actualite.description_courte }}
+                                {% else %}
+                                    {{ actualite.description|truncatewords:20 }}
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Footer Carte : CTA -->
+                    <div class="px-6 pb-6 pt-3 flex items-center justify-between border-t border-slate-100">
+                        <span class="text-xs font-semibold">
+                            {% if actualite.est_en_cours %}
+                                <span class="text-emerald-600"><i class="fas fa-circle text-[8px] mr-1"></i>En cours</span>
+                            {% elif actualite.est_a_venir %}
+                                <span class="text-blue-600"><i class="fas fa-clock mr-1"></i>À venir</span>
+                            {% else %}
+                                <span class="text-slate-400">Passé</span>
+                            {% endif %}
+                        </span>
+
+                        <a href="{% url 'home_app:actualites-detail' actualite.pk %}" class="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 group-hover:text-blue-700 group-hover:translate-x-1 transition-all">
+                            <span>Voir l'événement</span>
+                            <i class="fas fa-chevron-right text-[10px]"></i>
+                        </a>
+                    </div>
+
+                </div>
+            {% empty %}
+                <!-- État vide -->
+                <div class="col-span-full py-16 text-center space-y-4">
+                    <div class="w-16 h-16 mx-auto rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 text-2xl">
+                        <i class="fas fa-newspaper"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 font-heading">Aucune actualité disponible</h3>
+                    <p class="text-slate-500 text-sm max-w-sm mx-auto">Revenez très bientôt pour découvrir nos prochains événements et offres spéciales.</p>
+                </div>
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+</main>
+
+<!-- ============================================================ -->
+<!-- ==========        SCRIPT FILTRAGE DYNAMIQUE        ========== -->
+<!-- ============================================================ -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const cards = document.querySelectorAll('.actualite-card');
+
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            filterBtns.forEach(b => {
+                b.classList.remove('active', 'bg-blue-600', 'text-white', 'shadow-lg', 'shadow-blue-600/25');
+                b.classList.add('bg-white', 'border', 'border-slate-200', 'text-slate-700');
+            });
+
+            this.classList.add('active', 'bg-blue-600', 'text-white', 'shadow-lg', 'shadow-blue-600/25');
+            this.classList.remove('bg-white', 'border', 'border-slate-200', 'text-slate-700');
+
+            const filter = this.getAttribute('data-filter');
+
+            cards.forEach(card => {
+                const cardType = card.getAttribute('data-type');
+                
+                if (filter === 'all' || cardType === filter) {
+                    card.style.display = 'flex';
+                    if (typeof gsap !== 'undefined') {
+                        gsap.fromTo(card, { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.35 });
+                    }
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

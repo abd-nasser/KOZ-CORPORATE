@@ -34,6 +34,8 @@ urlpatterns = [
     path("actualites/<int:pk>/modifier/", views.ActualiteUpdateView.as_view(), name="actualites-update"),
     path("actualites/<int:pk>/supprimer/", views.delete_actualite, name="actualites-delete"),
     
+    path('koz-services/', views.financement_koz_detail, name='koz-detail'),
+    path('fidelis-finance/', views.financement_fidelis_detail, name='fidelis-detail'),
     #Actions for contact form
     path("contact/", views.contact_form, name="contact-form"),
     path("rdv/", views.prise_rdv, name="prise-rdv"),

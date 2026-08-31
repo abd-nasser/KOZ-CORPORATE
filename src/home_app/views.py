@@ -14,6 +14,15 @@ from vehicul_app.models import Vehicul, TypeVehicule
 from services_app.models import Services, TypesServices
 from products_app.models import Products
 from .models import Actualite, Temoignage, AvisReseau, VideoTemoignage
+import json
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import CreateView
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from django.conf import settings
+from .models import RendezVous
+import time
 
 
 
@@ -42,7 +51,7 @@ def home_page_view(request):
         "total_pages":paginator.num_pages,
         "current_page":page_number,
         
-        
+        "all_services": Services.objects.all(),
         "services_vedette":services_vedettes,
         "services_page":services_page,
         "services_total_page":services_paginator.num_pages,
@@ -237,7 +246,6 @@ def activer_avis_reseau(request, avis_id):
     messages.success(request, f"✅ Avis de {avis.nom_utilisateur} activé !")
     return redirect('home_app:avis-reseau-list')
 
-
 @login_required
 def desactiver_avis_reseau(request, avis_id):
     avis = get_object_or_404(AvisReseau, id=avis_id)
@@ -264,10 +272,19 @@ class VideoTemoingnageCreateView(LoginRequiredMixin, CreateView):
         return reverse_lazy('directeur_app:directeur-view')  # Redirige vers la page d'accueil après la soumission du formulaire
 
 
-class ActualiteListView(LoginRequiredMixin, ListView):
+class ActualiteListView(ListView):
     model = Actualite
-    template_name = 'directeur_templates/actualites_list.html'
     context_object_name = 'actualites'
+
+    def get_template_names(self):
+        user_role = getattr(self.request.user, 'role', None)
+        
+        # Si c'est un directeur ou un commercial, on garde la vue gestion
+        if user_role in ['directeur', 'commercial']:
+            return ['directeur_templates/actualites_list.html']
+        
+        # Pour les autres rôles (clients, visiteurs connectés, etc.)
+        return ['actualite_templates/actualites_list.html']
 
     def get_queryset(self):
         return Actualite.objects.all().order_by('-date_publication', '-date_evenement')
@@ -279,26 +296,26 @@ class ActualiteListView(LoginRequiredMixin, ListView):
         return context
 
 
-class ActualiteDetailView(LoginRequiredMixin, DetailView):
+class ActualiteDetailView(DetailView):
     model = Actualite
-    template_name = 'directeur_templates/actualite_detail.html'
     context_object_name = 'actualite'
+
+    def get_template_names(self):
+        user_role = getattr(self.request.user, 'role', None)
+        
+        if user_role in ['directeur', 'commercial']:
+            return ['directeur_templates/actualite_detail.html']
+        
+        return ['actualite_templates/actualites_detail.html']
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
-        if 'actualite_form' not in context:
-            context['update_actualite_form'] = ActualiteForm(instance=self.object)  # Pré-remplir le formulaire avec l'actualité actuelle
+        if 'update_actualite_form' not in context:
+            context['update_actualite_form'] = ActualiteForm(instance=self.object)
         return context
     
     def get_success_url(self):
-        return reverse_lazy('home_app:actualites-list')  # Redirige vers la liste des actualités après la soumission du formulaire
-
-
-import json
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import CreateView
-from django.urls import reverse_lazy
-from django.shortcuts import render
+        return reverse_lazy('home_app:actualites-list')
 
 class ActualiteCreateView(LoginRequiredMixin, CreateView):
     model = Actualite
@@ -323,7 +340,6 @@ class ActualiteCreateView(LoginRequiredMixin, CreateView):
         return render(self.request,'partials/actualite/actu_forms_error.html',{'actualite_form': form})
        
 
-
 class ActualiteUpdateView(LoginRequiredMixin, UpdateView):
     model = Actualite
     form_class = ActualiteForm
@@ -343,8 +359,6 @@ class ActualiteUpdateView(LoginRequiredMixin, UpdateView):
     def form_invalid(self, form):
         return render(self.request,'partials/actualite/actu_forms_error.html',{'actualite_form': form})
    
-
-
 @login_required
 def delete_actualite(request, pk):
     """FBV pour supprimer une actualité"""
@@ -355,16 +369,23 @@ def delete_actualite(request, pk):
     return redirect('home_app:actualites-list')
 
 
-# home_app/views.py
 
-from django.contrib import messages
-from django.shortcuts import render, redirect
-from django.core.mail import send_mail
-from django.template.loader import render_to_string
-from django.utils.html import strip_tags
-from django.conf import settings
-from .models import RendezVous
-import time
+
+
+def financement_koz_detail(request):
+    """
+    Page de détails statique pour l'offre de financement propre à KOZ Services.
+    """
+    return render(request, 'financement/financement_koz_detail.html')
+
+
+def financement_fidelis_detail(request):
+    """
+    Page de détails statique pour le partenariat de financement avec Fidelis Finance.
+    """
+    return render(request, 'financement/financement_fidelis_detail.html')
+
+
 
 def contact_form(request):
     time.sleep(1.5)

@@ -1,19 +1,50 @@
 {% load static %}
+{% load tailwind_tags %}
 {% load humanize %}
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nos Véhicules - KOZ Services</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="google-site-verification" content="8zepDTq803R8qsLctGCJ5kqWdBvS4pCEkoOgm_bwkQo"/>
+    {% tailwind_css %}
+    <title>KOZ Services - Votre voiture à crédit, vos pièces en ligne</title>
+    <link rel="stylesheet" href="{% static 'css/home/home_style.css' %}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        * {
-            font-family: 'Inter', sans-serif;
+    <link rel="alternate" href="https://koz-corporate.pro/" hreflang="fr" />
+    <link rel="alternate" href="https://koz-corporate.pro/" hreflang="x-default" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script src="{% static 'js/htmx.min.js' %}" defer></script>
+    <script src="{% static 'js/vendor/gsap.min.js' %}" defer></script>
+    <script src="{% static 'js/vendor/ScrollTrigger.min.js' %}" defer></script>
+    <script src="{% static 'js/vendor/lenis.min.js' %}" defer></script>
+    <script src="https://cdn.plyr.io/3.7.8/plyr.js" defer></script>
+    <script src="{% static 'js/home/gsap_anim.js' %}" defer></script>
+     <script defer>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        heading: ['Urbanist', 'sans-serif'],
+                        body: ['Plus Jakarta Sans', 'sans-serif'],
+                    }
+                }
+            }
         }
-        @keyframes fadeInUp {
+    </script>
+    {% block extra_css %}{% endblock %}
+</head>
+ <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: #f8fafc;
+        }
+        h1, h2, h3, h4, .font-heading {
+            font-family: 'Urbanist', sans-serif;
+            letter-spacing: -0.02em;
+        }
+
+         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
         }
@@ -122,49 +153,165 @@
         .filter-card input::placeholder {
             color: #9ca3af;
         }
-    </style>
-</head>
-<body class="bg-gray-50">
 
-    <!-- ===== NAVBAR ===== -->
-    <nav class="glass-nav sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+    </style>
+
+<body class="bg-gray-50">
+<!-- ========== NAVBAR PREMIUM ========== -->
+    <nav class="navbar fixed top-0 z-50 w-full bg-white/90 backdrop-blur-md border-b border-gray-200/50 shadow-sm transition-all duration-300">
+        <div class="container mx-auto px-4 flex justify-between items-center h-16">
+            
+            <!-- ===== LOGO ===== -->
             <div class="flex items-center gap-3">
-               <a href="{% url 'home_app:home-page' %}" class="flex items-center gap-2 group">
+                <a href="{% url 'home_app:home-page' %}" class="flex items-center gap-2 group">
                     
                         <img src="{% static 'images/Koz_logo_noBack.png' %}" alt="KOZ" class="w-25 h-25 object-contain">
                     
                     <span class="text-xl font-bold text-gray-200 hidden sm:inline">KOZ <span class="text-blue-600">SERVICES</span></span>
                 </a>
             </div>
-            <div class="flex items-center gap-6">
-                <a href="{% url 'vehicul_app:site-marque-list' %}" class="text-gray-700 hover:text-blue-600 transition-colors text-sm font-medium">
-                    <i class="fas fa-trademark mr-2"></i> Marques
+        
+            <!-- ===== LIENS CENTRAUX ===== -->
+            <div class="hidden md:flex items-center gap-1 lg:gap-2">
+                <a href="{% url 'home_app:home-page' %}" 
+                class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                    Accueil
                 </a>
+                <a href="{% url 'vehicul_app:site-vehicul-list' %}" 
+                class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                    Catalogue
+                </a>
+                <a href="{% url 'home_app:actualites-list' %}" 
+                class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                    Actualités
+                </a>
+                <a href="{% url 'services_app:services-list-public' %}" 
+                class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                    Services
+                </a>
+                <a href="#financement" 
+                class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                    Financement
+                </a>
+                <a href="#contact" 
+                class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                    Contact
+                </a>
+            </div>
+
+            <!-- ===== ACTIONS ===== -->
+            <div class="flex items-center gap-2 sm:gap-3">
                 {% if user.is_authenticated %}
-                    <a href="{% url 'home_app:home-page' %}" class="text-gray-700 hover:text-blue-600 transition-colors text-sm font-medium">
-                        <i class="fas fa-user mr-2"></i> Compte
+                    
+                    
+                    {% if user.role == "client" %}
+                    <a href="{% url 'client_app:client-view' %}" 
+                    class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                        <i class="fas fa-chart-simple text-blue-500"></i>
+                        <span class="hidden lg:inline">Tableau de bord</span>
                     </a>
+
+                    <!-- Panier -->
+                    <a href="{% url 'order_app:panier' %}" 
+                    class="relative p-2 rounded-lg text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                        <i class="fas fa-shopping-cart text-lg"></i>
+                        {% if user.panier.articles.count > 0 %}
+                        <span class="absolute -top-1 -right-1 bg-blue-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-md ring-2 ring-white">
+                            {{ user.panier.articles.count }}
+                        </span>
+                        {% endif %}
+                    </a>
+                    {% elif user.role == "commercial" %}
+                    <a href="{% url 'commercial_app:commercial-view' %}" 
+                    class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                        <i class="fas fa-chart-simple text-blue-500"></i>
+                        <span class="hidden lg:inline">Tableau de bord</span>
+                    </a>
+                    {% else %}
+                    <a href="{% url 'directeur_app:directeur-view' %}" 
+                    class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                        <i class="fas fa-chart-simple text-blue-500"></i>
+                        <span class="hidden lg:inline">Tableau de bord</span>
+                    </a>
+                    {% endif %}
+                        
+                    
+
+                    <!-- Utilisateur -->
+                    <div class="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-gray-50/50 border border-gray-100">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white text-sm font-bold shadow-sm">
+                            {{ user.nom_complet|slice:":1"|upper }}
+                        </div>
+                        <span class="text-sm font-medium text-gray-700 hidden sm:inline">
+                            {{ user.nom_complet|truncatechars:15 }}
+                        </span>
+                    </div>
+
+                    <!-- Déconnexion -->
+                    <a href="{% url 'auth_app:logout-simple-sur-home-page' %}" 
+                    class="btn btn-error btn-sm text-white hover:bg-red-700 transition shadow-sm flex items-center gap-1.5">
+                        <i class="fas fa-sign-out-alt text-xs"></i>
+                        <span class="hidden sm:inline">Déconnexion</span>
+                    </a>
+
                 {% else %}
-                    <a href="#" class="text-gray-700 hover:text-blue-600 transition-colors text-sm font-medium">
-                        <i class="fas fa-sign-in-alt mr-2"></i> Connexion
-                    </a>
+                    
+                    <!-- Connexion -->
+                    <button onclick="document.getElementById('login_simple_modal').showModal()" 
+                            class="btn btn-ghost btn-sm  sm:inline-flex hover:bg-gray-100 transition">
+                        Connexion
+                    </button>
+                    
+                    <!-- Inscription -->
+                    <button onclick="document.getElementById('register_modal').showModal()" 
+                            class="btn btn-sm bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg transition flex items-center gap-2">
+                        <i class="fas fa-user-plus"></i>
+                        <span class="hidden sm:inline">Inscription</span>
+                    </button>
+
                 {% endif %}
+
+                <!-- Burger -->
+                <button id="burgerBtn" class="md:hidden btn btn-ghost btn-sm hover:bg-gray-100 transition">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
             </div>
         </div>
-        {% if messages %}
-        <div class="fixed top-20 right-5 z-50 space-y-2">
-            {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} shadow-xl rounded-xl animate-slide-in-right">
-                <span>{{ message }}</span>
+
+        <!-- ===== MENU MOBILE ===== -->
+        <div id="mobileMenu" class="hidden md:hidden bg-white border-t border-gray-200 p-4 shadow-lg">
+            <div class="flex flex-col gap-2 text-gray-600 text-sm">
+                <a href="{% url 'home_app:home-page' %}" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Accueil</a>
+                <a href="{% url 'vehicul_app:site-vehicul-list' %}" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Catalogue</a>
+                <a href="{% url 'home_app:actualites-list' %}" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Actualités</a>
+                <a href="{% url 'services_app:services-list-public' %}" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Services</a>
+                <a href="{% url 'home_app:home-page' %}#financement" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Financement</a>
+                <a href="{% url 'home_app:home-page' %}#contact" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Contact</a>
+                <hr class="my-2">
+                
+                {% if user.is_authenticated %}
+                    <a href="#" class="px-4 py-2.5 rounded-lg text-blue-600 font-medium hover:bg-blue-50 transition">
+                    <i class="fas fa-shopping-cart mr-2"></i> Panier ({{ user.panier.nb_articles|default:0 }})
+                </a>
+                {% endif %}
+                    
+                
             </div>
-            {% endfor %}
         </div>
-        {% endif %}
+        <!-- Messages flash -->
+            {% if messages %}
+            <div class="fixed top-20 right-5 z-50 space-y-2">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} shadow-xl rounded-xl animate-slide-in-right">
+                    <span>{{ message }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
     </nav>
 
     <!-- ===== MAIN CONTENT ===== -->
-    <main class="max-w-7xl mx-auto px-4 py-10" style="min-height:81vh;">
+    <main class="max-w-7xl mx-auto px-4 mt-24 py-10" style="min-height:100vh;">
         
         <!-- Page Title -->
         <div class="mb-10 animate-fade-in-up">
@@ -373,15 +520,64 @@
             </div>
         </div>
     </main>
+        <!-- ========== MODALES ========== -->
+        {% include 'modals/home/register.html' %}
+        {% include 'modals/auth/login_simple_modal.html' %}
+    <!-- Script Menu Mobile toggle -->
 
-    <!-- ===== FOOTER ===== -->
-    <footer class="bg-gray-900 text-gray-400 py-6 mt-12">
-        <div class="max-w-7xl mx-auto px-4 text-center text-sm">
-            <p>&copy; {% now 'Y' %} KOZ Services - Concessionnaire automobile</p>
+
+      <!-- ============================================================ -->
+    <!-- ==========                 FOOTER                  ========== -->
+    <!-- ============================================================ -->
+    <footer class="bg-slate-950 border-t border-white/10 pt-16 pb-8 text-slate-400 text-sm">
+         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
+            
+            <div class="space-y-4">
+                <a href="{% url 'home_app:home-page' %}" class="flex items-center gap-2 group">
+                    
+                        <img src="{% static 'images/Koz_logo_noBack.png' %}" alt="KOZ" class="w-50 h-50 object-contain">
+
+                </a>
+                <p class="text-xs font-light text-slate-400 leading-relaxed">
+                    N'achetez pas seulement une auto, changez votre vie. Solutions d'achat à crédit, pièces détachées et accompagnement sur-mesure.
+                </p>
+            </div>
+
+          
+            <div>
+                <h4 class="text-white font-bold font-heading mb-4">Navigation</h4>
+                <ul class="space-y-2 text-xs">
+                    <li><a href="{% url 'home_app:home-page' %}" class="hover:text-white transition-colors">Accueil</a></li>
+                    <li><a href="{% url 'home_app:actualites-list' %}" class="hover:text-white transition-colors">Actualités & Événements</a></li>
+                    <li><a href="#financement" class="hover:text-white transition-colors">Demande de crédit</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="text-white font-bold font-heading mb-4">Services</h4>
+                <ul class="space-y-2 text-xs">
+                    <li><a href="#" class="hover:text-white transition-colors">Vente de Véhicules</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors">Pièces Détachées en Ligne</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors">Expertise & Rendez-vous</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="text-white font-bold font-heading mb-4">Contact</h4>
+                <ul class="space-y-2 text-xs">
+                    <li><i class="fas fa-envelope mr-2 text-blue-400"></i> contact@kozservices.com</li>
+                    <li><i class="fas fa-phone mr-2 text-blue-400"></i> +226 00 00 00 00</li>
+                    <li><i class="fas fa-map-marker-alt mr-2 text-blue-400"></i> Ouagadougou, Burkina Faso</li>
+                </ul>
+            </div>
+
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 border-t border-white/5 text-center text-xs text-slate-500">
+            <p>&copy; {% now "Y" %} KOZ Services. Tous droits réservés.</p>
             <p class="font-medium text-slate-700">Conçu par <strong>SPIRIT-DIGIT Agency</strong></p>
         </div>
     </footer>
-    
 </body>
-</html><a href="#" class="hover-3d my-12 mx-2 cursor-pointer">
+</html>
   

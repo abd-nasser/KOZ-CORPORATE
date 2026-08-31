@@ -9,6 +9,11 @@
     <meta name="google-site-verification" content="8zepDTq803R8qsLctGCJ5kqWdBvS4pCEkoOgm_bwkQo"/>
     {% tailwind_css %}
     <title>KOZ Services - Votre voiture à crédit, vos pièces en ligne</title>
+    <!-- FAVICON PRINCIPAL (Format PNG ou ICO) -->
+    <link rel="icon" type="image/png" href="{% static 'images/Koz_logo_noBack.png' %}">
+
+    <!-- BONUS : Pour les appareils Apple (iPhone / iPad sur l'écran d'accueil) -->
+    <link rel="apple-touch-icon" href="{% static 'images/Koz_logo_noBack.png' %}">
     <link rel="stylesheet" href="{% static 'css/home/home_style.css' %}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="alternate" href="https://koz-corporate.pro/" hreflang="fr" />
@@ -20,7 +25,7 @@
     <script src="{% static 'js/vendor/lenis.min.js' %}" defer></script>
     <script src="https://cdn.plyr.io/3.7.8/plyr.js" defer></script>
     <script src="{% static 'js/home/gsap_anim.js' %}" defer></script>
-     <script defer>
+    <script defer>
         tailwind.config = {
             theme: {
                 extend: {
@@ -887,9 +892,9 @@
         </div>
 </section>
 
-    <!-- ============================================================ -->
-    <!-- SECTION : POURQUOI CHOISIR KOZ SERVICES                      -->
-    <!-- ============================================================ -->
+<!-- ============================================================ -->
+<!-- SECTION : POURQUOI CHOISIR KOZ SERVICES                      -->
+<!-- ============================================================ -->
 <section class="py-16 section_choisir_koz sm:py-20 relative bg-white overflow-hidden">
         
         <!-- Dégradé de fond subtil -->
@@ -930,10 +935,7 @@
                     <p class="text-gray-500 text-sm leading-relaxed pl-1">
                         Une équipe de passionnés avec des années d'expérience dans le secteur automobile. Des conseils avisés pour vous guider vers le meilleur choix.
                     </p>
-                    <div class="mt-4 flex items-center gap-2 text-blue-600 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <span>En savoir plus</span>
-                        <i class="fas fa-arrow-right text-xs"></i>
-                    </div>
+                   
                 </div>
 
                 <!-- Raison 2 : Inspection professionnelle -->
@@ -949,10 +951,7 @@
                     <p class="text-gray-500 text-sm leading-relaxed pl-1">
                         Chaque véhicule est inspecté par nos experts pour garantir sa fiabilité et sa sécurité. Une transparence totale sur l'état du véhicule.
                     </p>
-                    <div class="mt-4 flex items-center gap-2 text-emerald-600 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <span>En savoir plus</span>
-                        <i class="fas fa-arrow-right text-xs"></i>
-                    </div>
+                   
                 </div>
 
                 <!-- Raison 3 : Véhicule contrôlé -->
@@ -968,10 +967,7 @@
                     <p class="text-gray-500 text-sm leading-relaxed pl-1">
                         Tous nos véhicules passent un contrôle technique rigoureux avant la mise en vente. Vous achetez en toute confiance.
                     </p>
-                    <div class="mt-4 flex items-center gap-2 text-amber-600 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <span>En savoir plus</span>
-                        <i class="fas fa-arrow-right text-xs"></i>
-                    </div>
+                   
                 </div>
 
                 <!-- Raison 4 : Conseils honnêtes -->
@@ -987,10 +983,7 @@
                     <p class="text-gray-500 text-sm leading-relaxed pl-1">
                         Pas de vente forcée, pas de mauvaises surprises. Nous vous donnons des conseils sincères pour que vous fassiez le bon choix.
                     </p>
-                    <div class="mt-4 flex items-center gap-2 text-purple-600 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <span>En savoir plus</span>
-                        <i class="fas fa-arrow-right text-xs"></i>
-                    </div>
+                    
                 </div>
 
                 <!-- Raison 5 : Assistance jusqu'à l'achat -->
@@ -1006,10 +999,7 @@
                     <p class="text-gray-500 text-sm leading-relaxed pl-1">
                         Nous vous accompagnons à chaque étape : du choix du véhicule à la finalisation de l'achat. Une équipe dédiée à votre service.
                     </p>
-                    <div class="mt-4 flex items-center gap-2 text-rose-600 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <span>En savoir plus</span>
-                        <i class="fas fa-arrow-right text-xs"></i>
-                    </div>
+                   
                 </div>
 
                 <!-- Raison 6 : Clients satisfaits (bonus) -->
@@ -1025,10 +1015,7 @@
                     <p class="text-gray-500 text-sm leading-relaxed pl-1">
                         La satisfaction de nos clients est notre priorité. Rejoignez la communauté des conducteurs KOZ Services.
                     </p>
-                    <div class="mt-4 flex items-center gap-2 text-cyan-600 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <span>En savoir plus</span>
-                        <i class="fas fa-arrow-right text-xs"></i>
-                    </div>
+                    
                 </div>
 
             </div>
@@ -1480,12 +1467,12 @@
                     
                     <div class="grid grid-cols-2 gap-4 mb-6">
                         <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-                            <p class="text-2xl font-bold text-blue-600">5+</p>
+                            <p class="text-2xl font-bold text-blue-600">10+</p>
                             <p class="text-sm text-gray-500">Années d'expérience</p>
                         </div>
                         <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-                            <p class="text-2xl font-bold text-blue-600">150+</p>
-                            <p class="text-sm text-gray-500">Véhicules vendus</p>
+                            <p class="text-2xl font-bold text-blue-600">Garantie</p>
+                            <p class="text-sm text-gray-500">Toutes nos autos sont vendus sous garanties</p>
                         </div>
                         <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
                             <p class="text-2xl font-bold text-blue-600">98%</p>

@@ -10,6 +10,11 @@
     <script src="{% static 'js/htmx.min.js' %}" defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+     <!-- FAVICON PRINCIPAL (Format PNG ou ICO) -->
+    <link rel="icon" type="image/png" href="{% static 'images/Koz_logo_noBack.png' %}">
+
+    <!-- BONUS : Pour les appareils Apple (iPhone / iPad sur l'écran d'accueil) -->
+    <link rel="apple-touch-icon" href="{% static 'images/Koz_logo_noBack.png' %}">
     <title>Paiement - KOZ Services</title>
     <style>
         @keyframes fadeInUp {
@@ -200,18 +205,12 @@
                     <span class="step-number">1</span>
                     <div>
                         <p class="text-sm text-gray-700 font-medium">Composez le code USSD</p>
-                        <div class="code-ussd mt-1">*144*6#</div>
+                        *144*4*6*montant#
                         <p class="text-xs text-gray-400 mt-1">Sur votre téléphone Orange Money</p>
                     </div>
                 </div>
                 
-                <div class="instruction-step">
-                    <span class="step-number">2</span>
-                    <div>
-                        <p class="text-sm text-gray-700 font-medium">Choisissez l'option paiement</p>
-                        <p class="text-sm text-gray-500">Sélectionnez "Payer" et entrez le montant</p>
-                    </div>
-                </div>
+                
                 
                 <div class="instruction-step">
                     <span class="step-number">3</span>

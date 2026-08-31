@@ -21,7 +21,7 @@
                 <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl flex items-center justify-center shadow-md">
                     <span class="text-white font-bold text-xl">K</span>
                 </div>
-                <a href="{% if user.role == 'client' %}{% url 'client_app:client-view' %}{% else %}{% url 'commercial_app:commercial-view' %}{% endif %}" 
+                <a href="{% if user.role == 'client' %}{% url 'client_app:client-view' %}{% elif user.role == 'directeur' %}{% url 'directeur_app:directeur-view' %}{% else %}{% url 'commercial_app:commercial-view' %}{% endif %}" 
                    class="text-gray-600 hover:text-blue-600 transition duration-200">
                     <i class="fas fa-arrow-left mr-2"></i>Retour
                 </a>

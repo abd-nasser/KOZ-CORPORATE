@@ -7,13 +7,13 @@
     <style>
         @page {
             size: a4 portrait;
-            margin: 1.5cm 2cm 2cm 2cm;
+            margin: 1.2cm 1.5cm 1.5cm 1.5cm;
         }
         body {
             font-family: Helvetica, Arial, sans-serif;
             color: #333333;
-            font-size: 13px;
-            line-height: 1.5;
+            font-size: 12px;
+            line-height: 1.4;
         }
 
         /* FILIGRANE / WATERMARK ARRIÈRE-PLAN */
@@ -22,7 +22,7 @@
             top: 250px;
             left: 80px;
             width: 400px;
-            opacity: 0.06; /* Faible opacité pour ne pas gêner la lecture */
+            opacity: 0.06;
             z-index: -1000;
         }
 
@@ -30,15 +30,15 @@
         .header {
             width: 100%;
             border-bottom: 2px solid #0056b3;
-            padding-bottom: 12px;
-            margin-bottom: 25px;
+            padding-bottom: 8px;
+            margin-bottom: 15px;
         }
         .logo-header {
-            max-height: 55px;
+            max-height: 50px;
             width: auto;
         }
         .document-title {
-            font-size: 18px;
+            font-size: 17px;
             font-weight: bold;
             text-align: right;
             color: #28a745;
@@ -47,12 +47,12 @@
         /* BLOCS CLIENT & DETAILS */
         .section-table {
             width: 100%;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         .box {
             background-color: #f8f9fa;
             border: 1px solid #e9ecef;
-            padding: 12px;
+            padding: 10px;
             border-radius: 4px;
         }
 
@@ -60,47 +60,63 @@
         .table-data {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 15px;
+            margin-top: 10px;
         }
         .table-data th {
             background-color: #0056b3;
             color: #ffffff;
             padding: 8px;
             text-align: left;
-            font-size: 12px;
+            font-size: 11px;
         }
         .table-data td {
-            padding: 10px 8px;
+            padding: 8px;
             border-bottom: 1px solid #dee2e6;
         }
         .badge-success {
             background-color: #28a745;
             color: #ffffff;
-            padding: 4px 8px;
+            padding: 3px 6px;
             font-weight: bold;
-            font-size: 11px;
+            font-size: 10px;
             border-radius: 3px;
         }
         .total-box {
-            margin-top: 20px;
+            margin-top: 15px;
             text-align: right;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: bold;
         }
 
-        /* PIED DE PAGE & TAMPON */
+        /* TAMPON / CACHET ÉLECTRONIQUE */
+        .stamp-box {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin: 5px auto 0 auto;
+        }
+        .stamp-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            opacity: 0.9;
+            transform: rotate(-12deg);
+            mix-blend-mode: multiply; /* Fusionne le tampon avec le fond */
+            pointer-events: none;
+        }
+
+        /* PIED DE PAGE */
         .footer {
-            margin-top: 50px;
+            margin-top: 25px;
             text-align: center;
             font-size: 10px;
             color: #777777;
             border-top: 1px solid #dee2e6;
-            padding-top: 10px;
+            padding-top: 8px;
         }
     </style>
 </head>
 <body>
-
 
     <!-- EN-TÊTE AVEC LOGO -->
     <table class="header">
@@ -119,14 +135,14 @@
     <!-- CLIENT & VENTE -->
     <table class="section-table">
         <tr>
-            <td width="50%" style="padding-right: 10px;">
+            <td width="50%" style="padding-right: 8px;">
                 <div class="box">
                     <strong>Informations Client :</strong><br>
                     Nom : {{ paiement.client.nom_complet }}<br>
                     Email : {{ paiement.client.email|default:"Non renseigné" }}
                 </div>
             </td>
-            <td width="50%" style="padding-left: 10px;">
+            <td width="50%" style="padding-left: 8px;">
                 <div class="box">
                     <strong>Détails du Véhicule / Vente :</strong><br>
                     Véhicule : {{ vente.vehicul.marque_and_model }}<br>
@@ -163,20 +179,24 @@
         Total Encaissé : <span style="color: #28a745;">{{ paiement.montant }} FCFA</span>
     </div>
 
-    <!-- PIED DE PAGE & TAMPON -->
-    <div style="margin-top: 40px;">
+    <!-- PIED DE PAGE & CACHET -->
+    <div style="margin-top: 20px;">
         <table width="100%">
             <tr>
-                <td width="60%">
-                    <p style="font-size: 11px; color: #666;">
+                <td width="55%" style="vertical-align: top;">
+                    <p style="font-size: 11px; color: #666; margin-top: 15px;">
                         * Ce document sert de décharge officielle de paiement pour l'échéance susmentionnée.
                     </p>
                 </td>
-                <td width="40%" style="text-align: center;">
-                    <strong>La Direction Commerciale</strong><br><br><br>
-                    <span style="color: #28a745; font-weight: bold; border: 2px dashed #28a745; padding: 5px 10px;">
-                        ✔ VALIDÉ & ENCAISSÉ
-                    </span>
+                <td width="45%" style="text-align: center; vertical-align: top;">
+                    <strong style="font-size: 12px; color: #333;">La Direction Commerciale</strong><br>
+                    
+                    <!-- CACHET STATIQUE VIA APPEL IMG -->
+                    <div class="stamp-box">
+                        <img src="{% static 'images/cachet_elct.png' %}" 
+                             alt="Cachet KOZ Services" 
+                             class="stamp-img" />
+                    </div>
                 </td>
             </tr>
         </table>

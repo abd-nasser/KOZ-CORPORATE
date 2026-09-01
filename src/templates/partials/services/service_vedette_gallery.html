@@ -94,7 +94,7 @@
         </h2>
 
         <p class="text-slate-200 text-base md:text-lg line-clamp-3 leading-relaxed drop-shadow">
-            {{ service.description_courte }}
+            {{ service.description_courte|default:service.description|truncatechars:150 }}
         </p>
 
         <div class="pt-2">

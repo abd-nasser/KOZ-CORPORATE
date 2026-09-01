@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Financement Direct KOZ | KOZ Services{% endblock %}
+{% block title %}Financement Maison KOZ | KOZ Services{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="https://unpkg.com/splitting/dist/splitting.css" />
@@ -32,12 +32,12 @@
             </span>
 
             <h1 class="text-4xl sm:text-6xl font-black font-heading tracking-tight text-slate-900 leading-tight">
-                Financement Direct <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">KOZ Services</span>
+                Financement Maison <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">KOZ Services</span>
             </h1>
 
             <!-- Accroche animée avec Splitting.js -->
             <p class="text-lg sm:text-xl font-medium text-slate-700 max-w-2xl mx-auto leading-relaxed split-text" data-splitting="words">
-                Accédez à votre véhicule en toute sérénité grâce à nos modalités de paiement échelonné sur-mesure, directement gérées avec notre équipe.
+                Accédez à votre véhicule en toute sérénité grâce à nos modalités de paiement échelonné sur-mesure, directement gérées avec notre équipe interne.
             </p>
         </header>
 
@@ -48,7 +48,7 @@
                     <i class="fas fa-bolt"></i>
                 </div>
                 <h3 class="font-bold font-heading text-lg">Approbation Rapide</h3>
-                <p class="text-slate-600 text-sm">Traitement du dossier en 48h sans démarches bancaires lourdes.</p>
+                <p class="text-slate-600 text-sm">Traitement du dossier de 24/72h sans démarches bancaires lourdes.</p>
             </div>
 
             <div class="p-6 rounded-3xl bg-white border border-slate-200/80 shadow-lg shadow-slate-200/50 space-y-3">
@@ -56,7 +56,7 @@
                     <i class="fas fa-sliders-h"></i>
                 </div>
                 <h3 class="font-bold font-heading text-lg">Échéances Souples</h3>
-                <p class="text-slate-600 text-sm">Choix de la durée d'amortissement adaptée à votre budget mensuel.</p>
+                <p class="text-slate-600 text-sm">Flexibilité de paiement disponible de 1-6 mois maximum</p>
             </div>
 
             <div class="p-6 rounded-3xl bg-white border border-slate-200/80 shadow-lg shadow-slate-200/50 space-y-3">
@@ -64,27 +64,26 @@
                     <i class="fas fa-shield-alt"></i>
                 </div>
                 <h3 class="font-bold font-heading text-lg">Transparence Totale</h3>
-                <p class="text-slate-600 text-sm">Aucun frais caché. Tout est défini clairement dès la signature.</p>
+                <p class="text-slate-600 text-sm">Aucun frais caché. Tout est défini clairement dès la signature du contrat.</p>
             </div>
         </div>
 
         <!-- TEXTE EXPLICATIF AVEC REVELATION SPLITTING AU SCROLL -->
         <div class="bg-white rounded-3xl border border-slate-200/80 p-8 sm:p-12 shadow-xl space-y-8">
             <h2 class="text-2xl font-bold font-heading text-slate-900 border-l-4 border-blue-600 pl-4">
-                Comment fonctionne l'offre KOZ ?
+                Comment fonctionne le financement maison ?
             </h2>
 
             <div class="split-paragraph text-slate-700 text-base sm:text-lg leading-relaxed space-y-6" data-splitting="words">
-                Notre formule de financement interne est conçue pour simplifier l'acquisition de véhicules neufs ou d'occasion. Nous évaluons directement votre dossier sans passer par les lourdeurs administratives traditionnelles. Après un apport initial convenu ensemble, le solde est étalé sur des mensualités fixes ajustées à vos revenus.
+                Notre formule de financement interne est conçue pour simplifier l'acquisition de véhicules neufs ou d'occasion. Nous évaluons directement votre dossier sans passer par les lourdeurs administratives traditionnelles. Après un apport initial de 75%, le solde restant de 25% est étalé sur des mensualités allant de 1-6 mois maximum. des décharges en bonne et due forme vous seront fournis après chaque versement.
             </div>
 
             <div class="pt-6 border-t border-slate-100 space-y-4">
                 <h4 class="font-bold text-slate-900 text-sm uppercase tracking-wider">Documents requis :</h4>
                 <ul class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-slate-600">
-                    <li class="flex items-center gap-2"><i class="fas fa-check-circle text-blue-600"></i> Pièce d'identité en cours de validité</li>
-                    <li class="flex items-center gap-2"><i class="fas fa-check-circle text-blue-600"></i> Justificatif de domicile récent</li>
-                    <li class="flex items-center gap-2"><i class="fas fa-check-circle text-blue-600"></i> 3 derniers bulletins de paie ou relevés</li>
-                    <li class="flex items-center gap-2"><i class="fas fa-check-circle text-blue-600"></i> Apport initial de 20% minimum</li>
+                    <li class="flex items-center gap-2"><i class="fas fa-check-circle text-blue-600"></i> Une pièce d'identité avec photo en cours de validité(Permis de conduire, ou CNIB, ou passeport)</li>
+                    <li class="flex items-center gap-2"><i class="fas fa-check-circle text-blue-600"></i> Une preuve géolocalisée de votre domicile</li>
+                    <li class="flex items-center gap-2"><i class="fas fa-check-circle text-blue-600"></i> Apport initial de 75% minimum</li>
                 </ul>
             </div>
         </div>
@@ -92,9 +91,12 @@
         <!-- CTA -->
         <div class="rounded-3xl bg-gradient-to-r from-blue-600 to-indigo-700 p-8 text-white text-center shadow-xl space-y-4">
             <h3 class="text-2xl font-bold font-heading">Prêt à monter votre dossier ?</h3>
-            <p class="text-blue-100 text-sm max-w-lg mx-auto">Rencontrez un conseiller KOZ Services pour une simulation personnalisée sans engagement.</p>
-            <a href="#contact" class="inline-block px-8 py-3.5 rounded-full bg-white text-blue-600 font-bold text-sm shadow-lg hover:bg-blue-50 transition-all hover:scale-105">
+            <p class="text-blue-100 text-sm max-w-lg mx-auto">Rencontrez un conseiller KOZ Services pour une simulation personnalisée sans engagement ou allez dans l'onglet catalogue.</p>
+            <a href="{% url 'home_app:home-page' %}#contact" class="inline-block px-8 py-3.5 rounded-full bg-white text-blue-600 font-bold text-sm shadow-lg hover:bg-blue-50 transition-all hover:scale-105">
                 Prendre rendez-vous
+            </a>
+            <a href="{% url 'vehicul_app:vehicul-list' %}" class="inline-block px-8 py-3.5 rounded-full bg-blue text-white font-bold text-sm shadow-lg hover:bg-blue-50 transition-all hover:scale-105">
+                Catalogue
             </a>
         </div>
 

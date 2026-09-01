@@ -332,7 +332,7 @@
     <!-- ============================================================ -->
     <!-- HERO SECTION                                                 -->
     <!-- ============================================================ -->
-    <section class="service-hero">
+    <section class="service-hero mt-16">
         <!-- Image de fond -->
         <div class="hero-bg">
             <img src="{% if service.image_principale %}{{ service.image_principale.url }}{% else %}https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=1200{% endif %}" 
@@ -350,7 +350,7 @@
                 </span>
                 
                 <!-- Titre (avec splitting) -->
-                <h1 id="service-title" class="text-4xl md:text-5xl font-black leading-tight mb-4 splitting" data-splitting>
+                <h1 id="service-title" class="text-3xl md:text-3xl font-black leading-tight mb-4 splitting" data-splitting>
                     {{ service.nom }}
                 </h1>
                 

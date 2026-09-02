@@ -1,3 +1,390 @@
+
+
+
+
+<!-- ============================================================ -->
+<!-- ==========     HERO IMMERSIVE (fond fixe)         ========== -->                                
+<!-- ============================================================ -->
+<div class="frame-container">
+    <img id="frame" src="{% static 'hero_frames/frame-0001.jpg' %}" alt="">
+</div>
+    <div id="result-toast-container" class="result-toast-container"></div>
+
+<section class="hero-section  relative min-h-screen flex flex-col items-center justify-center overflow-hidden pt-16">
+        
+        <!-- ===== CONTENU PRINCIPAL ===== -->
+        <div class="container hero_fade mx-auto px-4 text-center text-white relative z-10">
+            <h1 class="text-5xl md:text-7xl font-extrabold leading-tight mb-6">
+                Votre voiture à crédit.<br>
+                <span class="text-blue-400">Vos pièces en ligne.</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-blue-100 max-w-2xl mx-auto mb-8">
+                KOZ Services n'achetez pas une auto, changer votre vie
+            </p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="#section-cta" class="btn btn-white btn-lg text-blue-700 hover:bg-blue-50 shadow-lg">
+                    Découvrir nos offres
+                </a>
+                <a href="#financement" class="btn btn-outline trigger-box btn-lg text-white border-white/50 hover:bg-white/10">
+                    Financer mon auto
+                </a>
+            </div>
+        </div>
+
+        <!-- ===== TROIS BOX LATÉRALES (apparition au scroll) ===== -->
+        
+        
+            
+            <!-- Box 1 : gauche -->
+            <a href="#infos-rdv" >
+                <div class="box-icon"><i class="fas fa-calendar-check"></i></div>
+                <h1 class="box-title">Prendre un rendez vous</h1>
+                <p class="box-text">
+                    Acheter une voiture est une décision importante. <br>
+                    avec <strong class= "text-indigo-950">KOZ SERVICES</strong>, évitez les mauvaises surprises <br>
+                    grace à notre expertise automobible.
+                </p>
+            
+            </a>
+
+
+            <!-- Box 2 : droite -->
+            <a href="#financement">
+                <div class="box-icon"><i class='fas fa-hand-holding-usd' style='font-size:36px'></i></div>
+                <h4 class="box-title">Financement Flexible !</h4>
+                <p class="box-text">
+                    <i class="fas fa-check"></i><strong class= "text-indigo-950">Paiement</strong> en plusieurs fois <br>
+                    <i class="fas fa-check"></i>Adapté à votre budget
+                </p>
+                <p class="box-text">
+                    Decouvrez tout sur les <br>
+                <strong><em  class= "text-indigo-950">Demandes</em></strong> et <strong><em  class= "text-indigo-950">offres</em></strong> <br> 
+                de financement
+                </p>
+
+            </a>
+
+        
+        
+
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+koz-flow-nginx  | 172.70.247.37 - - [25/Aug/2026:09:11:32 +0000] "GET /wp-admin/install.php?step=1 HTTP/1.1" 301 169 "-" "http://koz-corporate.pro/wp-admin/install.php?step=1" "2a06:98c0:3600::103"
+koz-flow-web    | Not Found: /wp-admin/install.php
+koz-flow-nginx  | 172.70.247.38 - - [25/Aug/2026:09:11:32 +0000] "GET /wp-admin/install.php?step=1 HTTP/2.0" 404 10478 "-" "http://koz-corporate.pro/wp-admin/install.php?step=1" "2a06:98c0:3600::103"
+
+    <!-- ============================================================ -->
+    <!-- SECTION ACTUALITÉ – PREMIUM                                  -->
+    <!-- ============================================================ -->
+    <section class="py-16 sm:py-20 relative  actualite_sec  bg-white overflow-hidden">
+        
+        <!-- Dégradé de fond -->
+        <div class="absolute inset-0 pointer-events-none">
+            <div class="absolute top-0 right-0 w-96 h-96 bg-blue-50/30 rounded-full blur-3xl"></div>
+            <div class="absolute bottom-0 left-0 w-96 h-96 bg-indigo-50/30 rounded-full blur-3xl"></div>
+        </div>
+
+        <div class="container mt-0 actualite_fade min-h-auto mx-auto px-4 max-w-7xl relative z-10">
+            
+            <!-- ===== EN-TÊTE ===== -->
+            <div class="text-center informes mb-2">
+                <span class="inline-block text-xs font-semibold text-blue-600 uppercase tracking-[0.2em] bg-blue-50 px-5 py-2 rounded-full mb-4 border border-blue-100">
+                    📰 Actualités
+                </span>
+                <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-800">
+                    Dernières <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">actualités</span>
+                </h2>
+                <p class="text-gray-500  mt-3 max-w-2xl mx-auto text-sm sm:text-base">
+                    Restez informés des dernières nouveautés de KOZ Services
+                </p>
+            </div>
+
+            <!-- ===== GRILLE PRINCIPALE ===== -->
+            {% if actualites %}
+            {% with actu=actualites.0 %}
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+                
+                <!-- ===== COLONNE GAUCHE : HERO (50%) ===== -->
+                <div class="relative actu_video_img act-hero overflow-hidden bg-gray-900 aspect-[6/9] lg:aspect-auto group">
+                    
+                    <!-- VIDÉO OU IMAGE -->
+                    {% if actu.video_file or actu.video_url %}
+                        <!-- Vidéo -->
+                        <div class=" relative w-full h-full">
+                            {% if actu.video_file %}
+                                <video class="w-full  h-full object-cover" controls playsinline preload="metadata">
+                                    <source src="{{ actu.video_file.url }}" type="video/mp4">
+                                </video>
+                            {% elif actu.video_url %}
+                                <iframe class="w-full h-full" src="{{ actu.video_url }}" frameborder="0" allowfullscreen></iframe>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <!-- Image -->
+                        <img src="{{ actu.image_principale.url }}" 
+                            alt="{{ actu.titre }}"
+                            class="w-full h-full actu_video_img object-cover transition duration-700 group-hover:scale-105">
+                        <!-- Overlay -->
+                        
+                    {% endif %}
+                    
+                    <!-- Badges superposés -->
+                    <div class="absolute top-4 left-4 flex flex-wrap gap-2 z-10">
+                        <span class="text-3xl actu_type font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-yellow-800 px-3 py-1"
+                            >
+                            <i class="fas {{ actu.type_icone }} mr-1"></i>
+                            <em>{{ actu.get_type_display }}</em>
+                        </span>
+                        {% if actu.est_vedette %}
+                        <span class="text-xl font-bold actu_vedette  text-yellow-600 px-3 py-1 ">
+                            <i class="fas fa-star mr-1"></i><em>Vedette</em> 
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <div class="absolute bottom-8 left-0 right-0 p-6 z-10 bg-gradient-to-t from-black/90 via-black/50 to-transparent">
+                        <span class="text-xs text-white/60 flex items-center gap-2">
+                            <i class="fas fa-calendar-alt"></i>
+                            {{ actu.date_evenement|date:"d/m Y" }}
+                        </span>
+                        <h3 class="text-xl actu_titre sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-yellow-800 mt-1"><em>{{ actu.titre }}</em></h3>
+                        <p class="text-sm text-white/75 actu_mini_descript mt-1 line-clamp-2">{{ actu.description_courte|default:actu.description|truncatechars:120 }}</p>
+                        
+                    </div>
+                    
+                    
+                    
+                </div>
+
+                <!-- ===== COLONNE DROITE (50%) ===== -->
+                <div class="flex flex-col gap-4">
+                    
+                    <!-- ===== HAUT (60%) : DESCRIPTION AVEC SPLITTING ===== -->
+                    <div class="flex-1 relative bg-gradient-to-br actu_descript from-blue-50/50 to-indigo-50/50 rounded-2xl p-6 border border-blue-100/50 relative overflow-hidden">
+                        <!-- Icône de fond -->
+                        <div class="absolute -top-10 -right-10 text-8xl text-blue-100/20">
+                            <i class="fas fa-quote-right"></i>
+                        </div>
+                        
+                        <span class="text-xs font-semibold text-blue-600 uppercase tracking-wider">
+                            <i class="fas fa-align-left mr-1"></i> À découvrir
+                        </span>
+                        
+                       
+                        <div  class="description-splitting text-leading mt-2">
+                            <p class="text-base sm:text-lg text-gray-700">
+                                {{ actu.description|truncatechars:250 }}
+                            </p>
+                        </div>
+                        
+                        <a href="#" 
+                        class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium text-sm mt-4 group/link">
+                            En savoir plus
+                            <i class="fas fa-arrow-right text-xs group-hover/link:translate-x-1 transition-transform"></i>
+                        </a>
+                    </div>
+
+                    <!-- ===== BAS (40%) : GALERIE D'IMAGES ===== -->
+                    {% if actu.images_list|length > 1 %}
+                    <div class="grid actu-img-galerie grid-cols-2 sm:grid-cols-3 gap-3">
+                        {% for image in actu.images_list %}
+                            {% if forloop.counter0 > 0 and forloop.counter0 < 4 %}
+                            <div class="relative aspect-square rounded-xl overflow-hidden bg-gray-200 group/img cursor-pointer hover:shadow-lg transition"
+                                onclick="openLightbox('{{ image.url }}')">
+                                <img src="{{ image.url }}" 
+                                    alt="{{ actu.titre }}" 
+                                    class="w-full h-full object-cover group-hover/img:scale-110 transition duration-500">
+                                <div class="absolute inset-0 bg-black/20 opacity-0 group-hover/img:opacity-100 transition flex items-center justify-center">
+                                    <i class="fas fa-search-plus text-white text-xl"></i>
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                </div>
+            </div>
+            {% endwith %}
+            {% else %}
+            
+            <!-- ===== AUCUNE ACTUALITÉ ===== -->
+            <div class="text-center py-16">
+                <div class="w-24 h-24 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                    <i class="fas fa-newspaper text-4xl text-gray-400"></i>
+                </div>
+                <p class="text-gray-500 text-lg">Aucune actualité disponible</p>
+                <p class="text-gray-400 text-sm mt-1">Revenez bientôt pour découvrir nos dernières nouvelles</p>
+            </div>
+            
+            {% endif %}
+
+        </div>
+    </section>
+
+    // ============================================================
+// ACTUALITE ANIMATION
+// ============================================================
+document.addEventListener('DOMContentLoaded', function() {
+    gsap.from(".actualite_fade", {
+                scrollTrigger: {
+                    trigger: ".actualite_sec",
+                    start: "top 60%",
+                    end: "top 30%",
+                    toggleActions: "play none none reverse", 
+                    
+                },
+                opacity: 0,
+                y: 200,
+                duration: 1,
+                ease: "power3.out",
+                
+            });
+
+    // ACTUALITE ANIMATION COLONE GAUCHE
+    // =============================================
+
+    gsap.from(".actu_video_img",{
+                scrollTrigger:{
+                    trigger:".actu_video_img",
+                    start: "top 70%",
+                    end: "top 30%",
+                    toggleActions: "play none none reverse", 
+                    
+                },
+                opacity: 0,
+                x: -200,
+                duration: 1,
+                ease: "power3.out",
+            });
+
+    gsap.from(".actu_type", {
+                scrollTrigger: {
+                    trigger: ".actu_type",
+                    start: "top 60%",
+                    end: "top 30%",
+                    toggleActions: "play none none reverse", 
+                    
+                },
+                opacity: 0,
+                x: 200,
+                duration: 1,
+                ease: "power3.out",
+            
+            });
+
+    gsap.from(".actu_vedette",{
+                scrollTrigger:{
+                    trigger:".actu_vedette",
+                    start: "top 65%",
+                    end: "top 30%",
+                    toggleActions: "play none none reverse", 
+                    
+                },
+                opacity: 0,
+                y: 200,
+                duration: 1,
+                ease: "power3.out",
+            });
+    gsap.from(".actu_titre",{
+                scrollTrigger:{
+                    trigger:".actu_titre",
+                    start: "top 90%",
+                    end: "top 30%",
+                    toggleActions: "play none none reverse", 
+                   
+                },
+                opacity: 0,
+                x: -200,
+                duration: 1.5,
+                ease: "power3.out",
+            });
+
+    gsap.from(".actu_mini_descript",{
+                scrollTrigger:{
+                    trigger:".actu_titre",
+                    start: "top 90%",
+                    end: "top 30%",
+                    toggleActions: "play none none reverse", 
+                    
+                },
+                opacity: 0,
+                y: 200,
+                duration: 2,
+                ease: "power3.out",
+            });
+
+
+     // ACTUALITE ANIMATION COLONE DROITE
+    // =============================================
+    gsap.from(".actu_descript",{
+                scrollTrigger:{
+                    trigger:".actu_descript",
+                    start: "top 70%",
+                    end: "top 30%",
+                    toggleActions: "play none none reverse", 
+                    
+                    
+                },
+                opacity: 0,
+                x: 200,
+                duration: 1,
+                ease: "power3.out",
+            });
+    
+    gsap.from(".text-leading",{
+                scrollTrigger:{
+                    trigger:".text-leading",
+                    start: "-20% 50%",
+                    end: "top 30%",
+                    toggleActions: "play none none reverse",
+                    markers:true
+                    
+                    
+                },
+                opacity: 0,
+                y: 200,
+                duration: 1.5,
+                ease: "power3.out",
+            });
+
+    
+    // ACTUALITE ANIMATION GALERIE EN BAS
+    // =============================================
+    gsap.from(".actu-img-galerie",{
+                scrollTrigger:{
+                    trigger:".actu-img-galerie",
+                    start: "-2% 100%",
+                    end: "top 30%",
+                    toggleActions: "play none none reverse", 
+       
+                },
+                opacity: 0,
+                y: 200,
+                duration: 1,
+                ease: "power3.out",
+            });
+
+
+
+});
+
+#######################################
 <div id="result-toast-container" class="result-toast-container"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
@@ -2106,3 +2493,168 @@ gsap.ticker.add((time) => {
 
 // Disable lag smoothing in GSAP to prevent any delay in scroll animations
 gsap.ticker.lagSmoothing(0);
+
+
+
+
+
+
+
+
+
+  <!-- ============================================================ -->
+    <!-- SECTION STATS – STYLE ANIME                                  -->
+    <!-- ============================================================ -->
+<section class="py-20 relative bg-white section-stats overflow-hidden section_stati">
+        
+        <!-- Effet de fond "aura" -->
+        <div class="absolute inset-0 opacity-30">
+            <div class="absolute top-0 left-1/4 w-96 h-96 bg-blue-600 rounded-full blur-3xl"></div>
+            <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-indigo-800 rounded-full blur-3xl"></div>
+        </div>
+
+        <div class="container stats_fade mx-auto px-4 relative z-10">
+            
+            <!-- Titre -->
+            <div class="text-center mb-16">
+                <span class="inline-block text-xs font-semibold text-blue-500 uppercase tracking-widest bg-blue-500/20 px-4 py-1.5 rounded-full mb-3 border border-blue-400/30">
+                    ⚡ KOZ EN CHIFFRES
+                </span>
+                <h2 class="text-4xl md:text-5xl font-bold text-black">
+                    La <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-800">légende</span> en construction
+                </h2>
+                <p class="text-gray-400 mt-3 max-w-2xl mx-auto">
+                    Des chiffres qui parlent d'eux-mêmes. Notre mission : vous accompagner à chaque étape.
+                </p>
+            </div>
+
+            <!-- Grille de stats -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                
+                <!-- Stat 1 : Clients -->
+                <div class="stat-card stat-card_1 group bg-blue-400/8 backdrop-blur-sm  p-6 border border-indigo-800/10 hover:border-blue-400/50 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-500/10">
+                    <div class="text-4xl mb-3 text-black group-hover:scale-110 transition-transform duration-300">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-number text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-800" data-target="15">
+                        0
+                    </div>
+                    <p class="text-sm text-gray-400 mt-2 font-medium">Clients satisfaits</p>
+                    <div class="w-12 h-1 mx-auto mt-3 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full"></div>
+                </div>
+
+                <!-- Stat 2 : Véhicules -->
+                <div class="stat-card stat-card_2 group bg-blue-400/8 backdrop-blur-sm  p-6 border border-indigo-800/10 hover:border-blue-400/50 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-500/10">
+                    <div class="text-4xl mb-3 text-black group-hover:scale-110 transition-transform duration-300">
+                        <i class="fas fa-car"></i>
+                    </div>
+                    <div class="stat-number text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-800" data-target="320">
+                        0
+                    </div>
+                    <p class="text-sm text-gray-400 mt-2 font-medium">Véhicules en stock</p>
+                    <div class="w-12 h-1 mx-auto mt-3 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full"></div>
+                </div>
+
+                <!-- Stat 3 : Financements -->
+                <div class="stat-card stat-card_3 group bg-blue-400/8 backdrop-blur-sm  p-6 border border-indigo-800/10 hover:border-blue-400/50 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-500/10">
+                    <div class="text-4xl mb-3 text-black group-hover:scale-110 transition-transform duration-300">
+                        <i class="fas fa-hand-holding-usd"></i>
+                    </div>
+                    <div class="stat-number text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-800" data-target="850">
+                        0
+                    </div>
+                    <p class="text-sm text-gray-400 mt-2 font-medium">Financements accordés</p>
+                    <div class="w-12 h-1 mx-auto mt-3 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full"></div>
+                </div>
+
+                <!-- Stat 4 : Services -->
+                <div class="stat-card stat-card_4 group bg-blue-400/8 backdrop-blur-sm  p-6 border border-indigo-800/10 hover:border-blue-400/50 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-500/10">
+                    <div class="text-4xl mb-3 text-black group-hover:scale-110 transition-transform duration-300">
+                        <i class="fas fa-wrench"></i>
+                    </div>
+                    <div class="stat-number text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-800" data-target="1200">
+                        0
+                    </div>
+                    <p class="text-sm text-gray-400 mt-2 font-medium">Services réalisés</p>
+                    <div class="w-12 h-1 mx-auto mt-3 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full"></div>
+                </div>
+
+            </div>
+
+            <!-- Ligne d'énergie (style anime) -->
+            <div class="mt-12 flex justify-center">
+                <div class="w-64 h-1 bg-gradient-to-r from-transparent via-blue-400 to-transparent rounded-full animate-pulse"></div>
+            </div>
+
+        </div>
+</section>
+
+
+// ============================================================
+// ANIME STAT SECTION
+// ============================================================
+document.addEventListener('DOMContentLoaded', function() {
+
+    
+    gsap.from(".stats_fade", {
+                scrollTrigger: {
+                    trigger: ".section-stats",
+                    start: "top 70%",
+                    end: "top 30%",
+                    toggleActions: "play none none reverse",
+                     
+                     
+                },
+                opacity: 0,
+                y: 200,
+                duration: 1,
+                ease: "power3.out",
+            
+            });
+
+        
+    
+    const stats = document.querySelectorAll('.stat-number');
+    
+    if (stats.length === 0) return;
+    
+    // Fonction d'animation du compteur
+    function animateCounter(el) {
+        const target = parseInt(el.getAttribute('data-target'));
+        const duration = 2000; // 2 secondes
+        const startTime = performance.now();
+        
+        function updateCounter(currentTime) {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3); // easing cubic-out
+            
+            const currentValue = Math.floor(eased * target);
+            el.textContent = currentValue.toLocaleString();
+            
+            if (progress < 1) {
+                requestAnimationFrame(updateCounter);
+            } else {
+                el.textContent = target.toLocaleString();
+            }
+        }
+        
+        requestAnimationFrame(updateCounter);
+    }
+    
+    // Utiliser IntersectionObserver pour déclencher l'animation
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const el = entry.target;
+                animateCounter(el);
+                observer.unobserve(el); // Une seule fois
+            }
+        });
+    }, { threshold: 0.5 });
+    
+    stats.forEach(stat => observer.observe(stat));
+
+
+});
+

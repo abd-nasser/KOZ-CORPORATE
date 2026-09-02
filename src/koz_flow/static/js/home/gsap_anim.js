@@ -350,7 +350,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 trigger: '.img-slide-trigger',
                 start: "top 80%",
                 end: "top 40%",
-                toggleActions: "play none none reverse"
+                toggleActions: "play none none reverse",
+                
             }
         });
 

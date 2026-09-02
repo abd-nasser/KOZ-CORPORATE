@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Partenariat Fidelis Finance | KOZ Services{% endblock %}
+{% block title %}Partenariats externes | KOZ Services{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="https://unpkg.com/splitting/dist/splitting.css" />
@@ -32,11 +32,11 @@
             </span>
 
             <h1 class="text-4xl sm:text-6xl font-black font-heading tracking-tight text-slate-900 leading-tight">
-                Financement via <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">Fidelis Finance</span>
+                Partenaires financiers <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">Externes</span>
             </h1>
 
             <p class="text-lg sm:text-xl font-medium text-slate-700 max-w-2xl mx-auto leading-relaxed split-text" data-splitting="words">
-                Bénéficiez de la puissance et de la sécurité d'un établissement financier de premier plan pour concrétiser vos projets automobiles professionnels et personnels.
+                Bénéficiez de la puissance et de la sécurité d'établissements financiers de premier plan pour concrétiser vos projets automobiles professionnels et personnels.
             </p>
         </header>
 
@@ -47,7 +47,7 @@
             </h2>
 
             <div class="split-paragraph text-slate-700 text-base sm:text-lg leading-relaxed space-y-6" data-splitting="words">
-                Grâce au partenariat stratégique entre KOZ Services et Fidelis Finance, nos clients profitent de taux préférentiels et de formules de leasing adaptées (Crédit-Bail automobile). Que vous soyez un particulier ou une entreprise renforçant sa flotte de véhicules, l'accompagnement est structuré de bout en bout.
+                Grâce au partenariat stratégique entre KOZ Services et plusieurs institutions financières de la place, nos clients profitent de taux préférentiels et de formules de leasing adaptées (Crédit-Bail automobile). Que vous soyez un particulier, une entreprise, un organisme non gouvernemental (ONG) ou une institution gouvernementale renforçant sa flotte de véhicules, KOZ SERVICES vous offre un accompagnement  structuré et personnalisé de bout en bout.
             </div>
 
             <!-- ETAPES DU PROCESSUS -->
@@ -63,14 +63,14 @@
 
                     <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200/60 space-y-2">
                         <span class="w-8 h-8 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center">2</span>
-                        <h4 class="font-bold text-slate-900 text-sm">Montage du Dossier</h4>
-                        <p class="text-slate-600 text-xs">Transmission accélérée des pièces à l'équipe Fidelis Finance.</p>
+                        <h4 class="font-bold text-slate-900 text-sm">Montage du Dossier de financement</h4>
+                        <p class="text-slate-600 text-xs">Analyse accélérée du dossier de financement via nos conseillers experts.</p>
                     </div>
 
                     <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200/60 space-y-2">
                         <span class="w-8 h-8 rounded-full bg-emerald-600 text-white font-bold text-xs flex items-center justify-center">3</span>
                         <h4 class="font-bold text-slate-900 text-sm">Livraison</h4>
-                        <p class="text-slate-600 text-xs">Validation de l'accord et remise des clés de votre véhicule.</p>
+                        <p class="text-slate-600 text-xs">Réception de votre vehicule auprès de l'équipe KOZ SERVICES.</p>
                     </div>
                 </div>
             </div>
@@ -79,9 +79,9 @@
         <!-- CTA -->
         <div class="rounded-3xl bg-slate-900 p-8 text-white text-center shadow-xl space-y-4">
             <h3 class="text-2xl font-bold font-heading">Soumettre une étude de financement</h3>
-            <p class="text-slate-300 text-sm max-w-lg mx-auto">Nos conseillers sont à votre disposition pour réaliser une simulation avec Fidelis Finance.</p>
-            <a href="#contact" class="inline-block px-8 py-3.5 rounded-full bg-blue-600 text-white font-bold text-sm shadow-lg hover:bg-blue-700 transition-all hover:scale-105">
-                Demander une étude
+            <p class="text-slate-300 text-sm max-w-lg mx-auto">Vous pouvez dès maintenant soumettre une demande de financement en passant par l'onglet catalogue.</p>
+            <a href="{% url 'vehicul_app:site-vehicul-list' %}" class="inline-block px-8 py-3.5 rounded-full bg-blue-600 text-white font-bold text-sm shadow-lg hover:bg-blue-700 transition-all hover:scale-105">
+                catalogue
             </a>
         </div>
 

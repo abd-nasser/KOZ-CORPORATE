@@ -22,7 +22,7 @@
     <meta property="og:image" content="https://koz-corporate.pro/{% static 'images/Koz_logo_noBack.png' %}">
 
     <!-- GOOGLE ANALYTICS GA4 + CONSENT MODE V2 -->
-    <!-- ⚠️ Remplace G-XXXXXXXXXX par ton ID Analytics -->
+    <!-- ⚠️ Remplace G-CSDKP2N12T par ton ID Analytics -->
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag(){ dataLayer.push(arguments); }
@@ -34,10 +34,10 @@
             'ad_personalization': 'denied'
         });
     </script>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-CSDKP2N12T"></script>
     <script>
         gtag('js', new Date());
-        gtag('config', 'G-XXXXXXXXXX', { 'anonymize_ip': true });
+        gtag('config', 'G-CSDKP2N12T', { 'anonymize_ip': true });
     </script>
 
     {% tailwind_css %}
@@ -347,6 +347,80 @@
             gsap.ticker.lagSmoothing();
         });
     </script>
+
+    <script>
+    // ⚠️ REMPLACE CETTE VALEUR PAR TON PROPRE ID GOOGLE ANALYTICS (G-CSDKP2N12T)
+    const GA_MEASUREMENT_ID = 'G-CSDKP2N12T';
+
+    // Charge Google Analytics de manière dynamique uniquement après consentement
+    function initAnalytics() {
+        if (window.GA_INITIALIZED || GA_MEASUREMENT_ID === 'G-CSDKP2N12T') return;
+        window.GA_INITIALIZED = true;
+
+        // Injection du script externe Google Analytics
+        const script = document.createElement('script');
+        script.async = true;
+        script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
+        document.head.appendChild(script);
+
+        // Initialisation du dataLayer
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){ dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', GA_MEASUREMENT_ID, {
+            'anonymize_ip': true // Option RGPD pour anonymiser l'IP
+        });
+
+        console.log('🚀 Google Analytics activé avec succès.');
+    }
+
+    function showCookieBanner() {
+        const banner = document.getElementById('cookie-consent-banner');
+        if (!banner) return;
+        
+        banner.classList.remove('hidden');
+        requestAnimationFrame(() => {
+            banner.classList.remove('translate-y-10', 'opacity-0');
+        });
+    }
+
+    function hideCookieBanner() {
+        const banner = document.getElementById('cookie-consent-banner');
+        if (!banner) return;
+
+        banner.classList.add('translate-y-10', 'opacity-0');
+        setTimeout(() => {
+            banner.classList.add('hidden');
+        }, 500);
+    }
+
+    function handleCookieConsent(accepted) {
+        const value = accepted ? 'accepted' : 'refused';
+        
+        // Cookie valide 1 an
+        document.cookie = `cookie_consent=${value}; max-age=${60 * 60 * 24 * 365}; path=/; SameSite=Lax; Secure`;
+        
+        hideCookieBanner();
+
+        if (accepted) {
+            initAnalytics();
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const consent = document.cookie.split('; ').find(row => row.startsWith('cookie_consent='));
+        
+        if (!consent) {
+            // Affiche la bannière après 1.5s
+            setTimeout(showCookieBanner, 1500);
+        } else {
+            const consentValue = consent.split('=')[1];
+            if (consentValue === 'accepted') {
+                initAnalytics();
+            }
+        }
+    });
+</script>
  <script>
             // Burger menu
             document.getElementById('burgerBtn')?.addEventListener('click', function() {

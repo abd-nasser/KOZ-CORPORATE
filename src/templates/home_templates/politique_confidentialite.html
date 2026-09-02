@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Politique de Confidentialité - KOZ Services{% endblock %}
+
+{% block content %}
+<section class="bg-slate-50 text-slate-700 mt-28 py-12 md:py-20 px-4 sm:px-6 lg:px-8 min-h-screen">
+    <div class="max-w-4xl mx-auto bg-white border border-slate-200/80 rounded-3xl p-6 md:p-12 shadow-xl shadow-slate-200/50">
+        
+        <!-- En-tête -->
+        <div class="border-b border-slate-200 pb-8 mb-8 text-center md:text-left">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-semibold mb-4">
+                <i class="fas fa-shield-alt text-blue-600"></i> Protection des données
+            </div>
+            <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">Politique de Confidentialité</h1>
+            <p class="text-slate-500 text-sm mt-2">Dernière mise à jour : {% now "j F Y" %}</p>
+        </div>
+
+        <!-- Sommaire / Intro -->
+        <div class="space-y-8 text-sm md:text-base leading-relaxed text-slate-600">
+            
+            <p>
+                Chez <strong class="text-slate-900 font-semibold">KOZ Services</strong> (accessible depuis <a href="https://koz-corporate.pro/" class="text-blue-600 font-medium hover:underline">koz-corporate.pro</a>), la confidentialité et la sécurité de vos données personnelles sont une priorité absolue. Cette politique explique comment nous collectons, utilisons, protégeons et partageons vos informations dans le cadre de nos services : achat de pièces détachées, services de maintenance, demandes de financement automobile à crédit et création de compte utilisateur.
+            </p>
+
+            <!-- 1. Responsable du traitement -->
+            <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-5 md:p-6">
+                <h2 class="text-xl font-bold text-slate-900 flex items-center gap-3 mb-3">
+                    <span class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center text-sm font-bold shadow-md shadow-blue-600/20">1</span>
+                    Responsable du Traitement
+                </h2>
+                <p>
+                    Le responsable du traitement des données personnelles est la société <strong class="text-slate-900">KOZ Services</strong>.<br>
+                    Pour toute question relative à vos données personnelles ou pour exercer vos droits, vous pouvez nous contacter :
+                </p>
+                <ul class="list-disc list-inside mt-2 space-y-1 text-slate-600">
+                    <li><strong>E-mail :</strong> <a href="mailto:koz.corporate@gmail.com" class="text-blue-600 hover:underline">koz.corporate@gmail.com</a></li>
+                    <li><strong>Site web :</strong> <a href="https://koz-corporate.pro" class="text-blue-600 hover:underline">https://koz-corporate.pro</a></li>
+                </ul>
+            </div>
+
+            <!-- 2. Données collectées et finalités -->
+            <div>
+                <h2 class="text-xl font-bold text-slate-900 flex items-center gap-3 mb-4">
+                    <span class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center text-sm font-bold shadow-md shadow-blue-600/20">2</span>
+                    Données collectées et Finalités du traitement
+                </h2>
+
+                <div class="space-y-4">
+                    <!-- Inscription -->
+                    <div class="border-l-4 border-blue-600 bg-blue-50/40 rounded-r-xl p-4">
+                        <h3 class="text-lg font-bold text-slate-900">A. Inscription et Gestion du Compte Client</h3>
+                        <p class="text-slate-600 text-sm mt-1">
+                            <strong>Données collectées :</strong> Nom, prénom, adresse e-mail, numéro de téléphone, mot de passe (haché de manière sécurisée).<br>
+                            <strong>Finalité :</strong> Création et gestion de votre espace client, authentification sécurisée, suivi de vos activités sur le site.
+                        </p>
+                    </div>
+
+                    <!-- Pièces auto -->
+                    <div class="border-l-4 border-emerald-600 bg-emerald-50/40 rounded-r-xl p-4">
+                        <h3 class="text-lg font-bold text-slate-900">B. Achat de Produits en Ligne (Pièces Détachées)</h3>
+                        <p class="text-slate-600 text-sm mt-1">
+                            <strong>Données collectées :</strong> Adresse de livraison, adresse de facturation, historique des commandes, détails de paiement.<br>
+                            <strong>Finalité :</strong> Traitement de la commande, expédition, facturation, suivi de livraison et service après-vente (SAV).
+                        </p>
+                    </div>
+
+                    <!-- Maintenance -->
+                    <div class="border-l-4 border-amber-500 bg-amber-50/40 rounded-r-xl p-4">
+                        <h3 class="text-lg font-bold text-slate-900">C. Services de Maintenance & Prise de Rendez-vous</h3>
+                        <p class="text-slate-600 text-sm mt-1">
+                            <strong>Données collectées :</strong> Informations sur le véhicule (marque, modèle, immatriculation, kilométrage), historique des interventions.<br>
+                            <strong>Finalité :</strong> Planification des prestations en atelier, diagnostic technique et entretien de votre véhicule.
+                        </p>
+                    </div>
+
+                    <!-- Crédit / Documents -->
+                    <div class="border-l-4 border-indigo-600 bg-indigo-50/40 rounded-r-xl p-4">
+                        <h3 class="text-lg font-bold text-slate-900">D. Demande de Financement Automobile (Voiture à Crédit)</h3>
+                        <p class="text-slate-600 text-sm mt-1">
+                            <strong>Données et Documents collectés :</strong> Pièce d'identité (CNI / Passeport), justificatifs de domicile, bulletins de paie / justificatifs de revenus, relevés bancaires, situation professionnelle.<br>
+                            <strong>Finalité :</strong> Étude de solvabilité, constitution et transmission du dossier d'éligibilité au crédit auprès de nos partenaires financiers agréés.<br>
+                            <span class="text-indigo-900 font-semibold block mt-1">🔒 Les documents transmis sont stockés sur un serveur sécurisé avec accès strictly restreint.</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Cookies & Analytics -->
+            <div>
+                <h2 class="text-xl font-bold text-slate-900 flex items-center gap-3 mb-3">
+                    <span class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center text-sm font-bold shadow-md shadow-blue-600/20">3</span>
+                    Cookies & Mesure d'Audience (Google Analytics)
+                </h2>
+                <p>
+                    Nous utilisons des cookies techniques nécessaires au bon fonctionnement du site (session Django et protection CSRF).
+                </p>
+                <p class="mt-2">
+                    Si vous y consentez via notre bannière de cookies, nous utilisons également <strong class="text-slate-900">Google Analytics (GA4)</strong> pour analyser de manière anonyme la fréquentation et l'utilisation du site afin d'améliorer nos services. Vous pouvez accepter ou refuser ces cookies à tout moment.
+                </p>
+            </div>
+
+            <!-- 4. Partage des données -->
+            <div>
+                <h2 class="text-xl font-bold text-slate-900 flex items-center gap-3 mb-3">
+                    <span class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center text-sm font-bold shadow-md shadow-blue-600/20">4</span>
+                    Partage et Destinataires des Données
+                </h2>
+                <p>
+                    KOZ Services ne vend et ne loue <strong class="text-slate-900">AUCUNE</strong> de vos données personnelles à des tiers à des fins publicitaires. Vos données sont partagées uniquement avec :
+                </p>
+                <ul class="list-disc list-inside mt-2 space-y-1 text-slate-600">
+                    <li><strong>Organismes de Crédit Partenaires :</strong> Uniquement dans le cadre strict de l'instruction de votre demande de véhicule à crédit.</li>
+                    <li><strong>Transporteurs & Livreurs :</strong> Uniquement les données d'adresse nécessaires pour la livraison de vos pièces auto.</li>
+                    <li><strong>Prestataires Techniques :</strong> Nos hébergeurs et sous-traitants sous obligation stricte de confidentialité.</li>
+                </ul>
+            </div>
+
+            <!-- 5. Conservation des données -->
+            <div>
+                <h2 class="text-xl font-bold text-slate-900 flex items-center gap-3 mb-3">
+                    <span class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center text-sm font-bold shadow-md shadow-blue-600/20">5</span>
+                    Durée de Conservation
+                </h2>
+                <p>
+                    Vos données sont conservées uniquement pendant la durée nécessaire aux finalités pour lesquelles elles ont été collectées :
+                </p>
+                <ul class="list-disc list-inside mt-2 space-y-1 text-slate-600">
+                    <li><strong>Compte client :</strong> Conservé tant que le compte est actif, puis supprimé 3 ans après la dernière activité.</li>
+                    <li><strong>Documents de dossier de crédit :</strong> Conservés pendant la durée de traitement du dossier, puis archivés selon les obligations légales obligatoires.</li>
+                    <li><strong>Factures et Commandes :</strong> Conservées 10 ans selon les obligations comptables et fiscales.</li>
+                </ul>
+            </div>
+
+            <!-- 6. Sécurité -->
+            <div>
+                <h2 class="text-xl font-bold text-slate-900 flex items-center gap-3 mb-3">
+                    <span class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center text-sm font-bold shadow-md shadow-blue-600/20">6</span>
+                    Sécurité des Données
+                </h2>
+                <p>
+                    Nous mettons en œuvre des mesures de sécurité techniques (chiffrement SSL/HTTPS, mots de passe hachés, restriction des accès) et organisationnelles pour protéger vos données contre tout accès non autorisé, perte, altération ou divulgation.
+                </p>
+            </div>
+
+            <!-- 7. Vos Droits -->
+            <div class="bg-blue-50/80 border border-blue-200 rounded-2xl p-5 md:p-6">
+                <h2 class="text-xl font-bold text-slate-900 flex items-center gap-3 mb-3">
+                    <span class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center text-sm font-bold shadow-md shadow-blue-600/20">7</span>
+                    Vos Droits sur vos Données
+                </h2>
+                <p class="mb-3 text-slate-700">
+                    Conformément aux réglementations applicables sur la protection des données (RGPD), vous disposez des droits suivants :
+                </p>
+                <ul class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-slate-700">
+                    <li class="flex items-center gap-2"><i class="fas fa-check text-blue-600"></i> Droit d'accès à vos données</li>
+                    <li class="flex items-center gap-2"><i class="fas fa-check text-blue-600"></i> Droit de rectification</li>
+                    <li class="flex items-center gap-2"><i class="fas fa-check text-blue-600"></i> Droit à l'effacement ("droit à l'oubli")</li>
+                    <li class="flex items-center gap-2"><i class="fas fa-check text-blue-600"></i> Droit de limitation du traitement</li>
+                    <li class="flex items-center gap-2"><i class="fas fa-check text-blue-600"></i> Droit à la portabilité des données</li>
+                    <li class="flex items-center gap-2"><i class="fas fa-check text-blue-600"></i> Droit d'opposition</li>
+                </ul>
+                <p class="mt-4 text-xs text-slate-500">
+                    Pour exercer l'un de ces droits, envoyez un e-mail à <a href="mailto:koz.corporate@gmail.com" class="text-blue-600 underline font-medium">koz.corporate@gmail.com</a>. Nous vous répondrons dans les meilleurs délais.
+                </p>
+            </div>
+
+        </div>
+    </div>
+</section>
+{% endblock %}

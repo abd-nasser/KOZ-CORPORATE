@@ -6,18 +6,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    
+    <!-- SEO DE BASE -->
+    <title>{% block meta_title %}KOZ Services - Votre voiture à crédit, vos pièces en ligne{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}Achetez votre véhicule à crédit ou vos pièces détachées en ligne en toute simplicité avec KOZ Services.{% endblock %}">
     <meta name="google-site-verification" content="8zepDTq803R8qsLctGCJ5kqWdBvS4pCEkoOgm_bwkQo"/>
-    {% tailwind_css %}
-    <title>KOZ Services - Votre voiture à crédit, vos pièces en ligne</title>
-     <!-- FAVICON PRINCIPAL (Format PNG ou ICO) -->
-    <link rel="icon" type="image/png" href="{% static 'images/Koz_logo_noBack.png' %}">
-
-    <!-- BONUS : Pour les appareils Apple (iPhone / iPad sur l'écran d'accueil) -->
-    <link rel="apple-touch-icon" href="{% static 'images/Koz_logo_noBack.png' %}">
-    <link rel="stylesheet" href="{% static 'css/home/home_style.css' %}">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="alternate" href="https://koz-corporate.pro/" hreflang="fr" />
     <link rel="alternate" href="https://koz-corporate.pro/" hreflang="x-default" />
+
+    <!-- OPEN GRAPH (Aperçu lors du partage sur WhatsApp / Facebook / LinkedIn) -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://koz-corporate.pro/">
+    <meta property="og:title" content="KOZ Services - Votre voiture à crédit, vos pièces en ligne">
+    <meta property="og:description" content="Achetez votre véhicule à crédit ou vos pièces détachées en ligne.">
+    <meta property="og:image" content="https://koz-corporate.pro/{% static 'images/Koz_logo_noBack.png' %}">
+
+    <!-- GOOGLE ANALYTICS GA4 + CONSENT MODE V2 -->
+    <!-- ⚠️ Remplace G-XXXXXXXXXX par ton ID Analytics -->
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){ dataLayer.push(arguments); }
+        const isConsentAccepted = document.cookie.split('; ').some(row => row.startsWith('cookie_consent=accepted'));
+        gtag('consent', 'default', {
+            'analytics_storage': isConsentAccepted ? 'granted' : 'denied',
+            'ad_storage': 'denied',
+            'ad_user_data': 'denied',
+            'ad_personalization': 'denied'
+        });
+    </script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+        gtag('js', new Date());
+        gtag('config', 'G-XXXXXXXXXX', { 'anonymize_ip': true });
+    </script>
+
+    {% tailwind_css %}
+
+    <!-- FAVICONS -->
+    <link rel="icon" type="image/png" href="{% static 'images/Koz_logo_noBack.png' %}">
+    <link rel="apple-touch-icon" href="{% static 'images/Koz_logo_noBack.png' %}">
+
+    <!-- GOOGLE FONTS (Urbanist + Plus Jakarta Sans) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Urbanist:wght@600;700;800&display=swap" rel="stylesheet">
+
+    <!-- STYLES & LIBS -->
+    <link rel="stylesheet" href="{% static 'css/home/home_style.css' %}">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
     <script src="{% static 'js/htmx.min.js' %}" defer></script>
     <script src="{% static 'js/vendor/gsap.min.js' %}" defer></script>
@@ -25,6 +60,7 @@
     <script src="{% static 'js/vendor/lenis.min.js' %}" defer></script>
     <script src="https://cdn.plyr.io/3.7.8/plyr.js" defer></script>
     <script src="{% static 'js/home/gsap_anim.js' %}" defer></script>
+
     <script defer>
         tailwind.config = {
             theme: {
@@ -98,6 +134,10 @@
                 <a href="{% url 'home_app:home-page' %}#contact" 
                 class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
                     Contact
+                </a>
+                 <a href="{% url 'home_app:home-page' %}#apropos" 
+                class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                    À propos
                 </a>
             </div>
 
@@ -235,36 +275,43 @@
 
                 </a>
                 <p class="text-xs font-light text-slate-400 leading-relaxed">
-                    N'achetez pas seulement une auto, changez votre vie. Solutions d'achat à crédit, pièces détachées et accompagnement sur-mesure.
+                    N'achetez pas une auto, changez votre vie. Solutions d'achat à crédit, produits d'entretient auto et service de maintenance.
                 </p>
             </div>
 
-          
             <div>
                 <h4 class="text-white font-bold font-heading mb-4">Navigation</h4>
                 <ul class="space-y-2 text-xs">
                     <li><a href="{% url 'home_app:home-page' %}" class="hover:text-white transition-colors">Accueil</a></li>
                     <li><a href="{% url 'home_app:actualites-list' %}" class="hover:text-white transition-colors">Actualités & Événements</a></li>
-                    <li><a href="#financement" class="hover:text-white transition-colors">Demande de crédit</a></li>
+                    <li><a href="{% url 'products_app:products-list' %}" class="hover:text-white transition-colors">Catalogue</a></li>
+                    <li><a href="{% url 'services_app:services-list' %}" class="hover:text-white transition-colors">Nos services</a></li>
+                    <li><a href="{% url 'products_app:products-list' %}" class="hover:text-white transition-colors">Nos produits</a></li>
+                    <li><a href="{% url 'home_app:home-page' %}#apropos" class="hover:text-white transition-colors">À propos de nous</a></li>
+                    <li><a href="{% url 'home_app:home-page' %}#financement" class="hover:text-white transition-colors">Financement</a></li>
                 </ul>
             </div>
+
 
             <div>
                 <h4 class="text-white font-bold font-heading mb-4">Services</h4>
                 <ul class="space-y-2 text-xs">
-                    <li><a href="#" class="hover:text-white transition-colors">Vente de Véhicules</a></li>
-                    <li><a href="#" class="hover:text-white transition-colors">Pièces Détachées en Ligne</a></li>
-                    <li><a href="#" class="hover:text-white transition-colors">Expertise & Rendez-vous</a></li>
+                    <li><a href="https://www.koz-corporate.pro/services/detail/1/service/public" class="hover:text-white transition-colors">🔧 Inspection Complète</a></li>
+                    <li><a href="https://www.koz-corporate.pro/services/detail/9/service/public" class="hover:text-white transition-colors">✨ Lavage & Esthétique Automobile</a></li>
+                    <li><a href="https://www.koz-corporate.pro/services/detail/3/service/public" class="hover:text-white transition-colors">⚙️ Mécanique générale</a></li>
+                    <li><a href="https://www.koz-corporate.pro/services/detail/5/service/public" class="hover:text-white transition-colors">🚗 Vente de véhicules neufs & d'occasions</a></li>
+                    <li><a href="https://www.koz-corporate.pro/services/detail/6/service/public" class="hover:text-white transition-colors">⚡️ Électricité & Électronique Automobile</a></li>
+                    <li><a href="https://www.koz-corporate.pro/services/detail/7/service/public" class="hover:text-white transition-colors">❄️ Service de climatisation</a></li>
                 </ul>
             </div>
 
             <div>
                 <h4 class="text-white font-bold font-heading mb-4">Contact</h4>
                 <ul class="space-y-2 text-xs">
-                    <li><i class="fas fa-envelope mr-2 text-blue-400"></i> koz.corporate@gmail.com</li>
-                    <li><i class="fas fa-phone mr-2 text-blue-400"></i>+226-06-59-15-23 / 226 76-20-80-08/li>
-                    <li><i class="fas fa-map-marker-alt mr-2 text-blue-400"></i> Ouagadougou, Burkina Faso</li>
-                  
+                    <li><i class="fas fa-envelope mr-2 text-blue-400"></i> <a href="mailto:koz.corporate@gmail.com" class="text-blue-600 hover:underline">koz.corporate@gmail.com</a></li>
+                    <li><i class="fas fa-globe mr-2 text-blue-400"></i> <a href="https://koz-corporate.pro" target="_blank" class="text-blue-600 hover:underline">https://koz-corporate.pro</a></li>
+                    <li><i class="fas fa-phone mr-2 text-blue-400"></i> <a href="tel:+22606591523" class="text-blue-600 hover:underline">+226-06-59-15-23</a> / <a href="tel:+22676208008" class="text-blue-600 hover:underline">226 76-20-80-08</a></li>
+                    <li><i class="fas fa-map-marker-alt mr-2 text-blue-400"></i> Ouagadougou, Burkina Faso <br> Tampouy secteur 16 </li>
                 </ul>
             </div>
 

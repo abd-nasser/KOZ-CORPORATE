@@ -24,7 +24,8 @@ from django.conf import settings
 from .models import RendezVous
 import time
 
-
+def politique_confidentialite(request):
+    return render(request, 'home_templates/politique_confidentialite.html')
 
 def home_page_view(request):
     """
@@ -70,6 +71,7 @@ def home_page_view(request):
         "likes": Vehicul.objects.annotate(nb_favoris=Count('favoris_de')).order_by('-nb_favoris')
     }
     return render(request, "home_templates/home_page.html", ctx)
+
 
 
 def vehicules_partial(request):
@@ -439,6 +441,7 @@ def prise_rdv(request):
         nom = request.POST.get('nom')
         prenom = request.POST.get('prenom')
         telephone = request.POST.get('telephone')
+        email = request.POST.get('email')
         date = request.POST.get('date')
         heure = request.POST.get('heure')
         motif = request.POST.get('motif')
@@ -449,6 +452,7 @@ def prise_rdv(request):
             client=request.user if request.user.is_authenticated else None,
             nom = nom if nom else None,
             prenom = prenom if prenom else None,
+            email = email if email else None,
             telephone = telephone if telephone else None,
             date_rendez_vous=f"{date} {heure}",
             motif=motif,
@@ -460,7 +464,8 @@ def prise_rdv(request):
             'success': True,
             'title': '✅ Enregisté',
             'message': f"""Votre rendez-vous du {date} à {heure} a été enregistré.
-                            Un commercial vous contactera sous 24h."""
+                            Un commercial vous contactera sous 24h.""",
+            'reload_on_close': True
         })
     return redirect(request, 'home_app:home-page')
 

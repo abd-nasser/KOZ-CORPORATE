@@ -427,6 +427,7 @@ class RendezVous(models.Model):
     nom = models.CharField(max_length=255, verbose_name="Nom", null=True, blank=True )
     prenom = models.CharField(max_length=255, verbose_name="Prenom", null=True, blank=True)
     telephone = models.CharField(max_length=255, verbose_name="telephone", null=True, blank=True)
+    email = models.EmailField(verbose_name="Email", null=True, blank=True)
     date_rendez_vous = models.DateTimeField(verbose_name="Date et heure")
     duree = models.PositiveIntegerField(default=60, verbose_name="Durée (minutes)")
     motif = models.CharField(max_length=255, verbose_name="Motif")

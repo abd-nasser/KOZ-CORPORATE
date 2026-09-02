@@ -40,8 +40,5 @@ RUN chmod 755 /app/staticfiles media
 RUN python manage.py collectstatic --noinput
 
 EXPOSE 8000
-<<<<<<< Updated upstream
+# ✅ Le serveur Gunicorn est configuré pour écouter sur toutes les interfaces réseau 
 CMD [ "gunicorn", "--bind", "0.0.0.0:8000", "--timeout", "300", "--workers", "3", "koz_flow.wsgi:application" ]
-=======
-CMD [ "gunicorn", "--bind", "0.0.0.0:8000", "--timeout", "300", "--workers", "3", "koz_flow.wsgi:application" ]
->>>>>>> Stashed changes

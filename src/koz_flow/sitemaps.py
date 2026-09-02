@@ -12,9 +12,9 @@ class StaticViewSitemap(Sitemap):
     def items(self):
         return [
             'home_app:home-page',
-            'vehicul_app:list-vehicul',
-            'leads_app:demande-financement',
+            'vehicul_app:site-vehicul-list',
             'services_app:services-list-public',
+            'products_app:products-list',
         ]
 
     def location(self, item):

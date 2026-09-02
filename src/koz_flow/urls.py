@@ -6,6 +6,11 @@ from koz_flow.views import health_check
 
 from django.contrib.sitemaps.views import sitemap
 from .sitemaps import StaticViewSitemap, VehiculSitemap, ProduitSitemap
+sitemaps = {
+    'pages': StaticViewSitemap,
+    'vehicules': VehiculSitemap,
+    'produits': ProduitSitemap,
+}
 
 urlpatterns = [
     path("", include("home_app.urls")),
@@ -24,18 +29,14 @@ urlpatterns = [
     
     path('health/', health_check, name='health-check'),
     path('koz_adminitration_2k26/', admin.site.urls),
+    
+    # ✅ La vue "sitemap" de Django s'occupe de générer le XML
+    path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='sitemap'),
 ]
 
 
-sitemaps = {
-    'pages': StaticViewSitemap,
-    'vehicules': VehiculSitemap,
-    'produits': ProduitSitemap,
-}
 
-urlpatterns += [
-    path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
-]
+
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

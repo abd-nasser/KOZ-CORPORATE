@@ -1,3 +1,4 @@
+{% load static %}
 <button 
     id="fav-btn-{{ produit.pk }}"
     hx-post="{% url 'products_app:products-favoris' produit.pk %}"

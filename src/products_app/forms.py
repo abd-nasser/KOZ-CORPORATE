@@ -70,6 +70,15 @@ class ProductsForm(forms.ModelForm):
             'est_nouveau': forms.CheckboxInput(attrs={'class': 'checkbox checkbox-primary'}),
             'ordre': forms.NumberInput(attrs={'class': 'input input-bordered w-full', 'min': 0}),
         }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Rendre les champs de date facultatifs
+        self.fields['marque'].required = True
+        self.fields['prix_promo'].required = False
+        self.fields['date_debut_promo'].required = False
+        self.fields['date_fin_promo'].required = False
+        
 
 
 class ProductImageForm(forms.ModelForm):

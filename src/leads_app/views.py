@@ -139,7 +139,7 @@ class ApiDemandeFinancementView(APIView):
                 
             
 def envoyer_contact_email(request):
-    time.sleep(1.5)
+
     if request.method == 'POST':
         nom = request.POST.get('nom')
         email = request.POST.get('email')
@@ -194,8 +194,7 @@ def envoyer_contact_email(request):
 ##################################################___Demande et Gestion de Financement_______###########################################
 @login_required
 def demande_financement_view(request, vehicul_id):
-    import time
-    time.sleep(2)
+   
     vehicul = get_object_or_404(Vehicul, id=vehicul_id)
     if not vehicul:
         response = render(request, 'partials/leads/_demande_fin_result.html', {
@@ -299,7 +298,7 @@ def demande_financement_view(request, vehicul_id):
     
 @login_required
 def attente_document(request, demande_id):
-    time.sleep(1.5)
+    
     demande = get_object_or_404(demande_financement, id=demande_id)
     
     # === 1. VÉRIFICATION DU FINANCEMENT ===
@@ -387,7 +386,7 @@ def attente_document(request, demande_id):
 
 @login_required
 def refuser_demande(request, demande_id):
-    time.sleep(1.5)
+    
     demande = get_object_or_404(demande_financement, id=demande_id)
     if demande.etape == "demande_refusee":
         response = render(request, "partials/leads/_dmd_fin_result.html", {
@@ -705,7 +704,7 @@ class GestionTypeFinancementView(LoginRequiredMixin, UserPassesTestMixin, Update
 ################################################### DOCUMENTS VIEWS #####################################################################
 @login_required
 def upload_multiple_documents(request, demande_id):
-    time.sleep(3)
+    
     demande = get_object_or_404(demande_financement, id=demande_id, client=request.user)
     dossier, created = Documents.objects.get_or_create(client=request.user, demande_financement=demande)
     
@@ -781,7 +780,7 @@ def upload_multiple_documents(request, demande_id):
 
 @login_required
 def upload_offre_documents(request, offre_id):
-    time.sleep(3)
+    
     """
     Vue pour uploader les documents d'une offre de financement.
     Le client upload ses documents, le dossier est vérifié.
@@ -871,7 +870,7 @@ def upload_offre_documents(request, offre_id):
                             
 @login_required
 def valide_dossier(request, dossier_id):
-    time.sleep(1.5)
+    
     dossier = get_object_or_404(Documents, id=dossier_id)
 
     if dossier.statut_dossier == "incomplet":
@@ -1118,7 +1117,7 @@ def valide_dossier(request, dossier_id):
 
 @login_required
 def modifier_dossier(request, dossier_id):
-    time.sleep(1.5)
+   
     dossier = get_object_or_404(Documents, id=dossier_id)
     
     # Vérifier que l'utilisateur est commercial ou directeur
@@ -1253,7 +1252,7 @@ def modifier_dossier(request, dossier_id):
 
 @login_required
 def rejete_dossier(request, dossier_id):
-    time.sleep(1.5)
+    
     dossier = get_object_or_404(Documents, id=dossier_id)
     
     # Vérifier que l'utilisateur est commercial ou directeur
@@ -1411,7 +1410,7 @@ def rejete_dossier(request, dossier_id):
 
 @login_required
 def verifier_dossier(request, dossier_id):
-    time.sleep(1.5)
+    
     dossier = get_object_or_404(Documents, id=dossier_id)
     
     # Vérifier que l'utilisateur est commercial ou directeur
@@ -1514,7 +1513,7 @@ def reverifier_document(request, dossier_id):
     Remet un dossier en vérification (après correction par le client)
     Utilisable pour les dossiers liés à une demande OU à une offre
     """
-    time.sleep(1.5)
+    
     dossier = get_object_or_404(Documents, id=dossier_id)
     
     # Vérifier que l'utilisateur est commercial ou directeur

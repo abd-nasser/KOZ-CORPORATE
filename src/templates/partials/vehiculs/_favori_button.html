@@ -1,3 +1,4 @@
+{% load static %}
 <button
     id="fav-btn-{{ vehicul.pk }}"
     hx-post="{% url 'vehicul_app:ajout-favoris' vehicul.pk %}"

@@ -79,7 +79,7 @@
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: #020617; /* slate-950 */
-            color: #f8fafc;
+            
         }
         h1, h2, h3, h4, .font-heading {
             font-family: 'Urbanist', sans-serif;
@@ -87,7 +87,7 @@
         }
         .section-contact input, button, textarea, select {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            color: black;
+            
 
         }
        .section-contact input::placeholder, textarea::placeholder {
@@ -1913,20 +1913,21 @@
 <!-- ============================================================ -->
 <!-- ========== BANNIÈRE COOKIES FLOATTANTE (RGPD COMPLIANT)========== -->
 <!-- ============================================================ -->
+<!-- BANNIÈRE COOKIES FLOATTANTE (WHITE & BLUE) -->
 <div id="cookie-consent-banner" 
-     class="fixed bottom-5 right-5 left-5 md:left-auto md:max-w-md z-[200] bg-slate-900/90 backdrop-blur-xl border border-slate-800 text-slate-200 shadow-2xl rounded-2xl p-5 transition-all duration-500 transform translate-y-10 opacity-0 hidden">
+     class="fixed bottom-5 right-5 left-5 md:left-auto md:max-w-md z-[200] bg-white/95 backdrop-blur-xl border border-slate-200 text-slate-700 shadow-2xl shadow-slate-900/10 rounded-2xl p-5 transition-all duration-500 transform translate-y-10 opacity-0 hidden">
     
     <div class="flex flex-col gap-4">
         <!-- Entête avec Icône -->
         <div class="flex items-start gap-3">
-            <div class="w-9 h-9 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center shrink-0 text-blue-400">
+            <div class="w-9 h-9 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0 text-blue-600">
                 <i class="fas fa-cookie-bite text-base"></i>
             </div>
             <div class="flex-1">
-                <h4 class="text-sm font-bold text-white mb-1">Gestion de la confidentialité</h4>
-                <p class="text-xs text-slate-400 leading-relaxed">
+                <h4 class="text-sm font-bold text-slate-900 mb-1">Gestion de la confidentialité</h4>
+                <p class="text-xs text-slate-500 leading-relaxed">
                     Nous utilisons des cookies pour analyser notre trafic et améliorer votre expérience sur KOZ Services. Consultez notre 
-                    <a href="{% url 'home_app:politique-confidentialite' %}" class="text-blue-400 underline hover:text-blue-300 transition-colors">
+                    <a href="{% url 'home_app:politique-confidentialite' %}" class="text-blue-600 underline font-medium hover:text-blue-700 transition-colors">
                         politique de confidentialité
                     </a>.
                 </p>
@@ -1934,13 +1935,13 @@
         </div>
 
         <!-- Boutons d'Action -->
-        <div class="flex items-center justify-end gap-2 pt-1 border-t border-slate-800/80">
+        <div class="flex items-center justify-end gap-2 pt-1 border-t border-slate-100">
             <button onclick="handleCookieConsent(false)" 
-                    class="px-4 py-2 rounded-xl border border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white text-xs font-semibold transition-all duration-200">
+                    class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900 text-xs font-semibold transition-all duration-200">
                 Refuser
             </button>
             <button onclick="handleCookieConsent(true)" 
-                    class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-lg shadow-blue-600/25 hover:shadow-blue-500/40 transition-all duration-200">
+                    class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md shadow-blue-600/20 hover:shadow-lg hover:shadow-blue-600/30 transition-all duration-200">
                 Accepter
             </button>
         </div>

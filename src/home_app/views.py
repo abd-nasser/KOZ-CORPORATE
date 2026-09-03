@@ -377,24 +377,17 @@ def delete_actualite(request, pk):
     messages.success(request, f"✅ Actualité '{titre}' supprimée avec succès !")
     return redirect('home_app:actualites-list')
 
-
-
-
-
 def financement_koz_detail(request):
     """
     Page de détails statique pour l'offre de financement propre à KOZ Services.
     """
     return render(request, 'financement/financement_koz_detail.html')
 
-
 def financement_fidelis_detail(request):
     """
     Page de détails statique pour le partenariat de financement avec Fidelis Finance.
     """
     return render(request, 'financement/financement_fidelis_detail.html')
-
-
 
 def contact_form(request):
     time.sleep(1.5)
@@ -430,12 +423,12 @@ def contact_form(request):
             'success': True,
             'title': '✅ Envoyé',
             'message': "Votre message à été envoyé,Un commercial vous contactera sous 24h.",
+            'reload_on_close': True
             
         })
         
 
 def prise_rdv(request):
-    
     time.sleep(1.5)
     if request.method == 'POST':
         nom = request.POST.get('nom')

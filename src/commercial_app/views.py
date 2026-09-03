@@ -126,7 +126,6 @@ def creer_offre(request, demande_id=None):
 
 @login_required
 def accepter_offre(request, offre_id):
-    time.sleep(1.5)
     if request.user.role != "client":
         messages.error(request, "Vous n'etes pas autorisé à exectuer cette action")
         return redirect("client_app:client-view")
@@ -200,7 +199,6 @@ def accepter_offre(request, offre_id):
     
 @login_required
 def refuser_offre(request, offre_id):
-    time.sleep(1.5)
     if request.user.role != "client":
         messages.error(request, "Vous n'etes pas autorisé à exectuer cette action")
         return redirect("client_app:client-view")
@@ -261,7 +259,6 @@ def refuser_offre(request, offre_id):
    
 @login_required
 def negocier_offre(request, offre_id):
-    time.sleep(1.5)
     if request.user.role != "client":
         messages.error(request, "Vous n'etes pas autorisé à exectuer cette action")
         return redirect("client_app:client-view")
@@ -416,7 +413,7 @@ class OffreSimpleCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView)
         return context
     
     def form_valid(self, form):
-        time.sleep(3)
+    
         client_id = self.kwargs.get("pk")
         client = get_object_or_404(kozUser, id=client_id)
         
@@ -479,7 +476,6 @@ class OffreDeFinancementView(LoginRequiredMixin, UserPassesTestMixin, CreateView
         return context
     
     def form_valid(self, form):
-        time.sleep(3)
         client_id = self.kwargs.get('pk')
         client = get_object_or_404(kozUser, id=client_id)
         
@@ -677,7 +673,7 @@ class OffreUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     def test_func(self):
         return self.request.user.role in ['commercial', 'directeur']
     
-    time.sleep(3)
+   
     def form_valid(self, form):
         offre = form.save(commit=False)
         
@@ -745,7 +741,7 @@ class OffreSimpleUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     def test_func(self):
         return self.request.user.role in ['commercial', 'directeur']
         
-    time.sleep(3)
+    
     def form_valid(self, form):
         offre = form.save(commit=False)
             
@@ -789,7 +785,7 @@ class OffreSimpleUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                                                         })
             response['HX-Trigger'] = "closeUpdateSimpleOffreModal"
             return response
-    time.sleep(3)
+    
     def form_invalid(self, form):
         return render(self.request, "partials/offre/_offre_simple_form_error.html", {"update_offre_simple_form":form})
              
@@ -820,7 +816,6 @@ def changer_statut_vente(request, vente_id):
         messages.warning(request, "Si toute fois nouvelle tentative votre compte sera bloqué")
         return redirect('home_app:home-page')
     
-    time.sleep(1.5)
     vente = get_object_or_404(Vente, id=vente_id)
     
     if request.method == 'POST':
@@ -948,7 +943,7 @@ def marquer_paye(request, vente_id, numero_echeance):
         response['HX-Trigger'] = "closePaiementModal"
         return response
         
-    time.sleep(1) # réduit à 1s pour accélérer
+   
     vente = get_object_or_404(Vente, id=vente_id)
     numero_echeance = int(numero_echeance)
 
@@ -1090,7 +1085,7 @@ class venteSimpleCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     form_class = VenteSimpleForm
     
     def form_valid(self, form):
-        time.sleep(3)
+        
         vente = form.save(commit=False)
         vente.montant_total_paye = form.cleaned_data.get("montant")
         vente.statut = "gestion_de_statut"
@@ -1280,8 +1275,7 @@ def refuser_maintenance(request, maintenance_id):
     return response
 
 @login_required
-def changer_statut_maintenance(request, maintenance_id, nouveau_statut):
-    time.sleep(1.5)  # Petit délai pour l'expérience UI (HTMX loader)
+def changer_statut_maintenance(request, maintenance_id, nouveau_statut):  # Petit délai pour l'expérience UI (HTMX loader)
     maintenance = get_object_or_404(Maintenance, id=maintenance_id)
 
     # 1. Sécurité Rôle
@@ -1424,7 +1418,7 @@ class MaintenanceListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         #Si commercial : Voir maintenances des ses clients
         if self.request.user.role == "commercial" or (self.request.user.is_staff and not self.request.user.is_superuser):
-            queryset = Maintenance.objects.all()
+            queryset = Maintenance.objects.all().select_related('client', 'effectue_par').order_by("-date_creation")
             q = self.request.GET.get("q")
             type_maintenance = self.request.GET.get("type_maintenance")
             priorite = self.request.GET.get("priorite")
@@ -1461,12 +1455,12 @@ class MaintenanceListView(LoginRequiredMixin, ListView):
             if effectue_par:
                 queryset = queryset.filter(effectue_par=effectue_par)
 
-            return queryset.order_by
+            return queryset.order_by("-date_creation")
             
         
         #Si client: Voir ses maintenance 
         elif self.request.user.role == "client":
-            queryset = Maintenance.objects.filter(client=self.request.user)
+            queryset = Maintenance.objects.filter(client=self.request.user).select_related('client', 'effectue_par', 'vehicul').order_by("-date_creation") 
             q = self.request.GET.get("q")
             type_maintenance = self.request.GET.get("type_maintenance")
             priorite = self.request.GET.get("priorite")
@@ -1507,7 +1501,7 @@ class MaintenanceListView(LoginRequiredMixin, ListView):
             
 
         else:
-            queryset = Maintenance.objects.all()
+            queryset = Maintenance.objects.all().select_related('client', 'effectue_par', 'vehicul').order_by("-date_creation")
             q = self.request.GET.get("q")
             type_maintenance = self.request.GET.get("type_maintenance")
             priorite = self.request.GET.get("priorite")
@@ -1569,7 +1563,7 @@ class MaintenanceCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView)
 
     def form_valid(self, form):
         # ⏱️ Simule un traitement (à supprimer en prod)
-        time.sleep(1.5)
+
         
         # ✅ Sauvegarde du formulaire
         maintenance = form.save()
@@ -1660,7 +1654,7 @@ class MaintenanceUpdateView(LoginRequiredMixin, UserPassesTestMixin,UpdateView):
         return self.request.user.role in ['commercial', 'directeur']
     
     def form_valid(self, form):
-        time.sleep(1.5)
+
         maintenance = form.save(commit=False)
     
         # Passe à 'planifiee' uniquement si l'état initial était 'en_attente'
@@ -1735,7 +1729,7 @@ class MajMaintenancePrix(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     form_class = MAJmaintenanceForm
     
     def form_valid(self, form):
-        time.sleep(1.5)
+
         form.save()
         response = render(self.request, "partials/maintenance/_maintenance_result.html", {
                         'success': True,
@@ -1757,7 +1751,7 @@ class ClientCreateMaintenance(LoginRequiredMixin, UserPassesTestMixin, CreateVie
         # ==========================================
         # 💾 SAUVEGARDE DE LA MAINTENANCE
         # ==========================================
-        time.sleep(1.5)
+
         maintenance = form.save(commit=False)
         maintenance.client = self.request.user
         maintenance.statut = 'en_attente'

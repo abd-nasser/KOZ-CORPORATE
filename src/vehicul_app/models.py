@@ -69,6 +69,7 @@ class Vehicul(models.Model):
         verbose_name="Type de véhicule"
     )
     
+   
     marque = models.ForeignKey(Marque, on_delete=models.CASCADE, related_name='vehicul')
     modele = models.CharField(max_length=100)
     annee = models.IntegerField()
@@ -81,6 +82,39 @@ class Vehicul(models.Model):
     kilometrage = models.IntegerField()
     carburant = models.CharField(max_length=20, choices=TYPES_CARBURANT_CHOICES, default="essence")
     
+    #========= NOUVEAUX CHAMPS DE CONSOMMATION ET CAPACITÉ ==========
+    couleur = models.CharField(
+            max_length=7,
+            default='#3b82f6',
+            help_text="Couleur en hexadécimal",
+            verbose_name="Couleur"
+        )
+    
+    conso_moyenne_en_agglomération = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=0.00,
+        verbose_name="Consommation moyenne en agglomération (L/100km)"
+    )
+    conso_moyenne_hors_agglomération = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=0.00,
+        verbose_name="Consommation moyenne hors agglomération (L/100km)"
+    )
+    capacite_reservoir = models.IntegerField(
+        null=True,
+        blank=True,
+        verbose_name="Capacité du réservoir (L)"
+    )
+    
+    type_de_pneus = models.CharField(
+        max_length=100,
+        default="Pneus d'origine",
+        verbose_name="Type de pneus"
+    )
+    #===============================================================================
+   
     # ========== IMAGE PRINCIPALE (conservée) ==========
     image_principale = models.ImageField(upload_to='vehicules/')
     
@@ -146,7 +180,6 @@ class Vehicul(models.Model):
                 self.slug = f"{original}-{counter}"
                 counter += 1
         super().save(*args, **kwargs)
-        
         
 
 # ============================================================

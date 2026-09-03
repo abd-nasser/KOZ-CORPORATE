@@ -369,7 +369,8 @@
             </div>
             <div class="max-w-3xl text-white">
                 <!-- Badge type -->
-                <span class="inline-block bg-blue-600/30 backdrop-blur-sm text-blue-200 text-sm font-semibold px-4 py-1.5 rounded-full mb-4 border border-blue-400/30 animate-fade-in-up">
+                <span class="inline-block bg-blue-600/30 backdrop-blur-sm text-blue-200 text-sm font-semibold px-4 py-1.5 rounded-full mb-4 border border-blue-400/30 animate-fade-in-up" 
+                style="position: relative; left: 10rem;">
                     <i class="fas fa-tag mr-2"></i> {{ service.types.nom }}
                 </span>
                 
@@ -694,7 +695,7 @@
     </div>
        
 {% include 'modals/auth/login_simple_modal.html' %}
-   {% include 'modals/home/register.html' %}
+{% include 'modals/home/register.html' %}
     <!-- ============================================================ -->
     <!-- SCRIPTS                                                       -->
     <!-- ============================================================ -->

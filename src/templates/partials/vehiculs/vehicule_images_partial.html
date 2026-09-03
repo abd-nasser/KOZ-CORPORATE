@@ -1,66 +1,60 @@
-<!-- vehicule_images_partial.html (corrigé) -->
 {% load static %}
 
-<!-- Miniatures -->
-<div class="flex gap-3 overflow-x-auto pb-2 img_miniatures" id="thumbnail-container">
-    <!-- Image principale en thumbnail -->
-    <img src="{{ vehicule.image_principale.url }}" 
-         class="thumbnail w-20 h-20 rounded-lg object-cover cursor-pointer border-2 border-transparent hover:border-blue-500 transition"
-         onclick="changeImage('{{ vehicule.image_principale.url }}')">
+<div class="relative w-full h-full group select-none">
 
-    <!-- Images supplémentaires -->
-    {% for image in images %}
-        <img src="{{ image.image.url }}" 
-             alt="{{ image.alt_text|default:vehicule.modele }}"
-             class="thumbnail w-20 h-20 rounded-lg object-cover cursor-pointer border-2 border-transparent hover:border-blue-500 transition"
-             onclick="changeImage('{{ image.image.url }}')">
-    {% empty %}
-        <div class="text-gray-400 text-sm flex items-center gap-2">
-            <i class="fas fa-info-circle"></i> Aucune image supplémentaire
-        </div>
-    {% endfor %}
-</div>
+    <!-- Image principale affichée -->
+    {% if images.object_list %}
+        {% with current_img=images.object_list.0 %}
+            <img src="{{ current_img.image.url }}" 
+                 alt="{{ current_img.alt_text|default:vehicul.modele }}" 
+                 class="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105">
+        {% endwith %}
+    {% else %}
+        <img src="{{ vehicul.image_principale.url }}" 
+             alt="{{ vehicul.marque.nom }} {{ vehicul.modele }}" 
+             class="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105">
+    {% endif %}
 
-<!-- Pagination -->
-<div class="flex justify-center items-center gap-4 mt-3">
+    <!-- Gradient d'assombrissement pour lisibilité du texte & boutons -->
+    <div class="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/20 to-slate-950/40 pointer-events-none"></div>
+
+    <!-- BOUTON PRÉCÉDENT (Flèche Gauche) -->
     {% if images.has_previous %}
-    <button hx-get="{% url 'vehicul_app:vehicul-images' vehicule.pk %}?page={{ images.previous_page_number }}"
-            hx-target="#image-gallery-container"
-            hx-swap="outerHTML"
-            class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition text-sm font-medium flex items-center gap-2">
-        <i class="fas fa-chevron-left text-xs"></i> Précédent
+    <button hx-get="{% url 'vehicul_app:vehicul-image-partial' vehicul.pk|default:vehicule.pk %}?page={{ images.previous_page_number }}"
+            hx-target="#hero-image-container"
+            hx-swap="innerHTML transition:true"
+            aria-label="Image précédente"
+            class="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-900/50 hover:bg-blue-600 text-white flex items-center justify-center backdrop-blur-md border border-white/20 transition-all duration-300 shadow-xl hover:scale-110 active:scale-95 cursor-pointer group/btn">
+        <i class="fas fa-chevron-left text-base sm:text-lg transition-transform group-hover/btn:-translate-x-0.5"></i>
     </button>
     {% else %}
-    <button
-            class="px-4 py-2 bg-gray-100 text-gray-400 rounded-lg text-sm font-medium cursor-not-allowed" disabled>
-        <i class="fas fa-chevron-left text-xs"></i> Précédent
+    <button disabled 
+            class="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-900/20 text-white/30 flex items-center justify-center backdrop-blur-sm border border-white/10 cursor-not-allowed">
+        <i class="fas fa-chevron-left text-base sm:text-lg"></i>
     </button>
     {% endif %}
 
-    <span class="text-sm text-gray-600 font-medium">
-        {{ images.number }} / {{ images.paginator.num_pages }}
-    </span>
-
+    <!-- BOUTON SUIVANT (Flèche Droite) -->
     {% if images.has_next %}
-    <button hx-get="{% url 'vehicul_app:vehicul-images' vehicule.pk %}?page={{ images.next_page_number }}"
-            hx-target="#image-gallery-container"
-            hx-swap="outerHTML"
-            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition text-sm font-medium flex items-center gap-2">
-        Suivant <i class="fas fa-chevron-right text-xs"></i>
+    <button hx-get="{% url 'vehicul_app:vehicul-image-partial' vehicul.pk|default:vehicule.pk %}?page={{ images.next_page_number }}"
+            hx-target="#hero-image-container"
+            hx-swap="innerHTML transition:true"
+            aria-label="Image suivante"
+            class="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-900/50 hover:bg-blue-600 text-white flex items-center justify-center backdrop-blur-md border border-white/20 transition-all duration-300 shadow-xl hover:scale-110 active:scale-95 cursor-pointer group/btn">
+        <i class="fas fa-chevron-right text-base sm:text-lg transition-transform group-hover/btn:translate-x-0.5"></i>
     </button>
     {% else %}
-    <button class="px-4 py-2 bg-gray-100 text-gray-400 rounded-lg text-sm font-medium cursor-not-allowed" disabled>
-        Suivant <i class="fas fa-chevron-right text-xs"></i>
+    <button disabled 
+            class="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-900/20 text-white/30 flex items-center justify-center backdrop-blur-sm border border-white/10 cursor-not-allowed">
+        <i class="fas fa-chevron-right text-base sm:text-lg"></i>
     </button>
     {% endif %}
-</div>
 
+    <!-- COMPTEUR DE PAGES/PHOTOS (Haut Droit) -->
+    <div class="absolute top-20 right-4 sm:top-20 sm:right-8 z-20 px-3.5 py-1.5 rounded-full bg-slate-900/60 backdrop-blur-md border border-white/20 text-white text-xs sm:text-sm font-semibold flex items-center gap-2 shadow-lg">
+        <i class="fas fa-camera text-blue-400 text-xs"></i>
+        <span>{{ images.number }} / {{ images.paginator.num_pages }}</span>
+    </div>
 
-<!-- Lightbox -->
-<div id="lightbox" class="fixed inset-0 z-50 bg-black/90 hidden items-center justify-center" onclick="closeLightbox()">
-    <img id="lightbox-img" src="" alt="Agrandissement" class="max-w-5xl max-h-[90vh] object-contain rounded-xl shadow-2xl">
-    <button onclick="closeLightbox()" class="absolute top-5 right-5 text-white text-3xl hover:text-gray-300 transition">
-        <i class="fas fa-times"></i>
-    </button>
 </div>
 

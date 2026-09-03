@@ -31,19 +31,16 @@
 <body class="bg-gray-50 font-inter">
 
     <!-- ===== NAVBAR ===== -->
-     <nav class="navbar fixed top-0 z-50 w-full bg-white/90 backdrop-blur-md border-b border-gray-200/50 shadow-sm transition-all duration-300">
+    <nav class="navbar fixed top-0 z-50 w-full bg-white/90 backdrop-blur-md border-b border-gray-200/50 shadow-sm transition-all duration-300">
         <div class="container mx-auto px-4 flex justify-between items-center h-16">
             
             <!-- ===== LOGO ===== -->
             <div class="flex items-center gap-3">
                 <a href="{% url 'home_app:home-page' %}" class="flex items-center gap-2 group">
-                    
-                        <img src="{% static 'images/Koz_logo_noBack.png' %}" alt="KOZ" class="w-25 h-25 object-contain">
-                    
+                    <img src="{% static 'images/Koz_logo_noBack.png' %}" alt="KOZ" class="w-25 h-25 object-contain">
                     <span class="text-xl font-bold text-gray-200 hidden sm:inline">KOZ <span class="text-blue-600">SERVICES</span></span>
                 </a>
             </div>
-           
            
             <a href="{% url 'vehicul_app:site-vehicul-list' %}" class="text-gray-600 hover:text-blue-600 transition flex items-center gap-2 text-sm">
                 <i class="fas fa-arrow-left"></i> Retour
@@ -64,8 +61,6 @@
     <!-- ============================================================ -->
     <!-- HERO : Image paginable avec slide directionnel               -->
     <!-- ============================================================ -->
-    <!-- Hauteurs identiques ici et dans le partial pour éviter tout   -->
-    <!-- saut de layout au moment du swap HTMX.                        -->
     <section id="hero-section" class="relative w-full h-[62vh] sm:h-[68vh] md:h-[78vh] lg:h-[85vh] bg-white overflow-hidden">
 
         <!-- ===== CONTENEUR IMAGE (chargé par HTMX) ===== -->
@@ -88,24 +83,45 @@
         <div class="absolute inset-0 z-10 pointer-events-none">
             <div class="hero-content max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-end pb-6 sm:pb-8 md:pb-12 lg:pb-14 pointer-events-auto">
                 <div class="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-3 sm:gap-4 md:gap-6 w-full">
-                     <div>
+                    <div>
                         <a href="{% url 'home_app:home-page' %}#section-vehicule-vedette" aria-label="Retour à la section véhicules vedette" class="service-back-link inline-flex items-center bg-slate-950/45 backdrop-blur-md text-blue-100 text-sm font-semibold px-4 py-2 rounded-full border border-blue-300/40 shadow-lg shadow-slate-950/20 animate-fade-in-up">
                             <i class="fas fa-arrow-left mr-2 service-back-icon" aria-hidden="true"></i>Retour 
                         </a>
-                     </div>
+                    </div>
                     <!-- Partie gauche : texte -->
                     <div class="w-full lg:w-auto lg:max-w-2xl">
-                        <!-- Badge (marque + année) -->
-                        <span class="inline-block text-[10px] sm:text-xs font-semibold text-white uppercase tracking-widest bg-blue-500/20 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full mb-2 sm:mb-3 border border-blue-400/30">
-                            {{ vehicul.marque.nom }} • {{ vehicul.annee }}
-                        </span>
+                        
+                        <!-- Badges d'information -->
+                        <div class="flex flex-wrap items-center gap-2 mb-2 sm:mb-3">
+                            <span class="inline-block text-[10px] sm:text-xs font-semibold text-white uppercase tracking-widest bg-blue-500/30 px-3 sm:px-4 py-1 rounded-full border border-blue-400/30 backdrop-blur-md">
+                                {{ vehicul.marque.nom }} • {{ vehicul.annee }}
+                            </span>
+                            
+                            {% if vehicul.type_vehicule %}
+                            <span class="inline-block text-[10px] sm:text-xs font-semibold text-blue-200 uppercase tracking-widest bg-slate-900/60 px-3 sm:px-4 py-1 rounded-full border border-slate-700/50 backdrop-blur-md">
+                                {{ vehicul.type_vehicule.nom }}
+                            </span>
+                            {% endif %}
+
+                            {% if vehicul.est_vedette %}
+                            <span class="inline-block text-[10px] sm:text-xs font-semibold text-amber-300 uppercase tracking-widest bg-amber-500/20 px-3 sm:px-4 py-1 rounded-full border border-amber-400/40 backdrop-blur-md">
+                                <i class="fas fa-star text-amber-400 mr-1"></i> Vedette
+                            </span>
+                            {% endif %}
+
+                            {% if vehicul.actualite %}
+                            <span class="inline-block text-[10px] sm:text-xs font-semibold text-emerald-300 uppercase tracking-widest bg-emerald-500/20 px-3 sm:px-4 py-1 rounded-full border border-emerald-400/40 backdrop-blur-md">
+                                Nouveauté
+                            </span>
+                            {% endif %}
+                        </div>
 
                         <!-- Titre -->
                         <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black text-white leading-[1.1] md:leading-tight">
                             {{ vehicul.marque.nom }} {{ vehicul.modele }}
                         </h1>
 
-                        <!-- Description -->
+                        <!-- Description rapide -->
                         <p class="text-sm sm:text-base md:text-lg text-white/80 mt-1 sm:mt-2 max-w-2xl line-clamp-2">
                             {{ vehicul.description|truncatechars:120 }}
                         </p>
@@ -118,15 +134,23 @@
                             {{ vehicul.prix|intcomma }} FCFA
                         </span>
 
-                        <!-- Disponibilité -->
-                        <span class="text-white/70 text-[10px] sm:text-xs md:text-sm flex items-center gap-1 sm:gap-2">
-                            <i class="fas fa-car text-xs sm:text-sm"></i>
-                            {% if vehicul.disponible %}
-                                <span class="text-green-400 font-medium">disponible</span> ✅
-                            {% else %}
-                                <span class="text-red-400 font-medium">indisponible</span> ❌
+                        <!-- Disponibilité & Stock -->
+                        <div class="flex items-center gap-2">
+                            <span class="text-white/80 text-[10px] sm:text-xs md:text-sm flex items-center gap-1 sm:gap-2 bg-slate-900/50 px-3 py-1 rounded-full backdrop-blur-md border border-white/10">
+                                <i class="fas fa-car text-xs sm:text-sm"></i>
+                                {% if vehicul.disponible and vehicul.est_en_stock %}
+                                    <span class="text-green-400 font-medium">Disponible</span> ✅
+                                {% else %}
+                                    <span class="text-red-400 font-medium">Indisponible</span> ❌
+                                {% endif %}
+                            </span>
+                            
+                            {% if vehicul.stock_alerte and vehicul.est_en_stock %}
+                                <span class="text-xs font-bold text-amber-300 bg-amber-500/30 px-2.5 py-1 rounded-full border border-amber-400/40 animate-pulse">
+                                    Plus que {{ vehicul.stock }} !
+                                </span>
                             {% endif %}
-                        </span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -135,126 +159,241 @@
     </section>
     
     <!-- ============================================================ -->
-    <!-- MAIN : Cartes + caractéristiques                            -->
+    <!-- MAIN : Cartes + caractéristiques                             -->
     <!-- ============================================================ -->
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
 
-        <!-- ===== GRILLE DES CARTES ===== -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-12 sm:mb-16">
+        <!-- ===== GRILLE DES CARTES ESSENTIELLES (6 MÉTRIQUES) ===== -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-12 sm:mb-16">
 
             <!-- Carte 1 : Kilométrage -->
             <div class="glass-card animate-fade-in-up" style="animation-delay: 0.1s">
-                <div class="flex items-center gap-3 sm:gap-4">
+                <div class="flex items-center gap-3">
                     <div class="icon-wrapper flex-shrink-0">
                         <i class="fas fa-tachometer-alt"></i>
                     </div>
                     <div class="min-w-0">
-                        <p class="text-gray-400 text-[11px] sm:text-xs font-medium uppercase tracking-wider">Kilométrage</p>
-                        <p class="text-gray-800 text-base sm:text-xl font-bold truncate">{{ vehicul.kilometrage|intcomma }} km</p>
+                        <p class="text-gray-400 text-[10px] sm:text-xs font-medium uppercase tracking-wider">Kilométrage</p>
+                        <p class="text-gray-800 text-sm sm:text-base font-bold truncate">{{ vehicul.kilometrage|intcomma }} km</p>
                     </div>
                 </div>
                 <div class="connection-line"></div>
             </div>
 
             <!-- Carte 2 : Carburant -->
-            <div class="glass-card animate-fade-in-up" style="animation-delay: 0.2s">
-                <div class="flex items-center gap-3 sm:gap-4">
+            <div class="glass-card animate-fade-in-up" style="animation-delay: 0.15s">
+                <div class="flex items-center gap-3">
                     <div class="icon-wrapper flex-shrink-0">
                         <i class="fas fa-gas-pump"></i>
                     </div>
                     <div class="min-w-0">
-                        <p class="text-gray-400 text-[11px] sm:text-xs font-medium uppercase tracking-wider">Carburant</p>
-                        <p class="text-gray-800 text-base sm:text-xl font-bold truncate">{{ vehicul.get_carburant_display }}</p>
+                        <p class="text-gray-400 text-[10px] sm:text-xs font-medium uppercase tracking-wider">Carburant</p>
+                        <p class="text-gray-800 text-sm sm:text-base font-bold truncate capitalize">{{ vehicul.get_carburant_display }}</p>
                     </div>
                 </div>
                 <div class="connection-line"></div>
             </div>
 
-            <!-- Carte 3 : Année -->
+            <!-- Carte 3 : Type de Véhicule -->
+            <div class="glass-card animate-fade-in-up" style="animation-delay: 0.2s">
+                <div class="flex items-center gap-3">
+                    <div class="icon-wrapper flex-shrink-0">
+                        <i class="fas fa-car-side"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <p class="text-gray-400 text-[10px] sm:text-xs font-medium uppercase tracking-wider">Type</p>
+                        <p class="text-gray-800 text-sm sm:text-base font-bold truncate">{{ vehicul.type_vehicule.nom|default:"N/A" }}</p>
+                    </div>
+                </div>
+                <div class="connection-line"></div>
+            </div>
+
+            <!-- Carte 4 : Couleur -->
+            <div class="glass-card animate-fade-in-up" style="animation-delay: 0.25s">
+                <div class="flex items-center gap-3">
+                    <div class="icon-wrapper flex-shrink-0">
+                        <i class="fas fa-palette"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <p class="text-gray-400 text-[10px] sm:text-xs font-medium uppercase tracking-wider">Couleur</p>
+                        <div class="flex items-center gap-2 mt-0.5">
+                            <span class="w-3.5 h-3.5 rounded-full border border-gray-300 shadow-sm inline-block shrink-0" style="background-color: {{ vehicul.couleur }};"></span>
+                            <span class="text-gray-800 text-xs font-bold uppercase font-mono truncate">{{ vehicul.couleur }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="connection-line"></div>
+            </div>
+
+            <!-- Carte 5 : Année -->
             <div class="glass-card animate-fade-in-up" style="animation-delay: 0.3s">
-                <div class="flex items-center gap-3 sm:gap-4">
+                <div class="flex items-center gap-3">
                     <div class="icon-wrapper flex-shrink-0">
                         <i class="fas fa-calendar-alt"></i>
                     </div>
                     <div class="min-w-0">
-                        <p class="text-gray-400 text-[11px] sm:text-xs font-medium uppercase tracking-wider">Année</p>
-                        <p class="text-gray-800 text-base sm:text-xl font-bold truncate">{{ vehicul.annee }}</p>
+                        <p class="text-gray-400 text-[10px] sm:text-xs font-medium uppercase tracking-wider">Année</p>
+                        <p class="text-gray-800 text-sm sm:text-base font-bold truncate">{{ vehicul.annee }}</p>
                     </div>
                 </div>
                 <div class="connection-line"></div>
             </div>
 
-            <!-- Carte 4 : Stock -->
-            <div class="glass-card animate-fade-in-up" style="animation-delay: 0.4s">
-                <div class="flex items-center gap-3 sm:gap-4">
+            <!-- Carte 6 : Stock 
+            <div class="glass-card animate-fade-in-up" style="animation-delay: 0.35s">
+                <div class="flex items-center gap-3">
                     <div class="icon-wrapper flex-shrink-0">
                         <i class="fas fa-boxes"></i>
                     </div>
                     <div class="min-w-0">
-                        <p class="text-gray-400 text-[11px] sm:text-xs font-medium uppercase tracking-wider">Stock</p>
-                        <p class="text-gray-800 text-base sm:text-xl font-bold truncate">{{ vehicul.stock|default:"0" }}</p>
+                        <p class="text-gray-400 text-[10px] sm:text-xs font-medium uppercase tracking-wider">Stock</p>
+                        <p class="text-gray-800 text-sm sm:text-base font-bold truncate">{{ vehicul.stock|default:"0" }} </p>
                     </div>
                 </div>
                 <div class="connection-line"></div>
-            </div>
+            </div>-->
 
         </div>
 
-        <!-- ===== SECTION DÉTAILS ===== -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+        <!-- ===== SECTION DÉTAILS ET DÉSPÉCIFICATIONS ===== -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
 
-            <!-- Description -->
-            <div class="glass-card !cursor-default p-6 sm:p-8 card-slide-left" style="animation-delay: 0.2s">
-                <h3 class="text-gray-800 text-lg font-bold mb-4 flex items-center gap-2">
-                    <i class="fas fa-align-left text-blue-600"></i> Description
-                </h3>
-                <p class="text-gray-600 leading-relaxed">{{ vehicul.description|default:"Aucune description disponible." }}</p>
+            <!-- COLONNE GAUCHE (8 COLS) : Description + Consommation & Fiche technique -->
+            <div class="lg:col-span-8 space-y-6 sm:space-y-8">
 
-                <!-- Marque -->
-                <div class="mt-6 pt-6 border-t border-gray-100">
-                    <div class="flex items-center gap-4">
-                        {% if vehicul.marque.logo %}
-                        <img src="{{ vehicul.marque.logo.url }}" alt="{{ vehicul.marque.nom }}" class="w-12 h-12 object-contain flex-shrink-0">
-                        {% endif %}
-                        <div>
-                            <p class="text-gray-400 text-xs font-medium uppercase tracking-wider">Marque</p>
-                            <p class="text-gray-800 font-semibold">{{ vehicul.marque.nom }}</p>
+                <!-- Block Description -->
+                <div class="glass-card !cursor-default p-6 sm:p-8 card-slide-left" style="animation-delay: 0.2s">
+                    <h3 class="text-gray-800 text-lg font-bold mb-4 flex items-center gap-2">
+                        <i class="fas fa-align-left text-blue-600"></i> Description du véhicule
+                    </h3>
+                    <p class="text-gray-600 leading-relaxed whitespace-pre-line text-sm sm:text-base">
+                        {{ vehicul.description|default:"Aucune description détaillée disponible pour ce véhicule." }}
+                    </p>
+
+                    <!-- Infos Marque -->
+                    <div class="mt-6 pt-6 border-t border-gray-100">
+                        <div class="flex items-center gap-4">
+                            {% if vehicul.marque.logo %}
+                            <img src="{{ vehicul.marque.logo.url }}" alt="{{ vehicul.marque.nom }}" class="w-12 h-12 object-contain flex-shrink-0">
+                            {% endif %}
+                            <div>
+                                <p class="text-gray-400 text-xs font-medium uppercase tracking-wider">Constructeur / Marque</p>
+                                <p class="text-gray-800 font-bold text-base">{{ vehicul.marque.nom }}</p>
+                            </div>
                         </div>
                     </div>
                 </div>
+
+                <!-- Block Consommation & Capacité / Pneumatiques -->
+                <div class="glass-card !cursor-default p-6 sm:p-8 card-slide-left" style="animation-delay: 0.3s">
+                    <h3 class="text-gray-800 text-lg font-bold mb-6 flex items-center gap-2">
+                        <i class="fas fa-chart-line text-blue-600"></i> Consommation & Spécifications
+                    </h3>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        
+                        <!-- Conso Agglomération -->
+                        <div class="p-4 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-city text-base"></i>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-500 font-medium">Consommation en ville</p>
+                                    <p class="text-xs text-gray-400">Agglomération</p>
+                                </div>
+                            </div>
+                            <span class="text-base font-extrabold text-gray-800">
+                                {{ vehicul.conso_moyenne_en_agglomération }} <span class="text-xs font-semibold text-gray-500">L/100km</span>
+                            </span>
+                        </div>
+
+                        <!-- Conso Hors Agglomération -->
+                        <div class="p-4 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-road text-base"></i>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-500 font-medium">Consommation sur route</p>
+                                    <p class="text-xs text-gray-400">Hors agglomération</p>
+                                </div>
+                            </div>
+                            <span class="text-base font-extrabold text-gray-800">
+                                {{ vehicul.conso_moyenne_hors_agglomération }} <span class="text-xs font-semibold text-gray-500">L/100km</span>
+                            </span>
+                        </div>
+
+                        <!-- Capacité Réservoir -->
+                        <div class="p-4 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-oil-can text-base"></i>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-500 font-medium">Capacité réservoir</p>
+                                    <p class="text-xs text-gray-400">Volume carburant</p>
+                                </div>
+                            </div>
+                            <span class="text-base font-extrabold text-gray-800">
+                                {% if vehicul.capacite_reservoir %}{{ vehicul.capacite_reservoir }} <span class="text-xs font-semibold text-gray-500">L</span>{% else %}N/A{% endif %}
+                            </span>
+                        </div>
+
+                        <!-- Type de pneus -->
+                        <div class="p-4 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-dharmachakra text-base"></i>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-500 font-medium">Type de pneus</p>
+                                    <p class="text-xs text-gray-400">Pneumatiques</p>
+                                </div>
+                            </div>
+                            <span class="text-sm font-bold text-gray-800 text-right truncate max-w-[140px]" title="{{ vehicul.type_de_pneus }}">
+                                {{ vehicul.type_de_pneus }}
+                            </span>
+                        </div>
+
+                    </div>
+                </div>
+
             </div>
 
-            <!-- Actions -->
-            <div class="glass-card !cursor-default p-6 sm:p-8 card-slide-right" style="animation-delay: 0.3s">
-                <h3 class="text-gray-800 text-lg font-bold mb-4 flex items-center gap-2">
-                    <i class="fas fa-bolt text-blue-600"></i> Actions
-                </h3>
-                <div class="space-y-3 sm:space-y-4">
-                    {% if user.is_authenticated  and user.role == "client" %}
-                        <!-- Contacter -->
-                        <a href="{% url 'vehicul_app:contacter-vehicule' vehicul.pk %}" 
-                            class="btn btn-outline w-full text-center py-3 rounded-xl border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition">
-                            <i class="fas fa-comment-dots mr-2"></i> Contacter pour ce véhicule
-                        </a>
-                        <!-- Demander un financement -->
-                        <button onclick="document.getElementById('dmd_fin_modal').showModal()" 
-                                class="block w-full text-center py-3.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl font-semibold transition shadow-lg shadow-blue-600/20">
-                                <i class="fas fa-hand-holding-usd mr-2"></i> Demander un financement
-                        </button>
+            <!-- COLONNE DROITE (4 COLS) : Actions & Contact -->
+            <div class="lg:col-span-4">
+                <div class="glass-card !cursor-default p-6 sm:p-8 card-slide-right sticky top-24" style="animation-delay: 0.3s">
+                    <h3 class="text-gray-800 text-lg font-bold mb-4 flex items-center gap-2">
+                        <i class="fas fa-bolt text-blue-600"></i> Actions
+                    </h3>
+                    <div class="space-y-3 sm:space-y-4">
+                        {% if user.is_authenticated and user.role == "client" %}
+                            <!-- Contacter -->
+                            <a href="{% url 'vehicul_app:contacter-vehicule' vehicul.pk %}" 
+                                class="btn btn-outline w-full text-center py-3 rounded-xl border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition">
+                                <i class="fas fa-comment-dots mr-2"></i> Contacter pour ce véhicule
+                            </a>
+                            <!-- Demander un financement -->
+                            <button onclick="document.getElementById('dmd_fin_modal').showModal()" 
+                                    class="block w-full text-center py-3.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl font-semibold transition shadow-lg shadow-blue-600/20">
+                                    <i class="fas fa-hand-holding-usd mr-2"></i> Demander un financement
+                            </button>
 
                         {% else %}
-                         <button onclick="document.getElementById('contact_modal').showModal()" 
-                                 class="btn btn-outline w-full text-center py-3 rounded-xl border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition">
-                                <i class="fas fa-envelope mr-2"></i> Contacter le commercial
-                        </button>
-                        <button onclick="document.getElementById('login_simple_modal').showModal()" 
-                                class="block w-full text-center py-3.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl font-semibold transition shadow-lg shadow-blue-600/20">
-                                <i class="fas fa-hand-holding-usd mr-2"></i> connectez vous pour un financement
-                        </button>
+                            <button onclick="document.getElementById('contact_modal').showModal()" 
+                                     class="btn btn-outline w-full text-center py-3 rounded-xl border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition">
+                                    <i class="fas fa-envelope mr-2"></i> Contacter le commercial
+                            </button>
+                            <button onclick="document.getElementById('login_simple_modal').showModal()" 
+                                    class="block w-full text-center py-3.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl font-semibold transition shadow-lg shadow-blue-600/20">
+                                    <i class="fas fa-hand-holding-usd mr-2"></i> Connectez-vous pour un financement
+                            </button>
                         {% endif %}
-                   <div id="return-fav-result"></div>
                         
+                        <div id="return-fav-result"></div>
+                            
                         <button
                             id="fav-btn-{{ vehicul.pk }}"
                             hx-post="{% url 'vehicul_app:ajout-favoris' vehicul.pk %}"
@@ -274,10 +413,12 @@
                                 <i class="far fa-heart mr-2"></i> Ajouter aux favoris
                             {% endif %}
                         </button>
+                    </div>
                 </div>
             </div>
 
         </div>
+
         <!-- ===== GALERIE D'IMAGES ===== -->
         {% if vehicul.images.all %}
         <div class="mt-12 sm:mt-16">
@@ -314,14 +455,15 @@
             <i class="fas fa-times"></i>
         </button>
     </div>
-        {% include 'modals/leads/demande_financement.html' %}
-        {% include 'modals/auth/login_simple_modal.html' %}
-        {% include 'modals/contact/contact_modal.html' %}
-    <!-- ============================================================ -->
-    <!-- SCRIPTS  -->
-    <!-- ============================================================ -->
-   
     
+    {% include 'modals/leads/demande_financement.html' %}
+    {% include 'modals/auth/login_simple_modal.html' %}
+    {% include 'modals/home/register.html' %}
+    {% include 'modals/contact/contact_modal.html' %}
+
+    <!-- ============================================================ -->
+    <!-- SCRIPTS -->
+    <!-- ============================================================ -->
     <script src="{% static 'js/vehicule/site_vehicul_detail.js' %}"></script>
      
 </body>

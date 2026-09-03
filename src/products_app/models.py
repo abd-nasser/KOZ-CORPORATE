@@ -132,7 +132,7 @@ class Products(models.Model):
     )
     stock = models.IntegerField(default=0, verbose_name="Stock disponible")
     stock_min = models.IntegerField(
-        default=5,
+        default=3,
         verbose_name="Stock minimum (alerte)"
     )
     unite = models.ForeignKey(

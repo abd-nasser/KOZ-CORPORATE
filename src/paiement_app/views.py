@@ -176,7 +176,7 @@ def initier_paiement(request, commande_id):
                     # ✅ Alerte stock faible — après décrémentation, avec la valeur fraîche
                     produits_stock_faible = Products.objects.filter(
                         id__in=produit_a_verifier,
-                        stock__lte=5
+                        stock__lte=3
                     )
                     for produit in produits_stock_faible:
                         notifier_stock_faible(produit)

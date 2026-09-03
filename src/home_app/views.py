@@ -352,9 +352,9 @@ class ActualiteCreateView(LoginRequiredMixin, CreateView):
 class ActualiteUpdateView(LoginRequiredMixin, UpdateView):
     model = Actualite
     form_class = ActualiteForm
-  
 
     def form_valid(self, form):
+        form.save()
         response = render(self.request,'partials/actualite/actu_result.html',{'success': True,
                                                                             "title": "Mis à jour",
                                                                             "message":"actualité mis à jour",

@@ -178,8 +178,6 @@ class Actualite(models.Model):
     def images_list(self):
         """Retourne la liste des images disponibles (max 5)"""
         images = []
-        if self.image_principale:
-            images.append(self.image_principale)
         for i in range(1, 6):
             image = getattr(self, f'image_{i}', None)
             if image:

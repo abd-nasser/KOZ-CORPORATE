@@ -2,8 +2,9 @@ from django.contrib import admin
 
 # home_app/admin.py
 from django.contrib import admin
-from .models import Temoignage, AvisReseau, VideoTemoignage
+from .models import Temoignage, AvisReseau, VideoTemoignage,Actualite, RendezVous
 
+  
 @admin.register(Temoignage)
 class TemoignageTextuelAdmin(admin.ModelAdmin):
     list_display = ['nom', 'est_approuve', 'date_creation']

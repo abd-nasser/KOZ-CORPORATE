@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', function() {
     gsap.from(".hero_fade", {
                 opacity: 0,
                 y: 200,
-                duration: 1.5,
+                duration: 0.8,
             
             });
 
@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', function() {
         gsap.from("#hero-box-right", {
             x: 200,
             opacity: 0,
-            duration: 1,
+            duration: 0.7,
             ease: "power3.out",
             scrollTrigger: {
                 trigger: "#hero-box-right",
@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', function() {
         gsap.from("#hero-box-left", {
             x: -200,
             opacity: 0,
-            duration: 1,
+            duration: 0.7,
             ease: "power3.out",
             scrollTrigger: {
                 trigger: "#hero-box-left",
@@ -102,7 +102,7 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         opacity: 0,
         y: 30,
-        duration: 0.8,
+        duration: 0.6,
         ease: "power2.out"
     });
 
@@ -118,21 +118,21 @@ document.addEventListener('DOMContentLoaded', function() {
     heroTl.from(".act-hero", {
         opacity: 0,
         x: -40,
-        duration: 0.9,
+        duration: 0.7,
         ease: "power3.out"
     })
     .from([".actu_type", ".actu_vedette"], {
         opacity: 0,
         y: -15,
         stagger: 0.1,
-        duration: 0.4,
+        duration: 0.3,
         ease: "power2.out"
     }, "-=0.4")
     .from([".actu_titre", ".actu_mini_descript"], {
         opacity: 0,
         y: 20,
         stagger: 0.12,
-        duration: 0.5,
+        duration: 0.35,
         ease: "power2.out"
     }, "-=0.2");
 
@@ -148,23 +148,24 @@ document.addEventListener('DOMContentLoaded', function() {
     rightTl.from(".actu_descript", {
         opacity: 0,
         x: 40,
-        duration: 0.8,
+        duration: 0.6,
         ease: "power3.out"
-    })
-    gsap.from(".actu-img-galerie > div" , {
-    scrollTrigger: {
-        trigger: ".actu-img-galerie", // Ou le conteneur parent de ta galerie
-        start: "top 85%",
-        toggleActions: "play none none reverse"
-    },
-    autoAlpha: 0,       // Remplace opacity: 0 pour éviter les glitches
-    y: 20,
-    scale: 0.9,
-    stagger: 0.1,
-    duration: 0.5,
-    ease: "back.out(1.4)",
-    clearProps: "all"   // Supprime le style inline à la fin
-});
+    });
+
+    gsap.from(".actu-img-galerie > div", {
+        scrollTrigger: {
+            trigger: ".actu-img-galerie",
+            start: "top 85%",
+            toggleActions: "play none none reverse"
+        },
+        autoAlpha: 0,
+        y: 20,
+        scale: 0.9,
+        stagger: 0.1,
+        duration: 0.35,
+        ease: "back.out(1.4)",
+        clearProps: "all"
+    });
 });
 
   
@@ -184,10 +185,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 opacity: 0,
                 y: 200,
-                duration: 1,
+                duration: 0.7,
                 ease: "power3.out",
-                
-                
             });
 
    
@@ -213,10 +212,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // 1ère carte (ex: SUV - vient de la gauche)
         gsap.from(".type-card:nth-child(1)", {
             x: -180,
-            opacity: 0,
+                duration: 0.8,
             scale: 0.85,
             rotation: -12,
-            duration: 1.2,
+            duration: 0.8,
             ease: "power3.out",
             scrollTrigger: {
                 trigger: ".type-contain",
@@ -230,9 +229,9 @@ document.addEventListener('DOMContentLoaded', function() {
             y: 100,
             opacity: 0,
             scale: 0.85,
-            duration: 1.2,
+            duration: 0.8,
             delay: 0.15,
-            ease: "power3.out",
+                duration: 0.6,
             scrollTrigger: {
                 trigger: ".type-contain",
                 start: "top 80%",
@@ -245,8 +244,8 @@ document.addEventListener('DOMContentLoaded', function() {
             x: 180,
             opacity: 0,
             scale: 0.85,
-            rotation: 12,
-            duration: 1.2,
+                duration: 0.7,
+            duration: 0.8,
             delay: 0.3,
             ease: "power3.out",
             scrollTrigger: {
@@ -273,7 +272,7 @@ document.addEventListener('DOMContentLoaded', function() {
         gsap.from(".fleche_anim", {
             x: -100,
             opacity: 0,
-            duration: 1.2,
+            duration: 0.8,
             ease: "power3.out",
             scrollTrigger: {
                 trigger: ".text-anim",
@@ -330,7 +329,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 opacity: 0,
                 y: 200,
-                duration: 1,
+                duration: 0.7,
                 ease: "power3.out",
             
             });
@@ -358,7 +357,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Step 1 : Entrée en slide-in
         tl.fromTo(".vehicul_ved_anim", 
             { x: 200, opacity: 0, scale: 1 },
-            { x: 0, opacity: 1, duration: 1.2, ease: "power3.out" }
+            { x: 0, opacity: 1, duration: 0.8, ease: "power3.out" }
         )
         // Step 2 : Scale infini (effet respiration)
         .to(ved_img, {
@@ -581,7 +580,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 autoAlpha: 0,
                 x: -200,
-                duration: 1.2,
+                duration: 0.8,
                 ease: "power3.out",
             });
 
@@ -594,7 +593,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 autoAlpha: 0,
                 x: 200,
-                duration: 1.2,
+                duration: 0.8,
                 ease: "power3.out",
             });
 
@@ -610,7 +609,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 autoAlpha: 0,
                 y: 300,
                 duration: 1,
-                stagger: 0.50,
+                stagger: 0.16,
                 immediateRender: false,
                 ease: "power3.out",
             });
@@ -627,7 +626,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 autoAlpha: 0,
                 y: 300,
                 duration: 1,
-                stagger: 0.50,
+                stagger: 0.16,
                 immediateRender: false,
                 ease: "power3.out",
             });
@@ -668,7 +667,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const target = parseInt(el.getAttribute('data-target'), 10);
         const prefix = el.getAttribute('data-prefix') || '';
         const suffix = el.getAttribute('data-suffix') || '';
-        const duration = 1800;
+        const duration = 900;
         const startTime = performance.now();
 
         function updateCounter(currentTime) {
@@ -775,11 +774,11 @@ document.addEventListener('DOMContentLoaded', function() {
             backgroundColor: "rgba(255,255,255,0.24)",
             borderColor: "rgba(96,165,250,0.35)",
             boxShadow: "0 24px 62px rgba(59,130,246,0.14)",
-            duration: 1,
+            duration: 0.7,
             ease: "sine.inOut",
             repeat: -1,
             yoyo: true,
-            stagger: 0.5,
+            stagger: 0.16,
         }
     );
 
@@ -796,7 +795,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Add Lenis's requestAnimationFrame (raf) method to GSAP's ticker
             // This ensures Lenis's smooth scroll animation updates on each GSAP tick
             gsap.ticker.add((time) => {
-            lenis.raf(time * 500); // Convert time from seconds to milliseconds
+            lenis.raf(time * 1000); // Convert time from seconds to milliseconds
             });
 
             // Disable lag smoothing in GSAP to prevent any delay in scroll animations

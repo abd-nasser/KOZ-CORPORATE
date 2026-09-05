@@ -2027,37 +2027,30 @@
     const basePath = "{% static 'hero_frames/frame-' %}";
     const frameImg = document.getElementById('frame');
 
-    // ✅ Précharger toutes les images AVANT de créer le ScrollTrigger
+    // Le scroll devient actif immédiatement ; les images se chargent en arrière-plan.
     const images = [];
-    let loadedCount = 0;
-
-    function preloadImages(callback) {
+    function preloadImages() {
         for (let i = 1; i <= totalFrames; i++) {
             const img = new Image();
             const paddedIndex = String(i).padStart(4, '0');
             img.src = `${basePath}${paddedIndex}.jpg`;
-            img.onload = () => {
-                loadedCount++;
-                if (loadedCount === totalFrames) callback();
-            };
             images[i - 1] = img;
         }
     }
 
-    preloadImages(() => {
-        // ✅ Le ScrollTrigger ne démarre qu'une fois TOUTES les images en cache navigateur
-        ScrollTrigger.create({
-            trigger: ".hero-section",
-            start: "top top",
-            end: "bottom bottom",
-            scrub: 2.8,
-            onUpdate: (self) => {
-                let frameIndex = Math.floor(self.progress * (totalFrames - 1)) + 1;
-                frameIndex = Math.min(frameIndex, totalFrames);
-                frameImg.src = images[frameIndex - 1].src;  // déjà en cache, changement instantané
-            }
-        });
+    ScrollTrigger.create({
+        trigger: ".hero-section",
+        start: "top top",
+        end: "bottom bottom",
+        scrub: 0.8,
+        onUpdate: (self) => {
+            let frameIndex = Math.floor(self.progress * (totalFrames - 1)) + 1;
+            frameIndex = Math.min(frameIndex, totalFrames);
+            const frame = images[frameIndex - 1];
+            if (frame && frame.complete) frameImg.src = frame.src;
+        }
     });
+    preloadImages();
 
     // Initialize a new Lenis instance for smooth scrolling
         const lenis = new Lenis();
@@ -2068,7 +2061,7 @@
             // Add Lenis's requestAnimationFrame (raf) method to GSAP's ticker
             // This ensures Lenis's smooth scroll animation updates on each GSAP tick
             gsap.ticker.add((time) => {
-            lenis.raf(time * 500); // Convert time from seconds to milliseconds
+            lenis.raf(time * 1000); // Convert time from seconds to milliseconds
             });
 
             // Disable lag smoothing in GSAP to prevent any delay in scroll animations

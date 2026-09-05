@@ -8,8 +8,7 @@ services:
       POSTGRES_DB: koz_db
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+    # ❌ Port 5432 supprimé pour la sécurité (accessible uniquement via koz_network)
     networks:
       - koz_network
     restart: always
@@ -29,6 +28,8 @@ services:
       - .env.prod
     depends_on:
       postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     networks:
       - koz_network
@@ -52,7 +53,37 @@ services:
       - /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:
       web:
-        condition: service_started
+        condition: service_healthy # 🟢 Attend que web réponde sur /health/
+    networks:
+      - koz_network
+    restart: always
+
+  redis:
+    image: redis:7-alpine
+    container_name: koz-flow-redis
+    restart: always
+    networks:
+      - koz_network
+    command: redis-server --maxmemory 128mb --maxmemory-policy allkeys-lru
+    healthcheck: # 🟢 Garantit la disponibilité du broker
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  celery_worker:
+    build: .
+    container_name: koz-flow-celery
+    command: celery -A koz_flow worker --loglevel=info --concurrency=2
+    volumes:
+      - media_volume:/app/media/
+    env_file:
+      - .env.prod
+    depends_on:
+      postgres:
+        condition: service_healthy # 🟢 Attente explicite de la DB
+      redis:
+        condition: service_healthy # 🟢 Attente explicite de Redis
     networks:
       - koz_network
     restart: always
@@ -60,8 +91,7 @@ services:
 volumes:
   static_volume:
   media_volume:
-  db_volume:
-  postgres_data:
+  postgres_data: # 🟢 Nettoyé (db_volume supprimé)
 
 networks:
   koz_network:

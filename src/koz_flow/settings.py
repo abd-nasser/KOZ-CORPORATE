@@ -275,6 +275,23 @@ import shutil
 
 NPM_BIN_PATH = shutil.which("npm") or "/usr/bin/npm"
 
+
+# Host Redis par défaut selon le mode
+REDIS_HOST = '127.0.0.1' if DEBUG else 'redis'
+
+CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', f'redis://{REDIS_HOST}:6379/0')
+CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', f'redis://{REDIS_HOST}:6379/1')
+
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'
+
+# Robustesse & Sécurité VPS
+CELERY_TASK_ACKS_LATE = True
+CELERY_WORKER_MAX_TASKS_PER_CHILD = 100
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+
 #Email configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'

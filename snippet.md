@@ -1,5 +1,203 @@
+celery==5.4.0
+redis==5.0.8
 
 
+class Vehicul(models.Model):
+    
+    TYPES_CARBURANT_CHOICES = [
+        ('essence', "Essence"),
+        ("diesel", "Diesel"),
+        ("electrique", 'Electrique')
+    ]
+    
+    type_vehicule = models.ForeignKey(  # ← ✅ NOUVEAU CHAMP
+        TypeVehicule,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='vehicules',
+        verbose_name="Type de véhicule"
+    )
+    
+   
+    marque = models.ForeignKey(Marque, on_delete=models.CASCADE, related_name='vehicul')
+    modele = models.CharField(max_length=100)
+    annee = models.IntegerField()
+    stock = models.IntegerField(null=True, blank=True)
+    stock_min = models.IntegerField(
+            default=1,
+            verbose_name="Stock minimum (alerte)"
+        )
+    prix = models.DecimalField(max_digits=12, decimal_places=0)
+    kilometrage = models.IntegerField()
+    carburant = models.CharField(max_length=20, choices=TYPES_CARBURANT_CHOICES, default="essence")
+    
+    #========= NOUVEAUX CHAMPS DE CONSOMMATION ET CAPACITÉ ==========
+    couleur = models.CharField(
+            max_length=7,
+            default='#3b82f6',
+            help_text="Couleur en hexadécimal",
+            verbose_name="Couleur"
+        )
+    
+    conso_moyenne_en_agglomération = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=0.00,
+        verbose_name="Consommation moyenne en agglomération (L/100km)"
+    )
+    conso_moyenne_hors_agglomération = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=0.00,
+        verbose_name="Consommation moyenne hors agglomération (L/100km)"
+    )
+    capacite_reservoir = models.IntegerField(
+        null=True,
+        blank=True,
+        verbose_name="Capacité du réservoir (L)"
+    )
+    
+    type_de_pneus = models.CharField(
+        max_length=100,
+        default="Pneus d'origine",
+        verbose_name="Type de pneus"
+    )
+    #===============================================================================
+   
+    # ========== IMAGE PRINCIPALE (conservée) ==========
+    image_principale = models.ImageField(upload_to='vehicules/')
+    
+    
+    disponible = models.BooleanField(default=False)
+    description = models.TextField(null=True, blank=True)
+    date_ajout = models.DateTimeField(auto_now_add=True)
+    actualite = models.BooleanField(default=False)
+    est_vedette = models.BooleanField(default=False)
+    favoris_de = models.ManyToManyField(
+    'auth_app.kozUser',
+    related_name='vehicules_favoris',
+    blank=True,
+    limit_choices_to={'role': 'client'},
+)
+    
+    slug = models.SlugField(
+        max_length=200,
+        unique=True,
+        blank=True,
+        null=True,
+        help_text="Laissez vide pour génération automatique"
+    )
+    
+    # ✅ Propriété qui choisit la bonne image
+    @property
+    def display_image(self):
+        principale = self.images.filter(est_principale=True).first()
+        if principale:
+            return principale.image
+        return self.image_principale
+    
+    @property
+    def est_en_stock(self):
+        """Vérifie si le produit est en stock"""
+        return self.stock > 0
+    
+    @property
+    def stock_alerte(self):
+        """Vérifie si le stock est en dessous du seuil d'alerte"""
+        return self.stock <= self.stock_min
+    
+    @property
+    def marque_and_model(self):
+        return f'{self.marque.nom}-{self.modele}'
+      
+    def __str__(self):
+        marque_nom = self.marque.nom if self.marque else "?"
+        modele_nom = self.modele if self.modele else "?"
+        return f"{marque_nom} {modele_nom}"
+    
+    def get_absolute_url(self):
+        return reverse('vehicul_app:site-vehicul-detail-slug', kwargs={'slug': self.slug})
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base = f"{self.marque.nom} {self.modele} {self.annee}"
+            self.slug = slugify(base)
+            # Gérer l'unicité
+            original = self.slug
+            counter = 1
+            while Vehicul.objects.filter(slug=self.slug).exclude(pk=self.pk).exists():
+                self.slug = f"{original}-{counter}"
+                counter += 1
+        super().save(*args, **kwargs)
+
+#####Partials
+
+<!-- vehicule_images_partial.html (corrigé) -->
+{% load static %}
+
+<!-- Miniatures -->
+<div class="flex gap-3 overflow-x-auto pb-2 img_miniatures" id="thumbnail-container">
+    <!-- Image principale en thumbnail -->
+    <img src="{{ vehicule.image_principale.url }}" 
+         class="thumbnail w-20 h-20 rounded-lg object-cover cursor-pointer border-2 border-transparent hover:border-blue-500 transition"
+         onclick="changeImage('{{ vehicule.image_principale.url }}')">
+
+    <!-- Images supplémentaires -->
+    {% for image in images %}
+        <img src="{{ image.image.url }}" 
+             alt="{{ image.alt_text|default:vehicule.modele }}"
+             class="thumbnail w-20 h-20 rounded-lg object-cover cursor-pointer border-2 border-transparent hover:border-blue-500 transition"
+             onclick="changeImage('{{ image.image.url }}')">
+    {% empty %}
+        <div class="text-gray-400 text-sm flex items-center gap-2">
+            <i class="fas fa-info-circle"></i> Aucune image supplémentaire
+        </div>
+    {% endfor %}
+</div>
+
+<!-- Pagination -->
+<div class="flex justify-center items-center gap-4 mt-3">
+    {% if images.has_previous %}
+    <button hx-get="{% url 'vehicul_app:vehicul-images' vehicule.pk %}?page={{ images.previous_page_number }}"
+            hx-target="#image-gallery-container"
+            hx-swap="outerHTML"
+            class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition text-sm font-medium flex items-center gap-2">
+        <i class="fas fa-chevron-left text-xs"></i> Précédent
+    </button>
+    {% else %}
+    <button
+            class="px-4 py-2 bg-gray-100 text-gray-400 rounded-lg text-sm font-medium cursor-not-allowed" disabled>
+        <i class="fas fa-chevron-left text-xs"></i> Précédent
+    </button>
+    {% endif %}
+
+    <span class="text-sm text-gray-600 font-medium">
+        {{ images.number }} / {{ images.paginator.num_pages }}
+    </span>
+
+    {% if images.has_next %}
+    <button hx-get="{% url 'vehicul_app:vehicul-images' vehicule.pk %}?page={{ images.next_page_number }}"
+            hx-target="#image-gallery-container"
+            hx-swap="outerHTML"
+            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition text-sm font-medium flex items-center gap-2">
+        Suivant <i class="fas fa-chevron-right text-xs"></i>
+    </button>
+    {% else %}
+    <button class="px-4 py-2 bg-gray-100 text-gray-400 rounded-lg text-sm font-medium cursor-not-allowed" disabled>
+        Suivant <i class="fas fa-chevron-right text-xs"></i>
+    </button>
+    {% endif %}
+</div>
+
+
+<!-- Lightbox -->
+<div id="lightbox" class="fixed inset-0 z-50 bg-black/90 hidden items-center justify-center" onclick="closeLightbox()">
+    <img id="lightbox-img" src="" alt="Agrandissement" class="max-w-5xl max-h-[90vh] object-contain rounded-xl shadow-2xl">
+    <button onclick="closeLightbox()" class="absolute top-5 right-5 text-white text-3xl hover:text-gray-300 transition">
+        <i class="fas fa-times"></i>
+    </button>
+</div>
 
 
 <!-- ============================================================ -->

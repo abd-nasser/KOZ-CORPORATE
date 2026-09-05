@@ -2,6 +2,7 @@ from datetime import timedelta
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from django.core.mail import send_mail
+from koz_flow.tasks import send_email_task
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.conf import settings

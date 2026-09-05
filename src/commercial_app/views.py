@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 
 from django.core.mail import send_mail
+from koz_flow.tasks import send_email_task
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from leads_app.utils import generer_echeances_offre, generer_echeances_demande, calculer_mensualite

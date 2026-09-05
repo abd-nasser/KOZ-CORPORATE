@@ -11,6 +11,7 @@ from django.utils.decorators import method_decorator
 from django.contrib.auth import update_session_auth_hash
 
 from django.core.mail import send_mail
+from koz_flow.tasks import send_email_task
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 
@@ -58,9 +59,23 @@ def login_page(request):
     return render(request, "auth_templates/login.html")   
 
 
+import logging
+from django.conf import settings
+from django.db import transaction
+from django.shortcuts import redirect, render
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+
+from koz_flow.tasks import send_email_task  # Adapte le chemin d'import selon ton projet
+
+
+logger = logging.getLogger(__name__)
+
+
 def site_user_register(request):
-    time.sleep(3)
-    """Crée un compte utilisateur depuis le site et affiche le résultat dans un partial."""
+    """
+    Crée un compte utilisateur depuis le site et affiche le résultat dans un partial HTMX.
+    """
     if request.method != 'POST':
         return redirect('home_app:home-page')
 
@@ -75,64 +90,99 @@ def site_user_register(request):
     password = request.POST.get('password', '')
     password2 = request.POST.get('password2', '')
 
-    context = {
-        'success': False,
-        'title': 'Inscription échouée',
-        'message': 'Une erreur est survenue lors de l inscription.',
-        'reload_on_close': False,
-    }
-
-    if not email or not nom_complet or not telephone or not password or not password2 or not pays or not ville:
-        context['message'] = 'Tous les champs obligatoires doivent être remplis.'
+    # Helper interne pour homogénéiser et simplifier le rendu des partials HTMX
+    def render_register_response(context):
         response = render(request, 'partials/auth/register_result.html', context)
-        response['HX-Trigger'] = "closeRegisterModal"
+        response["HX-Trigger"] = "closeRegisterModal"
         return response
+
+    # 🛑 1. VALIDATIONS CÔTÉ SERVEUR (Sorties précoces)
+    if not email or not nom_complet or not telephone or not password or not password2 or not pays or not ville:
+        return render_register_response({
+            'success': False,
+            'title': 'Inscription échouée',
+            'message': 'Tous les champs obligatoires doivent être remplis.',
+            'reload_on_close': False,
+        })
 
     if password != password2:
-        context['message'] = 'Les mots de passe ne correspondent pas.'
-        response = render(request, 'partials/auth/register_result.html', context)
-        response['HX-Trigger'] = "closeRegisterModal"
-        return response
+        return render_register_response({
+            'success': False,
+            'title': 'Inscription échouée',
+            'message': 'Les mots de passe ne correspondent pas.',
+            'reload_on_close': False,
+        })
 
     if len(password) < 6:
-        context['message'] = 'Le mot de passe doit contenir au moins 6 caractères.'
-        response = render(request, 'partials/auth/register_result.html', context)
-        response['HX-Trigger'] = "closeRegisterModal"
-        return response
+        return render_register_response({
+            'success': False,
+            'title': 'Inscription échouée',
+            'message': 'Le mot de passe doit contenir au moins 6 caractères.',
+            'reload_on_close': False,
+        })
 
     if kozUser.objects.filter(email=email).exists():
-        context['message'] = 'Un compte existe déjà avec cette adresse e-mail.'
-        response = render(request, 'partials/auth/register_result.html', context)
-        response['HX-Trigger'] = "closeRegisterModal"
-        return response
+        return render_register_response({
+            'success': False,
+            'title': 'Inscription échouée',
+            'message': 'Un compte existe déjà avec cette adresse e-mail.',
+            'reload_on_close': False,
+        })
 
     try:
-        user = kozUser.objects.create_user(
-            email=email,
-            nom_complet=nom_complet,
-            telephone=telephone,
-            password=password,
-            adresse=adresse,
-            pays=pays,
-            ville=ville,
-            genre=genre,
-            profession=profession,
-            role='client',
-            is_active=True,
-        )
+        # 🔴 2. TRANSACTION ATOMIQUE : Création de l'utilisateur
+        with transaction.atomic():
+            user = kozUser.objects.create_user(
+                email=email,
+                nom_complet=nom_complet,
+                telephone=telephone,
+                password=password,
+                adresse=adresse,
+                pays=pays,
+                ville=ville,
+                genre=genre,
+                profession=profession,
+                role='client',
+                is_active=True,
+            )
 
-        context['success'] = True
-        context['title'] = 'Inscription réussie'
-        context['message'] = 'Votre compte a été créé avec succès. Vous pouvez maintenant vous connecter.'
-        context['reload_on_close'] = True
+            # 🟢 3. PRÉPARATION DE L'EMAIL DE BIENVENUE
+            context_email = {
+                'user': user,
+                'nom_complet': nom_complet,
+            }
+            html_message = render_to_string(
+                'emails/auth/welcome_client.html', context_email
+            )
+            plain_message = strip_tags(html_message)
+
+            # 🟢 4. ON_COMMIT : Tâche Celery déclenchée APRÈS validation SQL
+            transaction.on_commit(
+                lambda: send_email_task.delay(
+                    subject="Bienvenue chez KOZ Services !",
+                    plain_message=plain_message,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[user.email],
+                    html_message=html_message,
+                )
+            )
+
+        # 🟢 5. Réponse HTMX de succès
+        return render_register_response({
+            'success': True,
+            'title': 'Inscription réussie',
+            'message': 'Votre compte a été créé avec succès. Vous pouvez maintenant vous connecter.',
+            'reload_on_close': True,
+        })
+
     except Exception as e:
-        logger.error(f"Erreur création compte site: {e}")
-        context['message'] = 'Impossible de créer votre compte pour le moment. Veuillez réessayer plus tard.'
-
-    response = render(request, 'partials/auth/register_result.html', context)
-    response["HX-Trigger"] = "closeRegisterModal"
-    return response
-
+        logger.error(f"Erreur lors de la création du compte site ({email}) : {e}")
+        return render_register_response({
+            'success': False,
+            'title': 'Inscription échouée',
+            'message': 'Impossible de créer votre compte pour le moment. Veuillez réessayer plus tard.',
+            'reload_on_close': False,
+        })
 
 #------------- VUE POUR L'INSCRIPTION ----------------------
 #APIView = une vue qui répond aux requetes GET, POST, PUT, DELETE
@@ -261,97 +311,160 @@ class LogoutView(APIView):
 #--------------------------LES Vus d'autentification pour ERP--------------------------
 #---------------------------------------------------------------------------------------
 
+import logging
+from django.conf import settings
+from django.contrib.auth import authenticate, login as django_login
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.db import transaction
+from django.shortcuts import redirect, render
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from django.views.generic import CreateView
+
+from koz_flow.tasks import send_email_task  # Adapte le chemin selon ton projet
+
+
+logger = logging.getLogger(__name__)
+
+
 class UserRegisterView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = kozUser
     form_class = UserRegisterForm
+
     def test_func(self):
         return self.request.user.is_superuser or self.request.user.is_staff
-    
+
     def get_template_names(self):
         if self.request.user.is_superuser or self.request.user.role == "directeur":
-            return ["directeur_templates/directeur.html"]    
+            return ["directeur_templates/directeur.html"]
         else:
             return ["commercial_templates/commercial.html"]
-   
-       
+
     def get_form_kwargs(self):
-        kwargs =  super().get_form_kwargs()
+        kwargs = super().get_form_kwargs()
         kwargs["created_by"] = self.request.user
         return kwargs
-    
+
     def form_valid(self, form):
-        if self.request.user.role == 'commercial':
-            form.instance.role = 'client'
-            form.instance.is_active = True
-            form.instance.assigned_commercial = self.request.user
-        
-        user = form.save()   # ✅ toujours appelé, peu importe qui crée
-        
-        response = render(self.request, 'partials/auth/register_result.html', {
-            'success': True,
-            'title': f"Utilisateur {user.nom_complet} créé !",
-            'message': "📧 Les identifiants temporaires ont été envoyés par email.",
-            'reload_on_close': True,
-        })
-        response["HX-Trigger"] = "closeRegisterModal"
-        return response
-    
+        try:
+            # 🔴 1. TRANSACTION ATOMIQUE : Sauvegarde en BDD
+            with transaction.atomic():
+                if self.request.user.role == 'commercial':
+                    form.instance.role = 'client'
+                    form.instance.is_active = True
+                    form.instance.assigned_commercial = self.request.user
+
+                user = form.save()
+
+                # 🟢 2. PRÉPARATION DU MAIL D'IDENTIFIANTS TEMPORAIRES
+                context_email = {
+                    'user': user,
+                    'created_by': self.request.user,
+                }
+                html_message = render_to_string(
+                    'emails/auth/credentials_created.html', context_email
+                )
+                plain_message = strip_tags(html_message)
+
+                # 🟢 3. ON_COMMIT : Déclenchement Celery APRÈS validation BDD
+                transaction.on_commit(
+                    lambda: send_email_task.delay(
+                        subject="Vos identifiants de connexion - KOZ Services",
+                        plain_message=plain_message,
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        recipient_list=[user.email],
+                        html_message=html_message,
+                    )
+                )
+
+            # 🟢 4. Réponse HTMX de succès
+            response = render(
+                self.request,
+                'partials/auth/register_result.html',
+                {
+                    'success': True,
+                    'title': f"Utilisateur {user.nom_complet} créé !",
+                    'message': "📧 Les identifiants temporaires ont été envoyés par email.",
+                    'reload_on_close': True,
+                },
+            )
+            response["HX-Trigger"] = "closeRegisterModal"
+            return response
+
+        except Exception as e:
+            logger.error(f"Erreur lors de la création de l'utilisateur dans UserRegisterView : {e}")
+            response = render(
+                self.request,
+                'partials/auth/register_result.html',
+                {
+                    'success': False,
+                    'title': "Création échouée",
+                    'message': "Une erreur est survenue lors de la création de l'utilisateur.",
+                    'reload_on_close': False,
+                },
+            )
+            response["HX-Trigger"] = "closeRegisterModal"
+            return response
+
     def form_invalid(self, form):
-        return render(self.request, 'partials/auth/_user_register_form_errors.html', {"user_register_form":form})
+        return render(
+            self.request,
+            'partials/auth/_user_register_form_errors.html',
+            {"user_register_form": form},
+        )
 
 
 def login_simple(request):
+    """Gère la connexion simplifiée avec retours de partials HTMX."""
     if request.method != 'POST':
         return redirect("home_app:home-page")
+
+    # Helper interne pour homogénéiser les réponses HTMX
+    def render_login_response(context):
+        response = render(request, "partials/auth/login_result.html", context)
+        response["HX-Trigger"] = "closeLoginModal"
+        return response
 
     try:
         email = (request.POST.get('email') or '').strip()
         password = request.POST.get('password') or ''
 
         if not email or not password:
-            response = render(request, "partials/auth/login_result.html", {
+            return render_login_response({
                 'success': False,
                 'title': 'Connexion impossible',
                 'message': 'Veuillez renseigner votre email et votre mot de passe.',
                 'reload_on_close': False,
             })
-            response["HX-Trigger"] = "closeLoginModal"
-            return response
 
         user = authenticate(request, email=email, password=password)
 
         if user is None:
-            response = render(request, "partials/auth/login_result.html", {
+            return render_login_response({
                 'success': False,
                 'title': 'Email ou mot de passe incorrect',
                 'message': 'Vérifiez vos identifiants et réessayez.',
                 'reload_on_close': False,
             })
-            response["HX-Trigger"] = "closeLoginModal"
-            return response
 
-        # Tout est ok -> connexion
+        # Connexion Django
         django_login(request, user)
 
-        response = render(request, "partials/auth/login_result.html", {
+        return render_login_response({
             'success': True,
             'title': f'Bienvenue, {user.nom_complet}',
             'message': 'Connexion réussie',
             'reload_on_close': True,
         })
-        response["HX-Trigger"] = "closeLoginModal"
-        return response
 
     except Exception as e:
         logger.exception(f"Erreur lors de login_simple: {e}")
-        response = render(request, "partials/auth/login_result.html", {
+        return render_login_response({
             'success': False,
             'title': 'Erreur serveur',
             'message': 'Une erreur est survenue lors de la tentative de connexion. Réessayez plus tard.',
             'reload_on_close': False,
         })
-        response["HX-Trigger"] = "closeLoginModal"
-        return response
     
 
 def logout_simple_sur_home_page(request):

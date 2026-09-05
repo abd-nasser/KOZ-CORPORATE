@@ -1,32 +1,29 @@
 from datetime import timedelta, datetime
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal
 from django.utils import timezone
 from django.db.models import Q
 from django.db import transaction
-from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-
-
+from django.conf import settings
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 from django.urls import reverse_lazy, reverse
-
 from django.views.generic import ListView, DetailView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
 from .forms import DemandeFinancementForm, GestionFinancementForm, DocumentsUploadForm
 from commercial_app.forms import OffreFinancementForm
-from .models import DevisLeads, Vente, demande_financement
+from .models import Vente, demande_financement
 from commercial_app.models import Offre
 from vehicul_app.models import Vehicul
 from client_app.models import Documents
 from auth_app.models import kozUser
-from django.conf import settings
-from django.core.mail import send_mail
-from django.template.loader import render_to_string
-from django.utils.html import strip_tags
-from .utils import generer_echeances_demande, generer_echeances_offre, calculer_prix_financable, verifier_coherence
 
+from .utils import calculer_prix_financable, verifier_coherence
+from koz_flow.tasks import send_email_task
 
 ###API
 from rest_framework import status #status = codes HTTP(200 = OK, 400 = Erreur, 500 = erreu server)
@@ -35,10 +32,10 @@ from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import DemandeFinancementSerializers
-
-
 import time
 import logging
+
+
 logger = logging.getLogger(__name__)
 
 class ApiDemandeFinancementView(APIView):
@@ -192,19 +189,10 @@ def envoyer_contact_email(request):
         return response
 
 ##################################################___Demande et Gestion de Financement_______###########################################
+
 @login_required
 def demande_financement_view(request, vehicul_id):
-   
     vehicul = get_object_or_404(Vehicul, id=vehicul_id)
-    if not vehicul:
-        response = render(request, 'partials/leads/_demande_fin_result.html', {
-            'success': False,
-            'title': '⚠️ Véhicule manquant',
-            'message': "Cette demande concerne un véhicule hors catalogue. contacter le commercial via le chat interne.",
-            'reload_on_close': False,
-        })
-        response['HX-Trigger'] = 'closeOffreGestionModal'
-        return response
 
     if request.user.role != "client":
         messages.error(request, "Seuls les clients peuvent faire une demande.")
@@ -228,7 +216,6 @@ def demande_financement_view(request, vehicul_id):
         })
         response["HX-Trigger"] = "closeFinModal"
         return response
-        
 
     if request.method != "POST":
         return redirect("vehicul_app:detail-vehicul", vehicul.pk)
@@ -240,58 +227,73 @@ def demande_financement_view(request, vehicul_id):
             "dmd_fin_form": form,
         })
 
-    demande = form.save(commit=False)
-    demande.client = request.user
-    demande.Vehicul_interested = vehicul
-    demande.montant_finance = vehicul.prix - form.cleaned_data.get('apport', 0)
-    demande.mensualite = form.cleaned_data.get("mensualite_souhaitee")
-    demande.taux_interet = form.cleaned_data.get("taux_interet")
-    demande.etape = "nouvelle"
-    demande.save()
-
     try:
-        context_email = {
-            "client": request.user,
-            "vehicule": f"{vehicul.marque.nom} {vehicul.modele} ({vehicul.annee})",
-            "apport": form.cleaned_data.get("apport", 0),
-            "duree": form.cleaned_data.get("duree_mois", 36),
-            "revenus": form.cleaned_data.get("revenus_mensuel", 0),
-            "lien_dashboard": request.build_absolute_uri(
-                reverse("commercial_app:commercial-view")
-            ),
-        }
-        html_message = render_to_string(
-            "emails/demande_financement/demande_financement_envoyee.html",
-            context_email,
-        )
-        plain_message = strip_tags(html_message)
+        # 🔴 1. ATOMIC TRANSACTION : Tout ce qui est à l'intérieur réussi ensemble ou échoue ensemble
+        with transaction.atomic():
+            
+            # 🟢 2. Création et sauvegarde en base de données
+            demande = form.save(commit=False)
+            demande.client = request.user
+            demande.Vehicul_interested = vehicul
+            demande.montant_finance = vehicul.prix - form.cleaned_data.get('apport', 0)
+            demande.mensualite = form.cleaned_data.get("mensualite_souhaitee")
+            demande.taux_interet = form.cleaned_data.get("taux_interet")
+            demande.etape = "nouvelle"
+            demande.save()
 
-        for commercial in kozUser.objects.filter(role="commercial"):
-            if commercial.email:
-                send_mail(
-                    subject="🆕 Nouvelle demande de financement - KOZ Services",
-                    message=plain_message,
-                    from_email=settings.EMAIL_HOST_USER,
-                    recipient_list=[commercial.email],
-                    html_message=html_message,
-                    fail_silently=False,
+            # 🟢 3. Préparation des données d'email
+            context_email = {
+                "client": request.user,
+                "vehicule": f"{vehicul.marque.nom} {vehicul.modele} ({vehicul.annee})",
+                "apport": form.cleaned_data.get("apport", 0),
+                "duree": form.cleaned_data.get("duree_mois", 36),
+                "revenus": form.cleaned_data.get("revenus_mensuel", 0),
+                "lien_dashboard": request.build_absolute_uri(
+                    reverse("commercial_app:commercial-view")
+                ),
+            }
+            html_message = render_to_string(
+                "emails/demande_financement/demande_financement_envoyee.html",
+                context_email,
+            )
+            plain_message = strip_tags(html_message)
+
+            # Extraire la liste des emails valides des commerciaux
+            emails_commerciaux = list(
+                kozUser.objects.filter(role="commercial", email__isnull=False)
+                .exclude(email="")
+                .values_list("email", flat=True)
+            )
+
+            # 🟢 4. ON_COMMIT : Déclencher Celery UNIQUEMENT après validation DB réussie
+            if emails_commerciaux:
+                transaction.on_commit(
+                    lambda: send_email_task.delay(
+                        subject="🆕 Nouvelle demande de financement - KOZ Services",
+                        plain_message=plain_message,
+                        from_email=settings.EMAIL_HOST_USER,
+                        recipient_list=emails_commerciaux,
+                        html_message=html_message,
+                    )
                 )
 
+        # 🟢 5. Réponse HTTP retournée instantanément au client (~30ms)
         response = render(request, "partials/leads/_dmd_fin_result.html", {
             "success": True,
             "title": "✅ Demande envoyée",
-            "message": "Votre demande a été envoyée. Un commercial vous contactera sous 24 à 48h.",
+            "message": "Votre demande a été enregistrée. Un commercial vous contactera sous 24 à 48h.",
             "reload_on_close": True,
         })
         response["HX-Trigger"] = "closeFinModal"
         return response
 
     except Exception as e:
-        logger.error(f"Erreur lors de l'envoi de la demande de financement : {e}")
+        # 🔴 6. En cas d'erreur SQL ou serveur, la transaction est complètement annulée (Rollback)
+        logger.error(f"Erreur lors de la création de la demande de financement : {e}")
         response = render(request, "partials/leads/_dmd_fin_result.html", {
             "success": False,
             "title": "❌ Erreur lors de l'envoi",
-            "message": "L'envoi de la demande a échoué.",
+            "message": "L'enregistrement de la demande a échoué. Veuillez réessayer.",
         })
         response["HX-Trigger"] = "closeFinModal"
         return response
@@ -704,169 +706,247 @@ class GestionTypeFinancementView(LoginRequiredMixin, UserPassesTestMixin, Update
 ################################################### DOCUMENTS VIEWS #####################################################################
 @login_required
 def upload_multiple_documents(request, demande_id):
-    
     demande = get_object_or_404(demande_financement, id=demande_id, client=request.user)
-    dossier, created = Documents.objects.get_or_create(client=request.user, demande_financement=demande)
-    
-    if request.method == 'POST':
-        form = DocumentsUploadForm(request.POST, request.FILES, instance=dossier)
-        latitude = request.POST.get("latitude")
-        longitude = request.POST.get('longitude')
-               
-                    
-        if form.is_valid():
+    dossier, created = Documents.objects.get_or_create(
+        client=request.user, demande_financement=demande
+    )
+
+    if request.method != 'POST':
+        return redirect('leads_app:detail-demande', demande.pk)
+
+    form = DocumentsUploadForm(request.POST, request.FILES, instance=dossier)
+
+    if not form.is_valid():
+        return render(
+            request,
+            'partials/documents/_documents_form_errors.html',
+            {'upload_doc_form': form},
+        )
+
+    try:
+        # 🔴 1. TRANSACTIONS ATOMIQUES : Tout est sauvegardé ensemble ou rien du tout
+        with transaction.atomic():
             dossier = form.save(commit=False)
-            dossier.latitude = latitude
-            dossier.longitude = longitude
-            dossier.save()
-            form.save()
-            if dossier.verifier_completude():
-                # ✅ Dossier complet
+            dossier.latitude = request.POST.get("latitude")
+            dossier.longitude = request.POST.get("longitude")
+
+            # Vérification de la complétude du dossier
+            est_complet = dossier.verifier_completude()
+
+            if est_complet:
                 dossier.statut_dossier = "complet"
-                dossier.save()
                 demande.etape = "en_cours"
                 demande.save()
-                
-                # ✉️ Email à tous les commerciaux
-                try:
-                    commerciaux = kozUser.objects.filter(role="commercial")
-                    for commercial in commerciaux:
-                        if commercial and commercial.email:
-                            context_email = {
-                                               'client': demande,
-                                               'demande_id': demande.id,
-                                               'vehicule': str(demande.Vehicul_interested) if demande.Vehicul_interested else "Non renseigné",
-                                               'lien_offre': request.build_absolute_uri(
-                                                   reverse('commercial_app:offre-detail', kwargs={'pk': demande.id})  # ← CORRIGÉ
-                                               )
-                                           }
-                            html_message = render_to_string('emails/documents/dossier_complet_commercial.html', context_email)
-                            plain_message = strip_tags(html_message)
-                                           
-                            send_mail(
-                                        subject="📄 Dossier complet à étudier - KOZ Services",
-                                        message=plain_message,
-                                        from_email=settings.DEFAULT_FROM_EMAIL,
-                                        recipient_list=[commercial.email],
-                                        html_message=html_message,
-                                        fail_silently=False,
-                                           )
-                    
-                except Exception as e:
-                    logger.error(f"Erreur envoi email aux commerciaux: {e}")
-                
-                response = render(request, "partials/documents/_documents_result.html", {
-                            "success": True,
-                            "title": "✅ Dossier envoyée",
-                            "message": "Votre dossier complet a été envoyée.",
-                            "reload_on_close": True,
-                        })
-                response["HX-Trigger"] = "closeDocModal"
-                return response               
             else:
-                # ❌ Dossier incomplet (documents manquants)
                 dossier.statut_dossier = "incomplet"
-                dossier.save()
-                return render(request, 'partials/documents/_documents_toast_oob.html', {
+
+            dossier.save()
+            form.save_m2m()
+
+            # 🟢 2. PRÉPARATION DE L'EMAIL (Uniquement si le dossier est complet)
+            if est_complet:
+                emails_commerciaux = list(
+                    kozUser.objects.filter(role="commercial", email__isnull=False)
+                    .exclude(email="")
+                    .values_list("email", flat=True)
+                )
+
+                if emails_commerciaux:
+                    context_email = {
+                        'client': demande.client,
+                        'demande_id': demande.id,
+                        'vehicule': (
+                            str(demande.Vehicul_interested)
+                            if demande.Vehicul_interested
+                            else "Non renseigné"
+                        ),
+                        'lien_offre': request.build_absolute_uri(
+                            reverse(
+                                'commercial_app:offre-detail',
+                                kwargs={'pk': demande.id},
+                            )
+                        ),
+                    }
+                    html_message = render_to_string(
+                        'emails/documents/dossier_complet_commercial.html',
+                        context_email,
+                    )
+                    plain_message = strip_tags(html_message)
+
+                    # 🟢 3. ON_COMMIT : Déclenchement de Celery APRÈS validation SQL
+                    transaction.on_commit(
+                        lambda: send_email_task.delay(
+                            subject="📄 Dossier complet à étudier - KOZ Services",
+                            plain_message=plain_message,
+                            from_email=settings.DEFAULT_FROM_EMAIL,
+                            recipient_list=emails_commerciaux,
+                            html_message=html_message,
+                        )
+                    )
+
+        # 🟢 4. Rendu HTTP rapide pour l'interface HTMX
+        if est_complet:
+            response = render(
+                request,
+                "partials/documents/_documents_result.html",
+                {
+                    "success": True,
+                    "title": "✅ Dossier envoyé",
+                    "message": "Votre dossier complet a été envoyé.",
+                    "reload_on_close": True,
+                },
+            )
+            response["HX-Trigger"] = "closeDocModal"
+            return response
+        else:
+            return render(
+                request,
+                'partials/documents/_documents_toast_oob.html',
+                {
                     "success": False,
                     "title": "❌ Dossier incomplet",
                     "message": "Votre dossier est incomplet, il manque des documents requis.",
-                })
-        else:
-            return render(request, 'partials/documents/_documents_form_errors.html', {'upload_doc_form': form})
-    
-    # Si GET (pas POST), rediriger vers la page de détail
-    return redirect('leads_app:detail-demande', demande.pk)
+                },
+            )
 
+    except Exception as e:
+        logger.error(f"Erreur lors de l'upload des documents : {e}")
+        return render(
+            request,
+            'partials/documents/_documents_toast_oob.html',
+            {
+                "success": False,
+                "title": "❌ Erreur lors de l'enregistrement",
+                "message": "Une erreur réseau ou serveur est survenue. Veuillez réessayer.",
+            },
+        )
+        
 @login_required
 def upload_offre_documents(request, offre_id):
-    
     """
     Vue pour uploader les documents d'une offre de financement.
     Le client upload ses documents, le dossier est vérifié.
     """
-    # ✅ Récupérer l'offre (appartient au client connecté)
     offre = get_object_or_404(Offre, id=offre_id, client=request.user)
-    
-    # ✅ Récupérer ou créer le dossier de documents lié à l'offre
+
     dossier, created = Documents.objects.get_or_create(
         client=request.user,
-        offre_financement=offre  # ← Ajoute ce champ dans ton modèle Documents
+        offre_financement=offre
     )
-    
-    if request.method == "POST":
-        form = DocumentsUploadForm(request.POST, request.FILES, instance=dossier)
-        latitude = request.POST.get("latitude")
-        longitude = request.POST.get('longitude')
-        if form.is_valid():
+
+    # 🛑 Guard Clause : Redirection immédiate si ce n'est pas du POST
+    if request.method != "POST":
+        return redirect('commercial_app:offre-detail', pk=offre.pk)
+
+    form = DocumentsUploadForm(request.POST, request.FILES, instance=dossier)
+
+    # 🛑 Guard Clause : Sortie précoce si formulaire invalide
+    if not form.is_valid():
+        return render(
+            request,
+            'partials/documents/_documents_form_errors.html',
+            {'upload_doc_form': form}
+        )
+
+    try:
+        # 🔴 1. TRANSACTION ATOMIQUE : Atomicitée complète BDD
+        with transaction.atomic():
             dossier = form.save(commit=False)
-            dossier.latitude = latitude
-            dossier.longitude = longitude
-            dossier.save()
-            form.save()
-            
-            # ✅ Vérifier la complétude du dossier
-            if dossier.verifier_completude():
-                # ✅ Dossier complet → mise à jour des statuts
+            dossier.latitude = request.POST.get("latitude")
+            dossier.longitude = request.POST.get("longitude")
+
+            # Vérification de la complétude
+            est_complet = dossier.verifier_completude()
+
+            if est_complet:
                 dossier.statut_dossier = "complet"
-                dossier.save()
-                
                 offre.statut = "verification_document"
                 offre.save()
-                
-                
-                # ✉️ Email à tous les commerciaux
-                try:
-                    commerciaux = kozUser.objects.filter(role="commercial")
-                    for commercial in commerciaux:
-                        if commercial and commercial.email:
-                            context_email = {
-                                'client': offre.client,
-                                'offre_id': offre.id,
-                                'vehicule': str(offre.vehicule_propose) if offre.vehicule_propose else "Non renseigné",
-                                'lien_offre': request.build_absolute_uri(reverse('commercial_app:offre-detail', kwargs={'pk': offre.id}) )
-                            }
-                            html_message = render_to_string('emails/documents/dossier_offre_complet.html', context_email)
-                            plain_message = strip_tags(html_message)
-                            
-                            send_mail(
-                                subject="📄 Dossier complet à étudier - KOZ Services",
-                                message=plain_message,
-                                from_email=settings.DEFAULT_FROM_EMAIL,
-                                recipient_list=[commercial.email],
-                                html_message=html_message,
-                                fail_silently=False,
-                            )
-                         
-                except Exception as e:
-                    logger.error(f"Erreur envoi email aux commerciaux: {e}")
-                response = render(request, "partials/documents/_documents_result.html", {
-                                                                "success": True,
-                                                                "title": "✅ Dossier envoyée",
-                                                                "message": "Votre dossier complet a été envoyée.",
-                                                                "reload_on_close": True,
-                                                            })
-                response["HX-Trigger"] = "closeDocModal"
-                return response
-            
             else:
-                # ❌ Dossier incomplet (documents manquants)
                 dossier.statut_dossier = "incomplet"
-                dossier.save()
-                response = render(request, 'partials/documents/_documents_toast_oob.html', {
-                                    "success": False,
-                                    "title": "❌ Dossier incomplet",
-                                    "message": "Votre dossier est incomplet, il manque des documents requis.",
-                                })
-                response["HX-Trigger"] = "closeDocModal"
-                return response
-               
+
+            dossier.save()
+            form.save_m2m()
+
+            # 🟢 2. PRÉPARATION DU MAIL (Seulement si dossier complet)
+            if est_complet:
+                emails_commerciaux = list(
+                    kozUser.objects.filter(role="commercial", email__isnull=False)
+                    .exclude(email="")
+                    .values_list("email", flat=True)
+                )
+
+                if emails_commerciaux:
+                    context_email = {
+                        'client': offre.client,
+                        'offre_id': offre.id,
+                        'vehicule': (
+                            str(offre.vehicule_propose)
+                            if offre.vehicule_propose
+                            else "Non renseigné"
+                        ),
+                        'lien_offre': request.build_absolute_uri(
+                            reverse('commercial_app:offre-detail', kwargs={'pk': offre.id})
+                        )
+                    }
+                    html_message = render_to_string(
+                        'emails/documents/dossier_offre_complet.html',
+                        context_email
+                    )
+                    plain_message = strip_tags(html_message)
+
+                    # 🟢 3. ON_COMMIT : Envoi à Celery UNIQUEMENT si le commit BDD réussit
+                    transaction.on_commit(
+                        lambda: send_email_task.delay(
+                            subject="📄 Dossier complet à étudier - KOZ Services",
+                            plain_message=plain_message,
+                            from_email=settings.DEFAULT_FROM_EMAIL,
+                            recipient_list=emails_commerciaux,
+                            html_message=html_message,
+                        )
+                    )
+
+        # 🟢 4. Rendu HTMX (Exécuté uniquement si la transaction SQL a fonctionné)
+        if est_complet:
+            response = render(
+                request,
+                "partials/documents/_documents_result.html",
+                {
+                    "success": True,
+                    "title": "✅ Dossier envoyé",
+                    "message": "Votre dossier complet a été envoyé.",
+                    "reload_on_close": True,
+                }
+            )
+            response["HX-Trigger"] = "closeDocModal"
+            return response
         else:
-            # ❌ Formulaire invalide
-           return render(request, 'partials/documents/_documents_form_errors.html', {'upload_doc_form': form})
-    
-    # ✅ GET → rediriger vers le détail de l'offre
-    return redirect('commercial_app:offre-detail', pk=offre.pk)
+            response = render(
+                request,
+                'partials/documents/_documents_toast_oob.html',
+                {
+                    "success": False,
+                    "title": "❌ Dossier incomplet",
+                    "message": "Votre dossier est incomplet, il manque des documents requis.",
+                }
+            )
+            response["HX-Trigger"] = "closeDocModal"
+            return response
+
+    except Exception as e:
+        logger.error(f"Erreur lors de l'upload des documents de l'offre {offre_id} : {e}")
+        response = render(
+            request,
+            'partials/documents/_documents_toast_oob.html',
+            {
+                "success": False,
+                "title": "❌ Erreur réseau / serveur",
+                "message": "Une erreur est survenue lors de l'enregistrement de vos documents.",
+            }
+        )
+        response["HX-Trigger"] = "closeDocModal"
+        return response      
+
                             
 @login_required
 def valide_dossier(request, dossier_id):
@@ -1842,7 +1922,7 @@ class DocumentCommentUpdateView(LoginRequiredMixin, UpdateView):
     form_class = DocumentCommentForm
 
     def form_valid(self, form):
-        time.sleep(1.5)
+       
         dossier = form.save(commit=False)
          # Vérifier que l'utilisateur est commercial ou directeur
         if self.request.user.role not in ['commercial', 'directeur']:

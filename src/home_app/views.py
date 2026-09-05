@@ -18,6 +18,7 @@ import json
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import CreateView
 from django.core.mail import send_mail
+from koz_flow.tasks import send_email_task
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.conf import settings

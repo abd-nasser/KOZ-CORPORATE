@@ -29,6 +29,7 @@ from auth_app.models import kozUser
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.core.mail import send_mail
+from koz_flow.tasks import send_email_task
 from django.conf import settings
 from chat_app.models import Message
 

@@ -34,7 +34,7 @@ ENV DATABASE_URL=postgres://dummy:dummy@localhost:5432/dummy
 
 # 6. Installation des dépendances du thème Tailwind et Build
 # Note : django-tailwind install va exécuter `npm install` dans ton dossier de thème
-RUN python manage.py tailwind install --no-input || true
+
 RUN cd theme/static_src && npm install
 RUN python manage.py tailwind build --no-input
 

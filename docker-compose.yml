@@ -20,6 +20,7 @@ services:
 
   web:
     build: .
+    image: koz_app:latest
     container_name: koz-flow-web
     volumes:
       - static_volume:/app/staticfiles/
@@ -72,7 +73,7 @@ services:
       retries: 5
 
   celery_worker:
-    build: .
+    image: koz_app:latest
     container_name: koz-flow-celery
     command: celery -A koz_flow worker --loglevel=info --concurrency=2
     volumes:
@@ -80,10 +81,12 @@ services:
     env_file:
       - .env.prod
     depends_on:
+      web:
+        condition: service_started # 🟢 S'assure que web a construit l'image
       postgres:
-        condition: service_healthy # 🟢 Attente explicite de la DB
+        condition: service_healthy
       redis:
-        condition: service_healthy # 🟢 Attente explicite de Redis
+        condition: service_healthy
     networks:
       - koz_network
     restart: always

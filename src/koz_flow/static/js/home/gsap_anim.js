@@ -209,77 +209,59 @@ document.addEventListener('DOMContentLoaded', function() {
     // ==========================================
     mm.add("(min-width: 768px)", () => {
         
-        // 1ère carte (ex: SUV - vient de la gauche)
-        gsap.from(".type-card:nth-child(1)", {
-            x: -180,
-                duration: 0.8,
-            scale: 0.85,
-            rotation: -12,
-            duration: 0.8,
-            ease: "power3.out",
+        // Création d'UNE SEULE Timeline contrôlée par le ScrollTrigger du conteneur
+        let tl = gsap.timeline({
             scrollTrigger: {
                 trigger: ".type-contain",
                 start: "top 80%",
-                toggleActions: "play none none reverse"
+                toggleActions: "play none none reverse" // Rejoue proprement en remontant
             }
         });
 
+        tl
+        // 1ère carte (ex: SUV - vient de la gauche)
+        .from(".type-card:nth-child(1)", {
+            x: -180,
+            opacity: 0,
+            scale: 0.85,
+            rotation: -12,
+            duration: 0.8,
+            ease: "power3.out"
+        }, 0) // Démarre au temps 0
+
         // 2ème carte (ex: Berline - monte du bas)
-        gsap.from(".type-card:nth-child(2)", {
+        .from(".type-card:nth-child(2)", {
             y: 100,
             opacity: 0,
             scale: 0.85,
             duration: 0.8,
-            delay: 0.15,
-                duration: 0.6,
-            scrollTrigger: {
-                trigger: ".type-contain",
-                start: "top 80%",
-                toggleActions: "play none none reverse"
-            }
-        });
+            ease: "power3.out"
+        }, 0.15) // Décalage de 0.15s
 
         // 3ème carte (ex: Truck - vient de la droite)
-        gsap.from(".type-card:nth-child(3)", {
+        .from(".type-card:nth-child(3)", {
             x: 180,
             opacity: 0,
             scale: 0.85,
-                duration: 0.7,
             duration: 0.8,
-            delay: 0.3,
-            ease: "power3.out",
-            scrollTrigger: {
-                trigger: ".type-contain",
-                start: "top 80%",
-                toggleActions: "play none none reverse"
-            }
-        });
+            ease: "power3.out"
+        }, 0.3) // Décalage de 0.3s
 
-        // Bouton CTA
-        gsap.from(".text-anim", {
+        // Bouton CTA / Texte
+        .from(".text-anim", {
             y: 40,
             opacity: 0,
-            duration: 1,
-            ease: "power3.out",
-            scrollTrigger: {
-                trigger: ".type-contain",
-                start: "bottom 85%",
-                toggleActions: "play none none reverse"
-            }
-        });
+            duration: 0.8,
+            ease: "power3.out"
+        }, 0.45)
 
         // Flèche
-        gsap.from(".fleche_anim", {
-            x: -100,
+        .from(".fleche_anim", {
+            x: -60,
             opacity: 0,
-            duration: 0.8,
-            ease: "power3.out",
-            scrollTrigger: {
-                trigger: ".text-anim",
-                start: "top 90%",
-                toggleActions: "play none none reverse"
-            }
-        });
+            duration: 0.6,
+            ease: "power3.out"
+        }, 0.6);
     });
 
     // ==========================================
@@ -287,13 +269,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // ==========================================
     mm.add("(max-width: 767px)", () => {
         
-        // Anime toutes les cartes en cascade (stagger) sans rotation ni overflow
-        gsap.from(".type-card", {
-            y: 50,
-            opacity: 0,
-            duration: 0.8,
-            stagger: 0.2,
-            ease: "power2.out",
+        let tlMobile = gsap.timeline({
             scrollTrigger: {
                 trigger: ".type-contain",
                 start: "top 85%",
@@ -301,20 +277,24 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        gsap.from(".text-anim", {
-            y: 30,
+        tlMobile
+        // Anime toutes les cartes en cascade (stagger)
+        .from(".type-card", {
+            y: 50,
             opacity: 0,
             duration: 0.8,
-            scrollTrigger: {
-                trigger: ".text-anim",
-                start: "top 90%",
-                toggleActions: "play none none reverse"
-            }
-        });
+            stagger: 0.2,
+            ease: "power2.out"
+        })
+        // Anime le texte juste après
+        .from(".text-anim", {
+            y: 30,
+            opacity: 0,
+            duration: 0.6,
+            ease: "power2.out"
+        }, "-=0.3"); // Chevauchement léger pour la fluidité
     });
 });
-
-
 
 // ============================================================
 // ANIMATION : GALLERY DE VÉHICULES VEDETTE

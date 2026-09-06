@@ -194,10 +194,8 @@
                         <i class="fas fa-building text-indigo-600"></i>
                         <span class="font-semibold text-slate-800">Organisme de financement :</span> 
                         <span class="font-medium">
-                            {% if demande.financement_type == "maison" %}
-                                KOZ Finance (interne)
-                            {% else %}
-                                Externe - {{ demande.get_financement_par_display|default:"En attente" }}
+                            {% if demande.financement_type  %}
+                                 {{ demande.get_financement_par_display|default:"En attente" }}
                             {% endif %}
                         </span>
                     </p>

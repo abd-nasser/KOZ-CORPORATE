@@ -75,7 +75,7 @@
             <div class="info-box">
                 <p><strong>🚗 Véhicule :</strong> {{ vehicule.marque.nom }} {{ vehicule.modele }}</p>
                 <p><strong>🏦 Financement :</strong> {{ partenaire }}</p>
-                <p><strong>💰 Montant financé :</strong> {{ montant_finance|intcomma }} FCFA</p>
+                <p><strong>💰 Montant financé :</strong> {{ montant_finance|floatformat|intcomma }} FCFA</p>
                 <p><strong>📅 Durée :</strong> {{ duree }} mois</p>
             </div>
             

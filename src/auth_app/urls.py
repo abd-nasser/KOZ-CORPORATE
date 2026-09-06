@@ -11,7 +11,7 @@ app_name = "auth_app"
 urlpatterns = [
     
     #path("", views.home_page_view, name="home-page")
-    path("interface/connection", login_page, name="interface-login-page"),
+    path("interface/connexion", login_page, name="interface-login-page"),
     
     # Inscription
     path('register/', ApiRegisterView.as_view(), name='register'),

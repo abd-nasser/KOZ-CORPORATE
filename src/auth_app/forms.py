@@ -21,6 +21,12 @@ from django import forms
 from .models import kozUser  # Adapte le chemin selon ton projet
 
 
+import secrets
+import string
+from django import forms
+from .models import kozUser  # Adapte le chemin selon ton projet
+
+
 class UserRegisterForm(forms.ModelForm):
     """Formulaire de création d'utilisateur pour le directeur / commercial"""
 
@@ -127,7 +133,6 @@ class UserRegisterForm(forms.ModelForm):
             user.save()
 
         return user
-    
             
 
 class ChangePasswordForm(forms.Form):

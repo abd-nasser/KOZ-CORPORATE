@@ -23,7 +23,7 @@ from client_app.models import Documents
 from auth_app.models import kozUser
 
 from .utils import calculer_prix_financable, verifier_coherence
-from koz_flow.tasks import send_email_task
+from koz_flow.tasks import send_email_task, send_document_modification_email_task
 
 ###API
 from rest_framework import status #status = codes HTTP(200 = OK, 400 = Erreur, 500 = erreu server)
@@ -205,6 +205,7 @@ def demande_financement_view(request, vehicul_id):
             "nouvelle", "en_attente", "en_cours",
             "demande_accordee_fidelis", "demande_accordee_alios",
             "demande_accordee_maison", "demande_refusee",
+            "convertis_en_offre",
         ],
     ).first()
 
@@ -300,91 +301,118 @@ def demande_financement_view(request, vehicul_id):
     
 @login_required
 def attente_document(request, demande_id):
-    
+    """
+    Passe une demande de financement à l'étape 'en_attente' et notifie le client par email.
+    """
     demande = get_object_or_404(demande_financement, id=demande_id)
-    
-    # === 1. VÉRIFICATION DU FINANCEMENT ===
+
+    # Helper interne pour unifier les réponses HTMX et le déclenchement du modal
+    def render_dmd_result(context):
+        response = render(request, "partials/leads/_dmd_fin_result.html", context)
+        response['HX-Trigger'] = 'closeDmdGestionModal'
+        return response
+
+    # === 1. VÉRIFICATIONS DU FINANCEMENT (Guard Clauses) ===
     if not demande.financement_type:
-        response = render(request, "partials/leads/_dmd_fin_result.html", {
-                    "success": False,
-                    "title": "❗ Info ",
-                    "message": "Veuillez d'abord configurer le type de financement.",
-                })
-        response['HX-Trigger'] = 'closeDmdGestionModal'
-        return response
-    
+        return render_dmd_result({
+            "success": False,
+            "title": "❗ Info",
+            "message": "Veuillez d'abord configurer le type de financement.",
+            "reload_on_close": False,
+        })
+
     if demande.financement_type == "externe" and not demande.financement_par:
-            response = render(request, "partials/leads/_dmd_fin_result.html", {
-                            "success": False,
-                            "title": "❗ Info ",
-                            "message": "Veuillez d'abord sélectionner le partenaire de financement (Fidelis/Alios).",
-                        })
-            response['HX-Trigger'] = 'closeDmdGestionModal'
-            return response
-    
-    # === 2. VÉRIFICATION DE L'ETAPE ===
+        return render_dmd_result({
+            "success": False,
+            "title": "❗ Info",
+            "message": "Veuillez d'abord sélectionner le partenaire de financement (Fidelis/KOZ SERVICES).",
+            "reload_on_close": False,
+        })
+
+    # === 2. VÉRIFICATIONS DE L'ÉTAPE ACTUELLE ===
     if demande.etape == "en_attente":
-            response = render(request, "partials/leads/_dmd_fin_result.html", {
-                                    "success": False,
-                                    "title": "⚠️ Attention",
-                                    "message": "cette demande de financement est déjà en attente de document",
-                                })
-            response['HX-Trigger'] = 'closeDmdGestionModal'
-            return response
-        
-    elif demande.etape == "demande_accordee_fidelis" or demande.etape == "demande_accordee_alios" or demande.etape == "demande_accordee_maison":
-        response = render(request, "partials/leads/_dmd_fin_result.html", {
-                                            "success": False,
-                                            "title": " ⚠️ Attention ",
-                                            "message": f"Cette demande de financement est déja accordée par {demande.financement_par if demande.financement_type == 'externe' else demande.financement_type}",
-                                        })
-        response['HX-Trigger'] = 'closeDmdGestionModal'
-        return response
-    
-    elif demande.etape == "demande_refusee":
-        response = render(request, "partials/leads/_dmd_fin_result.html", {
-                                                    "success": False,
-                                                    "title": "⚠️ Attention ",
-                                                    "message": "cette demande de financement a été réfusée",
-                                                })
-        response['HX-Trigger'] = 'closeDmdGestionModal'
-        return response
-    
-    else:
-        demande.etape = "en_attente"
-        demande.save()
-       
-        # ✉️ Email au client
-        try:
+        return render_dmd_result({
+            "success": False,
+            "title": "⚠️ Attention",
+            "message": "Cette demande de financement est déjà en attente de document.",
+            "reload_on_close": False,
+        })
+
+    etapes_accordees = [
+        "demande_accordee_fidelis",
+        "demande_accordee_maison",
+    ]
+    if demande.etape in etapes_accordees:
+        partenaire = (
+            demande.financement_par
+            if demande.financement_type == 'externe'
+            else demande.financement_type
+        )
+        return render_dmd_result({
+            "success": False,
+            "title": "⚠️ Attention",
+            "message": f"Cette demande de financement est déjà accordée par {partenaire}.",
+            "reload_on_close": False,
+        })
+
+    if demande.etape == "demande_refusee":
+        return render_dmd_result({
+            "success": False,
+            "title": "⚠️ Attention",
+            "message": "Cette demande de financement a été refusée.",
+            "reload_on_close": False,
+        })
+
+    # === 3. TRANSACTION BDD & TÂCHE CELERY ===
+    try:
+        with transaction.atomic():
+            # Mise à jour du statut en base de données
+            demande.etape = "en_attente"
+            demande.save()
+
+            # Préparation du contenu du mail
+            lien_upload = request.build_absolute_uri(
+                reverse("leads_app:detail-demande", args=[demande.pk])
+            )
             context_email = {
                 'client': demande.client,
                 'demande_id': demande.id,
-                'lien_upload': request.build_absolute_uri(reverse("leads_app:detail-demande", args=[demande.pk])),
+                'lien_upload': lien_upload,
             }
-            html_message = render_to_string('emails/demande_financement/demande_attente_documents.html', context_email)
-            plain_message = strip_tags(html_message)
-            
-            send_mail(
-                subject="📎 Documents requis pour votre demande de financement - KOZ Services",
-                message=plain_message,
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[demande.client.email],
-                html_message=html_message,
-                fail_silently=False,
+            html_message = render_to_string(
+                'emails/demande_financement/demande_attente_documents.html',
+                context_email,
             )
-            response = render(request, "partials/leads/_dmd_fin_result.html",{
-                                                                    "success": True,
-                                                                    "title": "En attente de documents",
-                                                                    "message": "cette demande financement est désormais en attente de document",
-                                                                    "reload_on_close": True,
-                                                                    })
-            response['HX-Trigger'] = 'closeDmdGestionModal'
-            return response
-        
-        except Exception as e:
-            logger.error(f"Erreur envoi email: {e}")
-        
-    return redirect("leads_app:detail-demande", demande.pk)
+            plain_message = strip_tags(html_message)
+
+            # Déclenchement de l'envoi Celery APRÈS la validation effective de la transaction en BDD
+            transaction.on_commit(
+                lambda: send_email_task.delay(
+                    subject="📎 Documents requis pour votre demande de financement - KOZ Services",
+                    plain_message=plain_message,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[demande.client.email],
+                    html_message=html_message,
+                )
+            )
+
+        return render_dmd_result({
+            "success": True,
+            "title": "En attente de documents",
+            "message": "Cette demande de financement est désormais en attente de document.",
+            "reload_on_close": True,
+        })
+
+    except Exception as e:
+        logger.exception(
+            f"Erreur lors du passage en attente de document pour la demande #{demande_id}: {e}"
+        )
+        return render_dmd_result({
+            "success": False,
+            "title": "Erreur serveur",
+            "message": "Une erreur est survenue lors de la mise à jour de la demande. Veuillez réessayer.",
+            "reload_on_close": False,
+        })
 
 @login_required
 def refuser_demande(request, demande_id):
@@ -444,13 +472,6 @@ def refuser_demande(request, demande_id):
             logger.info(f"Erreur envoi email: {e}")
 
     return redirect("leads_app:detail-demande", demande.pk)    
-
-from decimal import Decimal, InvalidOperation
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-
-
-logger = logging.getLogger(__name__)
 
 @login_required
 def estimer_prix_vehicule(request):
@@ -760,9 +781,9 @@ def upload_multiple_documents(request, demande_id):
                             if demande.Vehicul_interested
                             else "Non renseigné"
                         ),
-                        'lien_offre': request.build_absolute_uri(
+                        'lien_demande': request.build_absolute_uri(
                             reverse(
-                                'commercial_app:offre-detail',
+                                'leads_app:detail-demande',
                                 kwargs={'pk': demande.id},
                             )
                         ),
@@ -947,253 +968,216 @@ def upload_offre_documents(request, offre_id):
         response["HX-Trigger"] = "closeDocModal"
         return response      
 
-                            
 @login_required
 def valide_dossier(request, dossier_id):
-    
+    """
+    Valide un dossier de documents (lié à une demande ou une offre de financement),
+    crée la Vente correspondante et notifie le client par email via Celery.
+    """
     dossier = get_object_or_404(Documents, id=dossier_id)
 
-    if dossier.statut_dossier == "incomplet":
-        response = render(request, "partials/documents/_documents_result.html", {
-            "success": False,
-            "title": "❌ Dossier incomplet",
-            "message": "Documents obligatoires manquants.",
-        })
+    # Helper interne pour unifier les réponses HTMX et le déclenchement du modal
+    def render_doc_result(title, message, success=False, reload_on_close=False):
+        response = render(
+            request,
+            "partials/documents/_documents_result.html",
+            {
+                "success": success,
+                "title": title,
+                "message": message,
+                "reload_on_close": reload_on_close,
+            },
+        )
         response["HX-Trigger"] = "closeGestionDocModal"
         return response
+
+    # === 1. VÉRIFICATIONS DU DOSSIER (Guard Clauses) ===
+    if dossier.statut_dossier == "incomplet":
+        return render_doc_result("❌ Dossier incomplet", "Documents obligatoires manquants.")
 
     if dossier.statut_dossier == "rejete":
-        response = render(request, "partials/documents/_documents_result.html", {
-            "success": False,
-            "title": "⚠️ Dossier rejeté",
-            "message": "Dossier rejeté ne peut pas être validé.",
-        })
-        response["HX-Trigger"] = "closeGestionDocModal"
-        return response
+        return render_doc_result("⚠️ Dossier rejeté", "Un dossier rejeté ne peut pas être validé.")
 
     if dossier.statut_dossier == "valide":
-        response = render(request, "partials/documents/_documents_result.html", {
-            "success": False,
-            "title": "ℹ️ Déjà validé",
-            "message": "Ce dossier est déjà validé.",
-        })
-        response["HX-Trigger"] = "closeGestionDocModal"
-        return response
+        return render_doc_result("ℹ️ Déjà validé", "Ce dossier est déjà validé.")
 
     demande = dossier.demande_financement
     offre = dossier.offre_financement
 
-    with transaction.atomic():
-        # ============================================================
-        # CONTEXTE 1 : DEMANDE DE FINANCEMENT
-        # ============================================================
-        if demande:
-            if not demande.financement_type:
-                response = render(request, "partials/documents/_documents_result.html", {
-                    "success": False, "title": "⚠️ Info",
-                    "message": "Veuillez d'abord configurer le type de financement.",
-                })
-                response["HX-Trigger"] = "closeGestionDocModal"
-                return response
+    if not demande and not offre:
+        return render_doc_result("❌ Erreur", "Aucune demande ni offre associée à ce dossier.")
 
-            if demande.financement_type == "externe" and not demande.financement_par:
-                response = render(request, "partials/documents/_documents_result.html", {
-                    "success": False, "title": "⚠️ Info",
-                    "message": "Veuillez d'abord sélectionner le partenaire de financement (Fidelis/Alios).",
-                })
-                response["HX-Trigger"] = "closeGestionDocModal"
-                return response
-            
-            # ✅ Vérifier qu'un véhicule du catalogue est bien associé
-            if not demande.Vehicul_interested:
-                response = render(request, "partials/documents/_documents_result.html", {
-                    "success": False,
-                    "title": "⚠️ Véhicule manquant",
-                    "message": "Cette demande concerne un véhicule hors catalogue. Ajoutez-le au catalogue et associez-le à la demande avant de valider le dossier.",
-                })
-                response["HX-Trigger"] = "closeGestionDocModal"
-                return response
+    # === 2. VÉRIFICATIONS SPÉCIFIQUES ET PRÉPARATION ===
+    partenaire = None
+    nouvelle_etape_demande = None
 
-            if hasattr(demande, 'vente') and demande.vente:
-                response = render(request, "partials/documents/_documents_result.html", {
-                    "success": False, "title": "⚠️ Info",
-                    "message": "Une vente est déjà enregistrée pour ce dossier.",
-                })
-                response["HX-Trigger"] = "closeGestionDocModal"
-                return response
+    if demande:
+        if not demande.financement_type:
+            return render_doc_result("⚠️ Info", "Veuillez d'abord configurer le type de financement.")
 
-            if demande.financement_type == "externe":
-                if demande.financement_par == "fidelis":
-                    nouvelle_etape = "demande_accordee_fidelis"
-                    partenaire = "Fidelis"
-                elif demande.financement_par == "alios":
-                    nouvelle_etape = "demande_accordee_alios"
-                    partenaire = "Alios"
-                else:
-                    response = render(request, "partials/documents/_documents_result.html", {
-                        "success": False, "title": "⚠️ Info",
-                        "message": "Partenaire de financement externe non reconnu.",
-                    })
-                    response["HX-Trigger"] = "closeGestionDocModal"
-                    return response
-            else:
-                nouvelle_etape = "demande_accordee_maison"
-                partenaire = "KOZ Services (financement interne)"
-                
-            if demande.financement_type == 'externe':
-                montant_total_paye_initial = demande.Vehicul_interested.prix
-               
-            else:
-                montant_total_paye_initial = demande.apport
-            Vente.objects.create(
-                client=demande.client,
-                vehicul=demande.Vehicul_interested,
-                demande_financement=demande,
-                statut='gestion_de_statut',
-                montant=demande.apport,
-                montant_finance=demande.montant_finance,
-                mensualite=demande.mensualite,
-                duree_mois=demande.duree_mois,
-                montant_total_paye=montant_total_paye_initial,
+        if demande.financement_type == "externe" and not demande.financement_par:
+            return render_doc_result(
+                "⚠️ Info",
+                "Veuillez d'abord sélectionner le partenaire de financement (Fidelis/Alios).",
             )
 
-            demande.etape = nouvelle_etape
-            demande.save()
-
-            client = demande.client
-            context_email = {
-                'client': client,
-                'demande_id': demande.id,
-                'partenaire': partenaire,
-                'vehicule': str(demande.Vehicul_interested) if demande.Vehicul_interested else "Véhicule sélectionné",
-                'montant_finance': demande.Vehicul_interested.prix if demande.Vehicul_interested else 0,
-                'duree': demande.duree_mois,
-                'lien_dossier': request.build_absolute_uri(
-                    reverse("leads_app:document-detail", kwargs={"pk": dossier.pk})
-                ),
-            }
-
-        # ============================================================
-        # CONTEXTE 2 : OFFRE DE FINANCEMENT
-        # ============================================================
-        elif offre:
-            if not offre.vehicule_propose:
-                response = render(request, "partials/documents/_documents_result.html", {
-                    "success": False,
-                    "title": "⚠️ Véhicule manquant",
-                    "message": "Cette offre concerne un véhicule hors catalogue. Ajoutez-le au catalogue avant de valider.",
-                })
-                response["HX-Trigger"] = "closeGestionDocModal"
-                return response
-            
-            if not offre.financement_type:
-                response = render(request, "partials/documents/_documents_result.html", {
-                    "success": False, "title": "⚠️ Info",
-                    "message": "Veuillez d'abord configurer le type de financement de l'offre.",
-                })
-                response["HX-Trigger"] = "closeGestionDocModal"
-                return response
-
-            if offre.financement_type == "externe" and not offre.financement_par:
-                response = render(request, "partials/documents/_documents_result.html", {
-                    "success": False, "title": "⚠️ Info",
-                    "message": "Veuillez d'abord sélectionner le partenaire de financement (Fidelis/Alios).",
-                })
-                response["HX-Trigger"] = "closeGestionDocModal"
-                return response
-
-            if hasattr(offre, 'vente') and offre.vente:
-                response = render(request, "partials/documents/_documents_result.html", {
-                    "success": False, "title": "⚠️ Info",
-                    "message": "Une vente est déjà enregistrée pour cette offre.",
-                })
-                response["HX-Trigger"] = "closeGestionDocModal"
-                return response
-
-            if offre.financement_type == "externe":
-                if offre.financement_par == "fidelis":
-                    partenaire = "Fidelis"
-                elif offre.financement_par == "alios":
-                    partenaire = "Alios"
-                else:
-                    response = render(request, "partials/documents/_documents_result.html", {
-                        "success": False, "title": "⚠️ Info",
-                        "message": "Partenaire de financement externe non reconnu.",
-                    })
-                    response["HX-Trigger"] = "closeGestionDocModal"
-                    return response
-            else:
-                partenaire = "KOZ Services (financement interne)"
-                
-            if offre.financement_type == "externe":
-                montant_total_paye_initial = offre.vehicule_propose.prix
-            else:
-                montant_total_paye_initial = offre.apport_demande
-                
-            Vente.objects.create(
-                client=offre.client,
-                vehicul=offre.vehicule_propose,
-                offre=offre,
-                statut='gestion_de_statut',
-                montant=offre.apport_demande,
-                montant_finance=offre.montant_finance,
-                mensualite=offre.mensualite,
-                duree_mois=offre.duree_mois,
-                montant_total_paye=montant_total_paye_initial,
-                
+        if not demande.Vehicul_interested:
+            return render_doc_result(
+                "⚠️ Véhicule manquant",
+                "Cette demande concerne un véhicule hors catalogue. Ajoutez-le au catalogue et associez-le avant de valider.",
             )
-            # Pas de offre.save() — statut/type/partenaire restent inchangés, KPI se basent dessus directement
-            offre.statut = "acceptee"
-            offre.save()
-            
 
-            client = offre.client
-            context_email = {
-                'client': client,
-                'offre_id': offre.id,
-                'partenaire': partenaire,
-                'vehicule': str(offre.vehicule_propose) if offre.vehicule_propose else "Véhicule sélectionné",
-                'montant_finance': offre.vehicule_propose.prix if offre.vehicule_propose else 0,
-                'duree': offre.duree_mois,
-                'lien_dossier': request.build_absolute_uri(
-                    reverse("leads_app:document-detail", kwargs={"pk": dossier.pk})
-                ),
-            }
+        if hasattr(demande, "vente") and demande.vente:
+            return render_doc_result("⚠️ Info", "Une vente est déjà enregistrée pour ce dossier.")
 
+        if demande.financement_type == "externe":
+            if demande.financement_par == "fidelis":
+                nouvelle_etape_demande = "demande_accordee_fidelis"
+                partenaire = "Fidelis"
+            elif demande.financement_par == "alios":
+                nouvelle_etape_demande = "demande_accordee_alios"
+                partenaire = "Alios"
+            else:
+                return render_doc_result("⚠️ Info", "Partenaire de financement externe non reconnu.")
         else:
-            response = render(request, "partials/documents/_documents_result.html", {
-                "success": False, "title": "❌ Erreur",
-                "message": "Aucune demande ni offre associée à ce dossier.",
-            })
-            response["HX-Trigger"] = "closeGestionDocModal"
-            return response
+            nouvelle_etape_demande = "demande_accordee_maison"
+            partenaire = "KOZ Services (financement interne)"
 
-        dossier.statut_dossier = "valide"
-        dossier.save()
+    elif offre:
+        if not offre.vehicule_propose:
+            return render_doc_result(
+                "⚠️ Véhicule manquant",
+                "Cette offre concerne un véhicule hors catalogue. Ajoutez-le au catalogue avant de valider.",
+            )
 
-    # Email hors transaction — un échec d'envoi ne doit pas annuler la validation en base
+        if not offre.financement_type:
+            return render_doc_result(
+                "⚠️ Info", "Veuillez d'abord configurer le type de financement de l'offre."
+            )
+
+        if offre.financement_type == "externe" and not offre.financement_par:
+            return render_doc_result(
+                "⚠️ Info",
+                "Veuillez d'abord sélectionner le partenaire de financement (Fidelis/Alios).",
+            )
+
+        if hasattr(offre, "vente") and offre.vente:
+            return render_doc_result("⚠️ Info", "Une vente est déjà enregistrée pour cette offre.")
+
+        if offre.financement_type == "externe":
+            if offre.financement_par == "fidelis":
+                partenaire = "Fidelis"
+            elif offre.financement_par == "alios":
+                partenaire = "Alios"
+            else:
+                return render_doc_result("⚠️ Info", "Partenaire de financement externe non reconnu.")
+        else:
+            partenaire = "KOZ Services (financement interne)"
+
+    # === 3. TRANSACTION BDD ATOMIQUE ET ENVOI TÂCHE CELERY ===
     try:
-        html_message = render_to_string('emails/documents/dossier_valide.html', context_email)
-        plain_message = strip_tags(html_message)
-        send_mail(
-            subject="✅ Félicitations ! Votre financement est accepté - KOZ Services",
-            message=plain_message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[client.email],
-            html_message=html_message,
-            fail_silently=False,
-        )
-    except Exception as e:
-        logger.error(f"Erreur envoi email au client: {e}")
+        with transaction.atomic():
+            if demande:
+                montant_total_initial = (
+                    demande.Vehicul_interested.prix
+                    if demande.financement_type == "externe"
+                    else demande.apport
+                )
 
-    response = render(request, "partials/documents/_documents_result.html", {
-        "success": True,
-        "title": "✅ Dossier validé",
-        "message": "Dossier validé. Demande et vente enregistrées. Un email a été envoyé au client.",
-        "reload_on_close": True,
-    })
-    response["HX-Trigger"] = "closeGestionDocModal"
-    return response
+                Vente.objects.create(
+                    client=demande.client,
+                    vehicul=demande.Vehicul_interested,
+                    demande_financement=demande,
+                    statut="gestion_de_statut",
+                    montant=demande.apport,
+                    montant_finance=demande.montant_finance,
+                    mensualite=demande.mensualite,
+                    duree_mois=demande.duree_mois,
+                    montant_total_paye=montant_total_initial,
+                )
+
+                demande.etape = nouvelle_etape_demande
+                demande.save()
+
+                client = demande.client
+                context_email = {
+                    "client": client,
+                    "demande_id": demande.id,
+                    "partenaire": partenaire,
+                    "vehicule": demande.Vehicul_interested,
+                    "montant_finance": demande.montant_finance,
+                    "duree": demande.duree_mois,
+                    "lien_dossier": request.build_absolute_uri(
+                        reverse("leads_app:document-detail", kwargs={"pk": dossier.pk})
+                    ),
+                }
+
+            elif offre:
+                montant_total_initial = (
+                    offre.vehicule_propose.prix
+                    if offre.financement_type == "externe"
+                    else offre.apport_demande
+                )
+
+                Vente.objects.create(
+                    client=offre.client,
+                    vehicul=offre.vehicule_propose,
+                    offre=offre,
+                    statut="gestion_de_statut",
+                    montant=offre.apport_demande,
+                    montant_finance=offre.montant_finance,
+                    mensualite=offre.mensualite,
+                    duree_mois=offre.duree_mois,
+                    montant_total_paye=montant_total_initial,
+                )
+
+                offre.statut = "acceptee"
+                offre.save()
+
+                client = offre.client
+                context_email = {
+                    "client": client,
+                    "offre_id": offre.id,
+                    "partenaire": partenaire,
+                    "vehicule": offre.vehicule_propose,
+                    "montant_finance": offre.montant_finance,
+                    "duree": offre.duree_mois,
+                    "lien_dossier": request.build_absolute_uri(
+                        reverse("leads_app:document-detail", kwargs={"pk": dossier.pk})
+                    ),
+                }
+
+            # Validation finale du dossier
+            dossier.statut_dossier = "valide"
+            dossier.save()
+
+            # Envoi asynchrone de l'email via Celery après validation effective du COMMIT SQL
+            html_message = render_to_string("emails/documents/dossier_valide.html", context_email)
+            plain_message = strip_tags(html_message)
+
+            transaction.on_commit(
+                lambda: send_email_task.delay(
+                    subject="✅ Félicitations ! Votre financement est accepté - KOZ Services",
+                    plain_message=plain_message,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[client.email],
+                    html_message=html_message,
+                )
+            )
+
+        return render_doc_result(
+            title="✅ Dossier validé",
+            message="Dossier validé. Demande et vente enregistrées. Un email a été envoyé au client.",
+            success=True,
+            reload_on_close=True,
+        )
+
+    except Exception as e:
+        logger.exception(f"Erreur lors de la validation du dossier #{dossier_id}: {e}")
+        return render_doc_result(
+            title="Erreur serveur",
+            message="Une erreur est survenue lors de la validation du dossier. Veuillez réessayer.",
+        )                           
 
 @login_required
 def modifier_dossier(request, dossier_id):
@@ -1917,138 +1901,112 @@ from django.urls import reverse_lazy
 from client_app.models import Documents
 from .forms import DocumentCommentForm
 
+from django.db import transaction
+from django.shortcuts import render
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic.edit import UpdateView
+
+
+from .forms import DocumentCommentForm
+
+
+
 class DocumentCommentUpdateView(LoginRequiredMixin, UpdateView):
     model = Documents
     form_class = DocumentCommentForm
 
     def form_valid(self, form):
-       
+        user = self.request.user
+
+        # 🛡️ 1. Vérification des droits d'accès
+        if user.role not in ['commercial', 'directeur']:
+            return self._render_htmx_response(
+                success=False,
+                title="❌ Action non autorisée",
+                message="Vous n'avez pas l'autorisation de modifier ce dossier."
+            )
+
         dossier = form.save(commit=False)
-         # Vérifier que l'utilisateur est commercial ou directeur
-        if self.request.user.role not in ['commercial', 'directeur']:
-            response = render(self.request, "partials/documents/_documents_result.html", {
-                    "success": False,
-                    "title": "❌ Action non autorisée",
-                    "message": "Vous n'avez pas l'autorisation de modifier ce dossier.",
-                })
-            response["HX-Trigger"] = "closeGestionDocModal"
-            return response
-        
-        # Vérifier si le dossier peut être modifié
+
+        # ⚠️ 2. Validation des états du dossier
         if dossier.statut_dossier == "valide":
-            response = render(self.request, "partials/documents/_documents_result.html", {
-                    "success": False,
-                    "title": "⚠️ Attention",
-                    "message": "Ce dossier a déjà été validé, vous ne pouvez pas demander de modifications.",
-                })
-            response["HX-Trigger"] = "closeGestionDocModal"
-            return response
-        
+            return self._render_htmx_response(
+                success=False,
+                title="⚠️ Attention",
+                message="Ce dossier a déjà été validé, vous ne pouvez pas demander de modifications."
+            )
+
         if dossier.statut_dossier == "rejete":
-            response = render(self.request, "partials/documents/_documents_result.html", {
-                    "success": False,
-                    "title": "⚠️ Attention",
-                    "message": "Ce dossier a été rejeté. Une nouvelle demande ou offre de financement est nécessaire.",
-                })
-            response["HX-Trigger"] = "closeGestionDocModal"
-            return response
-        
-        if not dossier.commentaire_rejet or dossier.commentaire_rejet is None:
-            response = render(self.request, "partials/documents/_documents_result.html", {
-                            "success": False,
-                            "title": "⚠️ Attention",
-                            "message": "Veillez renseigner les documents à  modifier ou manquants",
-                        })
-            response["HX-Trigger"] = "closeGestionDocModal"
-            return response
-        
-        # ✅ Mise à jour du statut
-        dossier.statut_dossier = "modification"
-        dossier.save()
-        
-        # ✅ Déterminer le contexte (demande ou offre)
-        demande = dossier.demande_financement
-        offre = dossier.offre_financement
-        
-        if demande:
-                contexte_nom = "demande de financement"
-                vehicule = str(demande.Vehicul_interested) if demande.Vehicul_interested else "Véhicule sélectionné"
-                
-                
-        elif offre:
-                contexte_nom = "offre de financement"
-                vehicule = str(offre.vehicule_propose) if offre.vehicule_propose else "Véhicule sélectionné"
-                
-                
-        else:
-            contexte_nom = "dossier"
-            vehicule = "Non renseigné"
-            
-        
-        # ✉️ EMAIL AU CLIENT
-        try:
-            context_email = {
-                    'client': dossier.client,
-                    'commercial': self.request.user,
-                    'dossier_id': dossier.id,
-                    'contexte': contexte_nom,
-                    'vehicule': vehicule,
-                    'lien_chat': f"https://www.koz-corporate.pro/chat/{dossier.client.pk}/",
-                    'lien_dossier': self.request.build_absolute_uri(
-                        reverse("leads_app:document-detail", kwargs={"pk": dossier.pk})
-                    ),
-                }
-            html_message = render_to_string('emails/documents/demande_modification_documents.html', context_email)
-            plain_message = strip_tags(html_message)
-                
-            send_mail(
-                    subject="📝 Demande de modification de vos documents - KOZ Services",
-                    message=plain_message,
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[dossier.client.email],
-                    html_message=html_message,
-                    fail_silently=False,
-                )
-        except Exception as e:
-            logger.error(f"Erreur envoi email au client: {e}")
-        
-         # 💬 MESSAGE DANS LE CHAT INTERNE
-        try:
-            from chat_app.models import Message
-                
+            return self._render_htmx_response(
+                success=False,
+                title="⚠️ Attention",
+                message="Ce dossier a été rejeté. Une nouvelle demande ou offre de financement est nécessaire."
+            )
+
+        if not dossier.commentaire_rejet:
+            return self._render_htmx_response(
+                success=False,
+                title="⚠️ Attention",
+                message="Veuillez renseigner les documents à modifier ou manquants."
+            )
+
+        # 💾 3. Transaction atomique pour la BDD
+        with transaction.atomic():
+            dossier.statut_dossier = "modification"
+            dossier.save()
+
+            # Détermination du message de chat
+            demande = dossier.demande_financement
+            offre = dossier.offre_financement
+
             if demande:
-                message_contenu = (
-                        f"📄 Demande de modification de vos documents pour la demande de financement "
-                        f"du véhicule {vehicule}. Veuillez consulter votre espace client."
-                    )
+                vehicule = demande.Vehicul_interested if demande.Vehicul_interested else "Véhicule sélectionné"
+                message_contenu = f"📄 Demande de modification de vos documents pour la demande de financement du véhicule {vehicule.marque}- {vehicule.modele}. Veuillez consulter votre espace client."
             elif offre:
-                message_contenu = (
-                        f"📄 Demande de modification de vos documents pour l'offre de financement "
-                        f"n°{offre.id} (véhicule {vehicule}). Veuillez consulter votre espace client."
-                    )
+                vehicule = offre.vehicule_propose if offre.vehicule_propose else "Véhicule sélectionné"
+                message_contenu = f"📄 Demande de modification de vos documents pour l'offre de financement n°{offre.id} (véhicule {vehicule.marque}- {vehicule.modele}). Veuillez consulter votre espace client."
             else:
-                message_contenu = (
-                        f"📄 Demande de modification de vos documents pour votre dossier. "
-                        f"Veuillez consulter votre espace client."
-                    )
-                
+                message_contenu = "📄 Demande de modification de vos documents pour votre dossier. Veuillez consulter votre espace client."
+
+            # Création du message dans le chat interne
+            try:
+                from chat_app.models import Message
                 Message.objects.create(
                     client=dossier.client,
-                    commercial=self.request.user,
+                    commercial=user,
                     contenu=message_contenu,
                     est_client=False,
                 )
-        except Exception as e:
-                logger.error(f"Erreur création message chat: {e}")
+            except Exception as e:
+                logger.error(f"Erreur création message chat pour dossier #{dossier.id}: {e}")
+
+            # ✉️ 4. Planification de l'email Celery post-commit
+            domain_url = f"{self.request.scheme}://{self.request.get_host()}"
+            transaction.on_commit(
+                lambda: send_document_modification_email_task.delay(
+                    dossier_id=dossier.id,
+                    user_id=user.id,
+                    domain_url=domain_url,
+                )
+            )
+
+        return self._render_htmx_response(
+            success=True,
+            title="✅ Demande envoyée",
+            message=f"Une demande de modification a été envoyée à {dossier.client.nom_complet}.",
+            reload_on_close=True
+        )
+
+    def _render_htmx_response(self, success, title, message, reload_on_close=False):
+        """Helper pour centraliser les réponses HTMX du modal."""
         response = render(self.request, "partials/documents/_documents_result.html", {
-                "success": True,
-                "title": "✅ Demande envoyée",
-                "message": f"Une demande de modification a été envoyée à {dossier.client.nom_complet}.",
-                "reload_on_close": True,
-            })
+            "success": success,
+            "title": title,
+            "message": message,
+            "reload_on_close": reload_on_close,
+        })
         response["HX-Trigger"] = "closeGestionDocModal"
         return response
-        
 
    
     

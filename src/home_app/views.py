@@ -1,11 +1,13 @@
 import django
 from django.contrib import messages
+from django.db import transaction
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect,render
 from django.core.paginator import Paginator
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from django.db.models import Q, Count
 from django.urls import reverse, reverse_lazy
 from auth_app.models import kozUser
@@ -390,76 +392,100 @@ def financement_fidelis_detail(request):
     """
     return render(request, 'financement/financement_fidelis_detail.html')
 
+
+
+
+
+@require_POST
 def contact_form(request):
-    time.sleep(1.5)
-    if request.method == 'POST':
-        nom = request.POST.get('nom')
-        email = request.POST.get('email')
-        telephone = request.POST.get('telephone')
-        sujet = request.POST.get('sujet')
-        message = request.POST.get('message')
-        
-        context = {
-            'nom': nom,
-            'email': email,
-            'telephone': telephone,
-            'sujet': sujet,
-            'message': message,
-        }
-        
-        html_message = render_to_string('emails/contact/contact.html', context)
-        plain_message = strip_tags(html_message)
-        commerciaux = kozUser.objects.filter(role='commercial', is_active=True)
-        for commercial in commerciaux:
-            send_mail(
-                subject=f"📩 Nouveau message de {nom} - {sujet}",
-                message=plain_message,
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[commercial.email],
-                html_message=html_message,
-                fail_silently=False,
+    """Gère le formulaire de contact et envoie une notification async aux commerciaux."""
+    nom = request.POST.get("nom", "").strip()
+    email = request.POST.get("email", "").strip()
+    telephone = request.POST.get("telephone", "").strip()
+    sujet = request.POST.get("sujet", "").strip()
+    message = request.POST.get("message", "").strip()
+
+    context = {
+        "nom": nom,
+        "email": email,
+        "telephone": telephone,
+        "sujet": sujet,
+        "message": message,
+    }
+
+    html_message = render_to_string("emails/contact/contact.html", context)
+    plain_message = strip_tags(html_message)
+
+    # 🔍 Récupération optimisée des emails des commerciaux actifs (1 seule requête SQL)
+    recipients = list(
+        kozUser.objects.filter(role="commercial", is_active=True)
+        .exclude(email="")
+        .values_list("email", flat=True)
+    )
+
+    # 💾 Transaction & envoi asynchrone groupé
+    if recipients:
+        with transaction.atomic():
+            transaction.on_commit(
+                lambda: send_email_task.delay(
+                    subject=f"📩 Nouveau message de {nom} - {sujet}",
+                    plain_message=plain_message,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=recipients,
+                    html_message=html_message,
+                )
             )
-            
-        return render(request, "partials/contact/contact_result.html",{
-            'success': True,
-            'title': '✅ Envoyé',
-            'message': "Votre message à été envoyé,Un commercial vous contactera sous 24h.",
-            'reload_on_close': True
-            
-        })
+
+    return render(
+        request,
+        "partials/contact/contact_result.html",
+        {
+            "success": True,
+            "title": "✅ Envoyé",
+            "message": "Votre message a été envoyé. Un commercial vous contactera sous 24h.",
+            "reload_on_close": True,
+        },
+    )
         
 
+
+
+@require_POST
 def prise_rdv(request):
-    time.sleep(1.5)
-    if request.method == 'POST':
-        nom = request.POST.get('nom')
-        prenom = request.POST.get('prenom')
-        telephone = request.POST.get('telephone')
-        email = request.POST.get('email')
-        date = request.POST.get('date')
-        heure = request.POST.get('heure')
-        motif = request.POST.get('motif')
-        
-        
-        # Créer le rendez-vous
-        rendez_vous = RendezVous.objects.create(
-            client=request.user if request.user.is_authenticated else None,
-            nom = nom if nom else None,
-            prenom = prenom if prenom else None,
-            email = email if email else None,
-            telephone = telephone if telephone else None,
-            date_rendez_vous=f"{date} {heure}",
-            motif=motif,
-            statut='en_attente'
-        )
-        
-        if rendez_vous:
-            return render(request, "partials/contact/contact_result.html",{
-            'success': True,
-            'title': '✅ Enregisté',
-            'message': f"""Votre rendez-vous du {date} à {heure} a été enregistré.
-                            Un commercial vous contactera sous 24h.""",
-            'reload_on_close': True
-        })
-    return redirect(request, 'home_app:home-page')
+    """Enregistre la demande de rendez-vous en BDD de façon atomique."""
+    nom = request.POST.get("nom", "").strip() or None
+    prenom = request.POST.get("prenom", "").strip() or None
+    telephone = request.POST.get("telephone", "").strip() or None
+    email = request.POST.get("email", "").strip() or None
+    date_str = request.POST.get("date", "").strip()
+    heure_str = request.POST.get("heure", "").strip()
+    motif = request.POST.get("motif", "").strip() or None
 
+    date_heure_combinee = f"{date_str} {heure_str}".strip()
+
+    # 💾 Écriture atomique sécurisée en BDD
+    with transaction.atomic():
+        RendezVous.objects.create(
+            client=request.user if request.user.is_authenticated else None,
+            nom=nom,
+            prenom=prenom,
+            email=email,
+            telephone=telephone,
+            date_rendez_vous=date_heure_combinee,
+            motif=motif,
+            statut="en_attente",
+        )
+
+    return render(
+        request,
+        "partials/contact/contact_result.html",
+        {
+            "success": True,
+            "title": "✅ Enregistré",
+            "message": (
+                f"Votre rendez-vous du {date_str} à {heure_str} a été enregistré. "
+                "Un commercial vous contactera sous 24h."
+            ),
+            "reload_on_close": True,
+        },
+    )

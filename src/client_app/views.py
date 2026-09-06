@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.template.loader import render_to_string
@@ -103,23 +104,24 @@ class ClientRdvCreateView(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy('client_app:mes-rendez-vous')
 
     def form_valid(self, form):
-        client = self.request.user
-        rdv = form.save(commit=False)
-        
-        # Remplissage automatique
-        rdv.client = client
-        rdv.email = client.email
-        rdv.telephone = getattr(client, 'telephone', '')
-        rdv.statut = 'en_attente'
+        with transaction.atomic():  # Assure que toutes les opérations sont atomiques
+            client = self.request.user
+            rdv = form.save(commit=False)
+            
+            # Remplissage automatique
+            rdv.client = client
+            rdv.email = client.email
+            rdv.telephone = getattr(client, 'telephone', '')
+            rdv.statut = 'en_attente'
 
-        # Auto-remplissage nom/prénom pour éviter les contraintes BDD NOT NULL
-        parts = (getattr(client, 'nom_complet', '')).strip().split(maxsplit=1)
-        rdv.nom = parts[0] if parts else client.nom_complet
-        rdv.prenom =  parts[1] if len(parts) > 1 else ''
+            # Auto-remplissage nom/prénom pour éviter les contraintes BDD NOT NULL
+            parts = (getattr(client, 'nom_complet', '')).strip().split(maxsplit=1)
+            rdv.nom = parts[0] if parts else client.nom_complet
+            rdv.prenom =  parts[1] if len(parts) > 1 else ''
 
-        rdv.save()  # Un seul save() suffit
-        messages.success(self.request, "Votre demande de rendez-vous a bien été transmise !")
-        return super().form_valid(form)
+            rdv.save()  # Un seul save() suffit
+            messages.success(self.request, "Votre demande de rendez-vous a bien été transmise !")
+            return super().form_valid(form)
 
     def form_invalid(self, form):
         # Affiche l'erreur exacte dans les messages flash pour debugger rapidement

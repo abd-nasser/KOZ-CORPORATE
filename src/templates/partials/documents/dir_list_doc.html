@@ -90,7 +90,16 @@
                                     {% else %}
                                         —
                                     {% endif %}
+
+                                </span> --
+                                {% if doc.demande_financement.apport %}
+                              <div class="flex items-center gap-2 text-gray-600">
+                                  <i class="fas fa-wallet text-blue-500 w-5"></i>
+                                <span><strong>Apport :</strong> 
+                                        {{ doc.demande_financement.apport|intcomma }} FCFA   
                                 </span>
+                              </div>
+                                {% endif %}
                             </div>
                         </div>
                         
@@ -126,7 +135,15 @@
                                     {% else %}
                                         {{ doc.offre_financement.montant_propose|intcomma }} FCFA
                                     {% endif %}
+                                </span>--
+                                  {% if doc.offre_financement.apport %}
+                              <div class="flex items-center gap-2 text-gray-600">
+                                  <i class="fas fa-wallet text-blue-500 w-5"></i>
+                                <span><strong>Apport :</strong> 
+                                        {{ doc.offre_financement.apport|intcomma }} FCFA   
                                 </span>
+                              </div>
+                                {% endif %}
                             </div>
                             <div class="flex items-center gap-2 text-gray-600 col-span-2">
                                 <i class="fas fa-info-circle text-blue-500 w-5"></i>

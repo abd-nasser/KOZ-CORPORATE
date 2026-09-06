@@ -267,9 +267,7 @@
                         <div class="flex justify-between py-1 border-b border-slate-100">
                             <span class="text-slate-500">Type financement :</span>
                             <span class="font-semibold text-slate-900">
-                                {% if document.demande_financement.financement_type == 'maison' %}
-                                    Interne (KOZ SERVICES)
-                                {% else %}
+                                {% if document.demande_financement.financement_type  %}
                                     {{ document.demande_financement.get_financement_par_display|default:document.demande_financement.get_financement_type_display }}
                                 {% endif %}
                             </span>

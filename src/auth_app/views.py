@@ -150,6 +150,7 @@ def site_user_register(request):
             context_email = {
                 'user': user,
                 'nom_complet': nom_complet,
+                'url_espace_client': request.build_absolute_uri(reverse('client_app:client-view')),
             }
             html_message = render_to_string(
                 'emails/auth/welcome_client.html', context_email
@@ -347,29 +348,32 @@ class UserRegisterView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 
     def form_valid(self, form):
         try:
-            # 🔴 1. TRANSACTION ATOMIQUE : Sauvegarde en BDD
+            # 🔴 1. TRANSACTION ATOMIQUE : Création BDD
             with transaction.atomic():
                 if self.request.user.role == 'commercial':
                     form.instance.role = 'client'
                     form.instance.is_active = True
                     form.instance.assigned_commercial = self.request.user
 
-                user = form.save()
+                user = form.save()  # `user.raw_password` contient le mot de passe en clair
 
-                # 🟢 2. PRÉPARATION DU MAIL D'IDENTIFIANTS TEMPORAIRES
+                # 🟢 2. PRÉPARATION DU MAIL AVEC LES IDENTIFIANTS TEMPORAIRES
                 context_email = {
                     'user': user,
-                    'created_by': self.request.user,
+                    'new_user': user.nom_complet,
+                    'email': user.email,
+                    'password_temporaire': getattr(user, 'raw_password', ''),
+                    'link_espace_de_connexion': "https://koz-corporate.pro/api/auth/interface/connexion",
                 }
                 html_message = render_to_string(
-                    'emails/auth/credentials_created.html', context_email
+                    'emails/auth/identifiant_user.html', context_email
                 )
                 plain_message = strip_tags(html_message)
 
-                # 🟢 3. ON_COMMIT : Déclenchement Celery APRÈS validation BDD
+                # 🟢 3. ON_COMMIT : Déclenchement de la tâche Celery
                 transaction.on_commit(
                     lambda: send_email_task.delay(
-                        subject="Vos identifiants de connexion - KOZ Services",
+                        subject="Vos identifiants KOZ Services",
                         plain_message=plain_message,
                         from_email=settings.DEFAULT_FROM_EMAIL,
                         recipient_list=[user.email],
@@ -392,7 +396,9 @@ class UserRegisterView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
             return response
 
         except Exception as e:
-            logger.error(f"Erreur lors de la création de l'utilisateur dans UserRegisterView : {e}")
+            logger.error(
+                f"Erreur lors de la création d'utilisateur dans UserRegisterView: {e}"
+            )
             response = render(
                 self.request,
                 'partials/auth/register_result.html',
@@ -412,7 +418,6 @@ class UserRegisterView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
             'partials/auth/_user_register_form_errors.html',
             {"user_register_form": form},
         )
-
 
 def login_simple(request):
     """Gère la connexion simplifiée avec retours de partials HTMX."""
@@ -477,7 +482,6 @@ def logout_sur_ERP(request):
     
 class ChangePasswordView(LoginRequiredMixin, FormView):
     form_class = ChangePasswordForm
-    time.sleep(1.5)
     def get_template_names(self):
         if self.request.user.is_superuser or self.request.user.role == "directeur":
             return ["directeur_templates/directeur.html"]

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienvenue chez KOZ Services</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; -webkit-font-smoothing: antialiased;">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f8fafc; padding: 40px 10px;">
+        <tr>
+            <td align="center">
+                <!-- Main Card Container -->
+                <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);">
+                    
+                    <!-- Header / Logo -->
+                    <tr>
+                        <td align="center" style="background-color: #0f172a; padding: 32px 20px;">
+                            <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 700; letter-spacing: 0.5px;">
+                                KOZ <span style="color: #38bdf8;">SERVICES</span>
+                            </h1>
+                        </td>
+                    </tr>
+
+                    <!-- Body Content -->
+                    <tr>
+                        <td style="padding: 40px 32px;">
+                            <h2 style="color: #0f172a; font-size: 20px; font-weight: 600; margin-top: 0; margin-bottom: 20px;">
+                                Bienvenue, {{ nom_complet }} ! 👋
+                            </h2>
+                            
+                            <p style="color: #334155; font-size: 15px; line-height: 1.6; margin-bottom: 20px;">
+                                Nous sommes ravis de vous compter parmi nos clients. Votre compte a été créé avec succès sur la plateforme KOZ Services.
+                            </p>
+
+                            <p style="color: #334155; font-size: 15px; line-height: 1.6; margin-bottom: 28px;">
+                                Vous pouvez dès à présent accéder à votre espace personnel pour suivre vos demandes de financement, échanger avec nos conseillers et gérer vos documents en toute sécurité.
+                            </p>
+
+                            <!-- CTA Button -->
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 32px;">
+                                <tr>
+                                    <td align="center">
+                                        <a href="{{ url_espace_client }}" target="_blank" style="display: inline-block; background-color: #2563eb; color: #ffffff; font-size: 15px; font-weight: 600; text-decoration: none; padding: 14px 28px; border-radius: 8px; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);">
+                                            Accéder à mon espace client
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Info Box -->
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f1f5f9; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+                                <tr>
+                                    <td style="color: #475569; font-size: 13px; line-height: 1.5;">
+                                        <strong>💡 Identifiant de connexion :</strong> {{ user.email }}<br>
+                                        Si vous avez des questions ou besoin d'assistance, notre équipe reste à votre disposition.
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <p style="color: #334155; font-size: 14px; line-height: 1.6; margin: 0;">
+                                À très bientôt,<br>
+                                <strong>L'équipe KOZ Services</strong>
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td align="center" style="background-color: #f8fafc; padding: 24px 32px; border-top: 1px solid #e2e8f0; color: #94a3b8; font-size: 12px; line-height: 1.5;">
+                            <p style="margin: 0 0 8px 0;">Cet email a été envoyé automatiquement, merci de ne pas y répondre directement.</p>
+                            <p style="margin: 0;">&copy; KOZ Services. Tous droits réservés.</p>
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

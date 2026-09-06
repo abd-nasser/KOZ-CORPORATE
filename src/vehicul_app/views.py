@@ -24,8 +24,10 @@ from .forms import VehiculForm, MarqueForm, VehiculeImage, VehiculeImageFormSet,
 from directeur_app.views import DirecteurDashboardView
 from leads_app.forms import DemandeFinancementForm
 from auth_app.models import kozUser
+from django.db import transaction
 
 
+from django.views.decorators.http import require_POST
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.core.mail import send_mail
@@ -706,56 +708,72 @@ def vehicul_image_partials(request, vehicul_id):
     })
 
 
+
+@login_required
+@require_POST
 def toggle_favori(request, vehicul_id):
-    if request.user.is_anonymous or request.user.role != 'client':
-        response = render(request, "partials/vehiculs/_favori_result.html", {
-            "success": False,
-            "title": "❌ Action non autorisée",
-            "message": "Seuls les clients ou abonnée peuvent ajouter des favoris.",
-        })
-        return response
-    
-    vehicul = get_object_or_404(Vehicul, id=vehicul_id)
-    
-    if vehicul.favoris_de.filter(id=request.user.id).exists():
-        vehicul.favoris_de.remove(request.user)
-        ajoute = False
-    else:
-        vehicul.favoris_de.add(request.user)
-        ajoute = True
-    
-        Message.objects.create(
-            client=request.user,
-            commercial=None,  # message système, pas encore pris en charge par un commercial précis
-            contenu=(
-                    f"Vous avez ajouté {vehicul.marque.nom} {vehicul.modele} à vos favoris. "
-                    f"N'hésitez pas à échanger avec un conseiller sur les options de financement disponibles."
-            ),
-            est_client=False,
-            lu=False,
-            origine_automatique=True,
+    """Bascule un véhicule dans les favoris du client et envoie une notification async."""
+    # 🛡️ 1. Vérification du rôle client
+    if getattr(request.user, "role", None) != "client":
+        return render(
+            request,
+            "partials/vehiculs/_favori_result.html",
+            {
+                "success": False,
+                "title": "❌ Action non autorisée",
+                "message": "Seuls les clients ou abonnés peuvent ajouter des favoris.",
+            },
+        )
+
+    # 🔍 2. Optimisation avec select_related pour charger la marque en une seule requête SQL
+    vehicul = get_object_or_404(Vehicul.objects.select_related("marque"), id=vehicul_id)
+    est_favori = vehicul.favoris_de.filter(id=request.user.id).exists()
+
+    # 💾 3. Transaction atomique BDD + envoi asynchrone Celery
+    with transaction.atomic():
+        if est_favori:
+            vehicul.favoris_de.remove(request.user)
+        else:
+            vehicul.favoris_de.add(request.user)
+            nom_vehicule = f"{vehicul.marque.nom} {vehicul.modele}"
+
+            # Message système automatique dans la messagerie
+            Message.objects.create(
+                client=request.user,
+                commercial=None,
+                contenu=(
+                    f"Vous avez ajouté {nom_vehicule} à vos favoris. "
+                    "N'hésitez pas à échanger avec un conseiller sur les options de financement disponibles."
+                ),
+                est_client=False,
+                lu=False,
+                origine_automatique=True,
             )
 
-        if request.user.email:
-            try:
-                lien_chat = request.build_absolute_uri(reverse('chat_app:chat-view'))
-                html_message = render_to_string('emails/vehicul/vehicul_notif_favori.html', {
-                        'client': request.user,
-                        'vehicule': f"{vehicul.marque.nom} {vehicul.modele}",
-                        'lien_chat': lien_chat,
-                })
-                send_mail(
-                        subject=f"💬 Nouveau message concernant {vehicul.marque.nom} {vehicul.modele}",
-                        message=strip_tags(html_message),
+            # Préparation du contenu de l'email
+            if request.user.email:
+                lien_chat = request.build_absolute_uri(reverse("chat_app:chat-view"))
+                html_message = render_to_string(
+                    "emails/vehicul/vehicul_notif_favori.html",
+                    {
+                        "client": request.user,
+                        "vehicule": nom_vehicule,
+                        "lien_chat": lien_chat,
+                    },
+                )
+                plain_message = strip_tags(html_message)
+
+                # Envoi asynchrone post-commit SQL
+                transaction.on_commit(
+                    lambda: send_email_task.delay(
+                        subject=f"💬 Nouveau message concernant {nom_vehicule}",
+                        plain_message=plain_message,
                         from_email=settings.DEFAULT_FROM_EMAIL,
                         recipient_list=[request.user.email],
                         html_message=html_message,
-                        fail_silently=False,
                     )
-            except Exception as e:
-                logger.error(f"Erreur email notif favori pour {request.user.email}: {e}")
-        
-        
+                )
+
+    # 🔄 4. Fragment HTMX mis à jour (bouton favori)
     return render(request, "partials/vehiculs/_favori_button.html", {"vehicul": vehicul})
-        
         

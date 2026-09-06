@@ -37,7 +37,7 @@ class demande_financement(models.Model):
         ("en_cours", "En cours de traitement"),
         ("demande_accordee_fidelis", "Demande accordée chez Fidelis"),
         ("demande_accordee_alios", "Demande accordée chez Alios"),
-        ("demande_accordee_maison", "Demande accordée (KOZ Finance)"),
+        ("demande_accordee_maison", "Demande accordée (KOZ SERVICES)"),
         ('demande_refusee', "Demande Refusé")
     ]
     

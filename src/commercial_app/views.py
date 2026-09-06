@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 
 from django.core.mail import send_mail
-from koz_flow.tasks import send_email_task
+from koz_flow.tasks import send_email_task, send_receipt_email_task
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from leads_app.utils import generer_echeances_offre, generer_echeances_demande, calculer_mensualite
@@ -10,6 +10,9 @@ from utils.pdf import render_to_pdf
 
 from datetime import datetime
 from django.http import HttpResponse, Http404
+from django.core.exceptions import PermissionDenied
+
+
 
 from django.urls import reverse_lazy, reverse
 from django.conf import settings
@@ -932,152 +935,159 @@ def changer_statut_vente(request, vente_id):
 
 
 
+from datetime import datetime
+from decimal import Decimal
+import logging
+
+
+
 @login_required
 def marquer_paye(request, vente_id, numero_echeance):
-    if request.user.role not in ["directeur", "commercial"]:
-        response = render(request, "partials/vente/_vente_result.html", {
-                    "success": False,
-                    "title": "❌ Erreur",
-                    "message": """Vous n'etes pas autorisé changer le status de cette vente 
-                                Si toute fois nouvelle tentative votre compte sera bloqué""",
-                })
-        response['HX-Trigger'] = "closePaiementModal"
+    """
+    Marque une échéance de vente comme payée, met à jour le solde
+    et déclenche l'envoi du reçu par email via Celery.
+    """
+    # Helper interne pour la réponse HTMX
+    def render_vente_result(title, message, success=False, reload_on_close=False):
+        response = render(
+            request,
+            "partials/vente/_vente_result.html",
+            {
+                "success": success,
+                "title": title,
+                "message": message,
+                "reload_on_close": reload_on_close,
+            },
+        )
+        response["HX-Trigger"] = "closePaiementModal"
         return response
-        
-   
+
+    # === 1. VÉRIFICATIONS (Guard Clauses hors transaction) ===
+    if request.user.role not in ["directeur", "commercial"]:
+        return render_vente_result(
+            "❌ Erreur",
+            "Vous n'êtes pas autorisé à changer le statut de cette vente. Toute tentative abusive entraînera le blocage de votre compte.",
+        )
+
+    if request.method != "POST":
+        return redirect("commercial_app:vente-detail", pk=vente_id)
+
     vente = get_object_or_404(Vente, id=vente_id)
     numero_echeance = int(numero_echeance)
 
-    if request.method != 'POST':
-        return redirect('commercial_app:vente-detail', vente.pk)
-
-    date_paiement_str = request.POST.get('date_paiement')
+    # Parsing de la date
+    date_paiement_str = request.POST.get("date_paiement")
     try:
         date_paiement = (
-            datetime.strptime(date_paiement_str, '%Y-%m-%d').date()
-            if date_paiement_str else timezone.now().date()
+            datetime.strptime(date_paiement_str, "%Y-%m-%d").date()
+            if date_paiement_str
+            else timezone.now().date()
         )
     except ValueError:
-        response = render(request, "partials/vente/_vente_result.html", {
-            "success": False,
-            "title": "❌ Erreur",
-            "message": "Date de paiement invalide.",
-        })
-        response['HX-Trigger'] = "closePaiementModal"
-        return response
+        return render_vente_result("❌ Erreur", "Date de paiement invalide.")
 
-    with transaction.atomic():
-        echeance_actuelle = next(
-            (e for e in vente.echeances if e['numero'] == numero_echeance), None
+    # Recherche de l'échéance dans le JSON / la liste de la vente
+    echeance_actuelle = next(
+        (e for e in vente.echeances if e["numero"] == numero_echeance), None
+    )
+
+    if echeance_actuelle is None:
+        return render_vente_result("❌ Erreur", f"Échéance #{numero_echeance} introuvable.")
+
+    if echeance_actuelle.get("paye"):
+        return render_vente_result(
+            "ℹ️ Déjà payée",
+            f"L'échéance #{numero_echeance} est déjà marquée comme payée.",
         )
 
-        if echeance_actuelle is None:
-            response = render(request, "partials/vente/_vente_result.html", {
-                "success": False,
-                "title": "❌ Erreur",
-                "message": f"Échéance #{numero_echeance} introuvable.",
-            })
-            response['HX-Trigger'] = "closePaiementModal"
-            return response
+    paiement = PaiementFinancement.objects.filter(
+        vente=vente, reference=f"PAY-{vente.id}-{numero_echeance}"
+    ).first()
 
-        if echeance_actuelle['paye']:
-            response = render(request, "partials/vente/_vente_result.html", {
-                "success": False,
-                "title": "ℹ️ Déjà payée",
-                "message": f"L'échéance #{numero_echeance} est déjà marquée comme payée.",
-            })
-            response['HX-Trigger'] = "closePaiementModal"
-            return response
+    # === 2. TRANSACTION ATOMIQUE ET DELEGATION CELERY ===
+    try:
+        with transaction.atomic():
+            # 1. Mise à jour de l'échéance et du cumul payé
+            echeance_actuelle["paye"] = True
+            echeance_actuelle["date_paiement"] = date_paiement.isoformat()
 
-        # 1. Marquer l'échéance payée
-        echeance_actuelle['paye'] = True
-        echeance_actuelle['date_paiement'] = date_paiement.isoformat()
+            total_echeances_payees = sum(
+                Decimal(str(e["montant"])) for e in vente.echeances if e.get("paye")
+            )
+            vente.montant_total_paye = vente.montant + total_echeances_payees
+            vente.save()
 
-        total_echeances_payees = sum(
-            Decimal(str(e['montant'])) for e in vente.echeances if e['paye']
+            # 2. Mise à jour du paiement associé
+            if paiement:
+                paiement.statut = "paye"
+                paiement.date_paiement = date_paiement
+                paiement.save()
+
+                # 3. Déclenchement Celery une fois le COMMIT validé
+                paiement_id = paiement.id
+                transaction.on_commit(
+                    lambda: send_receipt_email_task.delay(
+                                vente_id=vente.id,
+                                numero_echeance=numero_echeance,
+                            )
+                )
+
+        return render_vente_result(
+            title="✅ Paiement enregistré",
+            message=f"L'échéance #{numero_echeance} a été marquée comme payée. Le reçu sera généré et envoyé au client par email.",
+            success=True,
+            reload_on_close=True,
         )
-        vente.montant_total_paye = vente.montant + total_echeances_payees
-        vente.save()
 
-        # 2. Synchroniser le PaiementFinancement
-        paiement = PaiementFinancement.objects.filter(
-            vente=vente,
-            reference=f"PAY-{vente.id}-{numero_echeance}"
-        ).first()
-
-        if paiement:
-            paiement.statut = 'paye'
-            paiement.date_paiement = date_paiement
-            paiement.save()
-
-            # 3. 📄 GENERATION DU REÇU PDF + EMAIL CLIENT
-            pdf_bytes = render_to_pdf('pdf/recu_paiement.html', {
-                'paiement': paiement,
-                'vente': vente
-            })
-
-            if pdf_bytes and vente.client.email:
-                sujet = f"Reçu de paiement - Échéance #{numero_echeance} ({paiement.reference})"
-                corps = (
-                    f"Bonjour {vente.client.nom_complet},\n\n"
-                    f"Nous vous confirmons le bon règlement de votre échéance de {paiement.montant} FCFA "
-                    f"effectué le {date_paiement.strftime('%d/%m/%Y')}.\n\n"
-                    "Vous trouverez votre reçu officiel de paiement joint à ce message.\n\n"
-                    "Cordialement,\nL'équipe KOZ Services."
-                )
-
-                email = EmailMessage(
-                    subject=sujet,
-                    body=corps,
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    to=[vente.client.email]
-                )
-                email.attach(f"Reçu_Paiement_{paiement.reference}.pdf", pdf_bytes, 'application/pdf')
-                email.send(fail_silently=True)
-
-    response = render(request, "partials/vente/_vente_result.html", {
-        "success": True,
-        "title": "✅ Paiement enregistré",
-        "message": f"L'échéance #{numero_echeance} a été marquée comme payée et le reçu a été envoyé par email au client.",
-        "reload_on_close": True,
-    })
-    response['HX-Trigger'] = "closePaiementModal"
-    return response
-
+    except Exception as e:
+        logger.exception(f"Erreur lors du marquage du paiement pour la vente #{vente_id}: {e}")
+        return render_vente_result(
+            title="Erreur serveur",
+            message="Une erreur est survenue lors de l'enregistrement du paiement.",
+        )
 
 
 @login_required
 def telecharger_recu_pdf(request, vente_id, numero_echeance):
-    vente = get_object_or_404(Vente, pk=vente_id)
-    
-    # 🛡️ 1. Vérification des droits d'accès
-    if request.user != vente.client and request.user.role not in ['commercial', 'directeur']:
-        raise Http404("Accès non autorisé")
-    
-    # 🔍 2. Récupération du paiement grâce au pattern de référence
-    reference_recherchee = f"PAY-{vente.id}-{numero_echeance}"
-    paiement = get_object_or_404(PaiementFinancement, vente=vente, reference=reference_recherchee)
+    """
+    Génère et affiche le reçu PDF d'une échéance payée en affichage inline.
+    Vue en lecture seule (pas d'écriture BDD ni d'email).
+    """
+    reference_recherchee = f"PAY-{vente_id}-{numero_echeance}"
+
+    # 🔍 1. Récupération optimisée du paiement, de la vente et du client en 1 seule requête SQL
+    try:
+        paiement = (
+            PaiementFinancement.objects.select_related("vente__client")
+            .get(vente_id=vente_id, reference=reference_recherchee)
+        )
+    except PaiementFinancement.DoesNotExist:
+        raise Http404("Paiement ou échéance introuvable.")
+
+    vente = paiement.vente
+
+    # 🛡️ 2. Vérification des droits d'accès (Code 403 si non autorisé)
+    if request.user != vente.client and request.user.role not in ["commercial", "directeur"]:
+        raise PermissionDenied("Vous n'êtes pas autorisé à consulter ce document.")
 
     # ⚠️ 3. Sécurité : vérifier que l'échéance est réellement payée
-    if paiement.statut != 'paye':
+    if paiement.statut != "paye":
         messages.error(request, f"L'échéance #{numero_echeance} n'est pas encore réglée.")
-        return redirect('commercial_app:vente-detail', pk=vente.pk)
+        return redirect("commercial_app:vente-detail", pk=vente.pk)
 
     # 📄 4. Génération du PDF
-    pdf_bytes = render_to_pdf('pdf/recu_paiement.html', {
-        'paiement': paiement,
-        'vente': vente
-    })
+    pdf_bytes = render_to_pdf("pdf/recu_paiement.html", {"paiement": paiement, "vente": vente})
 
     if not pdf_bytes:
+        logger.error(f"Erreur de rendu PDF pour la référence {reference_recherchee}")
         raise Http404("Erreur lors de la génération du document PDF.")
 
-    # 📥 5. Envoi du fichier PDF au navigateur
-    response = HttpResponse(pdf_bytes, content_type='application/pdf')
-    
-    # inline = Ouvre dans le navigateur / attachment = Télécharge directement
-    response['Content-Disposition'] = f'inline; filename="Recu_Paiement_{reference_recherchee}.pdf"'
+    # 📥 5. Envoi du fichier PDF au navigateur (affichage inline)
+    response = HttpResponse(pdf_bytes, content_type="application/pdf")
+    response["Content-Disposition"] = f'inline; filename="Recu_Paiement_{reference_recherchee}.pdf"'
     return response
+
+
 
 class venteSimpleCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     def test_func(self):
@@ -1854,60 +1864,144 @@ class CommercialRendezVousListView(LoginRequiredMixin, UserPassesTestMixin, List
         return context
 
 
-
-
 @login_required
 def com_create_rdv(request, client_id=None):
     # 🛡️ Sécurité : Accès réservé aux commerciaux et directeurs
-    if request.user.role not in ['commercial', 'directeur',]:
+    if getattr(request.user, "role", None) not in ["commercial", "directeur"]:
         raise Http404("Accès non autorisé")
 
     initial_data = {}
-    
+
     # Si le commercial crée le RDV directement depuis la fiche d'un client
     if client_id:
-        from auth_app.models import kozUser
         client_obj = get_object_or_404(kozUser, pk=client_id)
-        initial_data['client'] = client_obj
+        initial_data["client"] = client_obj
 
-    if request.method == 'POST':
+    if request.method == "POST":
         form = RdvForm(request.POST)
         if form.is_valid():
-            rdv = form.save(commit=False)
-            
-            if rdv.client:
-                # On découpe en 2 parties maximum : le 1er mot et TOUT le reste
-                parts = (rdv.client.nom_complet or "").strip().split(maxsplit=1)
-                
-                if parts:
-                    rdv.nom = rdv.nom or parts[0]
-                    # On vérifie si la 2ème partie existe pour éviter le IndexError
-                    rdv.prenom = rdv.prenom or (parts[1] if len(parts) > 1 else "")
-                
-                # N'oublie pas le téléphone aussi !
-                rdv.telephone = rdv.telephone or getattr(rdv.client, 'telephone', '')
+            with transaction.atomic():
+                rdv = form.save(commit=False)
 
-            rdv.statut = 'confirme' # Directement confirmé par le commercial
-            rdv.save()
-            envoyer_notification_rdv(rdv)  # Déclenchement automatique
+                if rdv.client:
+                    parts = (rdv.client.nom_complet or "").strip().split(maxsplit=1)
+                    if parts:
+                        rdv.nom = rdv.nom or parts[0]
+                        rdv.prenom = rdv.prenom or (parts[1] if len(parts) > 1 else "")
+                    rdv.telephone = rdv.telephone or getattr(rdv.client, "telephone", "")
+
+                rdv.statut = "confirme"  # Directement confirmé par le commercial
+                rdv.save()
+
+                # 🔍 1. Récupération du destinataire et du nom
+                destinataire = None
+                nom_destinataire = ""
+
+                if rdv.client and rdv.client.email:
+                    destinataire = rdv.client.email
+                    nom_destinataire = getattr(rdv.client, "nom_complet", "").strip() or "Client"
+                elif getattr(rdv, "email", None):
+                    destinataire = rdv.email
+                    nom_destinataire = f"{rdv.prenom or ''} {rdv.nom or ''}".strip() or "Client"
+
+                # ✉️ 2. Envoi direct de l'email via Celery si destinataire présent
+                if destinataire:
+                    if hasattr(rdv.date_rendez_vous, "strftime"):
+                        date_fmt = rdv.date_rendez_vous.strftime("%d/%m/%Y à %H:%M")
+                        date_sujet = rdv.date_rendez_vous.strftime("%d/%m/%Y")
+                    else:
+                        date_fmt = str(rdv.date_rendez_vous)
+                        date_sujet = str(rdv.date_rendez_vous)
+
+                    duree = getattr(rdv, "duree", 30)
+                    motif = rdv.motif or "Non spécifié"
+
+                    # Message écrit en dur
+                    message_texte = (
+                        f"Bonjour {nom_destinataire},\n\n"
+                        f"Votre rendez-vous a été confirmé avec succès par notre équipe.\n\n"
+                        f"📅 Date : {date_fmt}\n"
+                        f"⏱️ Durée : {duree} minutes\n"
+                        f"📌 Motif : {motif}\n\n"
+                        f"L'équipe KOZ Services."
+                    )
+
+                    transaction.on_commit(
+                        lambda: send_email_task.delay(
+                            subject=f"KOZ Services — Rendez-vous confirmé le {date_sujet}",
+                            plain_message=message_texte,
+                            from_email=settings.DEFAULT_FROM_EMAIL,
+                            recipient_list=[destinataire],
+                        )
+                    )
+
             messages.success(request, "Rendez-vous créé et email de confirmation envoyé !")
-            messages.success(request, f"Rendez-vous programmé avec succès pour le {rdv.date_rendez_vous.strftime('%d/%m/%Y à %H:%M')}.")
-            return redirect('commercial_app:rendez-vous-list')
+            messages.success(
+                request,
+                f"Rendez-vous programmé avec succès pour le {rdv.date_rendez_vous.strftime('%d/%m/%Y à %H:%M')}.",
+            )
+            return redirect("commercial_app:rendez-vous-list")
     else:
         form = RdvForm(initial=initial_data)
 
-    return reverse(request, 'commercial_templates/rendez_vous_list.html', {'form': form})
+    # 🔧 Correction : render() à la place de reverse()
+    return render(request, "commercial_templates/rendez_vous_list.html", {"form": form})
 
 
 @login_required
 def confirmer_rdv(request, rdv_id):
+    """Confirme un rendez-vous et envoie la notification email en arrière-plan."""
     rdv = get_object_or_404(RendezVous, id=rdv_id)
-    rdv.statut = 'confirme'
-    rdv.save()
-    if rdv.client:
-        envoyer_notification_rdv(rdv)
-    messages.success(request, f"✅ Rendez-vous du {rdv.date_rendez_vous.strftime('%d/%m/%Y à %H:%M')} confirmé !")
-    return redirect('commercial_app:rendez-vous-list')
+
+    with transaction.atomic():
+        rdv.statut = "confirme"
+        rdv.save()
+
+        # 🔍 1. Extraction du destinataire et du nom
+        destinataire = None
+        nom_destinataire = ""
+
+        if rdv.client and rdv.client.email:
+            destinataire = rdv.client.email
+            nom_destinataire = getattr(rdv.client, "nom_complet", "").strip() or "Client"
+        elif getattr(rdv, "email", None):
+            destinataire = rdv.email
+            nom_destinataire = f"{getattr(rdv, 'prenom', '') or ''} {getattr(rdv, 'nom', '') or ''}".strip() or "Client"
+
+        # ✉️ 2. Notification Celery directe post-commit
+        if destinataire:
+            if hasattr(rdv.date_rendez_vous, "strftime"):
+                date_fmt = rdv.date_rendez_vous.strftime("%d/%m/%Y à %H:%M")
+                date_sujet = rdv.date_rendez_vous.strftime("%d/%m/%Y")
+            else:
+                date_fmt = str(rdv.date_rendez_vous)
+                date_sujet = str(rdv.date_rendez_vous)
+
+            duree = getattr(rdv, "duree", 30)
+            motif = getattr(rdv, "motif", "") or "Non spécifié"
+
+            # Message écrit directement en dur
+            message_texte = (
+                f"Bonjour {nom_destinataire},\n\n"
+                f"Votre rendez-vous a bien été confirmé par notre équipe.\n\n"
+                f"📅 Date : {date_fmt}\n"
+                f"⏱️ Durée : {duree} minutes\n"
+                f"📌 Motif : {motif}\n\n"
+                f"L'équipe KOZ Services."
+            )
+
+            transaction.on_commit(
+                lambda: send_email_task.delay(
+                    subject=f"KOZ Services — Rendez-vous confirmé le {date_sujet}",
+                    plain_message=message_texte,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[destinataire],
+                )
+            )
+
+    date_affichage = rdv.date_rendez_vous.strftime("%d/%m/%Y à %H:%M") if hasattr(rdv.date_rendez_vous, "strftime") else rdv.date_rendez_vous
+    messages.success(request, f"✅ Rendez-vous du {date_affichage} confirmé !")
+    return redirect("commercial_app:rendez-vous-list")
 
 
 @login_required
@@ -1929,36 +2023,3 @@ def terminer_rdv(request, rdv_id):
 
 
 
-def envoyer_notification_rdv(rdv):
-    # 1. Récupération dynamique de l'email destinataire
-    destinataire = None
-    nom_destinataire = ""
-
-    if rdv.client and rdv.client.email:
-        destinataire = rdv.client.email
-        nom_destinataire = rdv.client.get_nom_complet() 
-    elif getattr(rdv, 'email', None):  # Si champ email direct sur prospect
-        destinataire = rdv.email
-        nom_destinataire = f"{rdv.prenom} {rdv.nom}".strip()
-
-    # 2. Envoi conditionnel si l'email existe
-    if destinataire:
-        sujet = f"KOZ Services — Rendez-vous confirmé le {rdv.date_rendez_vous.strftime('%d/%m/%Y')}"
-        
-        # Message texte clair (ou rendu via template HTML)
-        message = (
-            f"Bonjour {nom_destinataire},\n\n"
-            f"Votre rendez-vous a bien été enregistré.\n\n"
-            f"📅 Date : {rdv.date_rendez_vous.strftime('%d/%m/%Y à %H:%M')}\n"
-            f"⏱️ Durée : {rdv.duree} minutes\n"
-            f"📌 Motif : {rdv.motif}\n\n"
-            f"L'équipe KOZ Services."
-        )
-
-        send_mail(
-            subject=sujet,
-            message=message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[destinataire],
-            fail_silently=True  # Évite de faire planter la requête si le serveur SMTP flanche
-        )

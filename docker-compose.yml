@@ -95,6 +95,8 @@ volumes:
   static_volume:
   media_volume:
   postgres_data: # 🟢 Nettoyé (db_volume supprimé)
+    external: true
+    name: koz-flow_postgres_data
 
 networks:
   koz_network:

@@ -171,16 +171,17 @@ WSGI_APPLICATION = 'koz_flow.wsgi.application'
         }
     }
 else:'''
+# 3. Base de données avec valeurs de secours
 DATABASES = {
-                'default': {
-                        'ENGINE': 'django.db.backends.postgresql',
-                        'NAME': os.getenv('POSTGRES_DB'),
-                        'USER': os.getenv('POSTGRES_USER'),
-                        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
-                        'HOST': os.getenv('POSTGRES_HOST', 'postgres'),
-                        'PORT': os.getenv('POSTGRES_PORT', '5432'),
-
-                }}
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('POSTGRES_DB', 'koz_db'),
+        'USER': os.getenv('POSTGRES_USER', 'koz_user'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
+        'HOST': os.getenv('POSTGRES_HOST', 'postgres'),
+        'PORT': os.getenv('POSTGRES_PORT', '5432'),
+    }
+}
 
     
 

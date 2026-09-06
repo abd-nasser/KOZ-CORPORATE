@@ -1789,103 +1789,109 @@ class DocumentDetailView(LoginRequiredMixin, DetailView):
                 context["update_doc_form"] = DocumentsUploadForm(instance=self.object)
         return context
 
-
 class DocumentUpdateView(LoginRequiredMixin, UpdateView):
-    
     model = Documents
     form_class = DocumentsUploadForm
-    template_name = "clients_templates/client_detail_doc.html"     
-    
+    template_name = "clients_templates/client_detail_doc.html"
+
     def form_valid(self, form):
-        time.sleep(3)
-       # 1. Récupération des données POST via self.request
         latitude = self.request.POST.get("latitude")
         longitude = self.request.POST.get("longitude")
 
-        # 2. Bloquer la sauvegarde directe pour injecter les coordonnées
-        dossier = form.save(commit=False)
-        if latitude:
-            dossier.latitude = latitude
-        if longitude:
-            dossier.longitude = longitude
+        # 💾 1. Transaction atomique BDD
+        with transaction.atomic():
+            dossier = form.save(commit=False)
+            if latitude:
+                dossier.latitude = latitude
+            if longitude:
+                dossier.longitude = longitude
 
-        dossier.save()
-        form.save_m2m()  # Pour préserver d'éventuelles relations ManyToMany
-        self.object = dossier
-
-        # 3. Logique de complétude
-        if dossier.verifier_completude():
-            dossier.statut_dossier = "complet"
             dossier.save()
-            if dossier.demande_financement:
-                dossier.demande_financement.etape = "en_cours"
-                dossier.demande_financement.save()
-            
-            # ==========================================
-            # 📧 ENVOI DE L'EMAIL AUX COMMERCIAUX
-            # ==========================================
-            try:
-                client = dossier.client if hasattr(dossier, 'client') else None
-                if client and client.email:
-                    # Récupérer tous les commerciaux
-                    from auth_app.models import kozUser
-                    commerciaux = kozUser.objects.filter(role='commercial')
-                    
-                    if commerciaux.exists():
-                        context_email = {
-                            'client': client,
-                            'dossier': dossier,
-                            'lien_dossier': self.request.build_absolute_uri(dossier.get_absolute_url()),
-                            'date_mise_a_jour': timezone.now(),
-                        }
-                        
-                        html_message = render_to_string(
-                            'emails/documents/dossier_mis_a_jour.html',
-                            context_email
-                        )
-                        plain_message = strip_tags(html_message)
-                        
-                        # Envoyer à tous les commerciaux
-                        recipients = [com.email for com in commerciaux if com.email]
-                        
-                        if recipients:
-                            send_mail(
-                                subject=f"✅ Dossier mis à jour - {client.nom_complet}",
-                                message=plain_message,
-                                from_email=settings.DEFAULT_FROM_EMAIL,
-                                recipient_list=recipients,
-                                html_message=html_message,
-                                fail_silently=False,
-                            )
-                            logger.info(f"Email envoyé aux commerciaux pour le dossier {dossier.id}")
-                        
-            except Exception as e:
-                logger.error(f"Erreur envoi email aux commerciaux: {e}")
+            form.save_m2m()
+            self.object = dossier
 
-            # ==========================================
-            # ✅ RÉPONSE HTMX
-            # ==========================================
-            response = render(self.request, "partials/documents/_documents_result.html", {
-                "success": True,
-                "title": "✅ Dossier mis à jour",
-                "message": "Votre dossier complet a été mis à jour.",
-                "reload_on_close": True,
-            })
+            est_complet = dossier.verifier_completude()
+
+            if est_complet:
+                dossier.statut_dossier = "complet"
+                dossier.save(update_fields=["statut_dossier"])
+
+                if dossier.demande_financement:
+                    dossier.demande_financement.etape = "en_cours"
+                    dossier.demande_financement.save(update_fields=["etape"])
+
+                # 🔍 2. Récupération optimisée des emails commerciaux
+                recipients = list(
+                    kozUser.objects.filter(role="commercial", is_active=True)
+                    .exclude(email="")
+                    .values_list("email", flat=True)
+                )
+
+                client = getattr(dossier, "client", None)
+
+                # ✉️ 3. Préparation & envoi asynchrone post-commit
+                if client and recipients:
+                    lien_dossier = (
+                        self.request.build_absolute_uri(dossier.get_absolute_url())
+                        if hasattr(dossier, "get_absolute_url")
+                        else ""
+                    )
+
+                    context_email = {
+                        "client": client,
+                        "dossier": dossier,
+                        "lien_dossier": lien_dossier,
+                        "date_mise_a_jour": timezone.now(),
+                    }
+
+                    html_message = render_to_string("emails/documents/dossier_mis_a_jour.html", context_email)
+                    plain_message = strip_tags(html_message)
+                    nom_client = getattr(client, "nom_complet", str(client))
+
+                    transaction.on_commit(
+                        lambda: send_email_task.delay(
+                            subject=f"✅ Dossier mis à jour - {nom_client}",
+                            plain_message=plain_message,
+                            from_email=settings.DEFAULT_FROM_EMAIL,
+                            recipient_list=recipients,
+                            html_message=html_message,
+                        )
+                    )
+            else:
+                dossier.statut_dossier = "incomplet"
+                dossier.save(update_fields=["statut_dossier"])
+
+        # 🔄 4. Réponses HTMX
+        if est_complet:
+            response = render(
+                self.request,
+                "partials/documents/_documents_result.html",
+                {
+                    "success": True,
+                    "title": "✅ Dossier mis à jour",
+                    "message": "Votre dossier complet a été mis à jour.",
+                    "reload_on_close": True,
+                },
+            )
             response["HX-Trigger"] = "closeUpdateDocModal"
             return response
-        
         else:
-            dossier.statut_dossier = "incomplet"
-            dossier.save()
-            response = render(self.request, "partials/documents/_documents_result.html", {
-                "success": False,
-                "title": "⚠️ Dossier incomplet",
-                "message": "Il manque encore des documents requis.",
-            })
-            return response
-        
+            return render(
+                self.request,
+                "partials/documents/_documents_result.html",
+                {
+                    "success": False,
+                    "title": "⚠️ Dossier incomplet",
+                    "message": "Il manque encore des documents requis.",
+                },
+            )
+
     def form_invalid(self, form):
-        return render(self.request, 'partials/documents/_documents_form_errors.html', {'update_doc_form': form})    
+        return render(
+            self.request,
+            "partials/documents/_documents_form_errors.html",
+            {"update_doc_form": form},
+        )
 
 class DocumentDeleteView(LoginRequiredMixin,UserPassesTestMixin, DeleteView):
     def test_func(self):

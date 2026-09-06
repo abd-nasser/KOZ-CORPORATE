@@ -480,70 +480,80 @@ def logout_sur_ERP(request):
     django_logout(request)
     return redirect("auth_app:interface-login-page")  
     
+
+
+
 class ChangePasswordView(LoginRequiredMixin, FormView):
     form_class = ChangePasswordForm
+
     def get_template_names(self):
-        if self.request.user.is_superuser or self.request.user.role == "directeur":
+        user = self.request.user
+        role = getattr(user, "role", None)
+
+        if user.is_superuser or role == "directeur":
             return ["directeur_templates/directeur.html"]
-        elif self.request.user.role == "commercial":
+        elif role == "commercial":
             return ["commercial_templates/commercial.html"]
-        else:
-            return ["clients_templates/client.html"]
-           
+        return ["clients_templates/client.html"]
 
     def get_form_kwargs(self):
-        kwargs =  super().get_form_kwargs()
+        kwargs = super().get_form_kwargs()
         kwargs["user"] = self.request.user
         return kwargs
-    
-    
-
 
     def form_valid(self, form):
-        new_password = form.cleaned_data.get("new_password")
-        
         user = self.request.user
-        user.set_password(new_password)
-        user.save()
-        
-        #Reconnecte le User
-        
-        update_session_auth_hash(self.request, user)
-        
-        # ✉️ Envoi d'email de confirmation
-         # ✉️ Email HTML
-        html_message = render_to_string('emails/auth/changement_mdp.html', {
-            'user': user,
-            'date': timezone.now(),
-        })
-        plain_message = strip_tags(html_message)
+        new_password = form.cleaned_data.get("new_password")
 
-        try:
-            send_mail(
-                subject="🔐 Votre mot de passe a été modifié - KOZ Services",
-                message=plain_message,
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[user.email],
-                html_message=html_message,
-                fail_silently=False,
-            )
-        except Exception as e:
-            print(f"Erreur envoi email: {e}")
-    
-        
-        
-        
-        response = render(self.request, "partials/auth/_password_change_result.html", {
-            "success": True,
-            "title" : "✅ Réussi",
-            "message":"🔐 Votre mot de passe a été modifié avec succès",
-            "reload_on_close": True
-        })
+        # 💾 1. Modification atomique du mot de passe
+        with transaction.atomic():
+            user.set_password(new_password)
+            user.save()
+
+            # Maintient la session active malgré la modification du mot de passe
+            update_session_auth_hash(self.request, user)
+
+            # ✉️ 2. Préparation et envoi asynchrone de l'email via Celery
+            if user.email:
+                html_message = render_to_string(
+                    "emails/auth/changement_mdp.html",
+                    {
+                        "user": user,
+                        "date": timezone.now(),
+                    },
+                )
+                plain_message = strip_tags(html_message)
+
+                transaction.on_commit(
+                    lambda: send_email_task.delay(
+                        subject="🔐 Votre mot de passe a été modifié - KOZ Services",
+                        plain_message=plain_message,
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        recipient_list=[user.email],
+                        html_message=html_message,
+                    )
+                )
+
+        # 🔄 3. Réponse HTMX
+        response = render(
+            self.request,
+            "partials/auth/_password_change_result.html",
+            {
+                "success": True,
+                "title": "✅ Réussi",
+                "message": "🔐 Votre mot de passe a été modifié avec succès",
+                "reload_on_close": True,
+            },
+        )
         response["HX-Trigger"] = "closeChangePassModal"
         return response
-        
+
     def form_invalid(self, form):
-       return render(self.request, 'partials/auth/_password_change_form_errors.html', {"change_pass_form":form})
+        return render(
+            self.request,
+            "partials/auth/_password_change_form_errors.html",
+            {"change_pass_form": form},
+        )
     
     
         

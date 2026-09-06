@@ -36,7 +36,7 @@ ENV DATABASE_URL=postgres://dummy:dummy@localhost:5432/dummy
 # Note : django-tailwind install va exécuter `npm install` dans ton dossier de thème
 
 RUN cd theme/static_src && npm install
-RUN python manage.py tailwind build --no-input
+RUN python manage.py tailwind build
 
 # 7. Organisation des fichiers statiques vendor
 RUN mkdir -p /app/koz_flow/static/js/vendor && \

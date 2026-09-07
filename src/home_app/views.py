@@ -43,7 +43,7 @@ def home_page_view(request):
     services_page =  services_paginator.get_page(services_page_number)
     
     #Récuperer tout les vehicules en vedettes
-    vehicules_vedette = Vehicul.objects.filter(est_vedette = True).annotate(nb_favoris=Count('favoris_de')).order_by('-nb_favoris')
+    vehicules_vedette = Vehicul.objects.filter(est_vedette = True).annotate(nb_favoris=Count('favoris_de')).order_by('-nb_favoris', 'pk')
     # paginator 1 véhicule par page
     paginator = Paginator(vehicules_vedette, 1)
     page_number = request.GET.get('page', 1)
@@ -81,7 +81,7 @@ def vehicules_partial(request):
     """
     Vue HTMX pour charger les véhicules paginés
     """
-    vehicules_vedette = Vehicul.objects.filter(est_vedette=True).annotate(nb_favoris=Count('favoris_de')).order_by('-nb_favoris')
+    vehicules_vedette = Vehicul.objects.filter(est_vedette=True).annotate(nb_favoris=Count('favoris_de')).order_by('-nb_favoris', 'pk')
     paginator = Paginator(vehicules_vedette, 1)
     page_number = request.GET.get('page', 1)
     vehicules_page = paginator.get_page(page_number)

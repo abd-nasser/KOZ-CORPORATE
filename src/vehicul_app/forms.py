@@ -37,20 +37,28 @@ class VehiculForm(forms.ModelForm):
     class Meta:
         model = Vehicul
         fields = ["marque","modele","type_vehicule","annee", "stock",
-                  "prix", "kilometrage", "carburant","actualite","est_vedette",
+                  "prix", "kilometrage","couleur",
+                  "conso_moyenne_en_agglomération","conso_moyenne_hors_agglomération",
+                  "capacite_reservoir","type_de_pneus",
+                  "carburant","actualite","est_vedette",
                   "image_principale",
                   "disponible", "description",
                   ]
         
         widgets = {
             "marque":forms.Select(attrs={"class":"select select-bordered w-full"}),
-            "ype_vehicule":forms.Select(attrs={"class":"select select-bordered w-full"}),
+            "type_vehicule":forms.Select(attrs={"class":"select select-bordered w-full"}),
             "modele": forms.TextInput(attrs={"class":"input input-bordered w-full", "placeholder":"Saisir le modèle"}),
             "annee": forms.NumberInput(attrs={"class":"input input-bordered w-full", "placeholder":"Saisir l'année"}),
             "stock":forms.NumberInput(attrs={"class":"input input-bordered w-full", "placeholder":"nombre"}),
             "prix": forms.NumberInput(attrs={"class":"input input-bordered w-full", "placeholder":"Saisir le prix"}),
             "kilometrage": forms.NumberInput(attrs={"class":"input input-bordered w-full", "placeholder":"Saisir le kilométrage"}),
+            "couleur": forms.TextInput(attrs={"class":"input input-bordered w-full", "placeholder":"Saisir la couleur"}),
+            "conso_moyenne_en_agglomération": forms.NumberInput(attrs={"class":"input input-bordered w-full", "placeholder":"Saisir la consommation"}),
+            "conso_moyenne_hors_agglomération": forms.NumberInput(attrs={"class":"input input-bordered w-full", "placeholder":"Saisir la consommation"}),
             "carburant": forms.Select(attrs={"class":"select select-bordered w-full"}),
+            "capacite_reservoir": forms.NumberInput(attrs={"class":"input input-bordered w-full", "placeholder":"Saisir la capacité du réservoir"}),
+            "type_de_pneus": forms.TextInput(attrs={"class":"input input-bordered w-full", "placeholder":"Saisir le type de pneus"}),
             "image_principale": forms.ClearableFileInput(attrs={"class":"file-input file-input-bordered w-full"}),
             "actualite":forms.CheckboxInput(attrs={"class":"checkbox checkbox-primary"}),
             "disponible": forms.CheckboxInput(attrs={"class":"checkbox checkbox-primary"}),

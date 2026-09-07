@@ -276,7 +276,7 @@ class ERP_VehiculDetailView(LoginRequiredMixin, DetailView):
         
         # Formulaire de modification
         if "vehicul_form" not in context:
-            context["vehicul_form"] = VehiculForm(instance=self.object)
+            context["update_vehicul_form"] = VehiculForm(instance=self.object)
         
         # Formulaire de demande de financement
         initial = {"duree_mois": 36, "apport": 0}

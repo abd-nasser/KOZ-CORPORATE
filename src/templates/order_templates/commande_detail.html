@@ -8,14 +8,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     {% tailwind_css %}
     <script src="{% static 'js/htmx.min.js' %}" defer></script>
-     <!-- FAVICON PRINCIPAL (Format PNG ou ICO) -->
+    
+    <!-- FAVICON -->
     <link rel="icon" type="image/png" href="{% static 'images/Koz_logo_noBack.png' %}">
-
-    <!-- BONUS : Pour les appareils Apple (iPhone / iPad sur l'écran d'accueil) -->
     <link rel="apple-touch-icon" href="{% static 'images/Koz_logo_noBack.png' %}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <title>Détail commande - KOZ Services</title>
+    
+    <!-- LEAFLET CSS & JS POUR LA CARTE GPS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <title>Détail commande #{{ commande.id }} - KOZ Services</title>
+    
     <style>
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(20px); }
@@ -25,136 +30,86 @@
             from { opacity: 0; transform: translateX(30px); }
             to { opacity: 1; transform: translateX(0); }
         }
-        
-        @keyframes msg_slide {
-            from { opacity: 1; transform: translateX(-800px); }
-            to { opacity: 0; transform: translateX(400px); }
-        }
         .animate-fade-in-up { animation: fadeInUp 0.5s ease-out forwards; }
         .animate-slide-in-right { animation: slideInRight 0.4s ease-out forwards; }
+        
         .glass-nav {
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-        }
-        .toast{
-            animation: msg_slide 20s ease-out forwards;;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
         }
         .status-badge {
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            padding: 0.25rem 1rem;
+            padding: 0.35rem 1rem;
             border-radius: 9999px;
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             font-weight: 600;
         }
-        .status-chargement { background: #fef3c7; color: #92400e; }
+        .status-chargement, .status-brouillon { background: #fef3c7; color: #92400e; }
         .status-validee { background: #dbeafe; color: #1e40af; }
-        .status-payee { background: #d1fae5; color: #065f46; }
-        .status-livraison { background: #ede9fe; color: #5b21b6; }
+        .status-payee { background: #e0e7ff; color: #3730a3; }
+        .status-livraison { background: #f3e8ff; color: #6b21a8; }
         .status-terminee { background: #d1fae5; color: #065f46; }
         .status-annulee { background: #fee2e2; color: #991b1b; }
+
         .btn-primary {
             background: linear-gradient(135deg, #3b82f6, #2563eb);
             color: white;
-            border: none;
             transition: all 0.3s ease;
-            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.5);
+            box-shadow: 0 4px 14px 0 rgba(59, 130, 246, 0.39);
         }
         .btn-primary:hover {
             background: linear-gradient(135deg, #2563eb, #1d4ed8);
-            transform: translateY(-2px);
-            box-shadow: 0 20px 35px -8px rgba(59, 130, 246, 0.7);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.54);
         }
-        .timeline-step {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.5rem 0;
+        .step-indicator {
+            width: 32px; height: 32px; border-radius: 9999px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.75rem; font-weight: 700; flex-shrink: 0;
         }
-        .timeline-step .step-indicator {
-            width: 32px;
-            height: 32px;
-            border-radius: 9999px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.75rem;
-            font-weight: 700;
-            flex-shrink: 0;
-        }
-        .timeline-step .step-indicator.active {
-            background: #3b82f6;
-            color: white;
-        }
-        .timeline-step .step-indicator.done {
-            background: #d1fae5;
-            color: #065f46;
-        }
-        .timeline-step .step-indicator.pending {
-            background: #f3f4f6;
-            color: #9ca3af;
-        }
-        .timeline-step .step-line {
-            flex: 1;
-            height: 2px;
-            background: #e5e7eb;
-            margin: 0 0.5rem;
-        }
-        .timeline-step .step-line.done {
-            background: #3b82f6;
-        }
-        .order-item {
-            transition: all 0.2s ease;
-        }
-        .order-item:hover {
-            background: #f8fafc;
-        }
-        .summary-card {
-            background: #f8fafc;
-            border-radius: 16px;
-            padding: 1.5rem;
-            border: 1px solid #e2e8f0;
-        }
-        .summary-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.5rem 0;
-            border-bottom: 1px solid #eef2f6;
-        }
-        .summary-row:last-child {
-            border-bottom: none;
-        }
+        .step-indicator.done { background: #10b981; color: white; }
+        .step-indicator.active { background: #3b82f6; color: white; }
+        .step-indicator.pending { background: #f1f5f9; color: #94a3b8; }
+        .step-line { flex: 1; height: 2px; background: #e2e8f0; }
+        .step-line.done { background: #10b981; }
     </style>
 </head>
-<body class="bg-gray-50 font-inter">
+<body class="bg-slate-50 font-inter text-slate-800 antialiased min-h-screen flex flex-col justify-between">
 
     <!-- ===== NAVBAR ===== -->
     <nav class="glass-nav sticky top-0 z-40 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <a href="{% url 'home_app:home-page' %}" class="font-bold text-2xl text-blue-600">
+            <div class="flex items-center gap-4">
+                <a href="{% url 'home_app:home-page' %}" class="font-extrabold text-2xl text-blue-600 tracking-tight">
                     KOZ Services
                 </a>
-                <a href="{% url 'order_app:panier' %}" class="text-gray-500 hover:text-blue-600 transition text-sm flex items-center gap-1 ml-4">
-                    <i class="fas fa-arrow-left text-xs"></i> Retour au panier
+                <span class="hidden sm:inline-block h-4 w-px bg-slate-300"></span>
+                <a href="{% if user.role == 'client' %}{% url 'order_app:panier' %}{% else %}{% url 'order_app:liste-commandes' %}{% endif %}" 
+                   class="text-slate-500 hover:text-blue-600 transition text-sm flex items-center gap-1">
+                    <i class="fas fa-arrow-left text-xs"></i> 
+                    {% if user.role == 'client' %}Retour au panier{% else %}Liste des commandes{% endif %}
                 </a>
             </div>
-            <div class="flex items-center gap-4">
-                <span class="text-sm text-gray-500">
-                    <i class="fas fa-receipt text-blue-600 mr-1"></i>
-                    Commande #{{ commande.id }}
-                </span>
-                <span class="text-sm text-gray-600">{{ user.nom_complet }}</span>
+
+            <div class="flex items-center gap-3">
+                <!-- Badge Rôle -->
+                {% if user.role != 'client' %}
+                    <span class="bg-purple-100 text-purple-700 font-semibold text-xs px-2.5 py-1 rounded-full border border-purple-200">
+                        <i class="fas fa-user-shield mr-1"></i> Espace Commercial
+                    </span>
+                {% endif %}
+                <span class="text-sm font-medium text-slate-700 hidden sm:inline">{{ user.nom_complet }}</span>
             </div>
         </div>
 
-         <!-- Messages flash -->
         {% if messages %}
-        <div class="fixed toast top-20 right-5 z-50 space-y-2">
+        <div class="fixed top-20 right-5 z-50 space-y-2">
             {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} shadow-xl rounded-xl animate-slide-in-right">
+            <div class="p-4 rounded-xl shadow-lg border text-sm flex items-center gap-2 animate-slide-in-right {% if message.tags == 'error' %}bg-red-50 text-red-700 border-red-200{% else %}bg-emerald-50 text-emerald-700 border-emerald-200{% endif %}">
+                <i class="fas {% if message.tags == 'error' %}fa-exclamation-circle{% else %}fa-check-circle{% endif %}"></i>
                 <span>{{ message }}</span>
             </div>
             {% endfor %}
@@ -162,193 +117,294 @@
         {% endif %}
     </nav>
 
-    <!-- ============================================================ -->
-    <!-- MAIN CONTENT                                                 -->
-    <!-- ============================================================ -->
-    <main class="max-w-7xl mx-auto px-4 py-8">
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="max-w-7xl mx-auto px-4 py-8 w-full flex-grow">
 
-        <!-- ===== EN-TÊTE ===== -->
+        <!-- PANNEAU D'ACTION RAPIDE (COMMERCIAL / AGENT SEULEMENT) -->
+        {% if user.role != 'client' %}
+        <div class="bg-slate-900 text-white rounded-2xl p-5 mb-8 shadow-xl border border-slate-800 animate-fade-in-up">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <span class="text-xs uppercase font-bold tracking-wider text-blue-400">Gestion Commerciale</span>
+                    <h2 class="text-lg font-bold">Actions sur la Commande #{{ commande.id }}</h2>
+                </div>
+                <form method="POST" action="{% url 'order_app:changer-statut-commande' commande.pk %}" class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                    {% csrf_token %}
+                    <select name="statut" class="bg-slate-800 text-white border border-slate-700 text-sm rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500">
+                        <option value="chargement" {% if commande.statut == 'chargement' %}selected{% endif %}>Chargement / Brouillon</option>
+                        <option value="validee" {% if commande.statut == 'validee' %}selected{% endif %}>Validée</option>
+                        <option value="payee" {% if commande.statut == 'payee' %}selected{% endif %}>Payée</option>
+                        <option value="livraison" {% if commande.statut == 'livraison' %}selected{% endif %}>En livraison</option>
+                        <option value="terminee" {% if commande.statut == 'terminee' %}selected{% endif %}>Terminée</option>
+                        <option value="annulee" {% if commande.statut == 'annulee' %}selected{% endif %}>Annulée</option>
+                    </select>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white font-medium text-sm px-4 py-2 rounded-xl transition flex items-center gap-1.5">
+                        <i class="fas fa-save"></i> Mettre à jour
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- EN-TÊTE DE COMMANDE -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 animate-fade-in-up">
             <div>
-                <h1 class="text-3xl md:text-4xl font-bold text-gray-800">
-                    <i class="fas fa-receipt text-blue-600 mr-3"></i>Commande #{{ commande.id }}
+                <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 flex items-center gap-3">
+                    <i class="fas fa-receipt text-blue-600"></i> Commande #{{ commande.id }}
                 </h1>
-                <p class="text-gray-500 text-sm mt-1">
-                    Passée le {{ commande.date_commande|date:"d/m/Y à H:i" }}
+                <p class="text-slate-500 text-sm mt-1">
+                    Créée le {{ commande.date_commande|date:"d/m/Y à H:i" }}
                 </p>
             </div>
             <span class="status-badge status-{{ commande.statut|lower }}">
-                <i class="fas fa-{% if commande.statut == 'Chargement' %}clock{% elif commande.statut == 'validee' %}check-circle{% elif commande.statut == 'payee' %}credit-card{% elif commande.statut == 'livraison' %}truck{% elif commande.statut == 'terminee' %}flag-checkered{% else %}times-circle{% endif %}"></i>
-                {{ commande.get_statut_display }}
+                <i class="fas fa-circle text-[8px]"></i> {{ commande.get_statut_display }}
             </span>
         </div>
 
-        <!-- ============================================================ -->
-        <!-- TIMELINE (Suivi de commande)                                -->
-        <!-- ============================================================ -->
-        <div class="bg-white rounded-xl shadow-sm p-6 mb-8 border border-gray-100 animate-fade-in-up">
-            <h3 class="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
-                <i class="fas fa-timeline text-blue-600"></i> Suivi de commande
+        <!-- TIMELINE (SUIVI) -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 mb-8 animate-fade-in-up">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-6 flex items-center gap-2">
+                <i class="fas fa-route text-blue-600"></i> Progression du traitement
             </h3>
-            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-                
-                <!-- Étape 1 : Chargement -->
-                <div class="flex items-center gap-2 flex-1 w-full">
+            <div class="flex flex-col md:flex-row items-start md:items-center gap-4">
+                <div class="flex items-center gap-3 flex-1">
                     <div class="step-indicator {% if commande.statut in 'Chargement,validee,payee,livraison,terminee' %}done{% else %}pending{% endif %}">
-                        <i class="fas fa-clock"></i>
+                        <i class="fas fa-check text-xs"></i>
                     </div>
-                    <span class="text-sm font-medium {% if commande.statut in 'Chargement,validee,payee,livraison,terminee' %}text-gray-800{% else %}text-gray-400{% endif %}">
-                        En attente
-                    </span>
+                    <span class="text-sm font-semibold">Réception</span>
                 </div>
+                <div class="step-line hidden md:block {% if commande.statut in 'validee,payee,livraison,terminee' %}done{% endif %}"></div>
                 
-                <div class="step-line {% if commande.statut in 'validee,payee,livraison,terminee' %}done{% else %}pending{% endif %} w-full sm:w-12"></div>
-                
-                <!-- Étape 2 : Validée -->
-                <div class="flex items-center gap-2 flex-1 w-full">
-                    <div class="step-indicator {% if commande.statut in 'validee,payee,livraison,terminee' %}done{% elif commande.statut == 'Chargement' %}pending{% else %}pending{% endif %}">
-                        <i class="fas fa-check-circle"></i>
+                <div class="flex items-center gap-3 flex-1">
+                    <div class="step-indicator {% if commande.statut in 'validee,payee,livraison,terminee' %}done{% else %}pending{% endif %}">
+                        <i class="fas fa-check text-xs"></i>
                     </div>
-                    <span class="text-sm font-medium {% if commande.statut in 'validee,payee,livraison,terminee' %}text-gray-800{% else %}text-gray-400{% endif %}">
-                        Validée
-                    </span>
+                    <span class="text-sm font-semibold">Validée</span>
                 </div>
-                
-                <div class="step-line {% if commande.statut in 'payee,livraison,terminee' %}done{% else %}pending{% endif %} w-full sm:w-12"></div>
-                
-                <!-- Étape 3 : Payée -->
-                <div class="flex items-center gap-2 flex-1 w-full">
-                    <div class="step-indicator {% if commande.statut in 'payee,livraison,terminee' %}done{% elif commande.statut in 'Chargement,validee' %}pending{% else %}pending{% endif %}">
-                        <i class="fas fa-credit-card"></i>
+                <div class="step-line hidden md:block {% if commande.statut in 'payee,livraison,terminee' %}done{% endif %}"></div>
+
+                <div class="flex items-center gap-3 flex-1">
+                    <div class="step-indicator {% if commande.statut in 'payee,livraison,terminee' %}done{% else %}pending{% endif %}">
+                        <i class="fas fa-credit-card text-xs"></i>
                     </div>
-                    <span class="text-sm font-medium {% if commande.statut in 'payee,livraison,terminee' %}text-gray-800{% else %}text-gray-400{% endif %}">
-                        Payée
-                    </span>
+                    <span class="text-sm font-semibold">Payée</span>
                 </div>
-                
-                <div class="step-line {% if commande.statut in 'livraison,terminee' %}done{% else %}pending{% endif %} w-full sm:w-12"></div>
-                
-                <!-- Étape 4 : En livraison -->
-                <div class="flex items-center gap-2 flex-1 w-full">
-                    <div class="step-indicator {% if commande.statut in 'livraison,terminee' %}done{% elif commande.statut in 'Chargement,validee,payee' %}pending{% else %}pending{% endif %}">
-                        <i class="fas fa-truck"></i>
+                <div class="step-line hidden md:block {% if commande.statut in 'livraison,terminee' %}done{% endif %}"></div>
+
+                <div class="flex items-center gap-3 flex-1">
+                    <div class="step-indicator {% if commande.statut in 'livraison,terminee' %}done{% else %}pending{% endif %}">
+                        <i class="fas fa-truck text-xs"></i>
                     </div>
-                    <span class="text-sm font-medium {% if commande.statut in 'livraison,terminee' %}text-gray-800{% else %}text-gray-400{% endif %}">
-                        Livraison
-                    </span>
+                    <span class="text-sm font-semibold">Livraison</span>
                 </div>
-                
-                <div class="step-line {% if commande.statut == 'terminee' %}done{% else %}pending{% endif %} w-full sm:w-12"></div>
-                
-                <!-- Étape 5 : Terminée -->
-                <div class="flex items-center gap-2 flex-1 w-full">
+                <div class="step-line hidden md:block {% if commande.statut == 'terminee' %}done{% endif %}"></div>
+
+                <div class="flex items-center gap-3 flex-1">
                     <div class="step-indicator {% if commande.statut == 'terminee' %}done{% else %}pending{% endif %}">
-                        <i class="fas fa-flag-checkered"></i>
+                        <i class="fas fa-flag-checkered text-xs"></i>
                     </div>
-                    <span class="text-sm font-medium {% if commande.statut == 'terminee' %}text-gray-800{% else %}text-gray-400{% endif %}">
-                        Terminée
-                    </span>
+                    <span class="text-sm font-semibold">Clôturée</span>
                 </div>
             </div>
         </div>
 
-        <!-- ============================================================ -->
-        <!-- GRILLE : ARTICLES + RÉSUMÉ                                  -->
-        <!-- ============================================================ -->
+        <!-- GRILLE PRINCIPALE -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-fade-in-up">
             
-            <!-- ===== COLONNE GAUCHE : ARTICLES ===== -->
-            <div class="lg:col-span-2">
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-100">
-                        <h3 class="text-sm font-semibold text-gray-700">
-                            <i class="fas fa-box text-blue-600 mr-2"></i>
-                            Articles commandés ({{ commande.panier.nb_articles }})
+            <!-- COLONNE GAUCHE (2/3) : ARTICLES & GEOLOCALISATION -->
+            <div class="lg:col-span-2 space-y-8">
+                
+                <!-- CARTE DE GÉOLOCALISATION GPS -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+                    <div class="px-6 py-4 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+                        <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fas fa-map-marker-alt text-red-500"></i> Localisation de Livraison
+                        </h3>
+                        {% if commande.google_maps_url %}
+                                    <a href="{{ commande.google_maps_url }}" target="_blank" rel="noopener noreferrer" 
+                                    class="btn btn-sm btn-outline btn-primary gap-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                        </svg>
+                                        Google Maps
+                                    </a>
+                                    <a href="https://waze.com/ul?ll={{ commande.latitude }},{{ commande.longitude }}&navigate=yes" target="_blank" rel="noopener noreferrer" 
+                                    class="btn btn-sm btn-ghost gap-1 text-base-content/70">
+                                        Waze
+                                    </a>
+             <!-- SCRIPT INITIALISATION CARTE LEAFLET -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // 1. On récupère les valeurs sous forme de chaînes en forçant le point décimal avec |unlocalize
+        const rawLat = "{{ commande.latitude|default:'' }}";
+        const rawLng = "{{ commande.longitude|default:'' }}";
+
+        const lat = parseFloat(rawLat);
+        const lng = parseFloat(rawLng);
+
+        const mapElement = document.getElementById('order-map');
+
+        // 2. Vérification que l'élément HTML existe et que les coordonnées sont de vrais nombres
+        if (mapElement && !isNaN(lat) && !isNaN(lng)) {
+            const map = L.map('order-map').setView([lat, lng], 15);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '© OpenStreetMap'
+            }).addTo(map);
+
+            L.marker([lat, lng])
+                .addTo(map)
+                .bindPopup("<b>Lieu de livraison</b><br>Commande #{{ commande.id }}")
+                .openPopup();
+
+            // 3. Force la carte à recalculer sa taille après le rendu CSS (évite la carte grise/blanche)
+            setTimeout(function() {
+                map.invalidateSize();
+            }, 200);
+        } else {
+            console.warn("Impossible d'afficher la carte : Coordonnées GPS manquantes ou invalides.");
+        }
+    });
+</script>
+ 
+
+                                    {% else %}
+                                    <p>Aucune donnée GPS disponible.</p>
+                                {% endif %}
+                    </div>
+                    
+                    <div class="p-6">
+                        {% if commande.latitude and commande.longitude %}
+                            <!-- Map Container -->
+                            <div id="order-map" class="h-64 w-full rounded-xl border border-slate-200 mb-4 z-0"></div>
+                            
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                <div>
+                                    <span class="text-slate-400 block font-medium">Latitude</span>
+                                    <span class="font-mono font-bold text-slate-700">{{ commande.latitude }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 block font-medium">Longitude</span>
+                                    <span class="font-mono font-bold text-slate-700">{{ commande.longitude }}</span>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-8 text-slate-400">
+                                <i class="fas fa-map-marked-alt text-4xl mb-2 text-slate-300"></i>
+                                <p class="text-sm">Aucune donnée GPS enregistrée pour cette commande.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- ARTICLES COMMANDÉS -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+                    <div class="px-6 py-4 bg-slate-50 border-b border-slate-100">
+                        <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fas fa-boxes text-blue-600"></i> Articles du panier ({{ commande.panier.nb_articles }})
                         </h3>
                     </div>
                     
-                    <div class="divide-y divide-gray-100">
+                    <div class="divide-y divide-slate-100">
                         {% for article in commande.panier.articles.all %}
-                        <div class="order-item px-6 py-4 flex items-center gap-4">
-                            <!-- Image -->
-                            <div class="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
-                                <img src="{{ article.products.image_principale.url }}" 
-                                     alt="{{ article.products.nom }}"
-                                     class="w-full h-full object-cover">
+                        <div class="p-6 flex items-center gap-4 hover:bg-slate-50/50 transition">
+                            <div class="w-16 h-16 rounded-xl bg-slate-100 border border-slate-200 flex-shrink-0 overflow-hidden">
+                                {% if article.products.image_principale %}
+                                    <img src="{{ article.products.image_principale.url }}" alt="{{ article.products.nom }}" class="w-full h-full object-cover">
+                                {% else %}
+                                    <div class="w-full h-full flex items-center justify-center text-slate-400"><i class="fas fa-image"></i></div>
+                                {% endif %}
                             </div>
                             
-                            <!-- Infos -->
                             <div class="flex-1 min-w-0">
-                                <h4 class="font-semibold text-gray-800 text-sm">{{ article.products.nom }}</h4>
-                                <p class="text-xs text-gray-400">{{ article.products.categorie.nom }}</p>
-                                <div class="flex items-center gap-3 mt-1 text-sm">
-                                    <span class="text-gray-600">Quantité : {{ article.quantite }}</span>
-                                    <span class="text-gray-300">|</span>
-                                    <span class="font-semibold text-gray-800">{{ article.sous_total|intcomma }} FCFA</span>
-                                </div>
+                                <h4 class="font-bold text-slate-800 text-sm truncate">{{ article.products.nom }}</h4>
+                                <p class="text-xs text-slate-400">{{ article.products.categorie.nom }}</p>
+                                <p class="text-xs text-slate-500 mt-1">Qté: <span class="font-bold text-slate-700">{{ article.quantite }}</span> × {{ article.products.prix_actuel|intcomma }} FCFA</p>
                             </div>
-                            
-                            <!-- Prix unitaire -->
-                            <div class="text-right text-sm text-gray-500 flex-shrink-0">
-                                <span class="block">{{ article.products.prix_actuel|intcomma }} FCFA</span>
-                                <span class="text-xs text-gray-400">l'unité</span>
+
+                            <div class="text-right">
+                                <span class="font-bold text-slate-900 text-sm block">{{ article.sous_total|intcomma }} FCFA</span>
                             </div>
                         </div>
                         {% endfor %}
                     </div>
                 </div>
+
             </div>
 
-            <!-- ===== COLONNE DROITE : RÉSUMÉ ===== -->
-            <div class="lg:col-span-1">
-                <div class="summary-card sticky top-24">
-                    <h3 class="text-lg font-bold text-gray-800 mb-4">Résumé de la commande</h3>
-                    
-                    <div class="summary-row">
-                        <span class="text-gray-600">Sous-total</span>
-                        <span class="font-semibold text-gray-800">{{ commande.panier.total_panier|intcomma }} FCFA</span>
-                    </div>
-                    
-                    <div class="summary-row">
-                        <span class="text-gray-600">Livraison</span>
-                        <span class="font-semibold text-gray-800">À calculer</span>
-                    </div>
-                    
-                    <div class="summary-row">
-                        <span class="text-gray-600">Taxes (18%)</span>
-                        <span class="font-semibold text-gray-800">{{ commande.panier.total_panier|floatformat:0|intcomma }} FCFA</span>
-                    </div>
-                    
-                    <div class="summary-row border-t-2 border-gray-200 mt-2 pt-3">
-                        <span class="text-lg font-bold text-gray-800">Total</span>
-                        <span class="text-xl font-bold text-blue-600">{{ commande.panier.total_panier|floatformat:0|intcomma }} FCFA</span>
-                    </div>
-
-                    <!-- Statut de paiement -->
-                    {% if commande.paiements %}
-                    <div class="mt-4 pt-4 border-t border-gray-200">
-                        <div class="flex items-center justify-between text-sm">
-                            <span class="text-gray-600">Paiement</span>
-                            <span class="font-semibold text-green-600">
-                                <i class="fas fa-check-circle mr-1"></i> {{ commande.paiements.statut }}
-                            </span>
+            <!-- COLONNE DROITE (1/3) : CLIENT & RÉSUMÉ PAIEMENT -->
+            <div class="lg:col-span-1 space-y-6">
+                
+                <!-- IF COMMERCIAL: CARTE D'INFORMATIONS CLIENT -->
+                {% if user.role != 'client' %}
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4 flex items-center gap-2">
+                        <i class="fas fa-user-circle text-blue-600"></i> Fiche Client
+                    </h3>
+                    <div class="space-y-3 text-sm">
+                        <div>
+                            <span class="text-xs text-slate-400 block">Nom complet</span>
+                            <span class="font-bold text-slate-800">{{ commande.panier.client.nom_complet }}</span>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-400 block">Téléphone</span>
+                            {% if commande.panier.client.telephone %}
+                                <a href="tel:{{ commande.panier.client.telephone }}" class="font-semibold text-blue-600 hover:underline">
+                                    <i class="fas fa-phone-alt text-xs mr-1"></i>{{ commande.panier.client.telephone }}
+                                </a>
+                            {% else %}
+                                <span class="text-slate-400 italic">Non renseigné</span>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-400 block">Email</span>
+                            <span class="font-medium text-slate-700">{{ commande.panier.client.email }}</span>
                         </div>
                     </div>
-                    {% endif %}
+                </div>
+                {% endif %}
+
+                <!-- RÉSUMÉ FINANCIER -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80 sticky top-24">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4">
+                        Résumé de la commande
+                    </h3>
                     
-                    <!-- Actions -->
-                    <div class="mt-6 space-y-3">
-                        {% if commande.statut == 'validee' %}
-                        <a href="{% url 'paiement_app:page-paiement' commande.pk %}" class="btn-primary w-full py-3 rounded-xl font-semibold flex items-center justify-center gap-2">
-                            <i class="fas fa-credit-card"></i> Payer la commande
-                        </a>
+                    <div class="space-y-3 text-sm border-b border-slate-100 pb-4">
+                        <div class="flex justify-between text-slate-600">
+                            <span>Sous-total</span>
+                            <span class="font-semibold text-slate-800">{{ commande.panier.total_panier|intcomma }} FCFA</span>
+                        </div>
+                        <div class="flex justify-between text-slate-600">
+                            <span>Frais de Livraison</span>
+                            <span class="font-medium text-emerald-600">Inclus / Incluses</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-between items-center pt-4 mb-6">
+                        <span class="font-bold text-slate-900">Total Général</span>
+                        <span class="text-2xl font-extrabold text-blue-600">{{ commande.panier.total_panier|intcomma }} FCFA</span>
+                    </div>
+
+                    <!-- BOUTONS D'ACTION (CONDITIONNEL CLIENT VS COMMERCIAL) -->
+                    <div class="space-y-3">
+                        {% if user.role == 'client' %}
+                            {% if commande.statut == 'validee' or commande.statut == 'Chargement' %}
+                            <a href="{% url 'paiement_app:page-paiement' commande.pk %}" class="btn-primary w-full py-3 rounded-xl font-bold text-center block text-sm">
+                                <i class="fas fa-credit-card mr-2"></i> Procéder au paiement
+                            </a>
+                            {% endif %}
+                        {% else %}
+                            <a href="https://wa.me/{{ commande.panier.client.telephone }}?text=Bonjour%20votre%20commande%20KOZ%20Services%20%23{{ commande.id }}" 
+                               target="_blank" 
+                               class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl text-center block text-sm transition">
+                                <i class="fab fa-whatsapp mr-2"></i> Contacter le client
+                            </a>
                         {% endif %}
-                        <a href="{% url 'order_app:panier' %}" 
-                           class="block w-full text-center py-2 text-sm text-gray-500 hover:text-blue-600 transition">
-                            <i class="fas fa-arrow-left mr-1"></i> Retour au panier
-                        </a>
                     </div>
                 </div>
+
             </div>
 
         </div>
@@ -356,12 +412,11 @@
     </main>
 
     <!-- ===== FOOTER ===== -->
-    <footer class="bg-gray-800 text-gray-400 py-6 mt-12">
-        <div class="max-w-7xl mx-auto px-4 text-center text-sm">
-            <p>&copy; {% now "Y" %} KOZ Services — Tous droits réservés</p>
-            <p class="font-medium text-slate-700">Conçu par <strong>SPIRIT-DIGIT Agency</strong></p>
-        </div>
+    <footer class="bg-white border-t border-slate-200 py-6 mt-12 text-center text-xs text-slate-500">
+        <p>&copy; {% now "Y" %} KOZ Services — Tous droits réservés</p>
+        <p class="mt-1 font-semibold text-slate-600">Développé par <strong>SPIRIT-DIGIT Agency</strong></p>
     </footer>
 
+    
 </body>
 </html>

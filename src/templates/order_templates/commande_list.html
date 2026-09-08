@@ -1,0 +1,177 @@
+{% load static %}
+{% load tailwind_tags %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% tailwind_css %}
+    
+    <!-- HTMX & FontAwesome -->
+    <script src="{% static 'js/htmx.min.js' %}"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <title>Gestion des Commandes — KOZ Services</title>
+</head>
+<body class="bg-slate-50 font-inter text-slate-800 antialiased min-h-screen flex flex-col justify-between">
+
+    <!-- ===== NAVBAR ===== -->
+    <nav class="bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200/80 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <a href="{% url 'home_app:home-page' %}" class="font-extrabold text-2xl text-blue-600 tracking-tight">
+                    KOZ Services
+                </a>
+                <span class="hidden sm:inline-block h-4 w-px bg-slate-300"></span>
+                <span class="text-sm font-semibold text-slate-600">Espace Direction & Commercial</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="bg-blue-50 text-blue-700 font-semibold text-xs px-3 py-1 rounded-full border border-blue-100">
+                    <i class="fas fa-user-shield mr-1"></i> {{ user.role|title }}
+                </span>
+                <span class="text-sm font-medium text-slate-700 hidden sm:inline">{{ user.nom_complet }}</span>
+            </div>
+            <a href="{% url 'directeur_app:directeur-view'%} {% if user.role == 'directeur' %} {% else %} {% url 'commercial_app:commercial-view' %} {% endif %}"
+            class="text-sl text-blue-400 hover:text-blue-600 transition" title="Retour à l'espace principal">
+                <i class="fas fa-arrow-left mr-2"></i>retour
+            </a>
+        </div>
+
+        
+    </nav>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="max-w-7xl mx-auto px-4 py-8 w-full flex-grow">
+
+        <!-- HEADER PAGE & KPI STATS -->
+        <div class="mb-8">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">
+                        Gestion des Commandes
+                    </h1>
+                    <p class="text-slate-500 text-sm mt-1">
+                        Suivi et traitement des commandes en temps réel.
+                    </p>
+                </div>
+            </div>
+
+            <!-- CARTE DE METRIQUES (PURE DJANGO) -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm">
+                    <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Commandes</span>
+                    <p class="text-2xl font-black text-slate-800 mt-1">{{ stats.total }}</p>
+                </div>
+                <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm">
+                    <span class="text-xs font-semibold text-amber-600 uppercase tracking-wider">En Attente / Chargement</span>
+                    <p class="text-2xl font-black text-amber-600 mt-1">{{ stats.en_attente }}</p>
+                </div>
+                <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm">
+                    <span class="text-xs font-semibold text-emerald-600 uppercase tracking-wider">Livrées / Terminées</span>
+                    <p class="text-2xl font-black text-emerald-600 mt-1">{{ stats.terminees }}</p>
+                </div>
+                <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm">
+                    <span class="text-xs font-semibold text-blue-600 uppercase tracking-wider">Chiffre d'Affaires</span>
+                    <p class="text-2xl font-black text-blue-600 mt-1">{{ stats.ca_total|intcomma }} FCFA</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- BARRE DE RECHERCHE & FILTRES HTMX -->
+        <div class="bg-white p-4 md:p-5 rounded-2xl border border-slate-200/80 shadow-sm mb-6 space-y-4">
+            <form id="filter-form"
+                hx-get="{% url 'order_app:liste-commandes' %}"
+                hx-target="#commandes-table"
+                hx-include="#filter-form"
+                hx-swap="outerHTML"
+                class="flex flex-col md:flex-row gap-4 justify-between items-center">
+                
+                <!-- Champ de Recherche HTMX -->
+                <div class="relative w-full md:w-96">
+                    <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                    <input type="text" 
+                           name="q" 
+                           value="{{ search_q }}"
+                           placeholder="Rechercher par ID, client, téléphone..." 
+                           class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
+                           hx-get="{% url 'order_app:liste-commandes' %}"
+                           hx-trigger="keyup changed delay:300ms, search"
+                           hx-target="#commandes-table"
+                           hx-include="#filter-form"
+                           hx-swap="outerHTML">
+                </div>
+
+                <!-- Input caché pour stocker le statut sélectionné -->
+                <input type="hidden" name="statut" id="statut-input" value="{{ statut_actif }}">
+
+                <!-- Boutons Filtrage par Statut -->
+                <div class="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 scrollbar-none">
+                    
+                    <button type="button"
+                            onclick="selectStatusFilter(this, 'all');"
+                            class="px-3.5 py-2 rounded-xl text-xs whitespace-nowrap transition font-medium {% if statut_actif == 'all' %}bg-slate-900 text-white font-bold{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200{% endif %}">
+                        Toutes
+                    </button>
+
+                    <button type="button"
+                            onclick="selectStatusFilter(this, 'chargement');"
+                            class="px-3.5 py-2 rounded-xl text-xs whitespace-nowrap transition font-medium {% if statut_actif == 'chargement' %}bg-slate-900 text-white font-bold{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200{% endif %}">
+                        Brouillon
+                    </button>
+
+                    <button type="button"
+                            onclick="selectStatusFilter(this, 'validee');"
+                            class="px-3.5 py-2 rounded-xl text-xs whitespace-nowrap transition font-medium {% if statut_actif == 'validee' %}bg-slate-900 text-white font-bold{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200{% endif %}">
+                        Validées
+                    </button>
+
+                    <button type="button"
+                            onclick="selectStatusFilter(this, 'terminee');"
+                            class="px-3.5 py-2 rounded-xl text-xs whitespace-nowrap transition font-medium {% if statut_actif == 'terminee' %}bg-slate-900 text-white font-bold{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200{% endif %}">
+                        Terminées
+                    </button>
+
+                    <button type="button"
+                            onclick="selectStatusFilter(this, 'annulee');"
+                            class="px-3.5 py-2 rounded-xl text-xs whitespace-nowrap transition font-medium {% if statut_actif == 'annulee' %}bg-slate-900 text-white font-bold{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200{% endif %}">
+                        Annulées
+                    </button>
+
+                </div>
+            </form>
+        </div>
+
+        <!-- TABLEAU DE COMMANDES (INCLUSION INITIALE DU PARTIAL) -->
+        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+            {% include "partials/order/commande_table.html" %}
+        </div>
+
+    </main>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="bg-white border-t border-slate-200 py-6 mt-12 text-center text-xs text-slate-500">
+        <p>&copy; {% now "Y" %} KOZ Services — Tous droits réservés</p>
+        <p class="font-medium text-slate-700">Conçu par <strong>SPIRIT-DIGIT Agency</strong></p>
+    </footer>
+
+    <script>
+        function selectStatusFilter(button, status) {
+            const filterForm = document.getElementById('filter-form');
+            const statusInput = document.getElementById('statut-input');
+
+            filterForm.querySelectorAll('button[type="button"]').forEach((filterButton) => {
+                filterButton.classList.remove('bg-slate-900', 'text-white', 'font-bold');
+                filterButton.classList.add('bg-slate-100', 'text-slate-600');
+            });
+
+            button.classList.remove('bg-slate-100', 'text-slate-600');
+            button.classList.add('bg-slate-900', 'text-white', 'font-bold');
+            statusInput.value = status;
+            htmx.trigger(filterForm, 'submit');
+        }
+    </script>
+
+</body>
+</html>

@@ -127,6 +127,35 @@
             <!-- ===== BOUTON VALIDER ===== -->
             <div class="mt-6 space-y-3">
                 {% if not commande or commande.statut not in "validee,payee,livraison,terminee" %}
+                <form id="location-form" action="{% url 'order_app:envoi-localisation' %}" method="POST">
+                            {% csrf_token %}
+
+                            <!-- Champs masqués synchronisés avec la carte -->
+                            <input type="hidden" name="latitude" id="id_latitude">
+                            <input type="hidden" name="longitude" id="id_longitude">
+
+                            <div class="mb-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <label class="block text-sm font-medium text-slate-700">
+                                        <i class="fas fa-map-marker-alt text-red-500 mr-1"></i> Emplacement de livraison
+                                    </label>
+                                    <button type="button" onclick="geolocaliserUtilisateur()" class="text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1">
+                                        <i class="fas fa-crosshairs"></i> Me géolocaliser
+                                    </button>
+                                </div>
+
+                                <!-- Conteneur de la carte -->
+                                <div id="map" class="h-72 w-full rounded-xl border border-slate-200 shadow-inner z-0"></div>
+                                
+                                <p class="text-xs text-slate-500 mt-1.5 flex items-center gap-1">
+                                    <i class="fas fa-info-circle"></i> Cliquez sur la carte ou faites glisser le marqueur pour ajuster l'adresse exacte.
+                                </p>
+                            </div>
+
+                            <button type="submit" id="submit-btn" class="btn btn-primary w-full" disabled>
+                                <i class="fas fa-check mr-2"></i> Valider cette position
+                            </button>
+                        </form>
                     <a href="{% url 'order_app:valider-commande' %}"
                        class="btn btn-success w-full py-3 rounded-xl font-semibold flex items-center justify-center gap-2">
                         <i class="fas fa-check-circle"></i> Valider la commande
@@ -150,3 +179,74 @@
     </div>
 
 </div>
+
+
+<script>
+    // Coordonnées par défaut (ex: centre-ville) si la géolocalisation échoue
+    const DEFAULT_LAT = 12.3714;
+    const DEFAULT_LNG = -1.5197;
+
+    let map, marker;
+
+    document.addEventListener("DOMContentLoaded", function () {
+        // 1. Initialisation de la carte Leaflet
+        map = L.map('map').setView([DEFAULT_LAT, DEFAULT_LNG], 13);
+
+        // 2. Chargement du fond de carte OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        // 3. Création du marqueur déplaçable (draggable)
+        marker = L.marker([DEFAULT_LAT, DEFAULT_LNG], {
+            draggable: true
+        }).addTo(map);
+
+        // Événement : Déplacement du marqueur au Drag & Drop
+        marker.on('dragend', function (e) {
+            const position = marker.getLatLng();
+            mettreAJourPosition(position.lat, position.lng);
+        });
+
+        // Événement : Clic n'importe où sur la carte
+        map.on('click', function (e) {
+            marker.setLatLng(e.latlng);
+            mettreAJourPosition(e.latlng.lat, e.latlng.lng);
+        });
+
+        // 4. Tentative de géolocalisation automatique à l'ouverture
+        geolocaliserUtilisateur();
+    });
+
+    // Met à jour les champs hidden et active le bouton de validation
+    function mettreAJourPosition(lat, lng) {
+        document.getElementById('id_latitude').value = lat.toFixed(6);
+        document.getElementById('id_longitude').value = lng.toFixed(6);
+        
+        const submitBtn = document.getElementById('submit-btn');
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    }
+
+    // Fonction de géolocalisation navigateur
+    function geolocaliserUtilisateur() {
+        if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition(
+                function (position) {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+
+                    // Recentrer la carte et placer le marqueur
+                    map.setView([lat, lng], 16);
+                    marker.setLatLng([lat, lng]);
+                    mettreAJourPosition(lat, lng);
+                },
+                function (error) {
+                    console.warn("Géolocalisation bloquée ou indisponible :", error.message);
+                },
+                { enableHighAccuracy: true, timeout: 5000 }
+            );
+        }
+    }
+</script>

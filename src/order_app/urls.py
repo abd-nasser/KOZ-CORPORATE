@@ -14,5 +14,13 @@ urlpatterns = [
     path('panier/vider/', views.vider_panier, name='vider-panier'),
     path('valider-commande/', views.valider_commande, name='valider-commande'),
     path('annuler-commande/<int:commande_id>/', views.annuler_commande, name='annuler-commande'),
-    path('detail/commande/<int:pk>/', views.CommandDetailView.as_view(), name="detail-commande")
+    path('detail/commande/<int:pk>/', views.CommandDetailView.as_view(), name="detail-commande"),
+    path('localisation/', views.envoi_localisation, name='envoi-localisation'),
+    path('commandes/', views.CommandeListView.as_view(), name='liste-commandes'),
+    # ... tes autres routes ...
+    path(
+        'commande/<int:pk>/changer-statut/', 
+        views.ChangerStatutCommandeView.as_view(), 
+        name='changer-statut-commande'
+    ),
 ]

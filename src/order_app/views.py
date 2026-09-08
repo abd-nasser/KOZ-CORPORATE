@@ -1,15 +1,19 @@
+from django.db import transaction
 from django.shortcuts import render, get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
-from django.views.generic import DetailView
+from django.views.generic import DetailView, ListView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from .models import Panier, ArticlePanier, Commande
 from products_app.models import Products, CategorieProducts
 from .serializers import PanierSerializer, ArticlePanierSerializer, CommandeSerializer
 
-
+from django.views.generic import ListView
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.db.models import Q, Sum
+from .models import Commande
 # order_app/views.py
 
 from django.shortcuts import render, get_object_or_404, redirect
@@ -100,36 +104,6 @@ def vider_panier(request):
 
 
 @login_required
-def valider_commande(request):
-    """Valide la commande et crée une commande"""
-    panier = get_object_or_404(Panier, client=request.user)
-    
-    if not panier.articles.exists():
-        messages.error(request, "❌ Votre panier est vide.")
-        return redirect('order_app:panier')
-    
-    # ✅ Vérifier si une commande existe déjà (pas seulement "Chargement")
-    commande_existante = Commande.objects.filter(
-        panier=panier,
-        statut__in=['validee', 'payee', 'livraison', 'terminee']
-    ).first()
-    
-    if commande_existante:
-        messages.info(request, f"ℹ️ Une commande est déjà en cours ({commande_existante.get_statut_display()}).")
-        return redirect('order_app:detail-commande', commande_existante.pk)
-    
-    # ✅ Créer une nouvelle commande
-    commande, _ = Commande.objects.get_or_create(
-        panier=panier,
-    )
-   
-    commande.statut = 'validee'
-    commande.save()
-    
-    messages.success(request, "✅ Commande validée avec succès !")
-    return redirect('order_app:detail-commande', commande.pk)
-
-@login_required
 def annuler_commande(request, commande_id):
     """Annule une commande en cours"""
     commande = get_object_or_404(Commande, id=commande_id, panier__client=request.user)
@@ -144,21 +118,177 @@ def annuler_commande(request, commande_id):
     messages.success(request, "✅ Commande annulée avec succès !")
     return redirect('order_app:panier')
 
-class CommandDetailView(LoginRequiredMixin, UserPassesTestMixin ,DetailView):
-    def test_func(self):
-        return self.request.user.role == "client"
+class CommandDetailView(LoginRequiredMixin, DetailView):
+    """Affiche les détails d'une commande spécifique"""
     
     model = Commande
     template_name = "order_templates/commande_detail.html" 
     context_object_name = "commande"
-    
+   
     def get_queryset(self):
-       return Commande.objects.filter(panier__client=self.request.user)
-    
-    
-    
+        if self.request.user.role == "client":
+            return Commande.objects.filter(panier__client=self.request.user)
+        else:
+            return Commande.objects.all()    
+            
+  
+   
 
 
+class CommandeListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    model = Commande
+    template_name = "order_templates/commande_list.html"
+    context_object_name = "commandes"
+
+    def test_func(self):
+        return self.request.user.role in ["commercial", "directeur"]
+
+    def get_queryset(self):
+        # Récupération de toutes les commandes pour la direction/commercial
+        queryset = Commande.objects.select_related('panier__client').order_by('-date_commande')
+
+        # 1. Filtre Recherche Texte (HTMX)
+        query = self.request.GET.get('q', '').strip()
+        if query:
+            queryset = queryset.filter(
+                Q(id__icontains=query) |
+                Q(panier__client__nom_complet__icontains=query) |
+                
+                Q(panier__client__telephone__icontains=query)
+            )
+
+        # 2. Filtre par Statut (HTMX)
+        statut = self.request.GET.get('statut', 'all')
+        if statut and statut != 'all':
+            queryset = queryset.filter(statut=statut)
+
+        return queryset
+
+    def get_template_names(self):
+        # Si c'est une requête HTMX, on renvoie seulement le tableau partiel
+        if self.request.headers.get('HX-Request'):
+            return ["partials/order/commande_table.html"]
+        return [self.template_name]
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        all_cmds = Commande.objects.all()
+        commandes_stats = all_cmds.select_related('panier').prefetch_related(
+            'panier__articles__products'
+        )
+        
+        # Conserver les filtres actifs dans le contexte
+        context['statut_actif'] = self.request.GET.get('statut', 'all')
+        context['search_q'] = self.request.GET.get('q', '')
+        
+        # Stats pour les cartes
+        context['stats'] = {
+            'total': all_cmds.count(),
+            'en_attente': all_cmds.filter(statut__in=['chargement', 'validee']).count(),
+            'terminees': all_cmds.filter(statut='terminee').count(),
+            'ca_total': sum(
+                commande.panier.total_panier()
+                for commande in commandes_stats
+                if commande.statut != 'annulee' and commande.statut != 'chargement'
+            )
+        }
+        return context
+
+
+from django.shortcuts import get_object_or_404, redirect
+from django.views import View
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib import messages
+from .models import Commande
+
+class ChangerStatutCommandeView(LoginRequiredMixin, UserPassesTestMixin, View):
+    
+    def test_func(self):
+        # Vérifie que l'utilisateur n'est pas un client
+        return self.request.user.role != 'client'
+
+    def post(self, request, pk):
+        commande = get_object_or_404(Commande, pk=pk)
+        nouveau_statut = request.POST.get('statut')
+        
+        # Liste des statuts autorisés
+        statuts_valides = ['chargement', 'validee', 'payee', 'livraison', 'terminee', 'annulee']
+
+        if nouveau_statut in statuts_valides:
+            commande.statut = nouveau_statut
+            commande.save()
+            messages.success(request, f"Le statut de la commande #{commande.id} a été mis à jour.")
+        else:
+            messages.error(request, "Statut sélectionné invalide.")
+
+        # Redirige vers la page courante (détail commande ou liste)
+        return redirect(request.META.get('HTTP_REFERER', 'order_app:commande-list'))
+
+@login_required
+def envoi_localisation(request):
+    """Reçoit la position GPS et crée/met à jour la commande en statut 'brouillon'."""
+    if request.method != "POST":
+        messages.error(request, "❌ Méthode non autorisée.")
+        return redirect('order_app:panier')
+    
+    latitude = request.POST.get('latitude')
+    longitude = request.POST.get('longitude')
+    
+    if not latitude or not longitude:
+        messages.error(request, "❌ Position GPS invalide.")
+        return redirect('order_app:panier')
+
+    panier = get_object_or_404(Panier, client=request.user)
+    
+    with transaction.atomic():
+        # Corrected: cibler le modèle Commande avec un statut temporaire 'brouillon'
+        commande, created = Commande.objects.get_or_create(
+            panier=panier,
+            statut='chargement',  # Utiliser un statut temporaire pour la commande en cours de création
+            defaults={'latitude': latitude, 'longitude': longitude}
+        )
+        
+        if not created:
+            commande.latitude = latitude
+            commande.longitude = longitude
+            commande.save()
+
+    messages.success(request, "✅ Position GPS enregistrée avec succès !")
+    return redirect('order_app:panier')
+
+
+@login_required
+def valider_commande(request):
+    """Passe la commande brouillon existante au statut 'validee'."""
+    panier = get_object_or_404(Panier, client=request.user)
+    
+    if not panier.articles.exists():
+        messages.error(request, "❌ Votre panier est vide.")
+        return redirect('order_app:panier')
+    
+    # 1. Empêcher la re-validation si une commande est déjà en cours
+    commande_existante = Commande.objects.filter(
+        panier=panier,
+        statut__in=['validee', 'payee', 'livraison', 'terminee']
+    ).first()
+    
+    if commande_existante:
+        messages.info(request, f"ℹ️ Une commande est déjà en cours ({commande_existante.get_statut_display()}).")
+        return redirect('order_app:detail-commande', commande_existante.pk)
+    
+    # 2. Récupérer la commande brouillon créée lors de l'envoi de la localisation
+    commande = Commande.objects.filter(panier=panier, statut='chargement').first()
+    
+    if not commande or not (commande.latitude and commande.longitude):
+        messages.error(request, "❌ Veuillez renseigner votre localisation avant de valider la commande.")
+        return redirect('order_app:panier')
+    
+    # 3. Validation finale de la commande
+    commande.statut = 'validee'
+    commande.save()
+    
+    messages.success(request, "✅ Commande validée avec succès !")
+    return redirect('order_app:detail-commande', commande.pk)
 
 # ============================================================
 # 1. Voir le panier (GET)

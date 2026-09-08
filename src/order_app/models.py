@@ -33,6 +33,7 @@ class ArticlePanier(models.Model):
 
 class Commande(models.Model):
     STATUT_COMMANDE = [
+        ('chargement', "Chargement"),
         ("validee", "Validée"),
         ("annulee", "Annulée"),
         ("payee", "Payée"),
@@ -42,7 +43,16 @@ class Commande(models.Model):
     panier = models.ForeignKey(Panier, on_delete=models.CASCADE, related_name="commande")
     statut = models.CharField(max_length=20, choices=STATUT_COMMANDE, default="Chargement")
     date_commande = models.DateTimeField(auto_now_add=True)
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True, verbose_name="Latitude GPS")
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True, verbose_name="Longitude GPS")
     paiements = models.OneToOneField("paiement_app.Paiement", related_name="commande_paiement", on_delete=models.SET_NULL, null=True, blank=True)
+    
+    @property
+    def google_maps_url(self):
+        """Raccourci pour le DG / Commercial afin d'ouvrir le lieu directement dans Google Maps"""
+        if self.latitude and self.longitude:
+            return f"https://www.google.com/maps?q={self.latitude},{self.longitude}"
+        return None
     
     def __str__(self):
         return f" commande : {self.panier.client.nom_complet}-{self.statut}"

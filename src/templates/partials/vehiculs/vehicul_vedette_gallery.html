@@ -22,7 +22,7 @@
 </style>
 <div id="vedette_gallery" class="w-full flex flex-col items-center overflow-x-hidden justify-center">
     
-    {% for vehicule in vehicules_page %}
+    {% for vehicule in vehicules_page|slice:'0:5' %}
     <!-- Carte Unifiée du Véhicule Vedette -->
     <div class="group vedette_gallery_display relative w-full max-w-4xl rounded-2xl  p-6 md:p-8 shadow-xl border border-gray-100/80 flex flex-col gap-6  transition-all duration-300 hover:shadow-2xl">
         

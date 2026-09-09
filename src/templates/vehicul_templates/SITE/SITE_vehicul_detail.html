@@ -163,98 +163,82 @@
     <!-- ============================================================ -->
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+<!-- ===== GRILLE DES CARTES ESSENTIELLES ===== -->
+<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4 mb-12 sm:mb-16">
 
-        <!-- ===== GRILLE DES CARTES ESSENTIELLES (6 MÉTRIQUES) ===== -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-12 sm:mb-16">
-
-            <!-- Carte 1 : Kilométrage -->
-            <div class="glass-card animate-fade-in-up" style="animation-delay: 0.1s">
-                <div class="flex items-center gap-3">
-                    <div class="icon-wrapper flex-shrink-0">
-                        <i class="fas fa-tachometer-alt"></i>
-                    </div>
-                    <div class="min-w-0">
-                        <p class="text-gray-400 text-[10px] sm:text-xs font-medium uppercase tracking-wider">Kilométrage</p>
-                        <p class="text-gray-800 text-sm sm:text-base font-bold truncate">{{ vehicul.kilometrage|intcomma }} km</p>
-                    </div>
-                </div>
-                <div class="connection-line"></div>
+    <!-- Carte 1 : Kilométrage -->
+    <div class="glass-card animate-fade-in-up" style="animation-delay: 0.05s">
+        <div class="flex items-center gap-3">
+            <div class="icon-wrapper flex-shrink-0">
+                <i class="fas fa-tachometer-alt text-blue-600"></i>
             </div>
-
-            <!-- Carte 2 : Carburant -->
-            <div class="glass-card animate-fade-in-up" style="animation-delay: 0.15s">
-                <div class="flex items-center gap-3">
-                    <div class="icon-wrapper flex-shrink-0">
-                        <i class="fas fa-gas-pump"></i>
-                    </div>
-                    <div class="min-w-0">
-                        <p class="text-gray-400 text-[10px] sm:text-xs font-medium uppercase tracking-wider">Carburant</p>
-                        <p class="text-gray-800 text-sm sm:text-base font-bold truncate capitalize">{{ vehicul.get_carburant_display }}</p>
-                    </div>
-                </div>
-                <div class="connection-line"></div>
+            <div class="min-w-0">
+                <p class="text-gray-400 text-[10px] sm:text-xs font-medium uppercase tracking-wider">Kilométrage</p>
+                <p class="text-gray-800 text-sm sm:text-base font-bold truncate">{{ vehicul.kilometrage|intcomma }} km</p>
             </div>
-
-            <!-- Carte 3 : Type de Véhicule -->
-            <div class="glass-card animate-fade-in-up" style="animation-delay: 0.2s">
-                <div class="flex items-center gap-3">
-                    <div class="icon-wrapper flex-shrink-0">
-                        <i class="fas fa-car-side"></i>
-                    </div>
-                    <div class="min-w-0">
-                        <p class="text-gray-400 text-[10px] sm:text-xs font-medium uppercase tracking-wider">Type</p>
-                        <p class="text-gray-800 text-sm sm:text-base font-bold truncate">{{ vehicul.type_vehicule.nom|default:"N/A" }}</p>
-                    </div>
-                </div>
-                <div class="connection-line"></div>
-            </div>
-
-            <!-- Carte 4 : Couleur -->
-            <div class="glass-card animate-fade-in-up" style="animation-delay: 0.25s">
-                <div class="flex items-center gap-3">
-                    <div class="icon-wrapper flex-shrink-0">
-                        <i class="fas fa-palette"></i>
-                    </div>
-                    <div class="min-w-0">
-                        <p class="text-gray-400 text-[10px] sm:text-xs font-medium uppercase tracking-wider">Couleur</p>
-                        <div class="flex items-center gap-2 mt-0.5">
-                            <span class="w-3.5 h-3.5 rounded-full border border-gray-300 shadow-sm inline-block shrink-0" style="background-color: {{ vehicul.couleur }};"></span>
-                            <span class="text-gray-800 text-xs font-bold uppercase font-mono truncate">{{ vehicul.couleur }}</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="connection-line"></div>
-            </div>
-
-            <!-- Carte 5 : Année -->
-            <div class="glass-card animate-fade-in-up" style="animation-delay: 0.3s">
-                <div class="flex items-center gap-3">
-                    <div class="icon-wrapper flex-shrink-0">
-                        <i class="fas fa-calendar-alt"></i>
-                    </div>
-                    <div class="min-w-0">
-                        <p class="text-gray-400 text-[10px] sm:text-xs font-medium uppercase tracking-wider">Année</p>
-                        <p class="text-gray-800 text-sm sm:text-base font-bold truncate">{{ vehicul.annee }}</p>
-                    </div>
-                </div>
-                <div class="connection-line"></div>
-            </div>
-
-            <!-- Carte 6 : Stock 
-            <div class="glass-card animate-fade-in-up" style="animation-delay: 0.35s">
-                <div class="flex items-center gap-3">
-                    <div class="icon-wrapper flex-shrink-0">
-                        <i class="fas fa-boxes"></i>
-                    </div>
-                    <div class="min-w-0">
-                        <p class="text-gray-400 text-[10px] sm:text-xs font-medium uppercase tracking-wider">Stock</p>
-                        <p class="text-gray-800 text-sm sm:text-base font-bold truncate">{{ vehicul.stock|default:"0" }} </p>
-                    </div>
-                </div>
-                <div class="connection-line"></div>
-            </div>-->
-
         </div>
+        <div class="connection-line"></div>
+    </div>
+
+    <!-- Carte 2 : Carburant -->
+    <div class="glass-card animate-fade-in-up" style="animation-delay: 0.1s">
+        <div class="flex items-center gap-3">
+            <div class="icon-wrapper flex-shrink-0">
+                <i class="fas fa-gas-pump text-amber-600"></i>
+            </div>
+            <div class="min-w-0">
+                <p class="text-gray-400 text-[10px] sm:text-xs font-medium uppercase tracking-wider">Carburant</p>
+                <p class="text-gray-800 text-sm sm:text-base font-bold truncate capitalize">{{ vehicul.get_carburant_display }}</p>
+            </div>
+        </div>
+        <div class="connection-line"></div>
+    </div>
+
+    <!-- Carte 3 : Type de Véhicule -->
+    <div class="glass-card animate-fade-in-up" style="animation-delay: 0.15s">
+        <div class="flex items-center gap-3">
+            <div class="icon-wrapper flex-shrink-0">
+                <i class="fas fa-car-side text-indigo-600"></i>
+            </div>
+            <div class="min-w-0">
+                <p class="text-gray-400 text-[10px] sm:text-xs font-medium uppercase tracking-wider">Type</p>
+                <p class="text-gray-800 text-sm sm:text-base font-bold truncate">{{ vehicul.type_vehicule.nom|default:"N/A" }}</p>
+            </div>
+        </div>
+        <div class="connection-line"></div>
+    </div>
+
+    <!-- Carte 4 : État -->
+    <div class="glass-card animate-fade-in-up" style="animation-delay: 0.2s">
+        <div class="flex items-center gap-3">
+            <div class="icon-wrapper flex-shrink-0">
+                <i class="fas fa-shield-alt text-emerald-600"></i>
+            </div>
+            <div class="min-w-0">
+                <p class="text-gray-400 text-[10px] sm:text-xs font-medium uppercase tracking-wider">État</p>
+                <p class="text-gray-800 text-sm sm:text-base font-bold truncate">{{ vehicul.get_etat_display|default:vehicul.etat|default:"N/A" }}</p>
+            </div>
+        </div>
+        <div class="connection-line"></div>
+    </div>
+
+   
+
+    <!-- Carte 12 : Année -->
+    <div class="glass-card animate-fade-in-up" style="animation-delay: 0.6s">
+        <div class="flex items-center gap-3">
+            <div class="icon-wrapper flex-shrink-0">
+                <i class="fas fa-calendar-alt text-blue-500"></i>
+            </div>
+            <div class="min-w-0">
+                <p class="text-gray-400 text-[10px] sm:text-xs font-medium uppercase tracking-wider">Année</p>
+                <p class="text-gray-800 text-sm sm:text-base font-bold truncate">{{ vehicul.annee }}</p>
+            </div>
+        </div>
+        <div class="connection-line"></div>
+    </div>
+
+</div>
 
         <!-- ===== SECTION DÉTAILS ET DÉSPÉCIFICATIONS ===== -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
@@ -293,70 +277,222 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         
-                        <!-- Conso Agglomération -->
-                        <div class="p-4 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
-                                    <i class="fas fa-city text-base"></i>
-                                </div>
-                                <div>
-                                    <p class="text-xs text-gray-500 font-medium">Consommation en ville</p>
-                                    <p class="text-xs text-gray-400">Agglomération</p>
-                                </div>
-                            </div>
-                            <span class="text-base font-extrabold text-gray-800">
-                                {{ vehicul.conso_moyenne_en_agglomération }} <span class="text-xs font-semibold text-gray-500">L/100km</span>
-                            </span>
-                        </div>
+                <!-- État -->
+        <div class="p-4 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-between hover:bg-white hover:shadow-sm transition-all">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-tag text-base"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500 font-medium">État du véhicule</p>
+                    <p class="text-xs text-gray-400">Condition</p>
+                </div>
+            </div>
+            <span class="text-sm font-bold text-gray-800">
+                {{ vehicul.get_etat_display|default:vehicul.etat|default:"N/A" }}
+            </span>
+        </div>
 
-                        <!-- Conso Hors Agglomération -->
-                        <div class="p-4 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
-                                    <i class="fas fa-road text-base"></i>
-                                </div>
-                                <div>
-                                    <p class="text-xs text-gray-500 font-medium">Consommation sur route</p>
-                                    <p class="text-xs text-gray-400">Hors agglomération</p>
-                                </div>
-                            </div>
-                            <span class="text-base font-extrabold text-gray-800">
-                                {{ vehicul.conso_moyenne_hors_agglomération }} <span class="text-xs font-semibold text-gray-500">L/100km</span>
-                            </span>
-                        </div>
+        <!-- Version -->
+        <div class="p-4 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-between hover:bg-white hover:shadow-sm transition-all">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-layer-group text-base"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500 font-medium">Version</p>
+                    <p class="text-xs text-gray-400">Finition</p>
+                </div>
+            </div>
+            <span class="text-sm font-bold text-gray-800 truncate max-w-[140px]" title="{{ vehicul.version }}">
+                {{ vehicul.version|default:"N/A" }}
+            </span>
+        </div>
 
-                        <!-- Capacité Réservoir -->
-                        <div class="p-4 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
-                                    <i class="fas fa-oil-can text-base"></i>
-                                </div>
-                                <div>
-                                    <p class="text-xs text-gray-500 font-medium">Capacité réservoir</p>
-                                    <p class="text-xs text-gray-400">Volume carburant</p>
-                                </div>
-                            </div>
-                            <span class="text-base font-extrabold text-gray-800">
-                                {% if vehicul.capacite_reservoir %}{{ vehicul.capacite_reservoir }} <span class="text-xs font-semibold text-gray-500">L</span>{% else %}N/A{% endif %}
-                            </span>
-                        </div>
+        <!-- Moteur -->
+        <div class="p-4 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-between hover:bg-white hover:shadow-sm transition-all">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-cog text-base"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500 font-medium">Moteur</p>
+                    <p class="text-xs text-gray-400">Motorisation</p>
+                </div>
+            </div>
+            <span class="text-sm font-bold text-gray-800 truncate max-w-[140px]" title="{{ vehicul.moteur }}">
+                {{ vehicul.moteur|default:"N/A" }}
+            </span>
+        </div>
 
-                        <!-- Type de pneus -->
-                        <div class="p-4 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
-                                    <i class="fas fa-dharmachakra text-base"></i>
-                                </div>
-                                <div>
-                                    <p class="text-xs text-gray-500 font-medium">Type de pneus</p>
-                                    <p class="text-xs text-gray-400">Pneumatiques</p>
-                                </div>
-                            </div>
-                            <span class="text-sm font-bold text-gray-800 text-right truncate max-w-[140px]" title="{{ vehicul.type_de_pneus }}">
-                                {{ vehicul.type_de_pneus }}
-                            </span>
-                        </div>
+        <!-- Motricité -->
+        <div class="p-4 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-between hover:bg-white hover:shadow-sm transition-all">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-arrows-spin text-base"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500 font-medium">Motricité</p>
+                    <p class="text-xs text-gray-400">Transmission / Roues</p>
+                </div>
+            </div>
+            <span class="text-sm font-bold text-gray-800">
+                {{ vehicul.get_motricite_display|default:vehicul.motricite|default:"N/A" }}
+            </span>
+        </div>
 
+        <!-- Nombre de portes -->
+        <div class="p-4 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-between hover:bg-white hover:shadow-sm transition-all">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-door-closed text-base"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500 font-medium">Nombre de portes</p>
+                    <p class="text-xs text-gray-400">Accès</p>
+                </div>
+            </div>
+            <span class="text-base font-extrabold text-gray-800">
+                {% if vehicul.nombre_portes %}{{ vehicul.nombre_portes }}{% else %}N/A{% endif %}
+            </span>
+        </div>
+
+        <!-- Nombre de places -->
+        <div class="p-4 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-between hover:bg-white hover:shadow-sm transition-all">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-users text-base"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500 font-medium">Nombre de places</p>
+
+                    <p class="text-xs text-gray-400">Capacité assises</p>
+                </div>
+            </div>
+            <span class="text-base font-extrabold text-gray-800">
+                {% if vehicul.nombre_places %}{{ vehicul.nombre_places }}{% else %}N/A{% endif %}
+            </span>
+        </div>
+
+        <!-- Revêtement Sièges -->
+        <div class="p-4 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-between hover:bg-white hover:shadow-sm transition-all">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-chair text-base"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500 font-medium">Sièges</p>
+                    <p class="text-xs text-gray-400">Revêtement</p>
+                </div>
+            </div>
+            <span class="text-sm font-bold text-gray-800">
+                {{ vehicul.get_sieges_display|default:vehicul.sieges|default:"N/A" }}
+            </span>
+        </div>
+
+        <!-- Couleur extérieure -->
+        <div class="p-4 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-between hover:bg-white hover:shadow-sm transition-all">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-palette text-base"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500 font-medium">Couleur extérieure</p>
+                    <p class="text-xs text-gray-400">Carrosserie</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                {% if vehicul.couleur_exterieure %}
+                <span class="w-6 h-6 rounded-full border border-gray-300 shadow-sm inline-block" style="background-color: {{ vehicul.couleur_exterieure }};" title="{{ vehicul.couleur_exterieure }}"></span>
+                {% else %}
+                <span class="text-sm font-bold text-gray-800">N/A</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Couleur intérieure -->
+        <div class="p-4 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-between hover:bg-white hover:shadow-sm transition-all">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-brush text-base"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500 font-medium">Couleur intérieure</p>
+                    <p class="text-xs text-gray-400">Habitacle</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                {% if vehicul.couleur_interieure %}
+                <span class="w-6 h-6 rounded-full border border-gray-300 shadow-sm inline-block" style="background-color: {{ vehicul.couleur_interieure }};" title="{{ vehicul.couleur_interieure }}"></span>
+                {% else %}
+                <span class="text-sm font-bold text-gray-800">N/A</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Conso Agglomération -->
+        <div class="p-4 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-between hover:bg-white hover:shadow-sm transition-all">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-city text-base"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500 font-medium">Consommation en ville</p>
+                    <p class="text-xs text-gray-400">Agglomération</p>
+                </div>
+            </div>
+            <span class="text-base font-extrabold text-gray-800">
+                {% if vehicul.conso_moyenne_en_agglomeration %}{{ vehicul.conso_moyenne_en_agglomeration }} <span class="text-xs font-semibold text-gray-500">L/100km</span>{% else %}N/A{% endif %}
+            </span>
+        </div>
+
+        <!-- Conso Hors Agglomération -->
+        <div class="p-4 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-between hover:bg-white hover:shadow-sm transition-all">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-road text-base"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500 font-medium">Consommation sur route</p>
+                    <p class="text-xs text-gray-400">Hors agglomération</p>
+                </div>
+            </div>
+            <span class="text-base font-extrabold text-gray-800">
+                {% if vehicul.conso_moyenne_hors_agglomeration %}{{ vehicul.conso_moyenne_hors_agglomeration }} <span class="text-xs font-semibold text-gray-500">L/100km</span>{% else %}N/A{% endif %}
+            </span>
+        </div>
+
+        <!-- Capacité Réservoir -->
+        <div class="p-4 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-between hover:bg-white hover:shadow-sm transition-all">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-oil-can text-base"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500 font-medium">Capacité réservoir</p>
+                    <p class="text-xs text-gray-400">Volume carburant</p>
+                </div>
+            </div>
+            <span class="text-base font-extrabold text-gray-800">
+                {% if vehicul.capacite_reservoir %}{{ vehicul.capacite_reservoir }} <span class="text-xs font-semibold text-gray-500">L</span>{% else %}N/A{% endif %}
+            </span>
+        </div>
+
+        <!-- Type de pneus -->
+        <div class="p-4 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-between hover:bg-white hover:shadow-sm transition-all">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-dharmachakra text-base"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500 font-medium">Type de pneus</p>
+                    <p class="text-xs text-gray-400">Pneumatiques</p>
+                </div>
+            </div>
+            <span class="text-sm font-bold text-gray-800 text-right truncate max-w-[140px]" title="{{ vehicul.type_de_pneus }}">
+                {{ vehicul.type_de_pneus|default:"N/A" }}
+            </span>
+        </div>
                     </div>
                 </div>
 

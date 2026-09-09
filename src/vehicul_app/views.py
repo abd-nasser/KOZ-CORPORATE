@@ -492,57 +492,105 @@ def detail_vehicul_slug(request, slug):
     vehicul = get_object_or_404(Vehicul, slug=slug)
     return redirect('vehicul_app:site-vehicul-detail', vehicul.pk)
 
+from django.db.models import Q
+from django.views.generic import ListView
+from .models import Vehicul, Marque, TypeVehicule
+
+
 class SITE_VehiculListView(ListView):
     """
-    Vue publique pour afficher la liste des véhicules disponibles
-    Accessible à tous sans authentification
+    Vue publique pour afficher et filtrer la liste des véhicules disponibles.
+    Supporte les requêtes classiques et les mises à jour partielles HTMX.
     """
     model = Vehicul
     template_name = "vehicul_templates/SITE/SITE_vehicul_list.html"
+    partial_template_name = "partials/vehiculs/vehicul_list_partial.html"
     context_object_name = "vehicules"
     paginate_by = 12
-    
+
+    def get_template_names(self):
+        """
+        Retourne le template partiel si la requête provient d'HTMX,
+        sinon le template complet.
+        """
+        if self.request.headers.get('HX-Request'):
+            return [self.partial_template_name]
+        return [self.template_name]
+
     def get_queryset(self):
         queryset = Vehicul.objects.filter(
             disponible=True
         ).select_related('marque', 'type_vehicule').prefetch_related('images').order_by('-date_ajout')
-        
-        # Filtres
-        search_query = self.request.GET.get('q')
-        marque = self.request.GET.get('marque')
-        carburant = self.request.GET.get('carburant')
-        type_vehicule = self.request.GET.get('type')
-        
+
+        # Récupération des filtres GET
+        search_query = self.request.GET.get('q', '').strip()
+        marque_id = self.request.GET.get('marque')
+        type_vehicule_id = self.request.GET.get('type_vehicul') or self.request.GET.get('type')
+        etat = self.request.GET.get('etat')
+        prix_min = self.request.GET.get('prix_min')
+        prix_max = self.request.GET.get('prix_max')
+
+        # Recherche textuelle (Modèle, Année, Marque, Description)
         if search_query:
-            queryset = queryset.filter(
+            filters = (
                 Q(modele__icontains=search_query) |
                 Q(marque__nom__icontains=search_query) |
                 Q(description__icontains=search_query)
             )
-        
-        if marque:
-            queryset = queryset.filter(marque__pk=marque)
-        
-        if carburant:
-            queryset = queryset.filter(carburant=carburant)
-        
-        if type_vehicule:
-            queryset = queryset.filter(type_vehicule__pk=type_vehicule)
-        
+            if search_query.isdigit():
+                filters |= Q(annee=int(search_query))
+                
+            queryset = queryset.filter(filters)
+
+        # Filtres spécifiques
+        if marque_id:
+            queryset = queryset.filter(marque__pk=marque_id)
+
+        if type_vehicule_id:
+            queryset = queryset.filter(type_vehicule__pk=type_vehicule_id)
+
+        if etat:
+            queryset = queryset.filter(etat=etat)
+
+        # Filtre sur la plage de prix
+        if prix_min:
+            try:
+                queryset = queryset.filter(prix__gte=float(prix_min))
+            except ValueError:
+                pass
+
+        if prix_max:
+            try:
+                queryset = queryset.filter(prix__lte=float(prix_max))
+            except ValueError:
+                pass
+
         return queryset
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        # Données pour alimenter les listes déroulantes de filtres
         context['marques'] = Marque.objects.all()
         context['types'] = TypeVehicule.objects.all()
-        context['carburants'] = Vehicul.TYPES_CARBURANT_CHOICES
-        context['search_query'] = self.request.GET.get('q', '')
         
-        # Ajouter l'image principale pour chaque véhicule
+        # Récupération des choix d'état depuis le modèle s'ils existent
+        if hasattr(Vehicul, 'ETAT_CHOICES'):
+            context['etats'] = Vehicul.ETAT_CHOICES
+
+        # Conservation de l'état des filtres dans le contexte
+        context['search_query'] = self.request.GET.get('q', '')
+        context['selected_marque'] = self.request.GET.get('marque', '')
+        context['selected_type'] = self.request.GET.get('type_vehicul') or self.request.GET.get('type', '')
+        context['selected_etat'] = self.request.GET.get('etat', '')
+        context['prix_min'] = self.request.GET.get('prix_min', '')
+        context['prix_max'] = self.request.GET.get('prix_max', '')
+
+        # Attribut d'affichage de l'image principale
         for vehicule in context['vehicules']:
             image_principale = vehicule.images.filter(est_principale=True).first()
             vehicule.image_display = image_principale.image if image_principale else vehicule.image_principale
-        
+
         return context
 
 class SITE_VehiculByTypeListView(ListView):

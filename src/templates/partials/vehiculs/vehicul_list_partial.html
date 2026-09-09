@@ -1,0 +1,77 @@
+{% load static %}
+{% load humanize %}
+<!-- Overlay de chargement HTMX -->
+<div class="htmx-indicator absolute inset-0 bg-white/60 backdrop-blur-[2px] z-20 flex items-center justify-center rounded-2xl">
+    <span class="loading loading-spinner loading-lg text-blue-600"></span>
+</div>
+
+<!-- Compteur de résultats -->
+<div class="flex items-center justify-between mb-6">
+    <p class="text-sm text-gray-500">
+        <span class="font-bold text-gray-800">{{ page_obj.paginator.count }}</span> véhicule{{ page_obj.paginator.count|pluralize }} trouvé{{ page_obj.paginator.count|pluralize }}
+    </p>
+</div>
+
+{% if vehicules %}
+    <!-- Grille des véhicules -->
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        {% for vehicule in vehicules %}
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden flex flex-col">
+                
+                <!-- Image -->
+                <div class="relative h-48 bg-gray-100 overflow-hidden">
+                    {% if vehicule.image_display %}
+                        <img src="{{ vehicule.image_display.url }}" alt="{{ vehicule.modele }}" class="w-full h-full object-cover">
+                    {% else %}
+                        <div class="w-full h-full flex items-center justify-center text-gray-300">
+                            <i class="fas fa-car text-4xl"></i>
+                        </div>
+                    {% endif %}
+
+                    {% if vehicule.annee %}
+                        <span class="absolute top-3 right-3 bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-full text-xs font-bold text-gray-800 shadow-sm">
+                            {{ vehicule.annee }}
+                        </span>
+                    {% endif %}
+                </div>
+
+                <!-- Infos -->
+                <div class="p-5 flex-1 flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs font-bold text-blue-600 uppercase tracking-wider">
+                            {{ vehicule.marque.nom }}
+                        </span>
+                        <h3 class="text-base font-bold text-gray-900 mt-1 mb-2 truncate">
+                            {{ vehicule.modele }}
+                        </h3>
+                    </div>
+
+                    <div class="border-t border-gray-100 pt-4 mt-2 flex items-center justify-between">
+                        <div>
+                            <span class="text-[10px] uppercase text-gray-400 font-semibold block">Prix</span>
+                            <span class="text-base font-extrabold text-gray-900">
+                                {% if vehicule.prix %}{{ vehicule.prix|intcomma }} F CFA {% endif %}
+                            </span>
+                        </div>
+                        <a href="{% url 'vehicul_app:site-vehicul-detail-slug' vehicule.slug %}" class="btn btn-primary btn-sm rounded-xl">
+                            Détails
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        {% endfor %}
+    </div>
+
+  
+
+{% else %}
+    <!-- Aucun résultat -->
+    <div class="text-center py-16 bg-white rounded-2xl border border-gray-100 p-8">
+        <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-search text-xl"></i>
+        </div>
+        <h3 class="text-base font-bold text-gray-800">Aucun véhicule trouvé</h3>
+        <p class="text-xs text-gray-500 mt-1">Ajustez vos filtres pour obtenir plus de résultats.</p>
+    </div>
+{% endif %}

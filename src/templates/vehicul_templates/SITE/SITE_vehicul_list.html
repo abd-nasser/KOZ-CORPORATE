@@ -1,609 +1,120 @@
+{% extends "base.html" %}
 {% load static %}
-{% load tailwind_tags %}
 {% load humanize %}
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <meta name="google-site-verification" content="8zepDTq803R8qsLctGCJ5kqWdBvS4pCEkoOgm_bwkQo"/>
-    {% tailwind_css %}
-    <title>KOZ Services - Votre voiture à crédit, vos pièces en ligne</title>
-     <!-- FAVICON PRINCIPAL (Format PNG ou ICO) -->
-    <link rel="icon" type="image/png" href="{% static 'images/Koz_logo_noBack.png' %}">
+{% block title %}Catalogue des Véhicules{% endblock %}
 
-    <!-- BONUS : Pour les appareils Apple (iPhone / iPad sur l'écran d'accueil) -->
-    <link rel="apple-touch-icon" href="{% static 'images/Koz_logo_noBack.png' %}">
-    <link rel="stylesheet" href="{% static 'css/home/home_style.css' %}">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="alternate" href="https://koz-corporate.pro/" hreflang="fr" />
-    <link rel="alternate" href="https://koz-corporate.pro/" hreflang="x-default" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
-    <script src="{% static 'js/htmx.min.js' %}" defer></script>
-    <script src="{% static 'js/vendor/gsap.min.js' %}" defer></script>
-    <script src="{% static 'js/vendor/ScrollTrigger.min.js' %}" defer></script>
-    <script src="{% static 'js/vendor/lenis.min.js' %}" defer></script>
-    <script src="https://cdn.plyr.io/3.7.8/plyr.js" defer></script>
-    <script src="{% static 'js/home/gsap_anim.js' %}" defer></script>
-     <script defer>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        heading: ['Urbanist', 'sans-serif'],
-                        body: ['Plus Jakarta Sans', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
-    {% block extra_css %}{% endblock %}
-</head>
- <style>
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-           
-        }
-        h1, h2, h3, h4, .font-heading {
-            font-family: 'Urbanist', sans-serif;
-            letter-spacing: -0.02em;
-        }
+{% block content %}
+<div class="container mt-30 mx-auto px-4 py-8">
+    
+    <!-- En-tête -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-extrabold text-gray-900">Nos Véhicules Disponibles</h1>
+        <p class="text-gray-500 text-sm mt-1">Filtrez et trouvez le véhicule idéal en temps réel.</p>
+    </div>
 
-         @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes slideInRight {
-            from { opacity: 0; transform: translateX(30px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-        .animate-fade-in-up {
-            animation: fadeInUp 0.6s ease-out forwards;
-        }
-        .animate-slide-in-right {
-            animation: slideInRight 0.4s ease-out forwards;
-        }
-        .glass-nav {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
-            color: white;
-            border: none;
-            transition: all 0.3s ease;
-            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.5);
-        }
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
-            transform: translateY(-2px);
-            box-shadow: 0 20px 35px -8px rgba(59, 130, 246, 0.7);
-        }
-        .vehicle-card {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-            border: 1px solid rgba(0, 0, 0, 0.04);
-            transition: all 0.3s ease;
-            overflow: hidden;
-        }
-        .vehicle-card:hover {
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-            transform: translateY(-3px);
-            border-color: #3b82f6;
-        }
-        .vehicle-image {
-            height: 180px;
-            overflow: hidden;
-            background: #f3f4f6;
-        }
-        .vehicle-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.3s ease;
-        }
-        .vehicle-card:hover .vehicle-image img {
-            transform: scale(1.05);
-        }
-        .badge {
-            display: inline-block;
-            padding: 0.15rem 0.6rem;
-            border-radius: 9999px;
-            font-size: 0.7rem;
-            font-weight: 600;
-        }
-        .badge-available {
-            background: #d1fae5;
-            color: #047857;
-        }
-        .badge-sold {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-        .filter-card {
-            background: white;
-            border-radius: 8px;
-            padding: 1.25rem;
-            border: 1px solid #e5e7eb;
-        }
-        .filter-card h3 {
-            font-weight: 600;
-            color: #1f2937;
-            margin-bottom: 0.6rem;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .filter-card input,
-        .filter-card select {
-            width: 100%;
-            padding: 0.5rem 0.75rem;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            margin-bottom: 0.6rem;
-            font-family: 'Inter', sans-serif;
-            font-size: 0.875rem;
-            background: #f9fafb;
-            transition: all 0.2s ease;
-        }
-        .filter-card input:focus,
-        .filter-card select:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.08);
-            background: white;
-        }
-        .filter-card input::placeholder {
-            color: #9ca3af;
-        }
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
 
-    </style>
-
-<body class="bg-gray-50">
-<!-- ========== NAVBAR PREMIUM ========== -->
-    <nav class="navbar fixed top-0 z-50 w-full bg-white/90 backdrop-blur-md border-b border-gray-200/50 shadow-sm transition-all duration-300">
-        <div class="container mx-auto px-4 flex justify-between items-center h-16">
-            
-            <!-- ===== LOGO ===== -->
-            <div class="flex items-center gap-3">
-                <a href="{% url 'home_app:home-page' %}" class="flex items-center gap-2 group">
-                    
-                        <img src="{% static 'images/Koz_logo_noBack.png' %}" alt="KOZ" class="w-25 h-25 object-contain">
-                    
-                    <span class="text-xl font-bold text-gray-200 hidden sm:inline">KOZ <span class="text-blue-600">SERVICES</span></span>
-                </a>
-            </div>
-        
-            <!-- ===== LIENS CENTRAUX ===== -->
-            <div class="hidden md:flex items-center gap-1 lg:gap-2">
-                <a href="{% url 'home_app:home-page' %}" 
-                class="px-3 py-2 rounded-lg text-sm font-medium text-black hover:text-blue-500 hover:bg-blue-50 transition-all duration-200">
-                    Accueil
-                </a>
-                <a href="{% url 'home_app:actualites-list' %}" 
-                class="px-3 py-2 rounded-lg text-sm font-medium text-black hover:text-blue-500 hover:bg-blue-50 transition-all duration-200">
-                    Actualités
-                </a>
-                <a href="{% url 'vehicul_app:site-vehicul-list' %}" 
-                class="px-3 py-2 rounded-lg text-sm font-medium text-black hover:text-blue-500 hover:bg-blue-50 transition-all duration-200">
-                    Catalogue
-                </a>
-                <a href="{% url 'services_app:services-list-public' %}" 
-                class="px-3 py-2 rounded-lg text-sm font-medium text-black hover:text-blue-500 hover:bg-blue-50 transition-all duration-200">
-                    Services
-                </a>
-                <a href="{% url 'products_app:products-list' %}" 
-                class="px-3 py-2 rounded-lg text-sm font-medium text-black hover:text-blue-500 hover:bg-blue-50 transition-all duration-200">
-                    Produits
-                </a>
-                <a href="{% url 'home_app:home-page' %}#financement" 
-                class="px-3 py-2 rounded-lg text-sm font-medium text-black hover:text-blue-500 hover:bg-blue-50 transition-all duration-200">
-                    Financement
-                </a>
-                <a href="{% url 'home_app:home-page' %}#contact" 
-                class="px-3 py-2 rounded-lg text-sm font-medium text-black hover:text-blue-500 hover:bg-blue-50 transition-all duration-200">
-                    Contact
-                </a>
-                <a href="{% url 'home_app:home-page' %}#apropos" 
-                class="px-3 py-2 rounded-lg text-sm font-medium text-black hover:text-blue-500 hover:bg-blue-50 transition-all duration-200">
-                    À propos
-                </a>
-            </div>
-
-            <!-- ===== ACTIONS ===== -->
-            <div class="flex items-center gap-2 sm:gap-3">
-                {% if user.is_authenticated %}
-                    
-                    
-                    {% if user.role == "client" %}
-                    <a href="{% url 'client_app:client-view' %}" 
-                    class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
-                        <i class="fas fa-chart-simple text-blue-500"></i>
-                        <span class="hidden lg:inline">Tableau de bord</span>
-                    </a>
-
-                    <!-- Panier -->
-                    <a href="{% url 'order_app:panier' %}" 
-                    class="relative p-2 rounded-lg text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
-                        <i class="fas fa-shopping-cart text-lg"></i>
-                        {% if user.panier.articles.count > 0 %}
-                        <span class="absolute -top-1 -right-1 bg-blue-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-md ring-2 ring-white">
-                            {{ user.panier.articles.count }}
-                        </span>
-                        {% endif %}
-                    </a>
-                    {% elif user.role == "commercial" %}
-                    <a href="{% url 'commercial_app:commercial-view' %}" 
-                    class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
-                        <i class="fas fa-chart-simple text-blue-500"></i>
-                        <span class="hidden lg:inline">Tableau de bord</span>
-                    </a>
-                    {% else %}
-                    <a href="{% url 'directeur_app:directeur-view' %}" 
-                    class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
-                        <i class="fas fa-chart-simple text-blue-500"></i>
-                        <span class="hidden lg:inline">Tableau de bord</span>
-                    </a>
-                    {% endif %}
-                        
-                    
-
-                    <!-- Utilisateur -->
-                    <div class="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-gray-50/50 border border-gray-100">
-                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white text-sm font-bold shadow-sm">
-                            {{ user.nom_complet|slice:":1"|upper }}
-                        </div>
-                        <span class="text-sm font-medium text-gray-700 hidden sm:inline">
-                            {{ user.nom_complet|truncatechars:15 }}
-                        </span>
-                    </div>
-
-                    <!-- Déconnexion -->
-                    <a href="{% url 'auth_app:logout-simple-sur-home-page' %}" 
-                    class="btn btn-error btn-sm text-white hover:bg-red-700 transition shadow-sm flex items-center gap-1.5">
-                        <i class="fas fa-sign-out-alt text-xs"></i>
-                        <span class="hidden sm:inline">Déconnexion</span>
-                    </a>
-
-                {% else %}
-                    
-                    <!-- Connexion -->
-                    <button onclick="document.getElementById('login_simple_modal').showModal()" 
-                            class="btn btn-ghost btn-sm  sm:inline-flex hover:bg-gray-100 transition">
-                        Connexion
-                    </button>
-                    
-                    <!-- Inscription -->
-                    <button onclick="document.getElementById('register_modal').showModal()" 
-                            class="btn btn-sm bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg transition flex items-center gap-2">
-                        <i class="fas fa-user-plus"></i>
-                        <span class="hidden sm:inline">Inscription</span>
-                    </button>
-
-                {% endif %}
-
-                <!-- Burger -->
-                <button id="burgerBtn" class="md:hidden btn btn-ghost btn-sm hover:bg-gray-100 transition">
-                    <i class="fas fa-bars text-xl"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- ===== MENU MOBILE ===== -->
-        <div id="mobileMenu" class="hidden md:hidden bg-white border-t border-gray-200 p-4 shadow-lg">
-            <div class="flex flex-col gap-2 text-gray-600 text-sm">
-                <a href="{% url 'home_app:home-page' %}" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Accueil</a>
-                <a href="{% url 'home_app:actualites-list' %}" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Actualités</a>
-                <a href="{% url 'vehicul_app:site-vehicul-list' %}" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Catalogue</a>
-                <a href="{% url 'services_app:services-list-public' %}" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Services</a>
-                 <a href="{% url 'products_app:products-list' %}" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Produits</a>
-                <a href="{% url 'home_app:home-page' %}#financement" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Financement</a>
-                <a href="{% url 'home_app:home-page' %}#contact" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Contact</a>
-                <a href="{% url 'home_app:home-page' %}#apropos" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">À propos</a>
-                <hr class="my-2">
-                
-                {% if user.is_authenticated %}
-                    <a href="{% url 'order_app:panier' %}" class="px-4 py-2.5 rounded-lg text-blue-600 font-medium hover:bg-blue-50 transition">
-                    <i class="fas fa-shopping-cart mr-2"></i> Panier ({{ user.panier.nb_articles|default:0 }})
-                </a>
-                {% endif %}
-                    
-                
-            </div>
-        </div>
-        <!-- Messages flash -->
-            {% if messages %}
-            <div class="fixed top-20 right-5 z-50 space-y-2">
-                {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} shadow-xl rounded-xl animate-slide-in-right">
-                    <span>{{ message }}</span>
+        <!-- Sidebar Filtres avec HTMX -->
+        <aside class="lg:col-span-1">
+            <form
+                hx-get="{% url 'vehicul_app:site-vehicul-list' %}"
+                hx-target="#vehicules-container"
+                hx-swap="innerHTML"
+                hx-trigger="submit, change from:select, keyup delay:400ms changed from:input"
+                hx-push-url="true"
+                class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-5 sticky top-6"
+            >
+                <div class="flex items-center justify-between border-b border-gray-100 pb-4">
+                    <h2 class="font-bold text-gray-800 flex items-center gap-2">
+                        <i class="fas fa-filter text-blue-600"></i> Filtres
+                    </h2>
+                    <a href="{% url 'vehicul_app:site-vehicul-list' %}" class="text-xs text-blue-600 hover:underline">Réinitialiser</a>
                 </div>
-                {% endfor %}
-            </div>
-            {% endif %}
-    </nav>
 
-    <!-- ===== MAIN CONTENT ===== -->
-    <main class="max-w-7xl mx-auto px-4 mt-24 py-10" style="min-height:100vh;">
-        
-        <!-- Page Title -->
-        <div class="mb-10 animate-fade-in-up">
-            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-                Nos Véhicules
-            </h1>
-            <p class="text-gray-600 text-base">
-                Découvrez notre sélection de véhicules disponibles à la vente
-            </p>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            
-            <!-- ===== SIDEBAR FILTERS ===== -->
-            <div class="animate-fade-in-up">
-                <div class="filter-card sticky top-24">
-                    <form method="get" class="space-y-3">
-                        
-                        <!-- Search -->
-                        <div>
-                            <h3><i class="fas fa-search mr-1 text-blue-500 text-xs"></i> Recherche</h3>
-                            <input 
-                                type="text" 
-                                name="q" 
-                                placeholder="Marque, modèle..." 
-                                value="{{ search_query }}"
-                            >
-                        </div>
-
-                        <!-- Marque Filter -->
-                        <div>
-                            <h3><i class="fas fa-trademark mr-1 text-blue-500 text-xs"></i> Marque</h3>
-                            <select name="marque">
-                                <option value="">Toutes les marques</option>
-                                {% for marque in marques %}
-                                    <option value="{{ marque.id }}" {% if request.GET.marque|add:'0' == marque.id %}selected{% endif %}>
-                                        {{ marque.nom }}
-                                    </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-
-                        <!-- Type Filter -->
-                        <div>
-                            <h3><i class="fas fa-car mr-1 text-blue-500 text-xs"></i> Type</h3>
-                            <select name="type">
-                                <option value="">Tous les types</option>
-                                {% for type in types %}
-                                    <option value="{{ type.id }}" {% if request.GET.type|add:'0' == type.id %}selected{% endif %}>
-                                        {{ type.nom }}
-                                    </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-
-                        <!-- Fuel Type Filter -->
-                        <div>
-                            <h3><i class="fas fa-gas-pump mr-1 text-blue-500 text-xs"></i> Carburant</h3>
-                            <select name="carburant">
-                                <option value="">Tous les carburants</option>
-                                {% for value, label in carburants %}
-                                    <option value="{{ value }}" {% if request.GET.carburant == value %}selected{% endif %}>
-                                        {{ label }}
-                                    </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-
-                        <!-- Submit Button -->
-                        <button type="submit" class="btn-primary w-full py-2 rounded-md font-semibold text-sm mt-2">
-                            <i class="fas fa-filter mr-2"></i> Filtrer
-                        </button>
-                        
-                        {% if search_query or request.GET.marque or request.GET.carburant or request.GET.type %}
-                            <a href="{% url 'vehicul_app:site-vehicul-list' %}" class="block w-full py-2 text-center bg-gray-100 text-gray-700 rounded-md font-semibold hover:bg-gray-200 transition text-sm">
-                                <i class="fas fa-times mr-2"></i> Réinitialiser
-                            </a>
-                        {% endif %}
-                    </form>
-                </div>
-            </div>
-
-            <!-- ===== VEHICLES GRID ===== -->
-            <div class="lg:col-span-3">
-                
-                {% if vehicules %}
-                    
-                    <!-- Results Count -->
-                    <div class="mb-4 text-gray-500 text-sm">
-                        <p>{{ paginator.count }} véhicule{{ paginator.count|pluralize }} trouvé{{ paginator.count|pluralize }}</p>
+                <!-- Recherche globale (Modèle, Année, etc.) -->
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">Recherche</label>
+                    <div class="relative">
+                        <input
+                            type="text"
+                            name="q"
+                            value="{{ search_query }}"
+                            placeholder="Modèle, marque, année..."
+                            class="input input-bordered w-full text-sm pl-9"
+                        />
+                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
                     </div>
+                </div>
 
-                    <!-- Vehicles Grid -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in-up">
-                        {% for vehicule in vehicules %}
-                            <div class="vehicle-card animate-fade-in-up" style="animation-delay: {{ forloop.counter|add:'1'|stringformat:'s' }}00ms">
-                                
-                                <!-- Image -->
-                                <a href="{% url 'vehicul_app:site-vehicul-detail' vehicule.pk %}" class="vehicle-image block">
-                                    {% if vehicule.image_display %}
-                                        <img src="{{ vehicule.image_display.url }}" alt="{{ vehicule.marque.nom }} {{ vehicule.modele }}" class="object-contain">
-                                    {% else %}
-                                        <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
-                                            <i class="fas fa-car text-4xl text-blue-300"></i>
-                                        </div>
-                                    {% endif %}
-                                </a>
-
-                                <!-- Content -->
-                                <div class="p-4">
-                                    <!-- Header -->
-                                    <div class="flex items-start justify-between mb-2">
-                                        <div>
-                                            <h3 class="text-base font-bold text-gray-900">
-                                                {{ vehicule.marque.nom }} {{ vehicule.modele }}
-                                            </h3>
-                                            <p class="text-xs text-gray-500">{{ vehicule.annee }}</p>
-                                        </div>
-                                        <span class="badge badge-available">
-                                            <i class="fas fa-check-circle text-[10px]"></i> Disponible
-                                        </span>
-                                    </div>
-
-                                    <!-- Price -->
-                                    <p class="text-xl font-bold text-blue-600 mb-2">
-                                        {{ vehicule.prix|floatformat:0|intcomma }} FCFA
-                                    </p>
-
-                                    <!-- Details -->
-                                    <div class="grid grid-cols-2 gap-1 mb-3 text-xs text-gray-600 border-t border-b border-gray-100 py-2">
-                                        <div>
-                                            <i class="fas fa-road text-blue-600 mr-1"></i>
-                                            {{ vehicule.kilometrage|intcomma }} km
-                                        </div>
-                                        <div>
-                                            <i class="fas fa-gas-pump text-blue-600 mr-1"></i>
-                                            {{ vehicule.get_carburant_display }}
-                                        </div>
-                                        {% if vehicule.type_vehicule %}
-                                            <div class="col-span-2">
-                                                <i class="fas fa-car-side text-blue-600 mr-1"></i>
-                                                {{ vehicule.type_vehicule.nom }}
-                                            </div>
-                                        {% endif %}
-                                    </div>
-
-                                    <!-- Action Button -->
-                                    <a href="{% url 'vehicul_app:site-vehicul-detail-slug' slug=vehicule.slug %}" class="btn-primary block w-full py-2 rounded-md font-semibold text-center text-sm">
-                                        <i class="fas fa-eye mr-2"></i> Voir les détails
-                                    </a>
-                                </div>
-                            </div>
+                <!-- Marque -->
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">Marque</label>
+                    <select name="marque" class="select select-bordered w-full text-sm">
+                        <option value="">Toutes les marques</option>
+                        {% for m in marques %}
+                            <option value="{{ m.id }}" {% if selected_marque == m.id|stringformat:"s" %}selected{% endif %}>
+                                {{ m.nom }}
+                            </option>
                         {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Type de Véhicule -->
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">Type de véhicule</label>
+                    <select name="type_vehicul" class="select select-bordered w-full text-sm">
+                        <option value="">Tous les types</option>
+                        {% for t in types %}
+                            <option value="{{ t.id }}" {% if selected_type == t.id|stringformat:"s" %}selected{% endif %}>
+                                {{ t.nom }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- État -->
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">État</label>
+                    <select name="etat" class="select select-bordered w-full text-sm">
+                        <option value="">Tous les états</option>
+                        {% for val, label in etats %}
+                            <option value="{{ val }}" {% if selected_etat == val %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Tranche de Prix -->
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">Prix</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <input
+                            type="number"
+                            name="prix_min"
+                            value="{{ prix_min }}"
+                            placeholder="Min"
+                            class="input input-bordered w-full text-sm"
+                        />
+                        <input
+                            type="number"
+                            name="prix_max"
+                            value="{{ prix_max }}"
+                            placeholder="Max"
+                            class="input input-bordered w-full text-sm"
+                        />
                     </div>
+                </div>
+            </form>
+        </aside>
 
-                    <!-- ===== PAGINATION ===== -->
-                    {% if is_paginated %}
-                        <div class="mt-10 flex items-center justify-center gap-2 text-sm">
-                            {% if page_obj.has_previous %}
-                                <a href="?page=1" class="px-3 py-1.5 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition">
-                                    <i class="fas fa-chevron-left text-xs"></i>
-                                </a>
-                                <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-1.5 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition">
-                                    Précédent
-                                </a>
-                            {% endif %}
-
-                            <div class="flex gap-1">
-                                {% for num in page_obj.paginator.page_range %}
-                                    {% if page_obj.number == num %}
-                                        <span class="px-3 py-1.5 bg-blue-600 text-white rounded-md font-semibold text-sm">{{ num }}</span>
-                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                                        <a href="?page={{ num }}" class="px-3 py-1.5 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition">{{ num }}</a>
-                                    {% endif %}
-                                {% endfor %}
-                            </div>
-
-                            {% if page_obj.has_next %}
-                                <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-1.5 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition">
-                                    Suivant
-                                </a>
-                                <a href="?page={{ page_obj.paginator.num_pages }}" class="px-3 py-1.5 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition">
-                                    <i class="fas fa-chevron-right text-xs"></i>
-                                </a>
-                            {% endif %}
-                        </div>
-                    {% endif %}
-                    
-                {% else %}
-                    
-                    <!-- No Results -->
-                    <div class="text-center py-12">
-                        <div class="bg-white rounded-lg p-8 border border-gray-200">
-                            <i class="fas fa-inbox text-gray-300 text-4xl mb-3 block"></i>
-                            <h3 class="text-xl font-bold text-gray-900 mb-2">Aucun véhicule trouvé</h3>
-                            <p class="text-gray-500 text-sm mb-4">
-                                Essayez de modifier vos critères de recherche.
-                            </p>
-                            <a href="{% url 'vehicul_app:site-vehicul-list' %}" class="btn-primary px-5 py-2 rounded-md font-semibold text-sm">
-                                <i class="fas fa-refresh mr-2"></i> Voir tous
-                            </a>
-                        </div>
-                    </div>
-                    
-                {% endif %}
+        <!-- Zone d'affichage dynamique HTMX -->
+        <main class="lg:col-span-3">
+            <div id="vehicules-container" class="relative min-h-[400px]">
+                {% include "partials/vehiculs/vehicul_list_partial.html" %}
             </div>
-        </div>
-    </main>
-        <!-- ========== MODALES ========== -->
-        {% include 'modals/home/register.html' %}
-        {% include 'modals/auth/login_simple_modal.html' %}
-    <!-- Script Menu Mobile toggle -->
+        </main>
 
-
-
-    <!-- ============================================================ -->
-    <!-- ==========                 FOOTER                  ========== -->
-    <!-- ============================================================ -->
-  
-    <footer class="bg-slate-950 border-t relative border-white/10 pt-16 pb-8 text-slate-400 text-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
-            
-            <div class="space-y-4">
-                <a href="{% url 'home_app:home-page' %}" class="flex items-center gap-2 group">
-                    
-                        <img src="{% static 'images/Koz_logo_noBack.png' %}" alt="KOZ" class="w-50 h-50 object-contain">
-
-                </a>
-                <p class="text-xs font-light text-slate-400 leading-relaxed">
-                    N'achetez pas une auto, changez votre vie. Solutions d'achat à crédit, produits d'entretien auto et service de maintenance.
-                </p>
-            </div>
-
-            <div>
-                <h4 class="text-white font-bold font-heading mb-4">Navigation</h4>
-                <ul class="space-y-2 text-xs">
-                    <li><a href="{% url 'home_app:home-page' %}" class="hover:text-white transition-colors">Accueil</a></li>
-                    <li><a href="{% url 'home_app:actualites-list' %}" class="hover:text-white transition-colors">Actualités & Événements</a></li>
-                    <li><a href="{% url 'products_app:products-list' %}" class="hover:text-white transition-colors">Catalogue</a></li>
-                    <li><a href="{% url 'services_app:services-list' %}" class="hover:text-white transition-colors">Nos services</a></li>
-                    <li><a href="{% url 'products_app:products-list' %}" class="hover:text-white transition-colors">Nos produits</a></li>
-                    <li><a href="{% url 'home_app:home-page' %}#financement" class="hover:text-white transition-colors">Financement</a></li>
-                    <li><a href="{% url 'home_app:home-page' %}#contact" class="hover:text-white transition-colors">Contact</a></li>
-                    <li><a href="{% url 'home_app:home-page' %}#apropos" class="hover:text-white transition-colors">À propos de nous</a></li>
-                </ul>
-            </div>
-
-
-            <div>
-                <h4 class="text-white font-bold font-heading mb-4">Services</h4>
-                <ul class="space-y-2 text-xs">
-                    <li><a href="https://www.koz-corporate.pro/services/detail/1/service/public" class="hover:text-white transition-colors">🚗 Vente de véhicules neufs & d'occasions</a></li>
-                    <li><a href="https://www.koz-corporate.pro/services/detail/2/service/public" class="hover:text-white transition-colors">🔧 Inspection Complète</a></li>
-                    <li><a href="https://www.koz-corporate.pro/services/detail/3/service/public" class="hover:text-white transition-colors">⚙️ Mécanique générale</a></li>
-                    <li><a href="https://www.koz-corporate.pro/services/detail/4/service/public" class="hover:text-white transition-colors">⚡️ Électricité & Électronique Automobile</a></li>
-                    <li><a href="https://www.koz-corporate.pro/services/detail/5/service/public" class="hover:text-white transition-colors">❄️ Service de climatisation</a></li>
-                    <li><a href="https://www.koz-corporate.pro/services/detail/6/service/public" class="hover:text-white transition-colors">🎨 Tôlerie & Peinture</a></li>
-                </ul>
-            </div>
-
-            <div>
-                <h4 class="text-white font-bold font-heading mb-4">Contact</h4>
-                <ul class="space-y-2 text-xs">
-                    <li><i class="fas fa-envelope mr-2 text-blue-400"></i> <a href="mailto:koz.corporate@gmail.com" class="text-blue-600 hover:underline">koz.corporate@gmail.com</a></li>
-                    <li><i class="fas fa-globe mr-2 text-blue-400"></i> <a href="https://koz-corporate.pro" target="_blank" class="text-blue-600 hover:underline">https://koz-corporate.pro</a></li>
-                    <li><i class="fas fa-phone mr-2 text-blue-400"></i> <a href="tel:+22606591523" class="text-blue-600 hover:underline">+226-06-59-15-23</a> / <a href="tel:+22676208008" class="text-blue-600 hover:underline">226 76-20-80-08</a></li>
-                    <li><i class="fas fa-map-marker-alt mr-2 text-blue-400"></i> Ouagadougou, Burkina Faso <br> Tampouy secteur 16 </li>
-                </ul>
-            </div>
-
-        </div>
-
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 border-t border-white/5 text-center text-xs text-slate-500">
-            <p>&copy; {% now "Y" %} KOZ Services. Tous droits réservés.</p>
-            <p class="font-medium text-slate-700">Conçu par <strong>SPIRIT-DIGIT Agency</strong></p>
-        </div>
-    </footer>
-</body>
-</html>
-  
+    </div>
+</div>
+{% endblock %}

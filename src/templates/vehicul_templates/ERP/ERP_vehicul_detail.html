@@ -162,90 +162,148 @@
                 </div>
             </div>
 
-            <!-- COLONNE DROITE : Données techniques et opérationnelles (7 cols) -->
-            <div class="lg:col-span-7 space-y-6">
+           <!-- COLONNE DROITE : Données techniques et opérationnelles (7 cols) -->
+<div class="lg:col-span-7 space-y-6">
 
-               <!-- Tableau de Caractéristiques Techniques ERP -->
-<div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-    <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
-        <h2 class="font-semibold text-slate-900 text-base flex items-center gap-2">
-            <i class="fas fa-sliders-h text-blue-600"></i> Fiche Technique
-        </h2>
-        <span class="text-xs text-slate-500">Mise à jour système</span>
+    <!-- Tableau de Caractéristiques Techniques ERP -->
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+            <h2 class="font-semibold text-slate-900 text-base flex items-center gap-2">
+                <i class="fas fa-sliders-h text-blue-600"></i> Fiche Technique
+            </h2>
+            <span class="text-xs text-slate-500">Mise à jour système</span>
+        </div>
+        
+        <div class="p-6">
+            <dl class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-4">
+                
+                <!-- IDENTIFICATION -->
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                    <dt class="text-xs font-medium text-slate-500">Marque</dt>
+                    <dd class="text-sm font-semibold text-slate-900 mt-0.5">{{ vehicul.marque.nom }}</dd>
+                </div>
+                
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                    <dt class="text-xs font-medium text-slate-500">Modèle</dt>
+                    <dd class="text-sm font-semibold text-slate-900 mt-0.5">{{ vehicul.modele }}</dd>
+                </div>
+
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                    <dt class="text-xs font-medium text-slate-500">Version</dt>
+                    <dd class="text-sm font-semibold text-slate-900 mt-0.5">{{ vehicul.version|default:"-" }}</dd>
+                </div>
+
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                    <dt class="text-xs font-medium text-slate-500">État du véhicule</dt>
+                    <dd class="text-sm font-semibold text-slate-900 mt-0.5">{{ vehicul.get_etat_display|default:vehicul.etat|default:"-" }}</dd>
+                </div>
+
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                    <dt class="text-xs font-medium text-slate-500">Année</dt>
+                    <dd class="text-sm font-semibold text-slate-900 mt-0.5">{{ vehicul.annee }}</dd>
+                </div>
+
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                    <dt class="text-xs font-medium text-slate-500">Kilométrage actuel</dt>
+                    <dd class="text-sm font-semibold text-slate-900 mt-0.5 font-mono">{{ vehicul.kilometrage|intcomma }} km</dd>
+                </div>
+
+                <!-- MOTORISATION & TRANSMISSION -->
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                    <dt class="text-xs font-medium text-slate-500">Moteur</dt>
+                    <dd class="text-sm font-semibold text-slate-900 mt-0.5">{{ vehicul.moteur|default:"-" }}</dd>
+                </div>
+
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                    <dt class="text-xs font-medium text-slate-500">Énergie / Carburant</dt>
+                    <dd class="text-sm font-semibold text-slate-900 mt-0.5">{{ vehicul.get_carburant_display }}</dd>
+                </div>
+
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                    <dt class="text-xs font-medium text-slate-500">Motricité / Transmission</dt>
+                    <dd class="text-sm font-semibold text-slate-900 mt-0.5">{{ vehicul.get_motricite_display|default:vehicul.motricite|default:"-" }}</dd>
+                </div>
+
+                <!-- CONSUMPTION & SPECS -->
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                    <dt class="text-xs font-medium text-slate-500">Réservoir</dt>
+                    <dd class="text-sm font-semibold text-slate-900 mt-0.5 font-mono">
+                        {% if vehicul.capacite_reservoir %}{{ vehicul.capacite_reservoir }} L{% else %}-{% endif %}
+                    </dd>
+                </div>
+
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                    <dt class="text-xs font-medium text-slate-500">Conso. Ville</dt>
+                    <dd class="text-sm font-semibold text-slate-900 mt-0.5 font-mono">
+                        {% if vehicul.conso_moyenne_en_agglomération %}{{ vehicul.conso_moyenne_en_agglomération }} L/100 km{% else %}-{% endif %}
+                    </dd>
+                </div>
+
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                    <dt class="text-xs font-medium text-slate-500">Conso. Route</dt>
+                    <dd class="text-sm font-semibold text-slate-900 mt-0.5 font-mono">
+                        {% if vehicul.conso_moyenne_hors_agglomération %}{{ vehicul.conso_moyenne_hors_agglomération }} L/100 km{% else %}-{% endif %}
+                    </dd>
+                </div>
+
+                <!-- HABITACLE & DIMENSIONS -->
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                    <dt class="text-xs font-medium text-slate-500">Nombre de portes</dt>
+                    <dd class="text-sm font-semibold text-slate-900 mt-0.5">{{ vehicul.nombre_portes|default:"-" }}</dd>
+                </div>
+
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                    <dt class="text-xs font-medium text-slate-500">Nombre de places</dt>
+                    <dd class="text-sm font-semibold text-slate-900 mt-0.5">{{ vehicul.nombre_places|default:"-" }}</dd>
+                </div>
+
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                    <dt class="text-xs font-medium text-slate-500">Matière des sièges</dt>
+                    <dd class="text-sm font-semibold text-slate-900 mt-0.5">{{ vehicul.get_sieges_display|default:vehicul.sieges|default:"-" }}</dd>
+                </div>
+
+                <!-- COULEURS ET PNEUMATIQUES -->
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                    <dt class="text-xs font-medium text-slate-500">Couleur Extérieure</dt>
+                    <dd class="text-sm font-semibold text-slate-900 mt-0.5 flex items-center gap-2">
+                        {% if vehicul.couleur_exterieure %}
+                            <span class="w-4 h-4 rounded-full border border-gray-300 inline-block shadow-sm" style="background-color: {{ vehicul.couleur_exterieure }};"></span>
+                            <span>{{ vehicul.couleur_exterieure }}</span>
+                        {% else %}
+                            <span>{{ vehicul.couleur|default:"-" }}</span>
+                        {% endif %}
+                    </dd>
+                </div>
+
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                    <dt class="text-xs font-medium text-slate-500">Couleur Intérieure</dt>
+                    <dd class="text-sm font-semibold text-slate-900 mt-0.5 flex items-center gap-2">
+                        {% if vehicul.couleur_interieure %}
+                            <span class="w-4 h-4 rounded-full border border-gray-300 inline-block shadow-sm" style="background-color: {{ vehicul.couleur_interieure }};"></span>
+                            <span>{{ vehicul.couleur_interieure }}</span>
+                        {% else %}
+                            <span>-</span>
+                        {% endif %}
+                    </dd>
+                </div>
+
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                    <dt class="text-xs font-medium text-slate-500">Type de pneus</dt>
+                    <dd class="text-sm font-semibold text-slate-900 mt-0.5 font-mono">{{ vehicul.type_de_pneus|default:"-" }}</dd>
+                </div>
+
+                <!-- CONFORMITÉ / STATUT -->
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-100 sm:col-span-2 md:col-span-3">
+                    <dt class="text-xs font-medium text-slate-500">Contrôle Technique & Conformité</dt>
+                    <dd class="text-sm font-semibold text-emerald-700 mt-0.5 flex items-center gap-1">
+                        <i class="fas fa-check-circle text-xs"></i> Conforme / À jour dans le système
+                    </dd>
+                </div>
+
+            </dl>
+        </div>
     </div>
-    
-    <div class="p-6">
-        <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
-            <!-- Informations Générales -->
-            <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
-                <dt class="text-xs font-medium text-slate-500">Marque</dt>
-                <dd class="text-sm font-semibold text-slate-900 mt-0.5">{{ vehicul.marque.nom }}</dd>
-            </div>
-            
-            <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
-                <dt class="text-xs font-medium text-slate-500">Modèle</dt>
-                <dd class="text-sm font-semibold text-slate-900 mt-0.5">{{ vehicul.modele }}</dd>
-            </div>
-            
-            <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
-                <dt class="text-xs font-medium text-slate-500">Année de mise en circulation</dt>
-                <dd class="text-sm font-semibold text-slate-900 mt-0.5">{{ vehicul.annee }}</dd>
-            </div>
-            
-            <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
-                <dt class="text-xs font-medium text-slate-500">Kilométrage actuel</dt>
-                <dd class="text-sm font-semibold text-slate-900 mt-0.5 font-mono">{{ vehicul.kilometrage|intcomma }} km</dd>
-            </div>
-
-            <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
-                <dt class="text-xs font-medium text-slate-500">Couleur</dt>
-                <dd class="text-sm font-semibold text-slate-900 mt-0.5">{{ vehicul.couleur|default:"Non spécifiée" }}</dd>
-            </div>
-
-            <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
-                <dt class="text-xs font-medium text-slate-500">Motorisation / Énergie</dt>
-                <dd class="text-sm font-semibold text-slate-900 mt-0.5">{{ vehicul.get_carburant_display }}</dd>
-            </div>
-
-            <!-- Consommations & Réservoir -->
-            <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
-                <dt class="text-xs font-medium text-slate-500">Capacité du réservoir</dt>
-                <dd class="text-sm font-semibold text-slate-900 mt-0.5 font-mono">
-                    {% if vehicul.capacite_reservoir %}{{ vehicul.capacite_reservoir }} L{% else %}N/A{% endif %}
-                </dd>
-            </div>
-
-            <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
-                <dt class="text-xs font-medium text-slate-500">Type de pneumatiques</dt>
-                <dd class="text-sm font-semibold text-slate-900 mt-0.5 font-mono">{{ vehicul.type_de_pneus|default:"Non spécifié" }}</dd>
-            </div>
-
-            <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
-                <dt class="text-xs font-medium text-slate-500">Conso. Ville (Agglomération)</dt>
-                <dd class="text-sm font-semibold text-slate-900 mt-0.5 font-mono">
-                    {% if vehicul.conso_moyenne_en_agglomération %}{{ vehicul.conso_moyenne_en_agglomération }} L/100 km{% else %}N/A{% endif %}
-                </dd>
-            </div>
-
-            <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
-                <dt class="text-xs font-medium text-slate-500">Conso. Route (Hors agglomération)</dt>
-                <dd class="text-sm font-semibold text-slate-900 mt-0.5 font-mono">
-                    {% if vehicul.conso_moyenne_hors_agglomération %}{{ vehicul.conso_moyenne_hors_agglomération }} L/100 km{% else %}N/A{% endif %}
-                </dd>
-            </div>
-
-            <!-- Conformité -->
-            <div class="bg-slate-50 p-3 rounded-lg border border-slate-100 sm:col-span-2">
-                <dt class="text-xs font-medium text-slate-500">Contrôle Technique</dt>
-                <dd class="text-sm font-semibold text-emerald-700 mt-0.5 flex items-center gap-1">
-                    <i class="fas fa-check-circle text-xs"></i> Conforme / Inclus
-                </dd>
-            </div>
-        </dl>
-    </div>
-</div>
-
-                <!-- Bloc Description / Notes Internes -->
+    <!-- Bloc Description / Notes Internes -->
                 <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-3">
                     <h2 class="font-semibold text-slate-900 text-base flex items-center gap-2">
                         <i class="fas fa-align-left text-blue-600"></i> Description & Observations
@@ -258,12 +316,11 @@
                         {% endif %}
                     </div>
                 </div>
-
-            </div>
+</div>
         </div>
 
     </main>
-
+ 
     <!-- ========== FOOTER ERP ========== -->
     <footer class="bg-white border-t border-slate-200 py-4 mt-12 text-center text-xs text-slate-500">
         <p>&copy; {% now "Y" %} KOZ Services — Système d'Information ERP (Module Stock)</p>

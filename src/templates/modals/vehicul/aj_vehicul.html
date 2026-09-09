@@ -1,17 +1,18 @@
 {% load static %}
-<dialog id="vehicul_modal" class="modal">
-    <div class="modal-box w-11/12 max-w-4xl p-0 max-h-[90vh] flex flex-col rounded-2xl bg-white shadow-2xl overflow-hidden">
+<dialog id="vehicul_modal" class="modal modal-bottom sm:modal-middle">
+    <div class="modal-box w-11/12 max-w-5xl p-0 max-h-[90vh] flex flex-col rounded-2xl bg-white shadow-2xl overflow-hidden">
         
         <!-- Header -->
-        <div class="bg-gradient-to-r from-blue-700 to-indigo-800 px-6 py-4 flex-shrink-0 flex justify-between items-center">
+        <div class="bg-gradient-to-r from-blue-700 to-indigo-800 px-6 py-4 flex-shrink-0 flex justify-between items-center shadow-md">
             <div>
                 <h3 class="text-xl font-bold text-white flex items-center gap-2">
-                    <i class="fas fa-car"></i> Ajouter un véhicule
+                    <i class="fas fa-car-side"></i> Ajouter un véhicule
                 </h3>
-                <p class="text-blue-100 text-xs mt-0.5">Complétez les informations pour ajouter un nouveau véhicule au catalogue</p>
+                <p class="text-blue-100 text-xs mt-0.5">Complétez l'ensemble des caractéristiques pour la fiche produit</p>
             </div>
-            <button type="button" class="text-white/80 hover:text-white text-2xl font-bold transition leading-none" 
-                    onclick="document.getElementById('vehicul_modal').close()">&times;</button>
+            <button type="button" 
+                    class="btn btn-sm btn-circle btn-ghost text-white/80 hover:text-white hover:bg-white/10" 
+                    onclick="document.getElementById('vehicul_modal').close()">✕</button>
         </div>
 
         <!-- Form Body -->
@@ -20,17 +21,18 @@
             
             <div class="p-6 overflow-y-auto space-y-6 flex-grow">
                 {% if vehicul_form.non_field_errors %}
-                    <div class="alert alert-error text-sm py-2">
-                        {{ vehicul_form.non_field_errors }}
+                    <div class="alert alert-error text-sm py-2 shadow-sm">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>{{ vehicul_form.non_field_errors }}</span>
                     </div>
                 {% endif %}
 
-                <!-- Section 1: Informations Générales -->
-                <div>
-                    <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-                        <i class="fas fa-info-circle text-blue-600"></i> Informations Générales
+                <!-- SECTION 1: IDENTIFICATION & VENTE -->
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/80">
+                    <h4 class="text-xs font-bold text-indigo-700 uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <i class="fas fa-info-circle text-indigo-600"></i> Identification & Commercial
                     </h4>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                         <div>
                             <label class="block text-xs font-semibold text-gray-700 mb-1">Marque <span class="text-red-500">*</span></label>
                             {{ vehicul_form.marque }}
@@ -42,9 +44,19 @@
                             {% for error in vehicul_form.modele.errors %}<p class="text-red-500 text-xs mt-1">{{ error }}</p>{% endfor %}
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-gray-700 mb-1">Type de véhicule <span class="text-red-500">*</span></label>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">Version</label>
+                            {{ vehicul_form.version }}
+                            {% for error in vehicul_form.version.errors %}<p class="text-red-500 text-xs mt-1">{{ error }}</p>{% endfor %}
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">Type véhicule <span class="text-red-500">*</span></label>
                             {{ vehicul_form.type_vehicule }}
                             {% for error in vehicul_form.type_vehicule.errors %}<p class="text-red-500 text-xs mt-1">{{ error }}</p>{% endfor %}
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">État du véhicule</label>
+                            {{ vehicul_form.etat }}
+                            {% for error in vehicul_form.etat.errors %}<p class="text-red-500 text-xs mt-1">{{ error }}</p>{% endfor %}
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-gray-700 mb-1">Année <span class="text-red-500">*</span></label>
@@ -57,35 +69,43 @@
                             {% for error in vehicul_form.prix.errors %}<p class="text-red-500 text-xs mt-1">{{ error }}</p>{% endfor %}
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-gray-700 mb-1">Stock en magasin <span class="text-red-500">*</span></label>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">Stock disponible <span class="text-red-500">*</span></label>
                             {{ vehicul_form.stock }}
                             {% for error in vehicul_form.stock.errors %}<p class="text-red-500 text-xs mt-1">{{ error }}</p>{% endfor %}
                         </div>
                     </div>
                 </div>
 
-                <hr class="border-gray-100" />
-
-                <!-- Section 2: Caractéristiques & Consommation -->
-                <div>
-                    <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-                        <i class="fas fa-tachometer-alt text-blue-600"></i> Spécifications Techniques
+                <!-- SECTION 2: MOTORISATION & PERFORMANCE -->
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/80">
+                    <h4 class="text-xs font-bold text-indigo-700 uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <i class="fas fa-cogs text-indigo-600"></i> Motorisation & Performance
                     </h4>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">Moteur</label>
+                            {{ vehicul_form.moteur }}
+                            {% for error in vehicul_form.moteur.errors %}<p class="text-red-500 text-xs mt-1">{{ error }}</p>{% endfor %}
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">Carburant</label>
+                            {{ vehicul_form.carburant }}
+                            {% for error in vehicul_form.carburant.errors %}<p class="text-red-500 text-xs mt-1">{{ error }}</p>{% endfor %}
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">Motricité / Transmission</label>
+                            {{ vehicul_form.motricite }}
+                            {% for error in vehicul_form.motricite.errors %}<p class="text-red-500 text-xs mt-1">{{ error }}</p>{% endfor %}
+                        </div>
                         <div>
                             <label class="block text-xs font-semibold text-gray-700 mb-1">Kilométrage (km)</label>
                             {{ vehicul_form.kilometrage }}
                             {% for error in vehicul_form.kilometrage.errors %}<p class="text-red-500 text-xs mt-1">{{ error }}</p>{% endfor %}
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-gray-700 mb-1">Couleur</label>
-                            {{ vehicul_form.couleur }}
-                            {% for error in vehicul_form.couleur.errors %}<p class="text-red-500 text-xs mt-1">{{ error }}</p>{% endfor %}
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-700 mb-1">Carburant</label>
-                            {{ vehicul_form.carburant }}
-                            {% for error in vehicul_form.carburant.errors %}<p class="text-red-500 text-xs mt-1">{{ error }}</p>{% endfor %}
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">Réservoir (L)</label>
+                            {{ vehicul_form.capacite_reservoir }}
+                            {% for error in vehicul_form.capacite_reservoir.errors %}<p class="text-red-500 text-xs mt-1">{{ error }}</p>{% endfor %}
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-gray-700 mb-1">Conso. Ville (L/100km)</label>
@@ -98,11 +118,6 @@
                             {% for error in vehicul_form.conso_moyenne_hors_agglomération.errors %}<p class="text-red-500 text-xs mt-1">{{ error }}</p>{% endfor %}
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-gray-700 mb-1">Réservoir (L)</label>
-                            {{ vehicul_form.capacite_reservoir }}
-                            {% for error in vehicul_form.capacite_reservoir.errors %}<p class="text-red-500 text-xs mt-1">{{ error }}</p>{% endfor %}
-                        </div>
-                        <div class="md:col-span-3">
                             <label class="block text-xs font-semibold text-gray-700 mb-1">Type de pneus</label>
                             {{ vehicul_form.type_de_pneus }}
                             {% for error in vehicul_form.type_de_pneus.errors %}<p class="text-red-500 text-xs mt-1">{{ error }}</p>{% endfor %}
@@ -110,30 +125,74 @@
                     </div>
                 </div>
 
-                <hr class="border-gray-100" />
+                <!-- SECTION 3: HABITACLE & DESIGN -->
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/80">
+                    <h4 class="text-xs font-bold text-indigo-700 uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <i class="fas fa-couch text-indigo-600"></i> Habitacle & Esthétique
+                    </h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">Nbr de portes</label>
+                            {{ vehicul_form.nombre_portes }}
+                            {% for error in vehicul_form.nombre_portes.errors %}<p class="text-red-500 text-xs mt-1">{{ error }}</p>{% endfor %}
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">Nbr de places</label>
+                            {{ vehicul_form.nombre_places }}
+                            {% for error in vehicul_form.nombre_places.errors %}<p class="text-red-500 text-xs mt-1">{{ error }}</p>{% endfor %}
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">Matière sièges</label>
+                            {{ vehicul_form.sieges }}
+                            {% for error in vehicul_form.sieges.errors %}<p class="text-red-500 text-xs mt-1">{{ error }}</p>{% endfor %}
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">Couleur ext.</label>
+                            <div class="h-10 border rounded-lg overflow-hidden flex items-center p-1 bg-white">
+                                {{ vehicul_form.couleur_exterieure }}
+                            </div>
+                            {% for error in vehicul_form.couleur_exterieure.errors %}<p class="text-red-500 text-xs mt-1">{{ error }}</p>{% endfor %}
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">Couleur int.</label>
+                            <div class="h-10 border rounded-lg overflow-hidden flex items-center p-1 bg-white">
+                                {{ vehicul_form.couleur_interieure }}
+                            </div>
+                            {% for error in vehicul_form.couleur_interieure.errors %}<p class="text-red-500 text-xs mt-1">{{ error }}</p>{% endfor %}
+                        </div>
+                    </div>
+                </div>
 
-                <!-- Section 3: Média & Description -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- SECTION 4: MÉDIAS, VISIBILITÉ & DESCRIPTION -->
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/80 space-y-4">
+                    <h4 class="text-xs font-bold text-indigo-700 uppercase tracking-wider mb-2 flex items-center gap-2">
+                        <i class="fas fa-photo-video text-indigo-600"></i> Médias & Mises en avant
+                    </h4>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">Image Principale</label>
+                            {{ vehicul_form.image_principale }}
+                            {% for error in vehicul_form.image_principale.errors %}<p class="text-red-500 text-xs mt-1">{{ error }}</p>{% endfor %}
+                        </div>
+                        
+                        <div class="flex items-center gap-3 pt-2 md:pt-6">
+                            <label class="cursor-pointer flex items-center gap-2 bg-white px-3 py-2 rounded-xl border border-slate-200 shadow-sm hover:bg-gray-50 transition">
+                                {{ vehicul_form.disponible }}
+                                <span class="text-xs font-semibold text-gray-700">Disponible</span>
+                            </label>
+                            <label class="cursor-pointer flex items-center gap-2 bg-white px-3 py-2 rounded-xl border border-slate-200 shadow-sm hover:bg-gray-50 transition">
+                                {{ vehicul_form.est_vedette }}
+                                <span class="text-xs font-semibold text-gray-700">En Vedette</span>
+                            </label>
+                            <label class="cursor-pointer flex items-center gap-2 bg-white px-3 py-2 rounded-xl border border-slate-200 shadow-sm hover:bg-gray-50 transition">
+                                {{ vehicul_form.actualite }}
+                                <span class="text-xs font-semibold text-gray-700">Nouveauté</span>
+                            </label>
+                        </div>
+                    </div>
+
                     <div>
-                        <label class="block text-xs font-semibold text-gray-700 mb-1">Image Principale</label>
-                        {{ vehicul_form.image_principale }}
-                        {% for error in vehicul_form.image_principale.errors %}<p class="text-red-500 text-xs mt-1">{{ error }}</p>{% endfor %}
-                    </div>
-                    <div class="flex items-center gap-6 pt-5">
-                        <label class="cursor-pointer flex items-center gap-2">
-                            {{ vehicul_form.disponible }}
-                            <span class="text-xs font-semibold text-gray-700">Disponible</span>
-                        </label>
-                        <label class="cursor-pointer flex items-center gap-2">
-                            {{ vehicul_form.est_vedette }}
-                            <span class="text-xs font-semibold text-gray-700">En Vedette</span>
-                        </label>
-                        <label class="cursor-pointer flex items-center gap-2">
-                            {{ vehicul_form.actualite }}
-                            <span class="text-xs font-semibold text-gray-700">Nouveauté</span>
-                        </label>
-                    </div>
-                    <div class="md:col-span-2">
                         <label class="block text-xs font-semibold text-gray-700 mb-1">Description</label>
                         {{ vehicul_form.description }}
                         {% for error in vehicul_form.description.errors %}<p class="text-red-500 text-xs mt-1">{{ error }}</p>{% endfor %}
@@ -142,19 +201,26 @@
             </div>
 
             <!-- Footer Actions -->
-            <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 flex-shrink-0 flex justify-end gap-3">
-                <button type="button" class="btn btn-ghost border-gray-300 text-gray-600 hover:bg-gray-200" onclick="document.getElementById('vehicul_modal').close()">
+            <div class="px-6 py-4 bg-gray-50 border-t border-slate-200 flex-shrink-0 flex justify-end gap-3">
+                <button type="button" 
+                        class="btn btn-ghost btn-sm text-gray-600 hover:bg-gray-200" 
+                        onclick="document.getElementById('vehicul_modal').close()">
                     <i class="fas fa-times mr-1"></i> Annuler
                 </button>
-                <button type="submit" class="btn btn-primary px-6 text-white bg-indigo-700 hover:bg-indigo-800 border-none shadow-md">
+                <button type="submit" class="btn btn-indigo btn-sm px-6 text-white bg-indigo-700 hover:bg-indigo-800 border-none shadow-md">
                     <i class="fas fa-save mr-1"></i> Enregistrer le véhicule
                 </button>
             </div>
         </form>
     </div>
+
+    <!-- Fermeture clic extérieur -->
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
 </dialog>
 
-<!-- Script pour rouvrir le modal si le formulaire soumis comporte des erreurs -->
+<!-- Script de réouverture automatique si erreur de validation -->
 {% if open_vehicul_modal %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {

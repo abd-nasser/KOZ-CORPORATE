@@ -163,25 +163,25 @@ WSGI_APPLICATION = 'koz_flow.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
-'''if DEBUG:
+if DEBUG:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR /"db" /'db.sqlite3',
         }
     }
-else:'''
-# 3. Base de données avec valeurs de secours
-DATABASES = {
-            'default': {
-                'ENGINE': 'django.db.backends.postgresql',
-                'NAME': os.getenv('POSTGRES_DB', 'koz_db'),
-                'USER': os.getenv('POSTGRES_USER', 'koz_user'),
-                'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
-                'HOST': os.getenv('POSTGRES_HOST', 'postgres'),
-                'PORT': os.getenv('POSTGRES_PORT', '5432'),
+else:
+    # 3. Base de données avec valeurs de secours
+    DATABASES = {
+                'default': {
+                    'ENGINE': 'django.db.backends.postgresql',
+                    'NAME': os.getenv('POSTGRES_DB', 'koz_db'),
+                    'USER': os.getenv('POSTGRES_USER', 'koz_user'),
+                    'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
+                    'HOST': os.getenv('POSTGRES_HOST', 'postgres'),
+                    'PORT': os.getenv('POSTGRES_PORT', '5432'),
+                }
             }
-        }
 
     
 
@@ -279,13 +279,14 @@ NPM_BIN_PATH = shutil.which("npm") or "/usr/bin/npm"
 
 # Host Redis par défaut selon le mode
 REDIS_HOST = '127.0.0.1' if DEBUG else 'redis'
-'''
+
 CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', f'redis://{REDIS_HOST}:6379/0')
 CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', f'redis://{REDIS_HOST}:6379/1')
-'''
 
+'''
 CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://redis:6379/0')
 CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'redis://redis:6379/1')
+'''
 
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'

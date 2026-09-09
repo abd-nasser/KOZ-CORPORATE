@@ -60,6 +60,23 @@ class Vehicul(models.Model):
         ("electrique", 'Electrique')
     ]
     
+    ETAT_CHOICES = [
+        ('neuf', "Neuf"),
+        ("occasion", "Occasion"),
+    ]
+    
+    MOTRICITE_CHOICES = [
+        ('awd', "Traction intégrale (AWD)"),
+        ("fw", "Traction avant (FW)"),
+    ]
+    
+    SIEGES_CHOICES = [
+        ('standard', "Sièges standards"),
+        ("ventilé", "Sièges ventilés"),
+        ("chauffant", "Sièges chauffants"),
+        ("massant", "Sièges massants"),
+    ]
+    
     type_vehicule = models.ForeignKey(  # ← ✅ NOUVEAU CHAMP
         TypeVehicule,
         on_delete=models.SET_NULL,
@@ -81,14 +98,27 @@ class Vehicul(models.Model):
     prix = models.DecimalField(max_digits=12, decimal_places=0)
     kilometrage = models.IntegerField()
     carburant = models.CharField(max_length=20, choices=TYPES_CARBURANT_CHOICES, default="essence")
-    
+    etat = models.CharField(max_length=20, choices=ETAT_CHOICES, default="neuf", verbose_name="État du véhicule", null=True, blank=True)
+    version = models.CharField(max_length=100, null=True, blank=True)
+    moteur = models.CharField(max_length=100, null=True, blank=True)
+    nombre_portes = models.IntegerField(null=True, blank=True)
+    nombre_places = models.IntegerField(null=True, blank=True)
+    motricite = models.CharField(max_length=20, choices=MOTRICITE_CHOICES, default="fw", verbose_name="Motricité", null=True, blank=True)
+    sieges = models.CharField(max_length=20, choices=SIEGES_CHOICES, default="ventilé", verbose_name="Type de sièges", null=True, blank=True)
     #========= NOUVEAUX CHAMPS DE CONSOMMATION ET CAPACITÉ ==========
-    couleur = models.CharField(
+    couleur_exterieure = models.CharField(
             max_length=7,
             default='#3b82f6',
             help_text="Couleur en hexadécimal",
-            verbose_name="Couleur"
+            verbose_name="Couleur extérieure"
         )
+    
+    couleur_interieure = models.CharField(
+        max_length=7,
+        default='#f9fafb',
+        help_text="Couleur en hexadécimal",
+        verbose_name="Couleur intérieure"
+    )
     
     conso_moyenne_en_agglomération = models.DecimalField(
         max_digits=5,

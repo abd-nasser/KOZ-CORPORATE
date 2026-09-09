@@ -169,14 +169,15 @@
                 class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
                     Accueil
                 </a>
+                 <a href="{% url 'home_app:actualites-list' %}" 
+                class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                    Actualités
+                </a>
                 <a href="{% url 'vehicul_app:site-vehicul-list' %}" 
                 class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
                     Catalogue
                 </a>
-                <a href="{% url 'home_app:actualites-list' %}" 
-                class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
-                    Actualités
-                </a>
+               
                 <a href="{% url 'services_app:services-list-public' %}" 
                 class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
                     Services
@@ -185,13 +186,17 @@
                 class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
                     Produits
                 </a>
-                <a href="#financement" 
+                <a href="{% url 'home_app:home-page' %}#financement" 
                 class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
                     Financement
                 </a>
-                <a href="#contact" 
+                <a href="{% url 'home_app:home-page' %}#contact" 
                 class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
                     Contact
+                </a>
+                <a href="{% url 'home_app:home-page' %}#apropos"
+                class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                    À propos 
                 </a>
             </div>
 
@@ -284,10 +289,11 @@
                 <a href="{% url 'products_app:products-list' %}" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Produits</a>
                 <a href="{% url 'home_app:home-page' %}#financement" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Financement</a>
                 <a href="{% url 'home_app:home-page' %}#contact" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Contact</a>
+                <a href="{% url 'home_app:home-page' %}#apropos" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">À propos</a>
                 <hr class="my-2">
                 
                 {% if user.is_authenticated %}
-                    <a href="#" class="px-4 py-2.5 rounded-lg text-blue-600 font-medium hover:bg-blue-50 transition">
+                    <a href="{% url 'order_app:panier' %}" class="px-4 py-2.5 rounded-lg text-blue-600 font-medium hover:bg-blue-50 transition">
                     <i class="fas fa-shopping-cart mr-2"></i> Panier ({{ user.panier.nb_articles|default:0 }})
                 </a>
                 {% endif %}

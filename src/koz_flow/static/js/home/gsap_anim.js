@@ -9,14 +9,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const navbar = document.querySelector('.navbar');
     // 1. Apparition au scroll (pure JS)
     window.addEventListener('scroll', () => {
-        if (window.scrollY > 30) {
+        if (window.scrollY > 15) {
                 navbar.classList.add('visible');
             } else {
                 navbar.classList.remove('visible');
             }
                 
                 // Fond qui s'intensifie
-            if (window.scrollY > 200) {
+            if (window.scrollY > 100) {
                 navbar.classList.add('scrolled');
             } else {
                     navbar.classList.remove('scrolled');

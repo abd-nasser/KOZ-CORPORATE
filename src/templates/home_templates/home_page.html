@@ -104,44 +104,44 @@
             <div class="flex items-center gap-3">
                 <a href="{% url 'home_app:home-page' %}" class="flex items-center gap-2 group">
                     
-                        <img src="{% static 'images/Koz_logo_noBack.png' %}" alt="KOZ" class="w-25 h-25 object-contain">
+                        <img src="{% static 'images/Koz_logo_noBack.png' %}" alt="KOZ" class="w-20 h-20 object-contain">
                     
-                    <span class="text-xl font-bold text-gray-200 hidden sm:inline">KOZ <span class="text-blue-600">SERVICES</span></span>
+                    <span class="text-xl font-bold shadow-2xl text-gray-200 hidden sm:inline">KOZ <span class="text-blue-400 shadow-blue-400">SERVICES</span></span>
                 </a>
             </div>
         
             <!-- ===== LIENS CENTRAUX ===== -->
             <div class="hidden md:flex items-center gap-1 lg:gap-2">
                 <a href="{% url 'home_app:home-page' %}" 
-                class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                class="px-3 py-2 rounded-lg text-sm font-medium text-black hover:text-blue-500 hover:bg-blue-50 transition-all duration-200">
                     Accueil
                 </a>
-                <a href="{% url 'vehicul_app:site-vehicul-list' %}" 
-                class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
-                    Catalogue
-                </a>
                 <a href="{% url 'home_app:actualites-list' %}" 
-                class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                class="px-3 py-2 rounded-lg text-sm font-medium text-black  hover:text-blue-500 hover:bg-blue-50 transition-all duration-200">
                     Actualités
                 </a>
+                <a href="{% url 'vehicul_app:site-vehicul-list' %}" 
+                class="px-3 py-2 rounded-lg text-sm font-medium text-black hover:text-blue-500 hover:bg-blue-50 transition-all duration-200">
+                    Catalogue
+                </a>
                 <a href="{% url 'services_app:services-list-public' %}" 
-                class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                class="px-3 py-2 rounded-lg text-sm font-medium text-black hover:text-blue-500 hover:bg-blue-50 transition-all duration-200">
                     Services
                 </a>
                 <a href="{% url 'products_app:products-list' %}" 
-                class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                class="px-3 py-2 rounded-lg text-sm font-medium text-black hover:text-blue-500 hover:bg-blue-50 transition-all duration-200">
                     Produits
                 </a>
                 <a href="#financement" 
-                class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                class="px-3 py-2 rounded-lg text-sm font-medium text-black hover:text-blue-500 hover:bg-blue-50 transition-all duration-200">
                     Financement
                 </a>
                 <a href="#contact" 
-                class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                class="px-3 py-2 rounded-lg text-sm font-medium text-black hover:text-blue-500 hover:bg-blue-50 transition-all duration-200">
                     Contact
                 </a>
                 <a href="#apropos" 
-                class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                class="px-3 py-2 rounded-lg text-sm font-medium text-black hover:text-blue-500 hover:bg-blue-50 transition-all duration-200">
                     À propos
                 </a>
             </div>
@@ -154,7 +154,7 @@
                     {% if user.role == "client" %}
                     <a href="{% url 'client_app:client-view' %}" 
                     class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
-                        <i class="fas fa-chart-simple text-blue-500"></i>
+                        <i class="fas fa-chart-simple text-blue-400"></i>
                         <span class="hidden lg:inline">Tableau de bord</span>
                     </a>
 
@@ -170,14 +170,14 @@
                     </a>
                     {% elif user.role == "commercial" %}
                     <a href="{% url 'commercial_app:commercial-view' %}" 
-                    class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
-                        <i class="fas fa-chart-simple text-blue-500"></i>
+                    class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-black hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                        <i class="fas fa-chart-simple text-blue-400"></i>
                         <span class="hidden lg:inline">Tableau de bord</span>
                     </a>
                     {% else %}
                     <a href="{% url 'directeur_app:directeur-view' %}" 
-                    class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
-                        <i class="fas fa-chart-simple text-blue-500"></i>
+                    class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-black hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                        <i class="fas fa-chart-simple text-blue-400"></i>
                         <span class="hidden lg:inline">Tableau de bord</span>
                     </a>
                     {% endif %}
@@ -238,7 +238,7 @@
                 <hr class="my-2">
                 
                 {% if user.is_authenticated %}
-                    <a href="#" class="px-4 py-2.5 rounded-lg text-blue-600 font-medium hover:bg-blue-50 transition">
+                    <a href="{% url 'order_app:panier' %}" class="px-4 py-2.5 rounded-lg text-blue-600 font-medium hover:bg-blue-50 transition">
                     <i class="fas fa-shopping-cart mr-2"></i> Panier ({{ user.panier.nb_articles|default:0 }})
                 </a>
                 {% endif %}
@@ -360,7 +360,7 @@
                 Dernières <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">actualités</span>
             </h2>
             <p class="text-gray-500 mt-3 max-w-2xl mx-auto text-sm sm:text-base">
-                Restez informés des dernières nouveautés de KOZ Services
+                Restez informés des dernières nouveautés chez KOZ Services
             </p>
         </div>
 
@@ -457,7 +457,7 @@
                                  alt="{{ actu.titre }}" 
                                  class="w-full h-full object-cover group-hover/img:scale-110 transition duration-500">
                             <div class="absolute inset-0 bg-black/30 opacity-0 group-hover/img:opacity-100 transition flex items-center justify-center">
-                                <i class="fas fa-search-plus text-white text-lg"></i>
+                                
                             </div>
                         </div>
                         {% endif %}
@@ -605,7 +605,7 @@
                             Parcourez nos <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-indigo-600">véhicules vedette</span>
                         </h2>
                         <p class="text-gray-500 mt-3 max-w-2xl mx-auto">
-                            Des SUV aux berlines, en passant par les breaks, trouvez le véhicule qui correspond à votre style de vie.
+                           Explorez notre sélection de véhicules vedette et découvrez les modèles disponibles au fil des pages.
                         </p>
                     </div>
 
@@ -1972,8 +1972,10 @@
                     <li><a href="{% url 'products_app:products-list' %}" class="hover:text-white transition-colors">Catalogue</a></li>
                     <li><a href="{% url 'services_app:services-list' %}" class="hover:text-white transition-colors">Nos services</a></li>
                     <li><a href="{% url 'products_app:products-list' %}" class="hover:text-white transition-colors">Nos produits</a></li>
-                    <li><a href="#apropos" class="hover:text-white transition-colors">À propos de nous</a></li>
                     <li><a href="#financement" class="hover:text-white transition-colors">Financement</a></li>
+                    <li><a href="#contact" class="hover:text-white transition-colors">Contact</a></li>
+                    <li><a href="#apropos" class="hover:text-white transition-colors">À propos de nous</a></li>
+                    
                 </ul>
             </div>
 

@@ -50,6 +50,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Urbanist:wght@600;700;800&display=swap" rel="stylesheet">
+  
+    <link href="https://fonts.googleapis.com/css2?family=Agbalumo&display=swap" rel="stylesheet">
 
     <!-- STYLES & LIBS -->
     <link rel="stylesheet" href="{% static 'css/home/home_style.css' %}">
@@ -93,169 +95,121 @@
        .section-contact input::placeholder, textarea::placeholder {
             color: #94a3b8; /* slate-400 */
         }
+  .agbalumo-regular {
+  font-family: "Agbalumo", system-ui;
+  font-weight: 400;
+  font-style: normal;
+}
 </style>
 <body>
 
 <!-- ========== NAVBAR PREMIUM ========== -->
 <nav class="navbar fixed top-0 z-50 w-full bg-white/90 backdrop-blur-md border-b border-gray-200/50 shadow-sm transition-all duration-300">
-        <div class="container mx-auto px-4 flex justify-between items-center h-16">
-            
-            <!-- ===== LOGO ===== -->
-            <div class="flex items-center gap-3">
-                <a href="{% url 'home_app:home-page' %}" class="flex items-center gap-2 group">
-                    
-                        <img src="{% static 'images/Koz_logo_noBack.png' %}" alt="KOZ" class="w-20 h-20 object-contain">
-                    
-                    <span class="text-xl font-bold shadow-2xl text-gray-200 hidden sm:inline">KOZ <span class="text-blue-400 shadow-blue-400">SERVICES</span></span>
-                </a>
-            </div>
+    <div class="container mx-auto px-4 flex justify-between items-center h-16">
         
-            <!-- ===== LIENS CENTRAUX ===== -->
-            <div class="hidden md:flex items-center gap-1 lg:gap-2">
-                <a href="{% url 'home_app:home-page' %}" 
-                class="px-3 py-2 rounded-lg text-sm font-medium text-black hover:text-blue-500 hover:bg-blue-50 transition-all duration-200">
-                    Accueil
-                </a>
-                <a href="{% url 'home_app:actualites-list' %}" 
-                class="px-3 py-2 rounded-lg text-sm font-medium text-black  hover:text-blue-500 hover:bg-blue-50 transition-all duration-200">
-                    Actualités
-                </a>
-                <a href="{% url 'vehicul_app:site-vehicul-list' %}" 
-                class="px-3 py-2 rounded-lg text-sm font-medium text-black hover:text-blue-500 hover:bg-blue-50 transition-all duration-200">
-                    Catalogue
-                </a>
-                <a href="{% url 'services_app:services-list-public' %}" 
-                class="px-3 py-2 rounded-lg text-sm font-medium text-black hover:text-blue-500 hover:bg-blue-50 transition-all duration-200">
-                    Services
-                </a>
-                <a href="{% url 'products_app:products-list' %}" 
-                class="px-3 py-2 rounded-lg text-sm font-medium text-black hover:text-blue-500 hover:bg-blue-50 transition-all duration-200">
-                    Produits
-                </a>
-                <a href="#financement" 
-                class="px-3 py-2 rounded-lg text-sm font-medium text-black hover:text-blue-500 hover:bg-blue-50 transition-all duration-200">
-                    Financement
-                </a>
-                <a href="#contact" 
-                class="px-3 py-2 rounded-lg text-sm font-medium text-black hover:text-blue-500 hover:bg-blue-50 transition-all duration-200">
-                    Contact
-                </a>
-                <a href="#apropos" 
-                class="px-3 py-2 rounded-lg text-sm font-medium text-black hover:text-blue-500 hover:bg-blue-50 transition-all duration-200">
-                    À propos
-                </a>
-            </div>
+        <!-- ===== LOGO ===== -->
+        <div class="flex items-center gap-2 shrink-0">
+            <a href="{% url 'home_app:home-page' %}" class="flex items-center gap-2 group">
+                <img src="{% static 'images/Koz_logo_noBack.png' %}" alt="KOZ" class="w-12 h-12 object-contain">
+                <span class="text-lg font-bold text-gray-200 hidden sm:inline">KOZ <span class="text-blue-400">SERVICES</span></span>
+            </a>
+        </div>
+    
+        <!-- ===== LIENS CENTRAUX (Masqués sous 1024px -> lg:flex) ===== -->
+        <div class="hidden lg:flex items-center gap-0.5 xl:gap-1.5">
+            <a href="{% url 'home_app:home-page' %}" class="px-2.5 py-1.5 rounded-lg text-xs xl:text-sm font-medium text-black hover:text-blue-600 hover:bg-blue-50 transition">Accueil</a>
+            <a href="{% url 'home_app:actualites-list' %}" class="px-2.5 py-1.5 rounded-lg text-xs xl:text-sm font-medium text-black hover:text-blue-600 hover:bg-blue-50 transition">Actualités</a>
+            <a href="{% url 'vehicul_app:site-vehicul-list' %}" class="px-2.5 py-1.5 rounded-lg text-xs xl:text-sm font-medium text-black hover:text-blue-600 hover:bg-blue-50 transition">Catalogue</a>
+            <a href="{% url 'services_app:services-list-public' %}" class="px-2.5 py-1.5 rounded-lg text-xs xl:text-sm font-medium text-black hover:text-blue-600 hover:bg-blue-50 transition">Services</a>
+            <a href="{% url 'products_app:products-list' %}" class="px-2.5 py-1.5 rounded-lg text-xs xl:text-sm font-medium text-black hover:text-blue-600 hover:bg-blue-50 transition">Produits</a>
+            <a href="{% url 'home_app:home-page' %}#financement" class="px-2.5 py-1.5 rounded-lg text-xs xl:text-sm font-medium text-black hover:text-blue-600 hover:bg-blue-50 transition">Financement</a>
+            <a href="{% url 'home_app:home-page' %}#contact" class="px-2.5 py-1.5 rounded-lg text-xs xl:text-sm font-medium text-black hover:text-blue-600 hover:bg-blue-50 transition">Contact</a>
+            <a href="{% url 'home_app:home-page' %}#apropos" class="px-2.5 py-1.5 rounded-lg text-xs xl:text-sm font-medium text-black hover:text-blue-600 hover:bg-blue-50 transition">À propos</a>
+        </div>
 
-            <!-- ===== ACTIONS ===== -->
-            <div class="flex items-center gap-2 sm:gap-3">
-                {% if user.is_authenticated %}
-                    
-                    
-                    {% if user.role == "client" %}
-                    <a href="{% url 'client_app:client-view' %}" 
-                    class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
-                        <i class="fas fa-chart-simple text-blue-400"></i>
-                        <span class="hidden lg:inline">Tableau de bord</span>
-                    </a>
-
-                    <!-- Panier -->
-                    <a href="{% url 'order_app:panier' %}" 
-                    class="relative p-2 rounded-lg text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
-                        <i class="fas fa-shopping-cart text-lg"></i>
-                        {% if user.panier.articles.count > 0 %}
-                        <span class="absolute -top-1 -right-1 bg-blue-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-md ring-2 ring-white">
-                            {{ user.panier.articles.count }}
-                        </span>
-                        {% endif %}
-                    </a>
-                    {% elif user.role == "commercial" %}
-                    <a href="{% url 'commercial_app:commercial-view' %}" 
-                    class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-black hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
-                        <i class="fas fa-chart-simple text-blue-400"></i>
-                        <span class="hidden lg:inline">Tableau de bord</span>
-                    </a>
-                    {% else %}
-                    <a href="{% url 'directeur_app:directeur-view' %}" 
-                    class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-black hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
-                        <i class="fas fa-chart-simple text-blue-400"></i>
-                        <span class="hidden lg:inline">Tableau de bord</span>
-                    </a>
+        <!-- ===== ACTIONS DROITE ===== -->
+        <div class="flex items-center gap-2 shrink-0">
+            {% if user.is_authenticated %}
+                
+                <!-- Panier -->
+                {% if user.role == "client" %}
+                <a href="{% url 'order_app:panier' %}" class="relative p-2 rounded-lg text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition">
+                    <i class="fas fa-shopping-cart text-lg"></i>
+                    {% if user.panier.articles.count > 0 %}
+                    <span class="absolute -top-1 -right-1 bg-blue-600 text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full ring-2 ring-white">
+                        {{ user.panier.articles.count }}
+                    </span>
                     {% endif %}
-                        
-                    
+                </a>
+                {% endif %}
 
-                    <!-- Utilisateur -->
-                    <div class="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-gray-50/50 border border-gray-100">
-                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white text-sm font-bold shadow-sm">
+                <!-- DROPDOWN UTILISATEUR COMPACT (Gagne +250px d'espace) -->
+                <div class="dropdown dropdown-end">
+                    <label tabindex="0" class="flex items-center gap-2 p-1.5 rounded-lg bg-gray-50 border border-gray-200 cursor-pointer hover:bg-gray-100 transition">
+                        <div class="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold">
                             {{ user.nom_complet|slice:":1"|upper }}
                         </div>
-                        <span class="text-sm font-medium text-gray-700 hidden sm:inline">
-                            {{ user.nom_complet|truncatechars:15 }}
+                        <span class="text-xs font-semibold text-gray-700 hidden xl:inline max-w-[100px] truncate">
+                            {{ user.nom_complet }}
                         </span>
-                    </div>
+                        <i class="fas fa-chevron-down text-[10px] text-gray-400"></i>
+                    </label>
 
-                    <!-- Déconnexion -->
-                    <a href="{% url 'auth_app:logout-simple-sur-home-page' %}" 
-                    class="btn btn-error btn-sm text-white hover:bg-red-700 transition shadow-sm flex items-center gap-1.5">
-                        <i class="fas fa-sign-out-alt text-xs"></i>
-                        <span class="hidden sm:inline">Déconnexion</span>
-                    </a>
+                    <ul tabindex="0" class="dropdown-content menu p-2 shadow-xl bg-white rounded-xl w-52 mt-2 border border-gray-100 z-[100]">
+                        <li class="menu-title text-[11px] text-gray-400 font-bold uppercase px-3 py-1">
+                            {{ user.nom_complet }} ({{ user.role }})
+                        </li>
+                        
+                        <!-- Dashboard selon le rôle -->
+                        {% if user.role == "client" %}
+                            <li><a href="{% url 'client_app:client-view' %}"><i class="fas fa-chart-simple text-blue-600"></i> Tableau de bord</a></li>
+                        {% elif user.role == "commercial" %}
+                            <li><a href="{% url 'commercial_app:commercial-view' %}"><i class="fas fa-chart-simple text-blue-600"></i> Tableau de bord</a></li>
+                        {% else %}
+                            <li><a href="{% url 'directeur_app:directeur-view' %}"><i class="fas fa-chart-simple text-blue-600"></i> Tableau de bord</a></li>
+                        {% endif %}
 
-                {% else %}
-                    
-                    <!-- Connexion -->
-                    <button onclick="document.getElementById('login_simple_modal').showModal()" 
-                            class="btn btn-ghost btn-sm  sm:inline-flex hover:bg-gray-100 transition">
-                        Connexion
-                    </button>
-                    
-                    <!-- Inscription -->
-                    <button onclick="document.getElementById('register_modal').showModal()" 
-                            class="btn btn-sm bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg transition flex items-center gap-2">
-                        <i class="fas fa-user-plus"></i>
-                        <span class="hidden sm:inline">Inscription</span>
-                    </button>
+                        <div class="divider my-1"></div>
 
-                {% endif %}
-
-                <!-- Burger -->
-                <button id="burgerBtn" class="md:hidden btn btn-ghost btn-sm hover:bg-gray-100 transition">
-                    <i class="fas fa-bars text-xl"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- ===== MENU MOBILE ===== -->
-        <div id="mobileMenu" class="hidden md:hidden bg-white border-t border-gray-200 p-4 shadow-lg">
-            <div class="flex flex-col gap-2 text-gray-600 text-sm">
-                <a href="{% url 'home_app:home-page' %}" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Accueil</a>
-                <a href="{% url 'vehicul_app:site-vehicul-list' %}" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Catalogue</a>
-                <a href="{% url 'home_app:actualites-list' %}" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Actualités</a>
-                <a href="{% url 'services_app:services-list-public' %}" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Services</a>
-                <a href="{% url 'products_app:products-list' %}" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Produits</a>
-                <a href="#financement" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Financement</a>
-                <a href="#contact" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Contact</a>
-                <hr class="my-2">
-                
-                {% if user.is_authenticated %}
-                    <a href="{% url 'order_app:panier' %}" class="px-4 py-2.5 rounded-lg text-blue-600 font-medium hover:bg-blue-50 transition">
-                    <i class="fas fa-shopping-cart mr-2"></i> Panier ({{ user.panier.nb_articles|default:0 }})
-                </a>
-                {% endif %}
-                    
-                
-            </div>
-        </div>
-        <!-- Messages flash -->
-            {% if messages %}
-            <div class="fixed top-20 right-5 z-50 space-y-2">
-                {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} shadow-xl rounded-xl animate-slide-in-right">
-                    <span>{{ message }}</span>
+                        <li>
+                            <a href="{% url 'auth_app:logout-simple-sur-home-page' %}" class="text-red-600 hover:bg-red-50">
+                                <i class="fas fa-sign-out-alt"></i> Déconnexion
+                            </a>
+                        </li>
+                    </ul>
                 </div>
-                {% endfor %}
-            </div>
+
+            {% else %}
+                <!-- Non connecté -->
+                <button onclick="document.getElementById('login_simple_modal').showModal()" class="btn btn-ghost btn-sm text-xs hover:bg-gray-100">
+                    Connexion
+                </button>
+                <button onclick="document.getElementById('register_modal').showModal()" class="btn btn-sm text-xs bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
+                    <i class="fas fa-user-plus text-xs"></i>
+                    <span class="hidden sm:inline">Inscription</span>
+                </button>
             {% endif %}
+
+            <!-- Burger Button (Visible sous 1024px -> lg:hidden) -->
+            <button id="burgerBtn" class="lg:hidden btn btn-ghost btn-sm p-1.5 hover:bg-gray-100">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- ===== MENU MOBILE (Visible sous 1024px) ===== -->
+    <div id="mobileMenu" class="hidden lg:hidden bg-white border-t border-gray-200 p-4 shadow-lg">
+        <div class="flex flex-col gap-1 text-gray-600 text-sm">
+            <a href="{% url 'home_app:home-page' %}" class="px-4 py-2 rounded-lg hover:bg-blue-50 hover:text-blue-600">Accueil</a>
+            <a href="{% url 'home_app:actualites-list' %}" class="px-4 py-2 rounded-lg hover:bg-blue-50 hover:text-blue-600">Actualités</a>
+            <a href="{% url 'vehicul_app:site-vehicul-list' %}" class="px-4 py-2 rounded-lg hover:bg-blue-50 hover:text-blue-600">Catalogue</a>
+            <a href="{% url 'services_app:services-list-public' %}" class="px-4 py-2 rounded-lg hover:bg-blue-50 hover:text-blue-600">Services</a>
+            <a href="{% url 'products_app:products-list' %}" class="px-4 py-2 rounded-lg hover:bg-blue-50 hover:text-blue-600">Produits</a>
+            <a href="{% url 'home_app:home-page' %}#financement" class="px-4 py-2 rounded-lg hover:bg-blue-50 hover:text-blue-600">Financement</a>
+            <a href="{% url 'home_app:home-page' %}#contact" class="px-4 py-2 rounded-lg hover:bg-blue-50 hover:text-blue-600">Contact</a>
+            <a href="{% url 'home_app:home-page' %}#apropos" class="px-4 py-2 rounded-lg hover:bg-blue-50 hover:text-blue-600">À propos</a>
+        </div>
+    </div>
 </nav>
 
 <!-- ============================================================ -->
@@ -271,11 +225,21 @@
         
     <!-- ===== CONTENU PRINCIPAL (Remonté d'un cran) ===== -->
     <div class="hero-main-content hero_fade -top-20 mx-auto text-center text-white relative z-10 max-w-4xl -mt-6 md:-mt-12">
-        <h1 class="text-4xl sm:text-6xl md:text-7xl font-extrabold leading-tight mb-4 tracking-tight" style="position: relative;top: -12rem;">
+        <h1 class="text-4xl sm:text-6xl md:text-7xl font-extrabold leading-tight mb-4 tracking-tight" 
+        style="position: relative;top: -12rem; 
+        font-family: Agbalumo, system-ui;
+        font-weight: 400;
+        font-style: normal;
+        ">
             Votre voiture à crédit.<br>
-            <span class="text-blue-400 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-300">Vos pièces et produits en ligne.</span>
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-600 to-sky-500">Vos pièces et produits en ligne.</span>
         </h1>
-        <p class="text-lg md:text-xl text-slate-200 max-w-2xl mx-auto mb-6 font-light leading-relaxed" style="position: relative;top: -12rem;">
+        <p class="text-lg md:text-xl text-slate-200 max-w-2xl mx-auto mb-6 font-light leading-relaxed" 
+        style="position: relative;top: -12rem;
+        font-family: Agbalumo, system-ui;
+        font-weight: 400;
+        font-style: normal;
+        ">
             <strong class="font-semibold text-white">KOZ Services</strong> : n'achetez pas une auto, changez votre vie.
         </p>
         <div class="flex flex-wrap justify-center gap-4" style="position: relative;top: -12rem;">
@@ -356,7 +320,7 @@
             <span class="inline-block text-xs font-semibold text-blue-600 uppercase tracking-[0.2em] bg-blue-50 px-5 py-2 rounded-full mb-4 border border-blue-100">
                 📰 Actualités
             </span>
-            <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-800">
+            <h2 class="text-3xl sm:text-4xl md:text-5xl agbalumo-regular font-bold text-gray-800">
                 Dernières <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">actualités</span>
             </h2>
             <p class="text-gray-500 mt-3 max-w-2xl mx-auto text-sm sm:text-base">
@@ -487,6 +451,7 @@
 </section>
 
 
+
 <!-- ============================================================ -->
 <!-- SECTION SERVICES – SCROLL IMMERSIF                           -->
 <!-- ============================================================ -->
@@ -497,7 +462,7 @@
             <span class="inline-block text-xs font-semibold text-blue-600 uppercase tracking-widest bg-blue-50 px-4 py-1.5 rounded-full mb-3">
                 Nos Prestations & Expertise
             </span>
-            <h2 class="text-4xl md:text-5xl font-bold text-gray-800">
+            <h2 class="text-4xl md:text-5xl agbalumo-regular font-bold text-gray-800">
                 Explorez nos <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-indigo-600">services vedettes</span>
             </h2>
             <p class="text-gray-500 mt-3 max-w-2xl mx-auto">
@@ -515,7 +480,6 @@
     
 
 </section>
-
 <!-- ============================================================ -->
 <!-- SECTION : TYPES DE VÉHICULES VEDETTE                         -->
 <!-- ============================================================ -->
@@ -527,7 +491,7 @@
             <span class="inline-block text-xs font-semibold text-blue-600 uppercase tracking-widest bg-blue-50 px-4 py-1.5 rounded-full mb-3">
                 Notre Gamme
             </span>
-            <h2 class="text-4xl md:text-5xl font-bold text-gray-800">
+            <h2 class="text-4xl md:text-5xl agbalumo-regular font-bold text-gray-800">
                 Découvrez nos <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-indigo-600">types de véhicules</span>
             </h2>
             <p class="text-gray-500 mt-3 max-w-2xl mx-auto">
@@ -605,7 +569,7 @@
                 <span class="inline-block text-xs font-semibold text-blue-600 uppercase tracking-widest bg-blue-50 px-4 py-1.5 rounded-full mb-3">
                     Découvrez votre bonheur ici
                 </span>
-                <h2 class="text-4xl md:text-5xl font-bold text-gray-800">
+                <h2 class="text-4xl md:text-5xl agbalumo-regular font-bold text-gray-800 agbalumo-regular">
                     Parcourez nos <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-indigo-600">véhicules vedette</span>
                 </h2>
                 <p class="text-gray-500 mt-3">
@@ -642,7 +606,7 @@
                 <span class="inline-block text-xs font-semibold text-blue-300 uppercase tracking-[0.2em] bg-blue-500/20 px-5 py-2 rounded-full mb-4 border border-blue-400/30">
                     💰 Financement
                 </span>
-                <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-black">
+                <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold agbalumo-regular text-black agbalumo-regular">
                     Nos modèles de <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-800">financement</span>
                 </h2>
                 <p class="text-gray-400 mt-3 max-w-2xl mx-auto text-sm sm:text-base">
@@ -740,7 +704,7 @@
                 <span class="inline-block text-xs font-semibold text-blue-600 uppercase tracking-[0.2em] bg-blue-50 px-5 py-2 rounded-full mb-4 border border-blue-100">
                     ⚡ Nos meilleurs produits
                 </span>
-                <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-800">
+                <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-800 agbalumo-regular">
                     Pièces & <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Accessoires</span>
                 </h2>
                 <p class="text-gray-500 mt-3 max-w-2xl mx-auto text-sm sm:text-base">
@@ -903,7 +867,7 @@
             <span class="inline-block text-xs font-semibold text-blue-600 uppercase tracking-[0.2em] bg-blue-50 px-5 py-2 mb-4 border border-blue-100 rounded-full">
                 ✦ Notre ADN
             </span>
-            <h2 class="text-3xl sm:text-4xl font-bold text-gray-800">
+            <h2 class="text-3xl sm:text-4xl font-bold text-gray-800 agbalumo-regular">
                 Mission & <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Valeurs</span>
             </h2>
             <div class="w-20 h-1 bg-gradient-to-r from-blue-500 to-indigo-500 mx-auto mt-4 rounded-full"></div>
@@ -1064,7 +1028,7 @@
                 <span class="inline-block text-xs font-semibold text-blue-600 uppercase tracking-[0.2em] bg-blue-50 px-5 py-2 rounded-full mb-4 border border-blue-100">
                     ✦ Pourquoi nous ?
                 </span>
-                <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-800">
+                <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold agbalumo-regular text-gray-800">
                     Pourquoi choisir <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">KOZ Services</span>
                 </h2>
                 <div class="w-20 h-1 bg-gradient-to-r from-blue-500 to-indigo-500 mx-auto mt-4 rounded-full"></div>
@@ -1203,7 +1167,7 @@
             <span class="inline-block text-xs font-semibold text-blue-500 uppercase tracking-widest bg-blue-500/20 px-4 py-1.5 rounded-full mb-3 border border-blue-400/30">
                 ⚡ KOZ EN ENGAGEMENTS
             </span>
-            <h2 class="text-4xl md:text-5xl font-bold text-black">
+            <h2 class="text-4xl md:text-5xl font-bold text-black agbalumo-regular">
                 L'excellence <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-800">au quotidien</span>
             </h2>
             <p class="text-gray-400 mt-3 max-w-2xl mx-auto">
@@ -1291,7 +1255,7 @@
             <span class="inline-flex items-center gap-2 text-xs font-bold text-blue-600 uppercase tracking-widest bg-blue-100/60 backdrop-blur-md px-4 py-2 rounded-full mb-4 border border-blue-200/50 shadow-sm">
                 <span>💬</span> Ils parlent de nous
             </span>
-            <h2 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight">
+            <h2 class="text-3xl sm:text-4xl md:text-5xl font-extrabold agbalumo-regular text-slate-900 tracking-tight">
                 Ce que disent nos <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-sky-500">clients</span>
             </h2>
             <p class="text-slate-500 mt-4 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed">
@@ -1510,7 +1474,7 @@
                     <span class="inline-block text-xs font-semibold text-blue-600 uppercase tracking-[0.2em] bg-blue-50 px-5 py-2 rounded-full mb-4 border border-blue-100">
                         ✦ Qui sommes-nous
                     </span>
-                    <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-800 mb-6">
+                    <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold agbalumo-regular text-gray-800 mb-6">
                         À propos de <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">KOZ Services</span>
                     </h2>
                     <p class="text-gray-600 leading-relaxed text-base mb-4">
@@ -1597,7 +1561,7 @@
                 <span class="inline-block text-xs font-semibold text-blue-600 uppercase tracking-[0.2em] bg-blue-50 px-5 py-2 rounded-full mb-4 border border-blue-100">
                     📞 Contact
                 </span>
-                <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-800">
+                <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold agbalumo-regular text-gray-800">
                     Nous <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">contacter</span>
                 </h2>
                 <p class="text-gray-500 mt-3 max-w-2xl mx-auto text-sm sm:text-base">
@@ -1819,7 +1783,7 @@
                 </span>
                 
                 <!-- Titre -->
-                <h2 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-black leading-tight mb-4">
+                <h2 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-black agbalumo-regular leading-tight mb-4">
                     Prêt à rouler avec <span class="text-transparent bg-clip-text bg-gradient-to-br from-blue-600 to-indigo-800">KOZ</span> ?
                 </h2>
                 
@@ -1976,7 +1940,7 @@
                 <ul class="space-y-2 text-xs">
                     <li><a href="{% url 'home_app:home-page' %}" class="hover:text-white transition-colors">Accueil</a></li>
                     <li><a href="{% url 'home_app:actualites-list' %}" class="hover:text-white transition-colors">Actualités & Événements</a></li>
-                    <li><a href="{% url 'products_app:products-list' %}" class="hover:text-white transition-colors">Catalogue</a></li>
+                    <li><a href="{% url 'vehicul_app:site-vehicul-list' %}" class="hover:text-white transition-colors">Catalogue</a></li>
                     <li><a href="{% url 'services_app:services-list' %}" class="hover:text-white transition-colors">Nos services</a></li>
                     <li><a href="{% url 'products_app:products-list' %}" class="hover:text-white transition-colors">Nos produits</a></li>
                     <li><a href="#financement" class="hover:text-white transition-colors">Financement</a></li>

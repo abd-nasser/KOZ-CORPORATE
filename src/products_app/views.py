@@ -1,5 +1,6 @@
 # products_app/views.py
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.http import Http404
 from django.views.decorators.http import require_POST
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
@@ -230,53 +231,58 @@ class ProductsImageListView(LoginRequiredMixin, ListView):
             context["product_image_form"] = ProductImageForm()
         return context
 
+@login_required
+@require_POST
 def toggle_product_favoris(request, product_id):
     if request.user.is_anonymous or request.user.role != 'client':
-        response = render(request, "partials/products/_products_favori_result.html", {
-                    "success": False,
-                    "title": "❌ Action non autorisée",
-                    "message": "Seuls les clients ou abonnée peuvent ajouter des favoris.",
-                })
+        response = render(request, "partials/products/_product_favori_result.html", {
+            "success": False,
+            "title": "❌ Action non autorisée",
+            "message": "Seuls les clients peuvent ajouter des favoris.",
+        })
         return response
-    
-    product = get_object_or_404(Products, id=product_id)
-    
-    if product.favoris_de.filter(id=request.user.id).exists():
-        product.favoris_de.remove(request.user)
-        ajoute = False
-    else:
-        product.favoris_de.add(request.user)
-        ajoute = True
-        
-        Message.objects.create(
-            client=request.user,
-            commercial=None,
-            contenu=(
-                f"Vous avez ajouté {product.marque.nom} {product.nom} à vos favoris. "
-                f"N'hésitez pas à échanger avec un conseiller sur les different produits"
-                            ),
-            est_client=False,
-            lu=False,
-            origine_automatique=True  
-            ),
-        if request.user.email:
-            try:
+
+    product = get_object_or_404(Products.objects.select_related("marque"), id=product_id)
+    est_favori = product.favoris_de.filter(id=request.user.id).exists()
+
+    with transaction.atomic():
+        if est_favori:
+            product.favoris_de.remove(request.user)
+        else:
+            product.favoris_de.add(request.user)
+            nom_produit = f"{product.marque.nom} {product.nom}"
+
+            Message.objects.create(
+                client=request.user,
+                commercial=None,
+                contenu=(
+                    f"Vous avez ajouté {nom_produit} à vos favoris. "
+                    "N'hésitez pas à échanger avec un conseiller sur nos différents produits."
+                ),
+                est_client=False,
+                lu=False,
+                origine_automatique=True,
+            )
+
+            if request.user.email:
                 lien_chat = request.build_absolute_uri(reverse('chat_app:chat-view'))
                 html_message = render_to_string('emails/products/products_notif_favori.html', {
-                        'client': request.user,
-                        'produit': f"{product.marque.nom} {product.nom}",
-                        'lien_chat': lien_chat,
-                    })
-                send_mail(
-                            subject=f"💬 Nouveau message concernant {product.marque.nom} {product.nom}",
-                            message=strip_tags(html_message),
-                            from_email=settings.DEFAULT_FROM_EMAIL,
-                            recipient_list=[request.user.email],
-                            html_message=html_message,
-                            fail_silently=False,
-                        )
-            except Exception as e:
-                logger.error(f"Erreur email notif favori pour {request.user.email}: {e}")
+                    'client': request.user,
+                    'produit': nom_produit,
+                    'lien_chat': lien_chat,
+                })
+                plain_message = strip_tags(html_message)
+
+                transaction.on_commit(
+                    lambda: send_email_task.delay(
+                        subject=f"💬 Nouveau message concernant {nom_produit}",
+                        plain_message=plain_message,
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        recipient_list=[request.user.email],
+                        html_message=html_message,
+                    )
+                )
+
     return render(request, "partials/products/_product_favori_button.html", {"produit": product})
             
         

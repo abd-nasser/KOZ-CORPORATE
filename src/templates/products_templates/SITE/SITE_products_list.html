@@ -149,170 +149,114 @@
  
 
  
- <!-- ========== NAVBAR PREMIUM ========== -->
+<!-- ========== NAVBAR PREMIUM ========== -->
 <nav class="navbar fixed top-0 z-50 w-full bg-white/90 backdrop-blur-md border-b border-gray-200/50 shadow-sm transition-all duration-300">
-        <div class="container mx-auto px-4 flex justify-between items-center h-16">
-            
-            <!-- ===== LOGO ===== -->
-            <div class="flex items-center gap-3">
-                <a href="{% url 'home_app:home-page' %}" class="flex items-center gap-2 group">
-                    
-                        <img src="{% static 'images/Koz_logo_noBack.png' %}" alt="KOZ" class="w-25 h-25 object-contain">
-                    
-                    <span class="text-xl font-bold text-gray-200 hidden sm:inline">KOZ <span class="text-blue-600">SERVICES</span></span>
-                </a>
-            </div>
+    <div class="container mx-auto px-4 flex justify-between items-center h-16">
         
-            <!-- ===== LIENS CENTRAUX ===== -->
-            <div class="hidden md:flex items-center gap-1 lg:gap-2">
-                <a href="{% url 'home_app:home-page' %}" 
-                class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
-                    Accueil
-                </a>
-                 <a href="{% url 'home_app:actualites-list' %}" 
-                class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
-                    Actualités
-                </a>
-                <a href="{% url 'vehicul_app:site-vehicul-list' %}" 
-                class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
-                    Catalogue
-                </a>
-               
-                <a href="{% url 'services_app:services-list-public' %}" 
-                class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
-                    Services
-                </a>
-                <a href="{% url 'products_app:products-list' %}" 
-                class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
-                    Produits
-                </a>
-                <a href="{% url 'home_app:home-page' %}#financement" 
-                class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
-                    Financement
-                </a>
-                <a href="{% url 'home_app:home-page' %}#contact" 
-                class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
-                    Contact
-                </a>
-                <a href="{% url 'home_app:home-page' %}#apropos"
-                class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
-                    À propos 
-                </a>
-            </div>
+        <!-- ===== LOGO ===== -->
+        <div class="flex items-center gap-2 shrink-0">
+            <a href="{% url 'home_app:home-page' %}" class="flex items-center gap-2 group">
+                <img src="{% static 'images/Koz_logo_noBack.png' %}" alt="KOZ" class="w-12 h-12 object-contain">
+                <span class="text-lg font-bold text-gray-200 hidden sm:inline">KOZ <span class="text-blue-400">SERVICES</span></span>
+            </a>
+        </div>
+    
+        <!-- ===== LIENS CENTRAUX (Masqués sous 1024px -> lg:flex) ===== -->
+        <div class="hidden lg:flex items-center gap-0.5 xl:gap-1.5">
+            <a href="{% url 'home_app:home-page' %}" class="px-2.5 py-1.5 rounded-lg text-xs xl:text-sm font-medium text-black hover:text-blue-600 hover:bg-blue-50 transition">Accueil</a>
+            <a href="{% url 'home_app:actualites-list' %}" class="px-2.5 py-1.5 rounded-lg text-xs xl:text-sm font-medium text-black hover:text-blue-600 hover:bg-blue-50 transition">Actualités</a>
+            <a href="{% url 'vehicul_app:site-vehicul-list' %}" class="px-2.5 py-1.5 rounded-lg text-xs xl:text-sm font-medium text-black hover:text-blue-600 hover:bg-blue-50 transition">Catalogue</a>
+            <a href="{% url 'services_app:services-list-public' %}" class="px-2.5 py-1.5 rounded-lg text-xs xl:text-sm font-medium text-black hover:text-blue-600 hover:bg-blue-50 transition">Services</a>
+            <a href="{% url 'products_app:products-list' %}" class="px-2.5 py-1.5 rounded-lg text-xs xl:text-sm font-medium text-black hover:text-blue-600 hover:bg-blue-50 transition">Produits</a>
+            <a href="{% url 'home_app:home-page' %}#financement" class="px-2.5 py-1.5 rounded-lg text-xs xl:text-sm font-medium text-black hover:text-blue-600 hover:bg-blue-50 transition">Financement</a>
+            <a href="{% url 'home_app:home-page' %}#contact" class="px-2.5 py-1.5 rounded-lg text-xs xl:text-sm font-medium text-black hover:text-blue-600 hover:bg-blue-50 transition">Contact</a>
+            <a href="{% url 'home_app:home-page' %}#apropos" class="px-2.5 py-1.5 rounded-lg text-xs xl:text-sm font-medium text-black hover:text-blue-600 hover:bg-blue-50 transition">À propos</a>
+        </div>
 
-            <!-- ===== ACTIONS ===== -->
-            <div class="flex items-center gap-2 sm:gap-3">
-                {% if user.is_authenticated %}
-                    
-                    
-                    {% if user.role == "client" %}
-                    <a href="{% url 'client_app:client-view' %}" 
-                    class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
-                        <i class="fas fa-chart-simple text-blue-500"></i>
-                        <span class="hidden lg:inline">Tableau de bord</span>
-                    </a>
-
-                    <!-- Panier -->
-                    <a href="{% url 'order_app:panier' %}" 
-                    class="relative p-2 rounded-lg text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
-                        <i class="fas fa-shopping-cart text-lg"></i>
-                        {% if user.panier.articles.count > 0 %}
-                        <span class="absolute -top-1 -right-1 bg-blue-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-md ring-2 ring-white">
-                            {{ user.panier.articles.count }}
-                        </span>
-                        {% endif %}
-                    </a>
-                    {% elif user.role == "commercial" %}
-                    <a href="{% url 'commercial_app:commercial-view' %}" 
-                    class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
-                        <i class="fas fa-chart-simple text-blue-500"></i>
-                        <span class="hidden lg:inline">Tableau de bord</span>
-                    </a>
-                    {% else %}
-                    <a href="{% url 'directeur_app:directeur-view' %}" 
-                    class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200">
-                        <i class="fas fa-chart-simple text-blue-500"></i>
-                        <span class="hidden lg:inline">Tableau de bord</span>
-                    </a>
+        <!-- ===== ACTIONS DROITE ===== -->
+        <div class="flex items-center gap-2 shrink-0">
+            {% if user.is_authenticated %}
+                
+                <!-- Panier -->
+                {% if user.role == "client" %}
+                <a href="{% url 'order_app:panier' %}" class="relative p-2 rounded-lg text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition">
+                    <i class="fas fa-shopping-cart text-lg"></i>
+                    {% if user.panier.articles.count > 0 %}
+                    <span class="absolute -top-1 -right-1 bg-blue-600 text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full ring-2 ring-white">
+                        {{ user.panier.articles.count }}
+                    </span>
                     {% endif %}
-                        
-                    
+                </a>
+                {% endif %}
 
-                    <!-- Utilisateur -->
-                    <div class="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-gray-50/50 border border-gray-100">
-                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white text-sm font-bold shadow-sm">
+                <!-- DROPDOWN UTILISATEUR COMPACT (Gagne +250px d'espace) -->
+                <div class="dropdown dropdown-end">
+                    <label tabindex="0" class="flex items-center gap-2 p-1.5 rounded-lg bg-gray-50 border border-gray-200 cursor-pointer hover:bg-gray-100 transition">
+                        <div class="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold">
                             {{ user.nom_complet|slice:":1"|upper }}
                         </div>
-                        <span class="text-sm font-medium text-gray-700 hidden sm:inline">
-                            {{ user.nom_complet|truncatechars:15 }}
+                        <span class="text-xs font-semibold text-gray-700 hidden xl:inline max-w-[100px] truncate">
+                            {{ user.nom_complet }}
                         </span>
-                    </div>
+                        <i class="fas fa-chevron-down text-[10px] text-gray-400"></i>
+                    </label>
 
-                    <!-- Déconnexion -->
-                    <a href="{% url 'auth_app:logout-simple-sur-home-page' %}" 
-                    class="btn btn-error btn-sm text-white hover:bg-red-700 transition shadow-sm flex items-center gap-1.5">
-                        <i class="fas fa-sign-out-alt text-xs"></i>
-                        <span class="hidden sm:inline">Déconnexion</span>
-                    </a>
+                    <ul tabindex="0" class="dropdown-content menu p-2 shadow-xl bg-white rounded-xl w-52 mt-2 border border-gray-100 z-[100]">
+                        <li class="menu-title text-[11px] text-gray-400 font-bold uppercase px-3 py-1">
+                            {{ user.nom_complet }} ({{ user.role }})
+                        </li>
+                        
+                        <!-- Dashboard selon le rôle -->
+                        {% if user.role == "client" %}
+                            <li><a href="{% url 'client_app:client-view' %}"><i class="fas fa-chart-simple text-blue-600"></i> Tableau de bord</a></li>
+                        {% elif user.role == "commercial" %}
+                            <li><a href="{% url 'commercial_app:commercial-view' %}"><i class="fas fa-chart-simple text-blue-600"></i> Tableau de bord</a></li>
+                        {% else %}
+                            <li><a href="{% url 'directeur_app:directeur-view' %}"><i class="fas fa-chart-simple text-blue-600"></i> Tableau de bord</a></li>
+                        {% endif %}
 
-                {% else %}
-                    
-                    <!-- Connexion -->
-                    <button onclick="document.getElementById('login_simple_modal').showModal()" 
-                            class="btn btn-ghost btn-sm  sm:inline-flex hover:bg-gray-100 transition">
-                        Connexion
-                    </button>
-                    
-                    <!-- Inscription -->
-                    <button onclick="document.getElementById('register_modal').showModal()" 
-                            class="btn btn-sm bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg transition flex items-center gap-2">
-                        <i class="fas fa-user-plus"></i>
-                        <span class="hidden sm:inline">Inscription</span>
-                    </button>
+                        <div class="divider my-1"></div>
 
-                {% endif %}
-
-                <!-- Burger -->
-                <button id="burgerBtn" class="md:hidden btn btn-ghost btn-sm hover:bg-gray-100 transition">
-                    <i class="fas fa-bars text-xl"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- ===== MENU MOBILE ===== -->
-        <div id="mobileMenu" class="hidden md:hidden bg-white border-t border-gray-200 p-4 shadow-lg">
-            <div class="flex flex-col gap-2 text-gray-600 text-sm">
-                <a href="{% url 'home_app:home-page' %}" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Accueil</a>
-                <a href="{% url 'vehicul_app:site-vehicul-list' %}" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Catalogue</a>
-                <a href="{% url 'home_app:actualites-list' %}" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Actualités</a>
-                <a href="{% url 'services_app:services-list-public' %}" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Services</a>
-                <a href="{% url 'products_app:products-list' %}" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Produits</a>
-                <a href="{% url 'home_app:home-page' %}#financement" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Financement</a>
-                <a href="{% url 'home_app:home-page' %}#contact" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">Contact</a>
-                <a href="{% url 'home_app:home-page' %}#apropos" class="px-4 py-2.5 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition">À propos</a>
-                <hr class="my-2">
-                
-                {% if user.is_authenticated %}
-                    <a href="{% url 'order_app:panier' %}" class="px-4 py-2.5 rounded-lg text-blue-600 font-medium hover:bg-blue-50 transition">
-                    <i class="fas fa-shopping-cart mr-2"></i> Panier ({{ user.panier.nb_articles|default:0 }})
-                </a>
-                {% endif %}
-                    
-                
-            </div>
-        </div>
-        <!-- Messages flash -->
-            {% if messages %}
-            <div class="fixed top-20 right-5 z-50 space-y-2">
-                {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} shadow-xl rounded-xl animate-slide-in-right">
-                    <span>{{ message }}</span>
+                        <li>
+                            <a href="{% url 'auth_app:logout-simple-sur-home-page' %}" class="text-red-600 hover:bg-red-50">
+                                <i class="fas fa-sign-out-alt"></i> Déconnexion
+                            </a>
+                        </li>
+                    </ul>
                 </div>
-                {% endfor %}
-            </div>
-            {% endif %}
-</nav>
 
+            {% else %}
+                <!-- Non connecté -->
+                <button onclick="document.getElementById('login_simple_modal').showModal()" class="btn btn-ghost btn-sm text-xs hover:bg-gray-100">
+                    Connexion
+                </button>
+                <button onclick="document.getElementById('register_modal').showModal()" class="btn btn-sm text-xs bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
+                    <i class="fas fa-user-plus text-xs"></i>
+                    <span class="hidden sm:inline">Inscription</span>
+                </button>
+            {% endif %}
+
+            <!-- Burger Button (Visible sous 1024px -> lg:hidden) -->
+            <button id="burgerBtn" class="lg:hidden btn btn-ghost btn-sm p-1.5 hover:bg-gray-100">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- ===== MENU MOBILE (Visible sous 1024px) ===== -->
+    <div id="mobileMenu" class="hidden lg:hidden bg-white border-t border-gray-200 p-4 shadow-lg">
+        <div class="flex flex-col gap-1 text-gray-600 text-sm">
+            <a href="{% url 'home_app:home-page' %}" class="px-4 py-2 rounded-lg hover:bg-blue-50 hover:text-blue-600">Accueil</a>
+            <a href="{% url 'home_app:actualites-list' %}" class="px-4 py-2 rounded-lg hover:bg-blue-50 hover:text-blue-600">Actualités</a>
+            <a href="{% url 'vehicul_app:site-vehicul-list' %}" class="px-4 py-2 rounded-lg hover:bg-blue-50 hover:text-blue-600">Catalogue</a>
+            <a href="{% url 'services_app:services-list-public' %}" class="px-4 py-2 rounded-lg hover:bg-blue-50 hover:text-blue-600">Services</a>
+            <a href="{% url 'products_app:products-list' %}" class="px-4 py-2 rounded-lg hover:bg-blue-50 hover:text-blue-600">Produits</a>
+            <a href="{% url 'home_app:home-page' %}#financement" class="px-4 py-2 rounded-lg hover:bg-blue-50 hover:text-blue-600">Financement</a>
+            <a href="{% url 'home_app:home-page' %}#contact" class="px-4 py-2 rounded-lg hover:bg-blue-50 hover:text-blue-600">Contact</a>
+            <a href="{% url 'home_app:home-page' %}#apropos" class="px-4 py-2 rounded-lg hover:bg-blue-50 hover:text-blue-600">À propos</a>
+        </div>
+    </div>
+</nav>
 
     <!-- ============================================================ -->
     <!-- MAIN CONTENT                                                 -->

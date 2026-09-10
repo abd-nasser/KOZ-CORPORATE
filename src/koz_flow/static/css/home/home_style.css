@@ -274,7 +274,7 @@ video {
 @media (max-width: 1024px) {
 
     .hero-section{
-        min-height: 250vh;
+        min-height: 180vh;
     }
     
     .trois_box {
@@ -315,11 +315,17 @@ video {
     
 }
 
+@media (min-width: 1025px) {
+  .hero-section{
+        min-height: 180vh;
+    }
+
+}
 
 @media (max-width: 768px) {
     /* HERO SECTION */
     .hero-section{
-        min-height: 225vh;
+        min-height: 100vh;
     }
     .trois_box {
         top: 40rem;
@@ -358,7 +364,7 @@ video {
 @media (max-width: 480px) {
     /* HERO SECTION */
     .hero-section{
-        min-height: 215vh;
+        min-height: 200vh;
     }
 
     .trois_box{
@@ -377,7 +383,7 @@ video {
 @media (max-width: 390px) {
     /* HERO SECTION */
     .hero-section{
-        min-height: 205vh;
+        min-height: 200vh;
     }
     .trois_box{
         top: 48rem;
@@ -398,10 +404,10 @@ video {
     
 }
 
-@media (max-width: 375px) , (max-height:667){
+@media (max-width: 375px) {
     /* HERO SECTION */
     .hero-section{
-        min-height: 255vh;
+        min-height: 200vh;
     }
     .trois_box{
         top: 50rem;
@@ -421,7 +427,7 @@ video {
 
 @media (max-width: 360px){
     .hero-section{
-        min-height: 274vh;
+        min-height: 200vh;
     }
     .trois_box{
         top: 55rem;

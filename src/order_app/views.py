@@ -26,6 +26,10 @@ from products_app.models import Products
 
 @login_required
 def panier_view(request):
+    if not request.user.is_authenticated or request.user.role != "client":
+            messages.info(request, "cette fonctionnalité est réservé uniquement pour les clients")
+            return redirect('home_app:home-page')
+        
     """Affiche le panier du client"""
     panier, created = Panier.objects.get_or_create(client=request.user)
     commande = panier.commande.order_by('-date_commande').first()
@@ -34,6 +38,10 @@ def panier_view(request):
 
 @login_required
 def ajouter_article(request, product_id):
+    if not request.user.is_authenticated or request.user.role != "client":
+        messages.info(request, "cette fonctionnalité est réservé uniquement pour les clients")
+        return redirect('order_app:panier')
+    
     produit = get_object_or_404(Products, id=product_id)
     panier, _ = Panier.objects.get_or_create(client=request.user)
     
@@ -63,11 +71,13 @@ def ajouter_article(request, product_id):
     
     return redirect('order_app:panier')
         
-        
-    
     
 @login_required
 def modifier_quantite(request, article_id):
+    if not request.user.is_authenticated or request.user.role != "client":
+            messages.info(request, "cette fonctionnalité est réservé uniquement pour les clients")
+            return redirect('order_app:panier')
+        
     article = get_object_or_404(ArticlePanier, id=article_id, panier__client=request.user)
     
     # ✅ Récupérer la nouvelle quantité depuis le body POST
@@ -89,6 +99,9 @@ def modifier_quantite(request, article_id):
 
 @login_required
 def retirer_article(request, article_id):
+    if not request.user.is_authenticated or request.user.role != "client":
+            messages.info(request, "cette fonctionnalité est réservé uniquement pour les clients")
+            return redirect('order_app:panier')
     """Supprime un article du panier (HTMX)"""
     article = get_object_or_404(ArticlePanier, id=article_id, panier__client=request.user)
     article.delete()
@@ -97,6 +110,9 @@ def retirer_article(request, article_id):
 
 @login_required
 def vider_panier(request):
+    if not request.user.is_authenticated or request.user.role != "client":
+            messages.info(request, "cette fonctionnalité est réservé uniquement pour les clients")
+            return redirect('order_app:panier')
     """Vide tout le panier (HTMX)"""
     panier = get_object_or_404(Panier, client=request.user)
     panier.articles.all().delete()

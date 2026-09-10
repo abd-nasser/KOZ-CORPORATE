@@ -529,8 +529,17 @@
                         {% endif %}
                         
                         <div id="return-fav-result"></div>
-                            
-                        <button
+                        
+                        
+                        {% if user.is_anonymous %}
+                             <button onclick="document.getElementById('login_simple_modal').showModal()" 
+                                    class="block w-full text-center cursor-pointer py-3.5 rounded-xl font-semibold transition border
+                                     bg-gray-50 hover:bg-gray-100 text-gray-600 border-gray-100">
+                                    <i class="far fa-heart mr-2"></i> Ajouter aux favoris
+                            </button>
+                            {% else %}
+
+                            <button
                             id="fav-btn-{{ vehicul.pk }}"
                             hx-post="{% url 'vehicul_app:ajout-favoris' vehicul.pk %}"
                             hx-target="#fav-btn-{{ vehicul.pk }}"
@@ -549,6 +558,10 @@
                                 <i class="far fa-heart mr-2"></i> Ajouter aux favoris
                             {% endif %}
                         </button>
+                        {% endif %}
+                            
+                                
+                        
                     </div>
                 </div>
             </div>

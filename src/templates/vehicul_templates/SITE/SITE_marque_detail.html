@@ -120,7 +120,7 @@
     <nav class="glass-nav sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <a href="{% url 'site-marque-list' %}" class="text-gray-700 hover:text-blue-600 transition-colors">
+                <a href="#" class="text-gray-700 hover:text-blue-600 transition-colors">
                     <i class="fas fa-arrow-left mr-2"></i> Retour aux marques
                 </a>
             </div>
@@ -183,7 +183,7 @@
                     {% for vehicule in vehicules %}
                         <div class="vehicle-card animate-fade-in-up" style="animation-delay: {{ forloop.counter|add:'1'|stringformat:'s' }}00ms">
                             <!-- Image -->
-                            <a href="{% url 'site-vehicul-detail' vehicule.pk %}" class="vehicle-image block">
+                            <a href="#" class="vehicle-image block">
                                 {% if vehicule.image_display %}
                                     <img src="{{ vehicule.image_display.url }}" alt="{{ vehicule.modele }}">
                                 {% else %}
@@ -224,7 +224,7 @@
                                 </div>
 
                                 <!-- View Button -->
-                                <a href="{% url 'site-vehicul-detail' vehicule.pk %}" class="btn-primary block w-full py-2 rounded-lg font-semibold text-center">
+                                <a href="#" class="btn-primary block w-full py-2 rounded-lg font-semibold text-center">
                                     <i class="fas fa-eye mr-2"></i> Voir les détails
                                 </a>
                             </div>

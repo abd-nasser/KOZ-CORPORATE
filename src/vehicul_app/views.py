@@ -757,21 +757,17 @@ def vehicul_image_partials(request, vehicul_id):
 
 
 
-@login_required
 @require_POST
 def toggle_favori(request, vehicul_id):
     """Bascule un véhicule dans les favoris du client et envoie une notification async."""
-    # 🛡️ 1. Vérification du rôle client
-    if getattr(request.user, "role", None) != "client":
-        return render(
-            request,
-            "partials/vehiculs/_favori_result.html",
-            {
-                "success": False,
-                "title": "❌ Action non autorisée",
-                "message": "Seuls les clients ou abonnés peuvent ajouter des favoris.",
-            },
-        )
+    if request.user.is_anonymous or request.user.role != 'client':
+        response = render(request, "partials/vehiculs/_favori_result.html", {
+            "success": False,
+            "title": "❌ Action non autorisée",
+            "message": "Seuls les clients ou abonnés peuvent ajouter des favoris.",
+            
+        })
+        return response
 
     # 🔍 2. Optimisation avec select_related pour charger la marque en une seule requête SQL
     vehicul = get_object_or_404(Vehicul.objects.select_related("marque"), id=vehicul_id)

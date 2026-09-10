@@ -20,11 +20,11 @@
         background: white;
     }
 </style>
-<div id="vedette_gallery" class="w-full flex flex-col items-center overflow-x-hidden justify-center">
+
     
     {% for vehicule in vehicules_page|slice:'0:5' %}
     <!-- Carte Unifiée du Véhicule Vedette -->
-    <div class="group vedette_gallery_display relative w-full max-w-4xl rounded-2xl  p-6 md:p-8 shadow-xl border border-gray-100/80 flex flex-col gap-6  transition-all duration-300 hover:shadow-2xl">
+    <div class="group vedette_gallery_display relative w-full items-center max-w-4xl rounded-2xl justify-center overflow-x-hidden p-6 md:p-8 shadow-xl border border-gray-100/80 flex flex-col gap-6  transition-all duration-300 hover:shadow-2xl">
         
         <!-- Badge Likes (Haut Gauche) -->
         <div class="absolute top-12 left-12 z-20 flex items-center gap-2 rounded-full bg-white/90 backdrop-blur-md px-4 py-1.5 text-sm font-semibold text-gray-700 shadow-sm border border-gray-100">
@@ -80,8 +80,8 @@
         {% if vehicules_page.has_previous %}
         <button class="prev-btn flex h-12 w-12 items-center justify-center rounded-full border-2 cursor-pointer border-gray-300 transition-all duration-300 group hover:border-blue-500 hover:bg-blue-50"
                 hx-get="{% url 'home_app:vehicules-vedette-partial' %}?page={{ vehicules_page.previous_page_number }}"
-                hx-target="#vedette_gallery"
-                hx-swap="outerHTML transition:true">
+                hx-target="#vedette_section_wrapper"
+                hx-swap="innerHTML scroll:none">
             <i class="fas fa-chevron-left text-xl text-gray-400 transition-colors group-hover:text-blue-600"></i>
         </button>
         {% else %}
@@ -96,8 +96,8 @@
             <span class="dot h-3 w-3 cursor-pointer rounded-full transition-all duration-300 hover:scale-125
                 {% if i == vehicules_page.number %}w-6 bg-blue-600{% else %}bg-gray-300 hover:bg-blue-400{% endif %}"
                 hx-get="{% url 'home_app:vehicules-vedette-partial' %}?page={{ i }}"
-                hx-target="#vedette_gallery"
-                hx-swap="outerHTML transition:true">
+                hx-target="#vedette_section_wrapper"
+                hx-swap="innerHTML scroll:none">
             </span>
             {% endfor %}
         </div>
@@ -106,8 +106,8 @@
         {% if vehicules_page.has_next %}
         <button class="next-btn flex h-12 w-12 items-center justify-center cursor-pointer rounded-full border-2 border-gray-300 transition-all duration-300 group hover:border-blue-500 hover:bg-blue-50"
                 hx-get="{% url 'home_app:vehicules-vedette-partial' %}?page={{ vehicules_page.next_page_number }}"
-                hx-target="#vedette_gallery"
-                hx-swap="outerHTML transition:true">
+                hx-target="#vedette_section_wrapper"
+                hx-swap="innerHTML scroll:none">
             <i class="fas fa-chevron-right text-xl text-gray-400 transition-colors group-hover:text-blue-600"></i>
         </button>
         {% else %}
@@ -123,4 +123,6 @@
         <span class="current-page">{{ vehicules_page.number }}</span> / <span class="total-pages">{{ vehicules_page.paginator.num_pages }}</span>
     </div>
 
-</div>
+
+
+ 

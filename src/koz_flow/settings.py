@@ -163,7 +163,8 @@ WSGI_APPLICATION = 'koz_flow.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
-'''if DEBUG:
+'''
+if DEBUG:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -279,7 +280,7 @@ NPM_BIN_PATH = shutil.which("npm") or "/usr/bin/npm"
 
 # Host Redis par défaut selon le mode
 REDIS_HOST = '127.0.0.1' if DEBUG else 'redis'
-'''
+''' 
 CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', f'redis://{REDIS_HOST}:6379/0')
 CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', f'redis://{REDIS_HOST}:6379/1')
 '''

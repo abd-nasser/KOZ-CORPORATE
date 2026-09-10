@@ -31,7 +31,7 @@
         }
 </style>
 
-<div id="service-gallery-container" class="relative w-full max-w-8xl  h-[550px] md:h-[650px]  overflow-hidden shadow-2xl border border-slate-800/80 group">
+
     {% for service in services_page %}
 
     <!-- 1. IMAGE DE FOND (Full Coverage + Zoom Infini) -->
@@ -54,7 +54,7 @@
     <button 
         hx-get="{% url 'home_app:services-vedette-partial' %}?page={% if services_page.has_previous %}{{ services_page.previous_page_number }}{% else %}{{ services_total_page }}{% endif %}"
         hx-target="#service-gallery-container"
-        hx-swap="outerHTML transition:true"
+        hx-swap="innerHTML scroll:none transition:true"
         aria-label="Service précédent"
         class="glow-floating-arrow absolute left-4 md:left-8 top-1/2 z-30 p-4 md:p-5 rounded-full img-contain bg-slate-900/80 text-white backdrop-blur-md border border-blue-400/50 hover:bg-blue-600 transition-all duration-300">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 md:h-8 md:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -66,7 +66,7 @@
     <button 
         hx-get="{% url 'home_app:services-vedette-partial' %}?page={% if services_page.has_next %}{{ services_page.next_page_number }}{% else %}1{% endif %}"
         hx-target="#service-gallery-container"
-        hx-swap="outerHTML transition:true"
+        hx-swap="innerHTML scroll:none transition:true"
         aria-label="Service suivant"
         class="glow-floating-arrow absolute right-4 md:right-8 top-1/2 z-30 p-4 md:p-5 rounded-full bg-slate-900/80 text-white backdrop-blur-md border border-blue-400/50 hover:bg-blue-600 transition-all duration-300">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 md:h-8 md:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -112,4 +112,4 @@
         <p class="text-xl">Aucun service en vedette pour le moment.</p>
     </div>
     {% endfor %}
-</div>
+

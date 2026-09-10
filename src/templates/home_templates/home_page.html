@@ -506,8 +506,9 @@
         </div>
 
         <!-- Galerie HTMX -->
-        
+        <div id="service-gallery-container" class="relative w-full max-w-8xl  h-250 md:h-162.5  overflow-hidden shadow-2xl border border-slate-800/80 group">
         {% include 'partials/services/service_vedette_gallery.html' %}
+        </div>
     </div>
     
     
@@ -568,7 +569,10 @@
                             <i class="fas fa-arrow-right text-xs transition-transform duration-300 group-hover/btn:translate-x-1"></i>
                         </a>
                     </div>
+                        
                 </div>
+                <!-- BOUTON VOIR TOUT & ANIMATIONS -->
+   
             {% empty %}
                 <div class="col-span-full text-center text-gray-400 py-8">
                     Aucun type de véhicule disponible pour le moment.
@@ -577,44 +581,46 @@
         </div>
 
       
-
+         <div class="text-center text-anim mt-8">
+                            <a href="{% url 'vehicul_app:site-vehicul-list' %}" 
+                            class="inline-flex items-center gap-2 px-8 py-3.5 border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white rounded-xl transition-all duration-300 font-medium">
+                                <span>Voir tous les véhicules</span>
+                            </a>
+                        </div>
     </div>
 </section>
 
 <!-- ============================================================ -->
-<!-- SECTION :VÉHICULE VEDETTE (avec pagination)                  -->
+<!-- SECTION : VÉHICULE VEDETTE (avec pagination)                 -->
 <!-- ============================================================ -->
 <section id="section-vehicule-vedette" class="py-16 relative section_vehicule_vedette bg-white">
-            <div class="container fade-gallery mx-auto px-4">
-                <div class="gallery-contain w-full">
-                    <div class="vehicul_vedette_titre">
-                        <span class="inline-block text-xs font-semibold text-blue-600 uppercase tracking-widest bg-blue-50 px-4 py-1.5 rounded-full mb-3">
-                            Decouvrez votre bonnheur ici
-                        </span>
-                        <h2 class="text-4xl md:text-5xl font-bold text-gray-800">
-                            Parcourez nos <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-indigo-600">véhicules vedette</span>
-                        </h2>
-                        <p class="text-gray-500 mt-3 max-w-2xl mx-auto">
-                           Explorez notre sélection de véhicules vedette et découvrez les modèles disponibles au fil des pages.
-                        </p>
-                    </div>
-                    
-                        {% include "partials/vehiculs/vehicul_vedette_gallery.html" %}
+    <div class="container fade-gallery mx-auto px-4">
+        
+        <!-- Ajout de 'flex' ici pour que flex-col, items-center et text-center fonctionnent -->
+        <div class="gallery-contain flex flex-col items-center text-center w-full">
+            
+            <!-- Titre centré -->
+            <div class="vehicul_vedette_titre max-w-3xl">
+                <span class="inline-block text-xs font-semibold text-blue-600 uppercase tracking-widest bg-blue-50 px-4 py-1.5 rounded-full mb-3">
+                    Découvrez votre bonheur ici
+                </span>
+                <h2 class="text-4xl md:text-5xl font-bold text-gray-800">
+                    Parcourez nos <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-indigo-600">véhicules vedette</span>
+                </h2>
+                <p class="text-gray-500 mt-3">
+                    Explorez notre sélection de véhicules vedette et découvrez les modèles disponibles au fil des pages.
+                </p>
             </div>
-             <!-- ===== BOUTON VOIR TOUT ===== -->
-              <!-- ===== ACTIONS ET ANIMATIONS ===== -->
-        <div class="text-center text-anim mt-10">
-            <a href="{% url 'vehicul_app:site-vehicul-list' %}" 
-               class="inline-flex items-center gap-2 px-8 py-3.5 border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white rounded-xl transition-all duration-300 font-medium">
-                <span>Voir tous les véhicules</span>
-            </a>
-        </div>
+            
+            <!-- CONTENEUR STABLE DÉDIÉ HTMX -->
+            <!-- 'flex flex-col items-center' centre automatiquement la carte et la pagination envoyées par le partial -->
+            <div id="vedette_section_wrapper" class="w-full h-250 overflow-hidden  mt-6 flex flex-col items-center justify-center">
+                {% include "partials/vehiculs/vehicul_vedette_gallery.html" %}
+            </div>
 
-        <div class="fleche_anim flex justify-center mt-6">
-            <i class="fas fa-arrow-right fleche relative inline-flex text-blue-500 text-5xl"></i>
         </div>
+    </div>
 </section>
-
 
 <!-- ============================================================ -->
 <!-- SECTION  : MODÈLES DE FINANCEMENT                            -->

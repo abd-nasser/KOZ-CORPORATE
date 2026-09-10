@@ -490,7 +490,7 @@
 <!-- ============================================================ -->
 <!-- SECTION SERVICES – SCROLL IMMERSIF                           -->
 <!-- ============================================================ -->
-<section id="services-section" class="relative w-full bg-white services-section overflow-hidden min-h-[600px] flex flex-col items-center justify-center">
+<section id="services-section" class="relative w-full bg-white services-section overflow-hidden min-h-[650px] flex flex-col items-center justify-center">
     <div class="service-fade w-full">
         <!-- En-tête de section adapté aux Services -->
         <div class="service_vedette_titre text-center mb-12">
@@ -505,10 +505,11 @@
             </p>
         </div>
 
-        <!-- Galerie HTMX -->
-        <div id="service-gallery-container" class="relative w-full max-w-8xl  h-150 md:h-162.5  overflow-hidden shadow-2xl border border-slate-800/80 group">
-        {% include 'partials/services/service_vedette_gallery.html' %}
-        </div>
+       <!-- 2. Galerie HTMX Services -->
+<div id="service-gallery-container" 
+     class="relative w-full max-w-8xl h-[600px] md:h-[650px] overflow-hidden shadow-2xl  group">
+    {% include 'partials/services/service_vedette_gallery.html' %}
+</div>
     </div>
     
     
@@ -613,8 +614,9 @@
             </div>
             
             <!-- CONTENEUR STABLE DÉDIÉ HTMX -->
-            <!-- 'flex flex-col items-center' centre automatiquement la carte et la pagination envoyées par le partial -->
-            <div id="vedette_section_wrapper" class="w-full min-h-150 overflow-hidden  mt-4 flex flex-col items-center justify-center">
+           <!-- 1. Vehicule Vedette Wrapper -->
+            <div id="vedette_section_wrapper" 
+                class="w-full min-h-[600px] overflow-hidden mt-4 flex flex-col items-center justify-center">
                 {% include "partials/vehiculs/vehicul_vedette_gallery.html" %}
             </div>
 

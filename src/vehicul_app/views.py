@@ -383,6 +383,8 @@ def ajouter_image(request, pk):
     # ✅ Redirection vers la page d'images
     return redirect('vehicul_app:vehicul-images-list', pk=vehicule.pk)
     
+from django.urls import reverse
+
 class VehiculeImageDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = VehiculeImage
     template_name = "vehicul_templates/vehicul_image_confirm_delete.html"
@@ -391,12 +393,12 @@ class VehiculeImageDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteVie
         return self.request.user.is_superuser or self.request.user.role == "directeur"
     
     def get_success_url(self):
-        return reverse_lazy('vehicul_app:detail-vehicul', kwargs={'pk': self.object.vehicule.pk})
+        # self.object est automatiquement défini par Django avant d'appeler get_success_url()
+        return reverse('vehicul_app:vehicul-images-list', kwargs={'pk': self.object.vehicule.pk})
     
     def delete(self, request, *args, **kwargs):
-        response = super().delete(request, *args, **kwargs)
         messages.success(request, "Image supprimée avec succès !")
-        return response
+        return super().delete(request, *args, **kwargs)
     
 
 # ============================================================

@@ -173,6 +173,7 @@ WSGI_APPLICATION = 'koz_flow.wsgi.application'
     }
 else:'''
     # 3. Base de données avec valeurs de secours
+
 DATABASES = {
                 'default': {
                     'ENGINE': 'django.db.backends.postgresql',

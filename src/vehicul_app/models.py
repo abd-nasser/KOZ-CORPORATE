@@ -57,7 +57,8 @@ class Vehicul(models.Model):
     TYPES_CARBURANT_CHOICES = [
         ('essence', "Essence"),
         ("diesel", "Diesel"),
-        ("electrique", 'Electrique')
+        ("electrique", 'Electrique'),
+        ('hybride', "Hybride")
     ]
     
     ETAT_CHOICES = [

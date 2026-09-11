@@ -37,9 +37,7 @@
                 </button>
                 {% endif %}
             </div>
-            <div class="text-sm text-gray-400">
-                <i class="fas fa-images mr-1"></i> {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
-            </div>
+          
         </div>
     </nav>
    <!-- Messages flash -->
@@ -66,102 +64,58 @@
                 Image {{ page_obj.number }} sur {{ page_obj.paginator.count }}
             </p>
         </div>
+<!-- ========== IMAGE UNIQUE ========== -->
+<div id="image-container" class="w-full max-w-5xl">
+    {% for image in images %}
+    <div class="relative bg-black rounded-2xl overflow-hidden shadow-2xl">
+        <!-- Image -->
+        <img src="{{ image.image.url }}" 
+             alt="{{ image.alt_text|default:vehicul.modele }}"
+             class="w-full max-h-[70vh] object-contain">
 
-        <!-- ========== IMAGE UNIQUE ========== -->
-        <div id="image-container" class="w-full max-w-5xl">
-            {% for image in images %}
-            <div class="relative bg-black rounded-2xl overflow-hidden shadow-2xl">
-                <!-- Image -->
-                <img src="{{ image.image.url }}" 
-                     alt="{{ image.alt_text|default:vehicul.modele }}"
-                     class="w-full max-h-[70vh] object-contain">
-
-                <!-- Badge : image principale -->
-                {% if image.est_principale %}
-                <div class="absolute top-4 left-4 bg-yellow-500 text-black text-xs px-3 py-1 rounded-full flex items-center gap-1 font-medium">
-                    <i class="fas fa-star"></i> Principale
-                </div>
-                {% endif %}
-
-                <!-- Info en bas -->
-                <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-                    <div class="flex flex-wrap items-center justify-between gap-2">
-                        <div>
-                            <p class="text-white text-sm font-medium">{{ vehicul.marque.nom }} {{ vehicul.modele }}</p>
-                            <p class="text-gray-400 text-xs">
-                                <i class="fas fa-clock mr-1"></i> {{ image.date_ajout|date:"d/m/Y" }}
-                            </p>
-                        </div>
-                        <div class="text-gray-400 text-xs">
-                            Ordre : {{ image.ordre }}
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Overlay actions (survol) -->
-                <div class="absolute inset-0 bg-black/30 opacity-0 hover:opacity-100 transition flex items-center justify-center gap-4">
-                    {% if user.is_superuser or user.role == "directeur" %}
-                    <button onclick="document.getElementById('delete_vehicul_image_modal').showModal()"
-                       class="bg-red-600 hover:bg-red-700 text-white p-3 rounded-full transition"
-                       >
-                        <i class="fas fa-trash"></i>
-                    </button>
-                    {% include 'modals/vehicul/vehicul_image_confirm_delete.html'%}
-                    {% endif %}
-                </div>
-            </div>
-            {% empty %}
-            <div class="text-center text-gray-400 py-12">
-                <i class="fas fa-image text-6xl mb-4 block opacity-40"></i>
-                <p class="text-lg font-medium">Aucune image</p>
-                <p class="text-sm">Ce véhicule n'a pas encore d'images</p>
-               
-            </div>
-            {% endfor %}
-        </div>
-
-        <!-- ========== PAGINATION (navigation) ========== -->
-        {% if page_obj.paginator.num_pages > 1 %}
-        <div class="flex items-center justify-center gap-4 mt-8 w-full max-w-5xl">
-            {% if page_obj.has_previous %}
-            <a href="?page={{ page_obj.previous_page_number }}" 
-               class="flex-1 md:flex-none px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl transition flex items-center justify-center gap-2 font-medium backdrop-blur-sm border border-white/10">
-                <i class="fas fa-chevron-left"></i> Précédent
-            </a>
-            {% else %}
-            <span class="flex-1 md:flex-none px-6 py-3 bg-white/5 text-gray-600 rounded-xl flex items-center justify-center gap-2 font-medium cursor-not-allowed border border-white/5">
-                <i class="fas fa-chevron-left"></i> Précédent
-            </span>
-            {% endif %}
-
-            <!-- Indicateur de progression -->
-            <div class="hidden md:flex items-center gap-2">
-                {% for i in page_obj.paginator.page_range %}
-                    {% if i == page_obj.number %}
-                        <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
-                    {% else %}
-                        <span class="w-2 h-2 rounded-full bg-white/20"></span>
-                    {% endif %}
-                {% endfor %}
-            </div>
-
-            <span class="text-white/70 text-sm font-medium md:hidden">
-                {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
-            </span>
-
-            {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}" 
-               class="flex-1 md:flex-none px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl transition flex items-center justify-center gap-2 font-medium backdrop-blur-sm border border-white/10">
-                Suivant <i class="fas fa-chevron-right"></i>
-            </a>
-            {% else %}
-            <span class="flex-1 md:flex-none px-6 py-3 bg-white/5 text-gray-600 rounded-xl flex items-center justify-center gap-2 font-medium cursor-not-allowed border border-white/5">
-                Suivant <i class="fas fa-chevron-right"></i>
-            </span>
-            {% endif %}
+        <!-- Badge : image principale (Haut Gauche) -->
+        {% if image.est_principale %}
+        <div class="absolute top-4 left-4 bg-yellow-500 text-black text-xs px-3 py-1 rounded-full flex items-center gap-1 font-medium z-10">
+            <i class="fas fa-star"></i> Principale
         </div>
         {% endif %}
 
+        <!-- Action Suppression Fixe (Haut Droite) -->
+        {% if user.is_superuser or user.role == "directeur" %}
+        <div class="absolute  top-4 right-4 z-10">
+            <button onclick="document.getElementById('delete_vehicul_image_modal').showModal()"
+                    class="bg-red-600/90 hover:bg-red-700 text-white w-9 h-9 rounded-full flex items-center cursor-pointer justify-center shadow-lg transition backdrop-blur-sm"
+                    title="Supprimer l'image">
+                <i class="fas fa-trash text-sm"></i>
+            </button>
+            {% include 'modals/vehicul/vehicul_image_confirm_delete.html' %}
+        </div>
+        {% endif %}
+
+        <!-- Info en bas -->
+        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                    <p class="text-white text-sm font-medium">{{ vehicul.marque.nom }} {{ vehicul.modele }}</p>
+                    <p class="text-gray-400 text-xs">
+                        <i class="fas fa-clock mr-1"></i> {{ image.date_ajout|date:"d/m/Y" }}
+                    </p>
+                </div>
+                <div class="text-gray-400 text-xs">
+                    Ordre : {{ image.ordre }}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="text-center text-gray-400 py-12">
+        <i class="fas fa-image text-6xl mb-4 block opacity-40"></i>
+        <p class="text-lg font-medium">Aucune image</p>
+        <p class="text-sm">Ce véhicule n'a pas encore d'images</p>
+    </div>
+    {% endfor %}
+</div>
+     
     </main>
 
     <!-- ========== MODAL UPLOAD (si directeur) ========== -->
@@ -170,21 +124,6 @@
     {% endif %}
 
     <!-- ========== SCRIPT ========== -->
-    <script>
-        // Navigation au clavier (flèches gauche/droite)
-        document.addEventListener('keydown', function(e) {
-            {% if page_obj.has_previous %}
-            if (e.key === 'ArrowLeft') {
-                window.location.href = '?page={{ page_obj.previous_page_number }}';
-            }
-            {% endif %}
-            {% if page_obj.has_next %}
-            if (e.key === 'ArrowRight') {
-                window.location.href = '?page={{ page_obj.next_page_number }}';
-            }
-            {% endif %}
-        });
-    </script>
-
+  
 </body>
 </html>

@@ -53,7 +53,6 @@ import time
 logger = logging.getLogger(__name__)
 
 
-
 @login_required
 def creer_offre(request, demande_id=None):
     demande = get_object_or_404(demande_financement, id=demande_id)
@@ -69,53 +68,60 @@ def creer_offre(request, demande_id=None):
     if request.method == 'POST':
         form = OffreFinancementForm(request.POST)
         if form.is_valid():
-            offre = form.save(commit=False)
-            offre.client = demande.client
-            offre.demande_financement = demande
-            offre.prix_vehicule = form.cleaned_data['prix_vehicule']
-            offre.apport_demande = form.cleaned_data['apport_demande']
-            offre.montant_finance = offre.prix_vehicule - offre.apport_demande
-            offre.mensualite = calculer_mensualite(offre.montant_finance, offre.taux_interet, offre.duree_mois)
-            offre.type_offre = "demande"
-            offre.statut = "envoyee"
-            offre.save()
-            demande.etape = 'convertis_en_offre'
-            demande.save()
-            
-            # ✉️ EMAIL AU CLIENT
             try:
-                context_email = {
-                    'client': demande.client,
-                    'offre_id': offre.id,
-                    'vehicule': str(offre.vehicule_propose) if offre.vehicule_propose else "Véhicule sélectionné",
-                    'montant_finance': offre.montant_finance,
-                    'mensualite': offre.mensualite,
-                    'duree_mois': offre.duree_mois,
-                    'apport': offre.apport_demande,
-                    'date_expiration': offre.date_expiration,
-                    'lien_offre': request.build_absolute_uri(offre.get_absolute_url()),
-                }
-                html_message = render_to_string('emails/offres/contre_offre_client.html', context_email)
-                plain_message = strip_tags(html_message)
+                with transaction.atomic():
+                    offre = form.save(commit=False)
+                    offre.client = demande.client
+                    offre.demande_financement = demande
+                    offre.prix_vehicule = form.cleaned_data['prix_vehicule']
+                    offre.apport_demande = form.cleaned_data['apport_demande']
+                    offre.montant_finance = offre.prix_vehicule - offre.apport_demande
+                    offre.mensualite = calculer_mensualite(offre.montant_finance, offre.taux_interet, offre.duree_mois)
+                    offre.type_offre = "demande"
+                    offre.statut = "envoyee"
+                    offre.save()
+
+                    demande.etape = 'convertis_en_offre'
+                    demande.save()
+                    
+                    # ✉️ Email au client
+                    context_email = {
+                        'client': demande.client,
+                        'offre_id': offre.id,
+                        'vehicule': str(offre.vehicule_propose) if offre.vehicule_propose else "Véhicule sélectionné",
+                        'montant_finance': offre.montant_finance,
+                        'mensualite': offre.mensualite,
+                        'duree_mois': offre.duree_mois,
+                        'apport': offre.apport_demande,
+                        'date_expiration': offre.date_expiration,
+                        'lien_offre': request.build_absolute_uri(offre.get_absolute_url()),
+                    }
+                    html_message = render_to_string('emails/offres/contre_offre_client.html', context_email)
+                    plain_message = strip_tags(html_message)
+                    
+                    # Déclenchement Celery après la confirmation BDD
+                    transaction.on_commit(
+                        lambda: send_email_task.delay(
+                            subject="📄 Une offre de financement vous attend - KOZ Services",
+                            message=plain_message,  # Vérifie si c'est 'message' ou 'plain_message' dans ta task
+                            from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', settings.EMAIL_HOST_USER),
+                            recipient_list=[demande.client.email],
+                            html_message=html_message,
+                        )
+                    )
                 
-                send_mail(
-                    subject="📄 Une offre de financement vous attend - KOZ Services",
-                    message=plain_message,
-                    from_email=settings.EMAIL_HOST_USER,
-                    recipient_list=[demande.client.email],
-                    html_message=html_message,
-                    fail_silently=False,
-                )
-            except Exception as e:
-                print(f"Erreur envoi email au client: {e}")
-            
-            messages.success(request, f"Offre créée et envoyée à {demande.client.nom_complet}.")
-            
-            # Redirection selon le rôle
-            if request.user.role == 'commercial':
-                return redirect('commercial_app:offre-detail', offre.pk)
-            else:
+                messages.success(request, f"Offre créée et envoyée à {demande.client.nom_complet}.")
+                
+                # Redirection selon le rôle
+                if request.user.role == 'commercial':
+                    return redirect('commercial_app:offre-detail', offre.pk)
                 return redirect('directeur_app:offre-detail', offre.pk)
+
+            except Exception as e:
+                logger.exception(f"Erreur lors de la création de l'offre : {e}")
+                messages.error(request, "Une erreur technique est survenue lors de la création de l'offre.")
+                return redirect('leads_app:detail-demande', demande.pk)
+                
         else:
             # Formulaire invalide
             template = 'commercial_templates/commercial_demande_detail.html' if request.user.role == 'commercial' else 'directeur_templates/directeur_demande_detail.html'
@@ -131,11 +137,11 @@ def creer_offre(request, demande_id=None):
 @login_required
 def accepter_offre(request, offre_id):
     if request.user.role != "client":
-        messages.error(request, "Vous n'etes pas autorisé à exectuer cette action")
+        messages.error(request, "Vous n'êtes pas autorisé à exécuter cette action.")
         return redirect("client_app:client-view")
-    
+
     offre = get_object_or_404(Offre, id=offre_id, client=request.user)
-    
+
     if offre.statut != 'envoyee':
         response = render(request, 'partials/offre/_offres_result.html', {
             'success': False,
@@ -146,51 +152,71 @@ def accepter_offre(request, offre_id):
         response['HX-Trigger'] = 'closeOffreGestionModal'
         return response
 
-    with transaction.atomic():
-        offre.statut = 'acceptee'
-        offre.save()
+    try:
+        with transaction.atomic():
+            # 1. Mise à jour de l'offre
+            offre.statut = 'acceptee'
+            offre.save(update_fields=['statut'])
 
-
-        vente = None
-        if offre.type_offre == "simple":
-            vente = Vente.objects.create(
-                client=request.user,
-                vehicul=offre.vehicule_propose,
-                statut="gestion_de_statut",
-                montant=offre.montant_propose,
-                montant_total_paye = offre.montant_propose,
-                offre=offre,
-            )
-
-    commerciaux = kozUser.objects.filter(role='commercial')
-    emails = [c.email for c in commerciaux if c.email]
-    if emails:
-        try:
-            for commercial in commerciaux:
-                if not commercial.email:
-                    continue
-                context_email = {
-                    'client': offre.client,
-                    'offre_id': offre.id,
-                    'date_acceptation': timezone.now(),
-                    'vehicule': str(offre.vehicule_propose) if offre.vehicule_propose else "Véhicule sélectionné",
-                    'montant_finance': offre.montant_finance,
-                    'lien_vente': request.build_absolute_uri(vente.get_absolute_url()) if vente else None,
-                    'lien_client': request.build_absolute_uri(offre.client.get_absolute_url()),
-                    'commercial': commercial,
-                }
-                html_message = render_to_string('emails/offres/offre_acceptee_commercial.html', context_email)
-                plain_message = strip_tags(html_message)
-                send_mail(
-                    subject="✅ Un client a accepté son offre - KOZ Services",
-                    message=plain_message,
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[commercial.email],
-                    html_message=html_message,
-                    fail_silently=False,
+            # 2. Création de la vente si offre simple
+            vente = None
+            if offre.type_offre == "simple":
+                vente = Vente.objects.create(
+                    client=request.user,
+                    vehicul=offre.vehicule_propose,
+                    statut="gestion_de_statut",
+                    montant=offre.montant_propose,
+                    montant_total_paye=offre.montant_propose,
+                    offre=offre,
                 )
-        except Exception as e:
-            logger.error(f"Erreur envoi email: {e}")
+
+            # 3. Préparation des URLs pour l'email
+            lien_vente = request.build_absolute_uri(vente.get_absolute_url()) if vente else None
+            lien_client = request.build_absolute_uri(offre.client.get_absolute_url())
+            now_date = timezone.now()
+
+            # Récupération des commerciaux actifs
+            commerciaux = list(kozUser.objects.filter(role='commercial', is_active=True))
+
+            # 4. Fonction d'envoi en file d'attente Celery après validation BDD
+            def notifier_commerciaux():
+                for commercial in commerciaux:
+                    if not commercial.email:
+                        continue
+
+                    context_email = {
+                        'client': offre.client,
+                        'offre_id': offre.id,
+                        'date_acceptation': now_date,
+                        'vehicule': str(offre.vehicule_propose) if offre.vehicule_propose else "Véhicule sélectionné",
+                        'montant_finance': offre.montant_finance,
+                        'lien_vente': lien_vente,
+                        'lien_client': lien_client,
+                        'commercial': commercial,
+                    }
+                    html_message = render_to_string('emails/offres/offre_acceptee_commercial.html', context_email)
+                    plain_txt = strip_tags(html_message)
+
+                    send_email_task.delay(
+                        subject="✅ Un client a accepté son offre - KOZ Services",
+                        plain_message=plain_txt,
+                        from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@koz.com'),
+                        recipient_list=[commercial.email],
+                        html_message=html_message,
+                    )
+
+            transaction.on_commit(notifier_commerciaux)
+
+    except Exception as e:
+        logger.exception(f"Erreur lors de l'acceptation de l'offre #{offre_id} : {e}")
+        response = render(request, 'partials/offre/_offres_result.html', {
+            'success': False,
+            'title': '❌ Erreur technique',
+            'message': "Une erreur est survenue lors de la validation. Veuillez réessayer.",
+            'reload_on_close': False,
+        })
+        response['HX-Trigger'] = 'closeOffreGestionModal'
+        return response
 
     response = render(request, 'partials/offre/_offres_result.html', {
         'success': True,
@@ -204,128 +230,164 @@ def accepter_offre(request, offre_id):
 @login_required
 def refuser_offre(request, offre_id):
     if request.user.role != "client":
-        messages.error(request, "Vous n'etes pas autorisé à exectuer cette action")
+        messages.error(request, "Vous n'êtes pas autorisé à exécuter cette action.")
         return redirect("client_app:client-view")
-    
+
     offre = get_object_or_404(Offre, id=offre_id, client=request.user)
-    
+
     if offre.statut != 'envoyee':
         response = render(request, 'partials/offre/_offres_result.html', {
-                'success': False,
-                'title': '❌ Action impossible',
-                'message': "Cette offre ne peut pas être refusée.",
-                'reload_on_close': False,
+            'success': False,
+            'title': '❌ Action impossible',
+            'message': "Cette offre ne peut pas être refusée.",
+            'reload_on_close': False,
         })
         response['HX-Trigger'] = 'closeOffreGestionModal'
         return response
-        
-    
-    offre.statut = 'refusee'
-    offre.save()
-    
-    # ✉️ Email à tous les commerciaux
-    commerciaux = kozUser.objects.filter(role='commercial')
-    if commerciaux.exists():
-        try:
-            for commercial in commerciaux:
-                if not commercial.email:
-                    continue
-                context_email = {
-                    'client': offre.client,
-                    'offre_id': offre.id,
-                    'vehicule': str(offre.vehicule_propose) if offre.vehicule_propose else "Non renseigné",
-                    'date_refus': timezone.now(),
-                    'lien_client': request.build_absolute_uri(offre.client.get_absolute_url()),
-                    'commercial': commercial,
-                }
-                html_message = render_to_string('emails/offres/offre_refusee_commercial.html', context_email)
-                plain_message = strip_tags(html_message)
-                send_mail(
-                    subject="❌ Un client a refusé son offre - KOZ Services",
-                    message=plain_message,
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[commercial.email],
-                    html_message=html_message,
-                    fail_silently=False,
-                )
-        except Exception as e:
-            logger.error(f"Erreur envoi email au commercial: {e}")
-    
-   
-    response = render(request, 'partials/offre/_offres_result.html', {
-            'success': True,
-            'title': '❌ Offre refusée',
-            'message': "L'offre a été refusée et le commercial a été notifié.",
-            'reload_on_close': True,
-        })
-    response['HX-Trigger'] = 'closeOffreGestionModal'
-    return response
-   
-@login_required
-def negocier_offre(request, offre_id):
-    if request.user.role != "client":
-        messages.error(request, "Vous n'etes pas autorisé à exectuer cette action")
-        return redirect("client_app:client-view")
-        
-    offre = get_object_or_404(Offre, id=offre_id, client=request.user)
-    
-    if offre.statut != 'envoyee':
+
+    try:
+        with transaction.atomic():
+            # 1. Mise à jour atomique du statut
+            offre.statut = 'refusee'
+            offre.save(update_fields=['statut'])
+
+            # 2. Préparation du contexte d'email
+            lien_client = request.build_absolute_uri(offre.client.get_absolute_url())
+            now_date = timezone.now()
+            vehicule = offre.vehicule_propose if offre.vehicule_propose else "Non renseigné"
+
+            # Récupération des commerciaux actifs
+            commerciaux = list(kozUser.objects.filter(role='commercial', is_active=True))
+
+            # 3. Notification Celery exécutée uniquement APRÈS le commit BDD
+            def notifier_commerciaux():
+                for commercial in commerciaux:
+                    if not commercial.email:
+                        continue
+
+                    context_email = {
+                        'client': offre.client,
+                        'offre_id': offre.id,
+                        'vehicule': vehicule,
+                        'date_refus': now_date,
+                        'lien_client': lien_client,
+                        'commercial': commercial,
+                    }
+                    html_message = render_to_string('emails/offres/offre_refusee_commercial.html', context_email)
+                    plain_txt = strip_tags(html_message)
+
+                    send_email_task.delay(
+                        subject="❌ Un client a refusé son offre - KOZ Services",
+                        plain_message=plain_txt,
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        recipient_list=[commercial.email],
+                        html_message=html_message,
+                    )
+
+            transaction.on_commit(notifier_commerciaux)
+
+    except Exception as e:
+        logger.exception(f"Erreur lors du refus de l'offre #{offre_id} : {e}")
         response = render(request, 'partials/offre/_offres_result.html', {
-                'success': False,
-                'title': '❌ Action impossible',
-                'message': "Seules les offres envoyées peuvent être renégociées.",
-                'reload_on_close': False,
-            })
+            'success': False,
+            'title': '❌ Erreur technique',
+            'message': "Une erreur est survenue lors du traitement. Veuillez réessayer.",
+            'reload_on_close': False,
+        })
         response['HX-Trigger'] = 'closeOffreGestionModal'
         return response
-        
-    
-    # 1️⃣ Changer le statut de l'offre
-    offre.statut = 'brouillon'
-    offre.save()
-    
-    # 2️⃣ 📨 Email à tous les commerciaux
-    commerciaux = kozUser.objects.filter(role='commercial')
-    if commerciaux.exists():
-        try:
-            for commercial in commerciaux:
-                if not commercial.email:
-                    continue
-                context_email = {
-                    'client': offre.client,
-                    'offre_id': offre.id,
-                    'vehicule': str(offre.vehicule_propose) if offre.vehicule_propose else "Non renseigné",
-                    'montant_finance': offre.montant_finance,
-                    'date_demande': timezone.now(),
-                    'lien_offre': request.build_absolute_uri(offre.get_absolute_url()),
-                    'lien_client': request.build_absolute_uri(offre.client.get_absolute_url()),
-                    'commercial': commercial,
-                }
-                html_message = render_to_string('emails/offres/offre_negociation_commercial.html', context_email)
-                plain_message = strip_tags(html_message)
-                send_mail(
-                    subject="🔄 Demande de renégociation d'offre - KOZ Services",
-                    message=plain_message,
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[commercial.email],
-                    html_message=html_message,
-                    fail_silently=False,
-                )
-        except Exception as e:
-            logger.error(f"Erreur envoi email au commercial: {e}")
-    
-    
-    
-    
+
     response = render(request, 'partials/offre/_offres_result.html', {
-            'success': True,
-            'title': '🔄 Renégociation demandée',
-            'message': "Votre demande de renégociation a été envoyée au commercial.",
-            'reload_on_close': True,
-        })
+        'success': True,
+        'title': '❌ Offre refusée',
+        'message': "L'offre a été refusée et le commercial a été notifié.",
+        'reload_on_close': True,
+    })
     response['HX-Trigger'] = 'closeOffreGestionModal'
     return response
 
+
+@login_required
+def negocier_offre(request, offre_id):
+    if request.user.role != "client":
+        messages.error(request, "Vous n'êtes pas autorisé à exécuter cette action.")
+        return redirect("client_app:client-view")
+
+    offre = get_object_or_404(Offre, id=offre_id, client=request.user)
+
+    if offre.statut != 'envoyee':
+        response = render(request, 'partials/offre/_offres_result.html', {
+            'success': False,
+            'title': '❌ Action impossible',
+            'message': "Seules les offres envoyées peuvent être renégociées.",
+            'reload_on_close': False,
+        })
+        response['HX-Trigger'] = 'closeOffreGestionModal'
+        return response
+
+    try:
+        with transaction.atomic():
+            # 1. Passage de l'offre en brouillon
+            offre.statut = 'brouillon'
+            offre.save(update_fields=['statut'])
+
+            # 2. Préparation du contexte d'email
+            lien_offre = request.build_absolute_uri(offre.get_absolute_url())
+            lien_client = request.build_absolute_uri(offre.client.get_absolute_url())
+            now_date = timezone.now()
+            vehicule = offre.vehicule_propose if offre.vehicule_propose else "Non renseigné"
+
+            commerciaux = list(kozUser.objects.filter(role='commercial', is_active=True))
+
+            # 3. Notification Celery (déclenchée post-commit BDD)
+            def notifier_commerciaux():
+                for commercial in commerciaux:
+                    if not commercial.email:
+                        continue
+
+                    context_email = {
+                        'client': offre.client,
+                        'offre_id': offre.id,
+                        'vehicule': vehicule,
+                        'montant_finance': offre.montant_finance,
+                        'date_demande': now_date,
+                        'lien_offre': lien_offre,
+                        'lien_client': lien_client,
+                        'commercial': commercial,
+                    }
+                    html_message = render_to_string('emails/offres/offre_negociation_commercial.html', context_email)
+                    plain_txt = strip_tags(html_message)
+
+                    # Alignement strict sur la signature : (subject, plain_message, from_email, recipient_list, html_message)
+                    send_email_task.delay(
+                        subject="🔄 Demande de renégociation d'offre - KOZ Services",
+                        plain_message=plain_txt,
+                        from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@koz.com'),
+                        recipient_list=[commercial.email],
+                        html_message=html_message,
+                    )
+
+            transaction.on_commit(notifier_commerciaux)
+
+    except Exception as e:
+        logger.exception(f"Erreur lors de la renégociation de l'offre #{offre_id} : {e}")
+        response = render(request, 'partials/offre/_offres_result.html', {
+            'success': False,
+            'title': '❌ Erreur technique',
+            'message': "Une erreur est survenue lors du traitement. Veuillez réessayer.",
+            'reload_on_close': False,
+        })
+        response['HX-Trigger'] = 'closeOffreGestionModal'
+        return response
+
+    response = render(request, 'partials/offre/_offres_result.html', {
+        'success': True,
+        'title': '🔄 Renégociation demandée',
+        'message': "Votre demande de renégociation a été envoyée au commercial.",
+        'reload_on_close': True,
+    })
+    response['HX-Trigger'] = 'closeOffreGestionModal'
+    return response
    
 class CommercialClientListFilter(LoginRequiredMixin, UserPassesTestMixin, ListView):  
     def test_func(self):
@@ -402,157 +464,248 @@ class CommercialDashboardView(LoginRequiredMixin, UserPassesTestMixin, TemplateV
 
 ##########################################________________OFFRE_VIEW_________________####################################################
 class OffreSimpleCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
-    
+
     def test_func(self):
-        return self.request.user.is_superuser or self.request.user.role in ["commercial", "directeur"]
-    
+        return self.request.user.is_superuser or self.request.user.role in [
+            "commercial",
+            "directeur",
+        ]
+
     model = Offre
-    form_class = OffreSimpleForm  # ← Utilise le formulaire complet
+    form_class = OffreSimpleForm
     template_name = "clients_templates/client_detail.html"
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if "offre_simple_form" not in context:
             context["offre_simple_form"] = OffreSimpleForm()
         return context
-    
+
     def form_valid(self, form):
-    
         client_id = self.kwargs.get("pk")
         client = get_object_or_404(kozUser, id=client_id)
-        
-        offre = form.save(commit=False)
-        offre.client = client
-        offre.type_offre = "simple"
-        offre.statut = "envoyee"
-        offre.save()
-        
-        # ✉️ Email au client
+
         try:
-            context_email = {
-                'client': client,
-                'offre_id': offre.id,
-                'montant_propose': offre.montant_propose,
-                'vehicule': str(offre.vehicule_propose) if offre.vehicule_propose else "Véhicule sélectionné",
-                'date_expiration': offre.date_expiration,
-                'lien_offre': self.request.build_absolute_uri(offre.get_absolute_url()),
-            }
-            html_message = render_to_string('emails/offres/simple_offre.html', context_email)
-            plain_message = strip_tags(html_message)
-            
-            send_mail(
-                subject="📄 Une offre vous attend - KOZ Services",
-                message=plain_message,
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[client.email],
-                html_message=html_message,
-                fail_silently=False,
-            )
+            with transaction.atomic():
+                # 1. Sauvegarde de l'offre
+                offre = form.save(commit=False)
+                offre.client = client
+                offre.type_offre = "simple"
+                offre.statut = "envoyee"
+                offre.save()
+
+                # 2. Préparation du mail si le client possède une adresse email
+                if client.email:
+                    vehicule = offre.vehicule_propose if offre.vehicule_propose else "Véhicule sélectionné"
+                
+                    lien_offre = self.request.build_absolute_uri(
+                        offre.get_absolute_url()
+                    )
+
+                    context_email = {
+                        "client": client,
+                        "offre_id": offre.id,
+                        "montant_propose": offre.montant_propose,
+                        "vehicule": vehicule,
+                        "date_expiration": offre.date_expiration,
+                        "lien_offre": lien_offre,
+                    }
+
+                    html_message = render_to_string(
+                        "emails/offres/simple_offre.html", context_email
+                    )
+                    plain_txt = strip_tags(html_message)
+
+                    # 3. Exécution Celery garantie après validation SQL (commit)
+                    def notifier_client():
+                        send_email_task.delay(
+                            subject="📄 Une offre vous attend - KOZ Services",
+                            plain_message=plain_txt,
+                            from_email=getattr(
+                                settings,
+                                "DEFAULT_FROM_EMAIL",
+                                "noreply@koz.com",
+                            ),
+                            recipient_list=[client.email],
+                            html_message=html_message,
+                        )
+
+                    transaction.on_commit(notifier_client)
+
         except Exception as e:
-            logger.error(f"Erreur envoi email au client: {e}")
-        
-        response = render(self.request, "partials/offre/_offres_result.html",{
-                                            "success": True,
-                                            "title": "✅ Offre envoyé ",
-                                            "message": f"Offre simple créée pour {client.nom_complet}. Un email a été envoyé.",
-                                            "reload_on_close":True
-                                        })
-        response['HX-Trigger'] = "closeOffreSimpleModal"
+            logger.exception(
+                f"Erreur lors de la création de l'offre simple pour le client"
+                f" #{client_id} : {e}"
+            )
+            response = render(
+                self.request,
+                "partials/offre/_offres_result.html",
+                {
+                    "success": False,
+                    "title": "❌ Erreur technique",
+                    "message": (
+                        "Une erreur est survenue lors de la création de"
+                        " l'offre. Veuillez réessayer."
+                    ),
+                    "reload_on_close": False,
+                },
+            )
+            response["HX-Trigger"] = "closeOffreSimpleModal"
+            return response
+
+        response = render(
+            self.request,
+            "partials/offre/_offres_result.html",
+            {
+                "success": True,
+                "title": "✅ Offre envoyée",
+                "message": (
+                    f"Offre simple créée pour {client.nom_complet}. Un email a"
+                    " été envoyé."
+                ),
+                "reload_on_close": True,
+            },
+        )
+        response["HX-Trigger"] = "closeOffreSimpleModal"
         return response
-    
+
     def form_invalid(self, form):
-        time.sleep(3)
-        return render(self.request, "partials/offre/_offre_simple_form_error.html", {"offre_simple_form":form})
+        return render(
+            self.request,
+            "partials/offre/_offre_simple_form_error.html",
+            {"offre_simple_form": form},
+        )
     
 class OffreDeFinancementView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
-    
+
     def test_func(self):
-        return self.request.user.is_superuser or self.request.user.role in ["commercial", "directeur"]
-    
+        return self.request.user.is_superuser or self.request.user.role in [
+            "commercial",
+            "directeur",
+        ]
+
     model = Offre
     form_class = OffreFinancementForm
     template_name = "clients_templates/client_detail.html"
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if "offre_financement_form" not in context:
-            context["offre_financement_form"] = OffreFinancementForm()  # ← CORRIGÉ
+            context["offre_financement_form"] = OffreFinancementForm()
         return context
-    
+
     def form_valid(self, form):
-        client_id = self.kwargs.get('pk')
+        client_id = self.kwargs.get("pk")
         client = get_object_or_404(kozUser, id=client_id)
-        
-        offre = form.save(commit=False)
-        offre.client = client
-        offre.type_offre = "offre_financement"
-        offre.statut = "envoyee"
-        
-        # Récupérer les valeurs
-        prix_vehicule = form.cleaned_data.get('prix_vehicule')
-        apport_demande = form.cleaned_data.get('apport_demande')
-        offre.montant_finance = prix_vehicule - (apport_demande or 0)
-        
-        # ✅ Calcul mensualité sécurisé
-        if offre.taux_interet and offre.taux_interet > 0:
-            taux_mensuel = offre.taux_interet / 100 / 12
-            offre.mensualite = (
-                (offre.montant_finance * taux_mensuel) / 
-                (1 - (1 + taux_mensuel) ** -(offre.duree_mois or 1))
-            )
-        else:
-            offre.mensualite = offre.montant_finance / (offre.duree_mois or 1)
-        
-        # ✅ Calcul total dû
-        offre.total_du = (
-            (offre.mensualite or 0) * (offre.duree_mois or 0)
-            + (offre.frais_dossier or 0)
-            + (offre.frais_garantie or 0)
-        )
-        
-        offre.save()
-        
-        # ✉️ Email au client
+
         try:
-            context_email = {
-                'client': client,
-                'offre_id': offre.id,
-                'vehicule': str(offre.vehicule_propose) if offre.vehicule_propose else "Véhicule sélectionné",
-                'montant_finance': offre.montant_finance,
-                'mensualite': offre.mensualite,
-                'duree_mois': offre.duree_mois,
-                'apport': offre.apport_demande,
-                'date_expiration': offre.date_expiration,
-                'lien_offre': self.request.build_absolute_uri(offre.get_absolute_url())
-            }
-            html_message = render_to_string('emails/offres/offre_financement_cree_client.html', context_email)
-            plain_message = strip_tags(html_message)
-            
-            send_mail(
-                subject="📄 Une offre de financement vous attend - KOZ Services",
-                message=plain_message,
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[client.email],
-                html_message=html_message,
-                fail_silently=False,
-            )
+            with transaction.atomic():
+                # 1. Construction de l'objet et calculs financiers
+                offre = form.save(commit=False)
+                offre.client = client
+                offre.type_offre = "offre_financement"
+                offre.statut = "envoyee"
+
+                prix_vehicule = form.cleaned_data.get("prix_vehicule") or 0
+                apport_demande = form.cleaned_data.get("apport_demande") or 0
+                offre.montant_finance = prix_vehicule - apport_demande
+
+                # Calcul mensualité
+                if offre.taux_interet and offre.taux_interet > 0:
+                    taux_mensuel = offre.taux_interet / 100 / 12
+                    offre.mensualite = (
+                        (offre.montant_finance * taux_mensuel)
+                        / (1 - (1 + taux_mensuel) ** -(offre.duree_mois or 1))
+                    )
+                else:
+                    offre.mensualite = offre.montant_finance / (
+                        offre.duree_mois or 1
+                    )
+
+                # Calcul total dû
+                offre.total_du = (
+                    (offre.mensualite or 0) * (offre.duree_mois or 0)
+                    + (offre.frais_dossier or 0)
+                    + (offre.frais_garantie or 0)
+                )
+
+                # Persistance BDD
+                offre.save()
+
+                # 2. Envoi email asynchrone Celery
+                if client.email:
+                    vehicule = offre.vehicule_propose if offre.vehicule_propose else "Véhicule sélectionné"
+                    
+                    lien_offre = self.request.build_absolute_uri(
+                        offre.get_absolute_url()
+                    )
+
+                    context_email = {
+                        "client": client,
+                        "offre_id": offre.id,
+                        "vehicule": vehicule,
+                        "montant_finance": offre.montant_finance,
+                        "mensualite": offre.mensualite,
+                        "duree_mois": offre.duree_mois,
+                        "apport": offre.apport_demande,
+                        "date_expiration": offre.date_expiration,
+                        "lien_offre": lien_offre,
+                    }
+
+                    html_message = render_to_string(
+                        "emails/offres/offre_financement_cree_client.html",
+                        context_email,
+                    )
+                    plain_txt = strip_tags(html_message)
+
+                    # 3. Garantie d'exécution Celery après validation BDD
+                    def notifier_client():
+                        send_email_task.delay(
+                            subject="📄 Une offre de financement vous attend - KOZ Services",
+                            plain_message=plain_txt,
+                            from_email=settings.DEFAULT_FROM_EMAIL,
+                            recipient_list=[client.email],
+                            html_message=html_message,
+                        )
+
+                    transaction.on_commit(notifier_client)
+
         except Exception as e:
-            logger.error(f"Erreur envoi email au client: {e}")
-        
-        response = render(self.request, "partials/offre/_offres_result.html",{
-                                    "success": True,
-                                    "title": "✅ Offre envoyé ",
-                                    "message": f"Offre de financement créée pour {client.nom_complet}. Un email a été envoyé.",
-                                    "reload_on_close":True
-                                })
-        response['HX-Trigger'] = "closeOffreModal"
+            logger.exception(
+                f"Erreur lors de la création de l'offre de financement pour le client #{client_id} : {e}"
+            )
+            response = render(
+                self.request,
+                "partials/offre/_offres_result.html",
+                {
+                    "success": False,
+                    "title": "❌ Erreur technique",
+                    "message": "Une erreur est survenue lors de la création de l'offre. Veuillez réessayer.",
+                    "reload_on_close": False,
+                },
+            )
+            response["HX-Trigger"] = "closeOffreModal"
+            return response
+
+        response = render(
+            self.request,
+            "partials/offre/_offres_result.html",
+            {
+                "success": True,
+                "title": "✅ Offre envoyée",
+                "message": f"Offre de financement créée pour {client.nom_complet}. Un email a été envoyé.",
+                "reload_on_close": True,
+            },
+        )
+        response["HX-Trigger"] = "closeOffreModal"
         return response
-        
-       
-    
+
     def form_invalid(self, form):
-        time.sleep(3)
-        return render(self.request, 'partials/offre/_offre_financement_form_errors.html', {'offre_financement_form': form})
+        return render(
+            self.request,
+            "partials/offre/_offre_financement_form_errors.html",
+            {"offre_financement_form": form},
+        )
         
 class OffreView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     def test_func(self):
@@ -664,134 +817,251 @@ class OffreDetailView(LoginRequiredMixin,UserPassesTestMixin ,DetailView):
             return context
         return context
 
+
+from decimal import Decimal, ROUND_HALF_UP
+
+
 class OffreUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Offre
     form_class = OffreFinancementForm
-    
-    
+
     def get_template_names(self):
         if self.request.user.is_superuser or self.request.user.role == "directeur":
             return ["directeur_templates/directeur_offre_detail.html"]
         return ["commercial_templates/commercial_offre_detail.html"]
-    
+
     def test_func(self):
-        return self.request.user.role in ['commercial', 'directeur']
-    
-   
+        return self.request.user.role in ["commercial", "directeur"]
+
     def form_valid(self, form):
-        offre = form.save(commit=False)
-        
-        # Vérifier si l'offre était en brouillon et va être envoyée
-        was_brouillon = offre.statut == 'brouillon'
-        
-        if was_brouillon:
-            offre.statut = 'envoyee'
-        
-        offre.save()
-        
-        # ✉️ Envoyer un email au client si l'offre vient d'être envoyée
-        if was_brouillon:
-            try:
-                context_email = {
-                    'client': offre.client,
-                    'offre_id': offre.id,
-                    'vehicule': str(offre.vehicule_propose) if offre.vehicule_propose else "Véhicule sélectionné",
-                    'montant_finance': offre.montant_finance,
-                    'mensualite': offre.mensualite,
-                    'duree_mois': offre.duree_mois,
-                    'apport': offre.apport_demande,
-                    'date_expiration': offre.date_expiration,
-                    'lien_offre': self.request.build_absolute_uri(offre.get_absolute_url()),
-                }
-                html_message = render_to_string('emails/offres/offre_envoyee_client.html', context_email)
-                plain_message = strip_tags(html_message)
-                
-                send_mail(
-                    subject="📄 Une offre de financement Mis à jour - KOZ Services",
-                    message=plain_message,
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[offre.client.email],
-                    html_message=html_message,
-                    fail_silently=False,
-                )
-                messages.success(self.request, "Offre mise à jour et envoyée au client.")
-            except Exception as e:
-                logger.error(f"Offre mise à jour mais l'email n'a pas pu être envoyé.: {e}")
-        response = render(self.request, "partials/offre/_offres_result.html",{
-                                                        "success": True,
-                                                        "title": "✅ Offre mis à jour ",
-                                                        "message": f"Offre a été modifié pour {offre.client.nom_complet}. Un email a été envoyé.",
-                                                        "reload_on_close":True
-                                                    })
-        response['HX-Trigger'] = "closeUpdateOffreModal"
+        # 1. Vérification de l'état en BDD avant la mise à jour
+        db_offre = self.get_object()
+        was_brouillon = db_offre.statut == "brouillon"
+
+        try:
+            with transaction.atomic():
+                offre = form.save(commit=False)
+
+                # Passage du statut à 'envoyee' si c'était un brouillon
+                if was_brouillon:
+                    offre.statut = "envoyee"
+
+                # 2. Recalcul financier (si les champs sont soumis dans le formulaire)
+                if "prix_vehicule" in form.cleaned_data:
+                    prix_vehicule = form.cleaned_data.get("prix_vehicule") or 0
+                    apport_demande = form.cleaned_data.get("apport_demande") or 0
+                    offre.montant_finance = prix_vehicule - apport_demande
+
+                    duree = offre.duree_mois or 1
+                    if offre.taux_interet and offre.taux_interet > 0 and duree > 0:
+                        taux_mensuel = offre.taux_interet / 100 / 12
+                        un_plus_r = 1 + taux_mensuel
+                        denominateur = 1 - (un_plus_r ** -duree)
+                        mensualite_raw = (offre.montant_finance * taux_mensuel) / denominateur
+                        offre.mensualite = mensualite_raw.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+                    else:
+                        offre.mensualite = (offre.montant_finance / duree).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+                    frais_dossier = offre.frais_dossier or 0
+                    frais_garantie = offre.frais_garantie or 0
+                    offre.total_du = (
+                        (offre.mensualite * duree) + frais_dossier + frais_garantie
+                    ).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+                offre.save()
+                form.save_m2m()
+
+                # 3. Notification Celery déclenchée uniquement après commit SQL
+                if was_brouillon and offre.client and offre.client.email:
+                    vehicule = offre.vehicule_propose if offre.vehicule_propose else "Véhicule sélectionné"
+                    
+                    lien_offre = self.request.build_absolute_uri(
+                        offre.get_absolute_url()
+                    )
+
+                    context_email = {
+                        "client": offre.client,
+                        "offre_id": offre.id,
+                        "vehicule": vehicule,
+                        "montant_finance": offre.montant_finance,
+                        "mensualite": offre.mensualite,
+                        "duree_mois": offre.duree_mois,
+                        "apport": offre.apport_demande,
+                        "date_expiration": offre.date_expiration,
+                        "lien_offre": lien_offre,
+                    }
+
+                    html_message = render_to_string(
+                        "emails/offres/offre_envoyee_client.html",
+                        context_email,
+                    )
+                    plain_txt = strip_tags(html_message)
+
+                    def notifier_client():
+                        send_email_task.delay(
+                            subject="📄 Une offre de financement mise à jour - KOZ Services",
+                            plain_message=plain_txt,
+                            from_email=getattr(
+                                settings,
+                                "DEFAULT_FROM_EMAIL",
+                                "noreply@koz.com",
+                            ),
+                            recipient_list=[offre.client.email],
+                            html_message=html_message,
+                        )
+
+                    transaction.on_commit(notifier_client)
+
+        except Exception as e:
+            logger.exception(
+                f"Erreur lors de la mise à jour de l'offre #{db_offre.id} : {e}"
+            )
+            response = render(
+                self.request,
+                "partials/offre/_offres_result.html",
+                {
+                    "success": False,
+                    "title": "❌ Erreur technique",
+                    "message": "Une erreur est survenue lors de la mise à jour de l'offre.",
+                    "reload_on_close": False,
+                },
+            )
+            response["HX-Trigger"] = "closeUpdateOffreModal"
+            return response
+
+        message_txt = (
+            f"L'offre a été modifiée pour {offre.client.nom_complet}."
+            + (" Un email a été envoyé." if was_brouillon else "")
+        )
+
+        response = render(
+            self.request,
+            "partials/offre/_offres_result.html",
+            {
+                "success": True,
+                "title": "✅ Offre mise à jour",
+                "message": message_txt,
+                "reload_on_close": True,
+            },
+        )
+        response["HX-Trigger"] = "closeUpdateOffreModal"
         return response
-    time.sleep(3)
+
     def form_invalid(self, form):
-       return render(self.request, "partials/offre/_offre_simple_form_error.html", {"update_offre_form":form})
+        return render(
+            self.request,
+            "partials/offre/_offre_financement_form_error.html",
+            {"update_offre_form": form},
+        )
    
+
 class OffreSimpleUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Offre
     form_class = OffreSimpleForm
-    
+
     def test_func(self):
-        return self.request.user.role in ['commercial', 'directeur'] 
-   
-    
+        return self.request.user.role in ["commercial", "directeur"]
+
     def get_template_names(self):
         if self.request.user.is_superuser or self.request.user.role == "directeur":
             return ["directeur_templates/directeur_offre_detail.html"]
         return ["commercial_templates/commercial_offre_detail.html"]
-        
-    def test_func(self):
-        return self.request.user.role in ['commercial', 'directeur']
-        
-    
+
     def form_valid(self, form):
-        offre = form.save(commit=False)
-            
-        # Vérifier si l'offre était en brouillon et va être envoyée
-        was_brouillon = offre.statut == 'brouillon'
-            
-        if was_brouillon:
-            offre.statut = 'envoyee'
-            
-            offre.save()
-            
-            # ✉️ Envoyer un email au client si l'offre vient d'être envoyée
-            try:
-                context_email = {
-                        'client': offre.client,
-                        'offre_id': offre.id,
-                        'vehicule': str(offre.vehicule_propose) if offre.vehicule_propose else "Véhicule sélectionné",
-                        'montant_propose': offre.montant_propose,
-                        'date_expiration': offre.date_expiration,
-                        'lien_offre': self.request.build_absolute_uri(offre.get_absolute_url()),
-                    }
-                html_message = render_to_string('emails/offres/offre_simple_MAJ_client.html', context_email)
-                plain_message = strip_tags(html_message)
+        # 1. Vérification fiable du statut en BDD avant mutation mémoire
+        db_offre = self.get_object()
+        was_brouillon = db_offre.statut == "brouillon"
+
+        try:
+            with transaction.atomic():
+                offre = form.save(commit=False)
+
+                if was_brouillon:
+                    offre.statut = "envoyee"
+
+                offre.save()
+                form.save_m2m()
+
+                # 2. Préparation et déclenchement Celery si passage de brouillon à envoyée
+                if was_brouillon and offre.client and offre.client.email:
+                    vehicule_str = offre.vehicule_propose if offre.vehicule_propose else "Véhicule sélectionné"
                     
-                send_mail(
-                        subject="📄  Offre  Mis à jour - KOZ Services",
-                        message=plain_message,
-                        from_email=settings.DEFAULT_FROM_EMAIL,
-                        recipient_list=[offre.client.email],
-                        html_message=html_message,
-                        fail_silently=False,
+                    lien_offre = self.request.build_absolute_uri(
+                        offre.get_absolute_url()
                     )
-                messages.success(self.request, "Offre mise à jour et envoyée au client.")
-            except Exception as e:
-                    logger.error(f"Offre mise à jour mais l'email n'a pas pu être envoyé.: {e}")
-            response = render(self.request, "partials/offre/_offres_result.html",{
-                                                            "success": True,
-                                                            "title": "✅ Offre mis à jour ",
-                                                            "message": f"Offre a été modifié pour {offre.client.nom_complet}. Un email a été envoyé.",
-                                                            "reload_on_close":True
-                                                        })
-            response['HX-Trigger'] = "closeUpdateSimpleOffreModal"
+
+                    context_email = {
+                        "client": offre.client,
+                        "offre_id": offre.id,
+                        "vehicule": vehicule_str,
+                        "montant_propose": offre.montant_propose,
+                        "date_expiration": offre.date_expiration,
+                        "lien_offre": lien_offre,
+                    }
+
+                    html_message = render_to_string(
+                        "emails/offres/offre_simple_MAJ_client.html",
+                        context_email,
+                    )
+                    plain_txt = strip_tags(html_message)
+
+                    # 3. Tâche Celery exécutée uniquement après validation SQL
+                    def notifier_client():
+                        send_email_task.delay(
+                            subject="📄 Offre mise à jour - KOZ Services",
+                            plain_message=plain_txt,
+                            from_email=getattr(
+                                settings,
+                                "DEFAULT_FROM_EMAIL",
+                                "noreply@koz.com",
+                            ),
+                            recipient_list=[offre.client.email],
+                            html_message=html_message,
+                        )
+
+                    transaction.on_commit(notifier_client)
+
+        except Exception as e:
+            logger.exception(
+                f"Erreur lors de la mise à jour de l'offre simple #{db_offre.id} : {e}"
+            )
+            response = render(
+                self.request,
+                "partials/offre/_offres_result.html",
+                {
+                    "success": False,
+                    "title": "❌ Erreur technique",
+                    "message": "Une erreur est survenue lors de la mise à jour de l'offre.",
+                    "reload_on_close": False,
+                },
+            )
+            response["HX-Trigger"] = "closeUpdateSimpleOffreModal"
             return response
-    
+
+        message_txt = (
+            f"L'offre a été modifiée pour {offre.client.nom_complet}."
+            + (" Un email a été envoyé." if was_brouillon else "")
+        )
+
+        response = render(
+            self.request,
+            "partials/offre/_offres_result.html",
+            {
+                "success": True,
+                "title": "✅ Offre mise à jour",
+                "message": message_txt,
+                "reload_on_close": True,
+            },
+        )
+        response["HX-Trigger"] = "closeUpdateSimpleOffreModal"
+        return response
+
     def form_invalid(self, form):
-        return render(self.request, "partials/offre/_offre_simple_form_error.html", {"update_offre_simple_form":form})
+        return render(
+            self.request,
+            "partials/offre/_offre_simple_form_error.html",
+            {"update_offre_simple_form": form},
+        )
              
 class OffreDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Offre
@@ -813,6 +1083,8 @@ class OffreDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         return super().delete(request, *args, **kwargs)
     
 ######################################___________VENTE/GESTION_View__________________#########################################################
+
+
 
 def changer_statut_vente(request, vente_id):
     if request.user.role not in ["directeur", "commercial"]:
@@ -931,9 +1203,6 @@ def changer_statut_vente(request, vente_id):
             return response
     
     return redirect('commercial_app:vente-detail', pk=vente.id)
-
-
-
 
 from datetime import datetime
 from decimal import Decimal

@@ -28,7 +28,7 @@
             <p>Bonjour <strong>{{ client.nom_complet }}</strong>,</p>
             <p>Votre commercial vous a préparé une offre simple. Retrouvez les détails ci-dessous et cliquez sur le lien pour consulter l'offre complète.</p>
             <div class="info-box">
-                <p><strong>🚗 Véhicule :</strong> {{ vehicule }}</p>
+                <p><strong>🚗 Véhicule :</strong> {{ vehicule.marque.nom }}-{{ vehicule.modele }}</p>
                 <p><strong>💰 Montant proposé :</strong> {{ montant_propose|floatformat:0|intcomma }} FCFA</p>
                 <p><strong>⏰ Offre valable jusqu'au :</strong> {{ date_expiration|date:"d/m/Y" }}</p>
             </div>

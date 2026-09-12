@@ -64,7 +64,7 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                             
                             <!-- ✅ CAS 1 : OFFRE DE FINANCEMENT -->
-                            {% if offre.type_offre == "offre_financement" %}
+                            {% if offre.type_offre == "offre_financement" or offre.type_offre == "demande" %}
                             
                             <div class="flex items-center gap-2 text-gray-600">
                                 <i class="fas fa-money-bill-wave text-green-600 w-5"></i>
@@ -80,7 +80,7 @@
                             </div>
                             <div class="flex items-center gap-2 text-gray-600">
                                 <i class="fas fa-percent text-blue-500 w-5"></i>
-                                <span><strong>Taux :</strong> {{ offre.taux_interet }}%</span>
+                                <span><strong>Taux :</strong> {{ offre.taux_interet|default:"0" }}%</span>
                             </div>
                             
                             <!-- ✅ CAS 2 : OFFRE SIMPLE -->

@@ -13,7 +13,7 @@ class Offre(models.Model):
     prix_vehicule = models.DecimalField(max_digits=12, decimal_places=0, null=True, blank=True)
     apport_demande = models.DecimalField(max_digits=12, decimal_places=0, null=True, blank=True)
     montant_finance = models.DecimalField(max_digits=12, decimal_places=0, null=True, blank=True)
-    duree_mois = models.IntegerField(default=0)
+    duree_mois = models.IntegerField(default=1)
     mensualite = models.DecimalField(max_digits=12, decimal_places=0, null=True, blank=True)
     taux_interet = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     

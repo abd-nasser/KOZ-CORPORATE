@@ -248,21 +248,21 @@
                         <div class="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-1">
                             <span class="text-xs font-medium text-slate-500">Taux d'intérêt</span>
                             <div class="text-base font-bold text-slate-900">
-                                {{ offre.taux_interet }} %
+                                {{ offre.taux_interet|default:"0" }} %
                             </div>
                         </div>
 
                         <div class="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-1">
                             <span class="text-xs font-medium text-slate-500">Frais de dossier</span>
                             <div class="text-base font-bold text-slate-900">
-                                {{ offre.frais_dossier|intcomma }} FCFA
+                                {{ offre.frais_dossier|default:"0"|intcomma }} FCFA
                             </div>
                         </div>
 
                         <div class="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-1">
                             <span class="text-xs font-medium text-slate-500">Frais de garantie</span>
                             <div class="text-base font-bold text-slate-900">
-                                {{ offre.frais_garantie|intcomma }} FCFA
+                                {{ offre.frais_garantie|default:"0"|intcomma }} FCFA
                             </div>
                         </div>
 
@@ -418,7 +418,7 @@
                     <div class="space-y-3">
                         
                         <!-- Bouton Modifier (Si brouillon) -->
-                        {% if offre.statut == "brouillon" and offre.type_offre == 'offre_financement' %}
+                        {% if offre.statut == "brouillon" and offre.type_offre == 'offre_financement' or offre.type_offre == "demande"  %}
                         <button onclick="document.getElementById('update_offre_Modal').showModal()" 
                                 class="w-full py-3.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs tracking-wide transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2.5">
                             <i class="fas fa-edit"></i>

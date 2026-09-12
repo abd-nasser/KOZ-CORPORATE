@@ -28,7 +28,7 @@
             <p>Le client <strong>{{ client.nom_complet }}</strong> souhaite <strong>renégocier son offre</strong> n°{{ offre_id }}.</p>
             
             <div class="info-box">
-                <p><strong>🚗 Véhicule :</strong> {{ vehicule }}</p>
+                <p><strong>🚗 Véhicule :</strong> {{ vehicule.marque.nom }} - {{ vehicule.modele }}</p>
                 <p><strong>💰 Montant financé actuel :</strong> {{ montant_finance|intcomma }} FCFA</p>
                 <p><strong>📅 Demande faite le :</strong> {{ date_demande|date:"d/m/Y H:i" }}</p>
             </div>

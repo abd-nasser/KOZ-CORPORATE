@@ -134,59 +134,74 @@ class ApiDemandeFinancementView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
                 
-            
-def envoyer_contact_email(request):
 
-    if request.method == 'POST':
-        nom = request.POST.get('nom')
-        email = request.POST.get('email')
-        telephone = request.POST.get('telephone')
-        message = request.POST.get('message')
-        reference = request.POST.get('reference')
-        type_ref = request.POST.get('type')
-        
-        context = {
-            'nom': nom,
-            'email': email,
-            'telephone': telephone,
-            'message': message,
-            'reference': reference,
-            'type': type_ref,
-        }
-        
+def envoyer_contact_email(request):
+    if request.method != 'POST':
+        return render(request, "partials/contact/contact_result.html", {
+            'success': False,
+            'title': "❌ Requête invalide",
+            'message': "Méthode non autorisée.",
+        })
+
+    # 1. Extraction propre des données
+    nom = request.POST.get('nom', '').strip()
+    email = request.POST.get('email', '').strip()
+    telephone = request.POST.get('telephone', '').strip()
+    message = request.POST.get('message', '').strip()
+    reference = request.POST.get('reference', '').strip()
+    type_ref = request.POST.get('type', '').strip()
+
+    # 2. Requête DB optimisée : Récupération directe de la liste des emails (actif uniquement)
+    recipient_list = list(
+        kozUser.objects.filter(role='commercial', is_active=True)
+        .values_list('email', flat=True)
+    )
+
+    if not recipient_list:
+        logger.warning("Aucun commercial actif trouvé pour recevoir l'email de contact.")
+
+    # 3. Préparation du rendu HTML/Text
+    context = {
+        'nom': nom,
+        'email': email,
+        'telephone': telephone,
+        'message': message,
+        'reference': reference,
+        'type': type_ref,
+    }
+
+    try:
         html_message = render_to_string('emails/contact/contact_client.html', context)
         plain_message = strip_tags(html_message)
-        
-        # Envoyer aux commerciaux
-        commercials = kozUser.objects.filter(role='commercial')
-        try:
-                send_mail(
-                    subject=f"📩 Nouvelle demande de contact - {type_ref}",
-                    message=plain_message,
-                    from_email=email,
-                    recipient_list=[commercial.email for commercial in commercials],
-                    html_message=html_message,
-                    fail_silently=False,
-                )
-        except Exception as e:
-            logger.error(f"Erreur envoi email aux commerciaux: {e}")
-            response = render(request, "partials/contact/contact_result.html",{
-                       'success': False,
-                       'title': "❌ Echèc d'envoi",
-                       'message': "Une erreur est survenue lors de l'envoi du message. Veuillez réessayer.",
-                       
-                   })
-            response["HX-Trigger"] = "closeContactModal"
-            return response
-                
-        response =  render(request, "partials/contact/contact_result.html",{
-                               'success': True,
-                               'title': "✅ Envoyé",
-                               'message': " Votre demande a été envoyée. Un commercial vous contactera rapidement..",
-                               
-                           })
-        response["HX-Trigger"] = "closeContactModal"
-        return response
+        subject = f"📩 Nouvelle demande de contact - {type_ref or 'Général'}"
+
+        # 4. Délégation de l'envoi à Celery (non-bloquant)
+        send_email_task.delay(
+            subject=subject,
+            plain_message=plain_message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=recipient_list,
+            html_message=html_message
+        )
+
+        success = True
+        title = "✅ Envoyé"
+        msg = "Votre demande a été envoyée. Un commercial vous contactera rapidement."
+
+    except Exception as e:
+        logger.error(f"Erreur lors de la mise en file Celery de l'email: {e}")
+        success = False
+        title = "❌ Échec d'envoi"
+        msg = "Une erreur est survenue lors de l'envoi du message. Veuillez réessayer."
+
+    # 5. Réponse HTMX
+    response = render(request, "partials/contact/contact_result.html", {
+        'success': success,
+        'title': title,
+        'message': msg,
+    })
+    response["HX-Trigger"] = "closeContactModal"
+    return response
 
 ##################################################___Demande et Gestion de Financement_______###########################################
 
@@ -437,42 +452,46 @@ def refuser_demande(request, demande_id):
         return response
     
     else:
-        demande.etape = "demande_refusee"
-        demande.save()
-        
-        # ✉️ Email au client
-        try:
-            context_email = {
-                'client': demande.client,
-                'demande_id': demande.id,
-                'raison': request.POST.get('raison_refus', 'Non conforme aux critères de financement'),
-                'lien_chat': request.build_absolute_uri(reverse("chat_app:chat-view")),
-            }
-            html_message = render_to_string('emails/demande_financement/demande_refusee.html', context_email)
-            plain_message = strip_tags(html_message)
+        try: 
+            with transaction.atomic():
+                demande.etape = "demande_refusee"
+                demande.save()
             
-            send_mail(
-                subject="❌ Mise à jour de votre demande de financement - KOZ Services",
-                message=plain_message,
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[demande.client.email],
-                html_message=html_message,
-                fail_silently=False,
-            )
-            response = render(request, "partials/leads/_dmd_fin_result.html", {
+            # ✉️ Email au client
+            
+                context_email = {
+                    'client': demande.client,
+                    'demande_id': demande.id,
+                    'raison': request.POST.get('raison_refus', 'Non conforme aux critères de financement'),
+                    'lien_chat': request.build_absolute_uri(reverse("chat_app:chat-view")),
+                }
+                html_message = render_to_string('emails/demande_financement/demande_refusee.html', context_email)
+                plain_message = strip_tags(html_message)
+                
+                transaction.on_commit(
+                    lambda: send_email_task.delay(
+                        subject="❌ Mise à jour de votre demande de financement - KOZ Services",
+                        plain_message=plain_message,
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        recipient_list=[demande.client.email],
+                        html_message=html_message,
+                                    
+                    )
+                )
+            
+                response = render(request, "partials/leads/_dmd_fin_result.html", {
                                                 "success": True,
                                                 "title": "✅  Demande de financement refusée",
                                                 "message": f"La demande de {demande.client.nom_complet} a été refusée. Un email a été envoyé au client.",
                                                 "reload_on_close": True,
                                             })
-            response['HX-Trigger'] = 'closeDmdGestionModal'
-            return response
-        
+                response['HX-Trigger'] = 'closeDmdGestionModal'
+                return response
         except Exception as e:
-            logger.info(f"Erreur envoi email: {e}")
-
-    return redirect("leads_app:detail-demande", demande.pk)    
-
+            logger.exception(f"Erreur lors du refus de la demande")
+            
+    return redirect("leads_app:detail-demande", demande.pk)   
+  
 @login_required
 def estimer_prix_vehicule(request):
     """

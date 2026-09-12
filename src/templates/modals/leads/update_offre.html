@@ -86,13 +86,13 @@ update_offre_Modal
 </dialog>
 
 <!-- Script pour rouvrir le modal si formulaire invalide -->
-{% if open_update_offre_modal %}
+
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        document.getElementById('update_offre_Modal').showModal();
+    document.addEventListener('closeUpdateOffreModal', function() {
+        document.getElementById('update_offre_Modal').close();
     });
 </script>
-{% endif %}
+
 
 <style>
     .btn-glow {

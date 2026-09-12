@@ -38,6 +38,10 @@
                             <span><strong>Durée :</strong> {{ demande.duree_mois }} mois</span>
                         </div>
                         <div class="flex items-center gap-2 text-gray-600">
+                            <i class="fas fa-percent text-blue-500 w-5"></i>
+                            <span><strong>Taux :</strong> {{ demande.taux_interet|default:"0" }} %</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-gray-600">
                             <i class="fas fa-chart-line text-blue-500 w-5"></i>
                             <span><strong>Revenus :</strong> {{ demande.revenus_mensuel|default:"0"|intcomma }} FCFA</span>
                         </div>

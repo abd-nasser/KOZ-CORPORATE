@@ -28,7 +28,7 @@
             <p>Le client <strong>{{ client.nom_complet }}</strong> a <strong>refusé</strong> son offre <strong>n°{{ offre_id }}</strong>.</p>
             
             <div class="info-box">
-                <p><strong>🚗 Véhicule :</strong> {{ vehicule }}</p>
+                <p><strong>🚗 Véhicule :</strong> {{ vehicule.marque.nom }} - {{ vehicule.modele}} </p>
                 <p><strong>📅 Date du refus :</strong> {{ date_refus|date:"d/m/Y H:i" }}</p>
             </div>
             

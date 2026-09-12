@@ -28,8 +28,8 @@
             <p>Votre commercial a préparé une offre de financement spécialement pour vous.</p>
             
             <div class="info-box">
-                <p><strong>🚗 Véhicule :</strong> {{ vehicule }}</p>
-                <p><strong>💰 Montant financé :</strong> {{ montant_finance|intcomma }} FCFA</p>
+                <p><strong>🚗 Véhicule :</strong> {{ vehicule.marque.nom }}-{{ vehicule.modele }}</p>
+                <p><strong>💰 Montant financé :</strong> {{ montant_finance|floatformat:0|intcomma }} FCFA</p>
                 <p><strong>📅 Mensualité :</strong> {{ mensualite|floatformat:0|intcomma }} FCFA / mois</p>
                 <p><strong>⏱️ Durée :</strong> {{ duree_mois }} mois</p>
                 <p><strong>💵 Apport :</strong> {{ apport|intcomma }} FCFA</p>

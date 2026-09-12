@@ -252,5 +252,7 @@ class  kozUser(AbstractBaseUser, PermissionsMixin):
         }
         return roles.get(self.role, self.role)
     
+    
     def get_absolute_url(self):
-        return reverse('client_app:client-detail', kwargs={'pk': self.pk})
+        if self.role == "client":
+            return reverse('client_app:client-detail', kwargs={'pk': self.pk})

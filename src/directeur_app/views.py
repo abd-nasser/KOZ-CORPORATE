@@ -4,6 +4,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin #
 
 
 from auth_app.forms import UserRegisterForm, ChangePasswordForm
+from commercial_app.forms import RdvForm
 from home_app.models import RendezVous
 from vehicul_app.forms import MarqueForm, VehiculForm, TypeVehiculeForm
 from products_app.forms import CategorieProductsForm, ProductsForm, UniteProduitForm, MarqueProduitForm
@@ -97,15 +98,17 @@ class DirecteurRendezVousListView(LoginRequiredMixin, UserPassesTestMixin, ListV
         return queryset
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['statut_choices'] = RendezVous.STATUT_CHOICES
-        context['statistiques'] = {
-            'en_attente': RendezVous.objects.filter(statut='en_attente').count(),
-            'confirme': RendezVous.objects.filter(statut='confirme').count(),
-            'annule': RendezVous.objects.filter(statut='annule').count(),
-            'termine': RendezVous.objects.filter(statut='termine').count(),
-        }
-        return context
+            context = super().get_context_data(**kwargs)
+            context['statut_choices'] = RendezVous.STATUT_CHOICES
+            context['statistiques'] = {
+                'en_attente': RendezVous.objects.filter(statut='en_attente').count(),
+                'confirme': RendezVous.objects.filter(statut='confirme').count(),
+                'annule': RendezVous.objects.filter(statut='annule').count(),
+                'termine': RendezVous.objects.filter(statut='termine').count(),
+            }
+            if "rdv_form" not in context:
+                context['rdv_form'] = RdvForm()
+            return context
     
 
         

@@ -20,7 +20,7 @@
     <div id="result-toast-container"></div>
 <div class="container mt-30 mx-auto px-4 py-8 max-w-4xl"
     x-init="taux = financement_type === 'maison' ? 0 : taux"
-     x-data="{
+    x-data="{
         mode: 'estimer_prix', // 'estimer_prix' | 'calculer_mensualite' | 'calculer_duree'
         financement_type: 'maison', // 'maison' | 'externe'
         prixVehiculeBase: {{ vehicul.prix|default:0 }},
@@ -127,6 +127,27 @@
         }
      }">
 
+     <!-- SECTION VIDÉO GUIDE D'UTILISATION -->
+    <div class="mb-6 bg-white rounded-xl border border-slate-200 shadow-xl overflow-hidden p-6">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+                <i class="fas fa-play text-lg"></i>
+            </div>
+            <div>
+                <h3 class="text-base font-bold text-slate-900">Guide vidéo d'utilisation</h3>
+                <p class="text-xs text-slate-500">Découvrez comment fonctionne le simulateur et choisissez la meilleure option de financement.</p>
+            </div>
+        </div>
+
+        <div class="relative aspect-video rounded-xl overflow-hidden bg-slate-900 border border-slate-200">
+            <video class="w-full h-full object-cover" controls poster="{% static 'images/guide_poster.jpg' %}">
+                <source src="{% static 'videos/guide_simulation.mp4' %}" type="video/mp4">
+                Votre navigateur ne prend pas en charge la lecture de vidéos.
+            </video>
+        </div>
+    </div>
+
+    <!-- CARTE PRINCIPALE SIMULATEUR -->
     <div class="bg-white rounded-xl border border-slate-200 shadow-xl overflow-hidden flex flex-col">
         
         <!-- En-tête -->

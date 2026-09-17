@@ -448,8 +448,6 @@ def contact_form(request):
     )
         
 
-
-
 @require_POST
 def prise_rdv(request):
     """Enregistre la demande de rendez-vous en BDD de façon atomique."""

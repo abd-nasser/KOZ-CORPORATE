@@ -205,6 +205,23 @@ def envoyer_contact_email(request):
 
 ##################################################___Demande et Gestion de Financement_______###########################################
 
+# 1. Vue pour afficher la page de simulation
+@login_required
+def simulation_financement_view(request, vehicul_id):
+    vehicul = get_object_or_404(Vehicul, id=vehicul_id)
+
+    # Instanciation du formulaire lié au véhicule
+    form = DemandeFinancementForm(Vehicul_interested=vehicul)
+
+    return render(
+                request,"financement/simulation_financement.html",
+        {
+            "vehicul": vehicul,  # Utilisé par Alpine.js : {{ vehicul.prix }}
+            "dmd_fin_form": form,
+        },
+    )
+
+
 @login_required
 def demande_financement_view(request, vehicul_id):
     vehicul = get_object_or_404(Vehicul, id=vehicul_id)
@@ -251,10 +268,17 @@ def demande_financement_view(request, vehicul_id):
             demande = form.save(commit=False)
             demande.client = request.user
             demande.Vehicul_interested = vehicul
+            demande.financement_type = form.cleaned_data.get('financement_type')
+            demande.duree_mois = form.cleaned_data.get("duree_mois")
             demande.montant_finance = vehicul.prix - form.cleaned_data.get('apport', 0)
             demande.mensualite = form.cleaned_data.get("mensualite_souhaitee")
+            demande.revenus_mensuel = form.cleaned_data.get('revenus_mensuel')
             demande.taux_interet = form.cleaned_data.get("taux_interet")
             demande.etape = "nouvelle"
+            if demande.financement_type == "maison":
+                demande.financement_par = "koz"
+            else:
+                demande.financement_par = "fidelis"
             demande.save()
 
             # 🟢 3. Préparation des données d'email
@@ -313,6 +337,7 @@ def demande_financement_view(request, vehicul_id):
         })
         response["HX-Trigger"] = "closeFinModal"
         return response
+   
     
 @login_required
 def attente_document(request, demande_id):

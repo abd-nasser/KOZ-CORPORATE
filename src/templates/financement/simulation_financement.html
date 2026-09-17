@@ -1,0 +1,268 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+
+    {% if messages %}
+    <div class="fixed top-20 right-5 z-50 space-y-2 max-w-sm">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} shadow-xl rounded-xl border border-slate-200 bg-white/95 backdrop-blur-md text-sm p-4 text-slate-800 animate-slide-in-right">
+            <span>{{ message }}</span>
+             <button onclick="this.parentElement.remove()" class="text-xs opacity-60 hover:opacity-100">
+            <i class="fas fa-xmark"></i>
+        </button>
+        </div>
+        {% endfor %}
+       
+    </div>
+    {% endif %}
+    <div id="result-toast-container"></div>
+<div class="container mt-30 mx-auto px-4 py-8 max-w-4xl"
+    x-init="taux = financement_type === 'maison' ? 0 : taux"
+     x-data="{
+        mode: 'estimer_prix', // 'estimer_prix' | 'calculer_mensualite' | 'calculer_duree'
+        financement_type: 'maison', // 'maison' | 'externe'
+        prixVehiculeBase: {{ vehicul.prix|default:0 }},
+        duree: 0,
+        mensualite: 000000,
+        taux: 0,
+        apportUser: null, // Stocke la saisie manuelle de l'utilisateur
+
+        // --- 1. RÈGLES DE FINANCEMENT (MAISON VS EXTERNE) ---
+        // Apport minimum requis : 75% du prix si MAISON, 0 FCFA si EXTERNE
+        get apportMin() {
+            return this.financement_type === 'maison' ? Math.round(this.prixVehiculeBase * 0.75) : 0;
+        },
+
+        // Durée maximale autorisée : 12 mois si MAISON, 59 mois si EXTERNE
+        get dureeMax() {
+            return this.financement_type === 'maison' ? 12 : 59;
+        },
+
+        // Apport effectif utilisé dans les calculs (garantit qu'on ne descend pas sous le minimum)
+        get apport() {
+            let val = (this.apportUser !== null) ? this.apportUser : this.apportMin;
+            return Math.max(val, this.apportMin);
+        },
+
+        // Gestion du changement de type de financement
+        setFinancementType(type) {
+            this.financement_type = type;
+            this.taux = type === 'maison' ? 0 : (this.taux === 0 ? 6.5 : this.taux);
+            // Réajuste la durée si elle dépasse le max autorisé
+            if (this.duree > this.dureeMax) {
+                this.duree = this.dureeMax;
+            }
+            // Réajuste l'apport si en dessous du min obligatoire
+            if (this.apportUser < this.apportMin) {
+                this.apportUser = this.apportMin;
+            }
+        },
+
+        // --- 2. CALCULS FINANCIERS ---
+        get r() {
+            return (this.taux / 100) / 12;
+        },
+
+        // Mode 1 : Estimation Prix Véhicule
+        get prixVehiculeEstime() {
+            if (this.mensualite <= 0 || this.duree <= 0) return 0;
+            if (this.r === 0) return Math.round(this.mensualite * this.duree + this.apport);
+            let p = this.mensualite * (1 - Math.pow(1 + this.r, -this.duree)) / this.r;
+            return Math.round(p + this.apport);
+        },
+
+        // Mode 2 : Calcul Mensualité
+        get mensualiteCalculee() {
+            let mFinancer = this.prixVehiculeBase - this.apport;
+            if (mFinancer <= 0 || this.duree <= 0) return 0;
+            if (this.r === 0) return Math.round(mFinancer / this.duree);
+            let m = (mFinancer * this.r) / (1 - Math.pow(1 + this.r, -this.duree));
+            return Math.round(m);
+        },
+
+        // Mode 3 : Calcul Durée
+        get dureeCalculee() {
+            let mFinancer = this.prixVehiculeBase - this.apport;
+            if (mFinancer <= 0 || this.mensualite <= 0) return 0;
+            if (this.r === 0) return Math.ceil(mFinancer / this.mensualite);
+            let num = -Math.log(1 - (mFinancer * this.r) / this.mensualite);
+            let den = Math.log(1 + this.r);
+            if (isNaN(num) || num <= 0) return 0;
+            return Math.min(Math.ceil(num / den), this.dureeMax);
+        },
+
+        // --- 3. VÉRIFICATION DE LA COHÉRENCE (MARGES 80% - 150%) ---
+        get controleCoherence() {
+            if (this.prixVehiculeBase <= 0) return { valide: true, message: '' };
+            
+            let prixFinancable = (this.mode === 'estimer_prix') ? this.prixVehiculeEstime : this.prixVehiculeBase;
+            let margeBasse = this.prixVehiculeBase * 0.95;
+            let margeHaute = this.prixVehiculeBase * 1.05;
+
+            if (prixFinancable < margeBasse) {
+                return {
+                    valide: false,
+                    type: 'trop_bas',
+                    message: 'Attention : Le budget estimé est trop bas par rapport au prix réel du véhicule (Inférieur à 95%).'
+                };
+            }
+            if (prixFinancable > margeHaute) {
+                return {
+                    valide: false,
+                    type: 'trop_haut',
+                    message: 'Attention : Le budget estimé dépasse largement la valeur du véhicule sélectionné (Supérieur à 105%).'
+                };
+            }
+            return { valide: true, type: 'ok', message: 'Budget cohérent avec le véhicule.' };
+        },
+
+        // Exports pour Django
+        get me_mensualite_finale() {
+            return (this.mode === 'calculer_mensualite') ? this.mensualiteCalculee : this.mensualite;
+        },
+        get me_duree_finale() {
+            return (this.mode === 'calculer_duree') ? this.dureeCalculee : this.duree;
+        }
+     }">
+
+    <div class="bg-white rounded-xl border border-slate-200 shadow-xl overflow-hidden flex flex-col">
+        
+        <!-- En-tête -->
+        <div class="border-b border-slate-200 px-6 py-4 flex justify-between items-center">
+            <h1 class="text-lg font-bold text-slate-900">Simulateur de Financement</h1>
+            <span class="text-xs bg-slate-100 px-3 py-1 rounded-full font-semibold text-slate-600">
+                Véhicule : {{ vehicul.prix|intcomma }} FCFA
+            </span>
+        </div>
+
+        <!-- 1. SÉLECTION DU TYPE DE FINANCEMENT (maison VS EXTERNE) -->
+        <div class="p-4 bg-slate-100 border-b border-slate-200">
+            <p class="text-xs font-bold text-slate-700 uppercase mb-2">Type de financement :</p>
+            <div class="grid grid-cols-2 gap-3">
+                <button type="button" 
+                        @click="setFinancementType('maison')"
+                        :class="financement_type === 'maison' ? 'bg-blue-600 text-white shadow font-bold' : 'bg-white text-slate-700 hover:bg-slate-50'"
+                        class="py-2.5 px-4 rounded-lg text-xs transition border border-slate-300 text-left">
+                    <div class="font-bold">Financement maison</div>
+                    <div class="text-[10px] opacity-80">Apport min. 75% | Durée 1 à 12 mois</div>
+                </button>
+
+                <button type="button" 
+                        @click="setFinancementType('externe')"
+                        :class="financement_type === 'externe' ? 'bg-blue-600 text-white shadow font-bold' : 'bg-white text-slate-700 hover:bg-slate-50'"
+                        class="py-2.5 px-4 rounded-lg text-xs transition border border-slate-300 text-left">
+                    <div class="font-bold">Financement Externe (Fidelis)</div>
+                    <div class="text-[10px] opacity-80">Pas d'apport min. | Durée 1 à 59 mois</div>
+                </button>
+            </div>
+        </div>
+
+        <!-- 2. TOGGLES DES MODES DE CALCUL -->
+        <div class="p-3 bg-slate-50 border-b border-slate-200">
+            <div class="grid grid-cols-3 gap-2 text-xs">
+                <button type="button" @click="mode = 'estimer_prix'" :class="mode === 'estimer_prix' ? 'bg-white text-blue-700 shadow font-bold' : 'text-slate-600'" class="py-2 rounded-lg border">1. Estim. Prix</button>
+                <button type="button" @click="mode = 'calculer_mensualite'" :class="mode === 'calculer_mensualite' ? 'bg-white text-blue-700 shadow font-bold' : 'text-slate-600'" class="py-2 rounded-lg border">2. Mensualité</button>
+                <button type="button" @click="mode = 'calculer_duree'" :class="mode === 'calculer_duree' ? 'bg-white text-blue-700 shadow font-bold' : 'text-slate-600'" class="py-2 rounded-lg border">3. Durée</button>
+            </div>
+        </div>
+
+        <div id="dmd-message-zone" class="px-6 empty:hidden mt-4"></div>
+
+        <!-- FORMULAIRE HTMX -->
+        <form 
+        hx-post="{% url 'leads_app:demande-financement' vehicul.id %}" 
+        hx-target="#dmd-message-zone"
+        hx-indicator="#dmd-indicator"
+        class="p-6 space-y-6">
+            {% csrf_token %}
+
+            <!-- Inputs cachés générés automatiquement par Django Form + Alpine.js -->
+                {{ dmd_fin_form.financement_type }}
+                {{ dmd_fin_form.apport }}
+                {{ dmd_fin_form.duree_mois }}
+                {{ dmd_fin_form.mensualite_souhaitee }}
+            
+                <!-- Indicateur de chargement HTMX (Overlay ciblé sur le formulaire) -->
+            <div id="dmd-indicator" class="htmx-indicator absolute inset-0 bg-white/80 backdrop-blur-sm z-50 flex items-center justify-center rounded-b-xl">
+                <div class="bg-white px-6 py-4 rounded-lg shadow-lg border border-slate-200 flex flex-col items-center gap-3">
+                    <i class="fas fa-circle-notch fa-spin text-2xl text-blue-600"></i>
+                    <p class="text-slate-700 text-sm font-medium">Traitement du dossier...</p>
+                </div>
+            </div>
+             
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Saisie des paramètres -->
+                <div class="space-y-4">
+                    <!-- Apport -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">
+                            Apport personnel (FCFA)
+                            <span class="text-[10px] text-blue-600 font-normal" x-text="'(Min. ' + apportMin.toLocaleString() + ' FCFA)'"></span>
+                        </label>
+                        <input type="number" x-model.number="apportUser" :min="apportMin" step="50000" class="w-full p-2 border rounded-lg text-sm bg-slate-50">
+                    </div>
+
+                    <!-- Mensualité (Mode 1 et 3) -->
+                    <div x-show="mode !== 'calculer_mensualite'">
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Mensualité visée (FCFA/mois)</label>
+                        <input type="number" x-model.number="mensualite" step="10000" class="w-full p-2 border rounded-lg text-sm bg-slate-50">
+                    </div>
+
+                    <!-- Durée (Mode 1 et 2) -->
+                    <div x-show="mode !== 'calculer_duree'">
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">
+                            Durée de remboursement (Mois) 
+                            <span class="text-[10px] text-blue-600 font-normal" x-text="'(Max. ' + dureeMax + ' mois)'"></span>
+                        </label>
+                        <input type="number" x-model.number="duree" min="1" :max="dureeMax" class="w-full p-2 border rounded-lg text-sm bg-slate-50">
+                    </div>
+                   
+                     <div>
+                        <label for="id_taux_interet" class="block text-xs font-semibold text-slate-700 mb-1">Taux d'intérêt (%)</label>
+                        <div :class="financement_type === 'maison' ? 'opacity-60 cursor-not-allowed' : ''">
+                            {{ dmd_fin_form.taux_interet }}
+                        </div>
+                    </div>
+                   
+                    <!-- Revenus -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Revenus mensuels (FCFA)</label>
+                        {{ dmd_fin_form.revenus_mensuel }}
+                    </div>
+                </div>
+
+                <!-- Résultats et Bloc de Cohérence -->
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-4 flex flex-col justify-between">
+                    <div>
+                        <h4 class="text-xs font-bold text-slate-500 uppercase">Résultat estimé</h4>
+                        
+                        <!-- Affiches dynamiques -->
+                        <div x-show="mode === 'estimer_prix'" class="mt-2 text-2xl font-black text-blue-700 font-mono" x-text="prixVehiculeEstime.toLocaleString() + ' FCFA'"></div>
+                        <div x-show="mode === 'calculer_mensualite'" class="mt-2 text-2xl font-black text-blue-700 font-mono" x-text="mensualiteCalculee.toLocaleString() + ' FCFA/mois'"></div>
+                        <div x-show="mode === 'calculer_duree'" class="mt-2 text-2xl font-black text-blue-700 font-mono" x-text="dureeCalculee + ' Mois'"></div>
+
+                        <!-- ALERTE DE COHÉRENCE VISUELLE -->
+                        <div class="mt-4 p-3 rounded-lg text-xs"
+                             :class="{
+                                'bg-emerald-50 border border-emerald-200 text-emerald-800': controleCoherence.valide,
+                                'bg-amber-50 border border-amber-200 text-amber-800': !controleCoherence.valide
+                             }">
+                            <div class="font-bold flex items-center gap-1.5">
+                                <i :class="controleCoherence.valide ? 'fas fa-check-circle text-emerald-600' : 'fas fa-exclamation-triangle text-amber-600'"></i>
+                                <span x-text="controleCoherence.valide ? 'Simulation Cohérente' : 'Incohérence Détectée'"></span>
+                            </div>
+                            <p class="mt-1 text-[11px]" x-text="controleCoherence.message"></p>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition">
+                        Soumettre le dossier
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

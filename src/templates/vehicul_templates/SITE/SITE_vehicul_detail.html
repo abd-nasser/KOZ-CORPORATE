@@ -512,10 +512,10 @@
                                 <i class="fas fa-comment-dots mr-2"></i> Contacter pour ce véhicule
                             </a>
                             <!-- Demander un financement -->
-                            <button onclick="document.getElementById('dmd_fin_modal').showModal()" 
+                            <a href="{% url 'leads_app:simulation-financement' vehicul.pk %}" 
                                     class="block w-full text-center py-3.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl font-semibold transition shadow-lg shadow-blue-600/20">
                                     <i class="fas fa-hand-holding-usd mr-2"></i> Demander un financement
-                            </button>
+                            </a>
 
                         {% else %}
                             <button onclick="document.getElementById('contact_modal').showModal()" 

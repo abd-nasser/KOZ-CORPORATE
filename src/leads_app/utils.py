@@ -57,8 +57,8 @@ def calculer_prix_financable(mensualite, duree_mois, taux_annuel, apport):
     return capital + apport
 
 
-MARGE_BASSE = Decimal('0.80')
-MARGE_HAUTE = Decimal('1.50')
+MARGE_BASSE = Decimal('0.95')
+MARGE_HAUTE = Decimal('1.05')
 
 def verifier_coherence(mensualite, duree_mois, taux_annuel, apport, prix_reel):
     prix_financable = calculer_prix_financable(mensualite, duree_mois, taux_annuel, apport)

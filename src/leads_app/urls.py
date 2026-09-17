@@ -36,5 +36,6 @@ urlpatterns = [
     
     #################################  API pour les demande depuis le sie site############################ ...
     path('api/demande/<int:vehicul_id>/',views.ApiDemandeFinancementView.as_view(), name='api-demande-financement'),
+    path("simulateur/financement/<int:vehicul_id>/", views.simulation_financement_view, name="simulation-financement")
 
 ]

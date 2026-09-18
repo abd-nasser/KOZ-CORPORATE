@@ -164,16 +164,16 @@ WSGI_APPLICATION = 'koz_flow.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-'''if DEBUG:
+if DEBUG:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR /"db" /'db.sqlite3',
         }
     }
-else:'''
+else:
     # 3. Base de données avec valeurs de secours
-DATABASES = {
+    DATABASES = {
                 'default': {
                     'ENGINE': 'django.db.backends.postgresql',
                     'NAME': os.getenv('POSTGRES_DB', 'koz_db'),

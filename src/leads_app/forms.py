@@ -93,11 +93,12 @@ class DemandeFinancementForm(forms.ModelForm):
         
         if 'taux_interet' in self.fields:
             self.fields['taux_interet'].widget.attrs.update({
-                'min': '0',
-                'max': '100',
+                'min': '12',
+                'max': '17',
                 'step': '1',
                 'x-model.number': 'taux',
                 ':readonly': "financement_type === 'maison'",
+                '@input': "taux = Math.min(Math.max(Number($event.target.value) || 12, 12), 17); $event.target.value = taux",
                 'class': "w-full p-2 border rounded-lg text-sm bg-slate-50 border-slate-300"
             })
 

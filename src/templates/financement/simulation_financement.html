@@ -19,9 +19,9 @@
     {% endif %}
     <div id="result-toast-container"></div>
 <div class="container mt-30 mx-auto px-4 py-8 max-w-4xl"
-    x-init="taux = financement_type === 'maison' ? 0 : taux"
+    x-init="taux = financement_type === 'maison' ? 0 : taux; apportUser = financement_type === 'maison' ? apportMin : 0;"
     x-data="{
-        mode: 'estimer_prix', // 'estimer_prix' | 'calculer_mensualite' | 'calculer_duree'
+        mode: 'calculer_mensualite', // 'estimer_prix' | 'calculer_mensualite' | 'calculer_duree'
         financement_type: 'maison', // 'maison' | 'externe'
         prixVehiculeBase: {{ vehicul.prix|default:0 }},
         duree: 0,
@@ -49,14 +49,14 @@
         // Gestion du changement de type de financement
         setFinancementType(type) {
             this.financement_type = type;
-            this.taux = type === 'maison' ? 0 : (this.taux === 0 ? 6.5 : this.taux);
+            if (type === 'maison') {
+                this.mode = 'calculer_mensualite';
+            }
+            this.apportUser = type === 'maison' ? this.apportMin : 0;
+            this.taux = type === 'maison' ? 0 : (this.taux === 0 ? 12 : this.taux);
             // Réajuste la durée si elle dépasse le max autorisé
             if (this.duree > this.dureeMax) {
                 this.duree = this.dureeMax;
-            }
-            // Réajuste l'apport si en dessous du min obligatoire
-            if (this.apportUser < this.apportMin) {
-                this.apportUser = this.apportMin;
             }
         },
 
@@ -73,6 +73,15 @@
             return Math.round(p + this.apport);
         },
 
+        // Mode 1.2 : Estimation Prix Véhicule sans intéret
+        get prixVehiculeEstimeSansInteret() {
+            if (this.mensualite <= 0 || this.duree <= 0) return 0;
+
+            return Math.round(
+                this.mensualite * this.duree + this.apport
+            );
+        },
+
         // Mode 2 : Calcul Mensualité
         get mensualiteCalculee() {
             let mFinancer = this.prixVehiculeBase - this.apport;
@@ -82,40 +91,51 @@
             return Math.round(m);
         },
 
-        // Mode 3 : Calcul Durée
-        get dureeCalculee() {
+        // Durée réellement nécessaire avant application de la limite
+        get dureeNecessaire() {
             let mFinancer = this.prixVehiculeBase - this.apport;
-            if (mFinancer <= 0 || this.mensualite <= 0) return 0;
+            if (mFinancer <= 0 || this.mensualite <= 0) return null;
             if (this.r === 0) return Math.ceil(mFinancer / this.mensualite);
             let num = -Math.log(1 - (mFinancer * this.r) / this.mensualite);
             let den = Math.log(1 + this.r);
-            if (isNaN(num) || num <= 0) return 0;
-            return Math.min(Math.ceil(num / den), this.dureeMax);
+            if (isNaN(num) || num <= 0 || !isFinite(num)) return null;
+            return Math.ceil(num / den);
         },
 
-        // --- 3. VÉRIFICATION DE LA COHÉRENCE (MARGES 80% - 150%) ---
+        // Mode 3 : Calcul Durée, plafonné à la durée autorisée
+        get dureeCalculee() {
+            if (this.dureeNecessaire === null) return 0;
+            return Math.min(this.dureeNecessaire, this.dureeMax);
+        },
+
+        get dureeAlerte() {
+            return this.mode === 'calculer_duree'
+                && (this.dureeNecessaire === null || this.dureeNecessaire > this.dureeMax);
+        },
+
+        // --- 3. VÉRIFICATION DE LA COHÉRENCE (MARGES 95% - 105%) ---
         get controleCoherence() {
             if (this.prixVehiculeBase <= 0) return { valide: true, message: '' };
             
             let prixFinancable = (this.mode === 'estimer_prix') ? this.prixVehiculeEstime : this.prixVehiculeBase;
             let margeBasse = this.prixVehiculeBase * 0.95;
             let margeHaute = this.prixVehiculeBase * 1.05;
-
-            if (prixFinancable < margeBasse) {
+            
+            if (this.mode === 'estimer_prix' && prixFinancable < margeBasse) {
                 return {
                     valide: false,
                     type: 'trop_bas',
                     message: 'Attention : Le budget estimé est trop bas par rapport au prix réel du véhicule (Inférieur à 95%).'
                 };
             }
-            if (prixFinancable > margeHaute) {
+            if (this.mode === 'estimer_prix' && prixFinancable > margeHaute) {
                 return {
                     valide: false,
                     type: 'trop_haut',
                     message: 'Attention : Le budget estimé dépasse largement la valeur du véhicule sélectionné (Supérieur à 105%).'
                 };
             }
-            return { valide: true, type: 'ok', message: 'Budget cohérent avec le véhicule.' };
+            return { valide: true, type: 'ok', message: '' };
         },
 
         // Exports pour Django
@@ -183,9 +203,9 @@
         <!-- 2. TOGGLES DES MODES DE CALCUL -->
         <div class="p-3 bg-slate-50 border-b border-slate-200">
             <div class="grid grid-cols-3 gap-2 text-xs">
-                <button type="button" @click="mode = 'estimer_prix'" :class="mode === 'estimer_prix' ? 'bg-white text-blue-700 shadow font-bold' : 'text-slate-600'" class="py-2 rounded-lg border">1. Estim. Prix</button>
+                <button type="button"  x-show="financement_type !== 'maison'" @click="mode = 'estimer_prix'" :class="mode === 'estimer_prix' ? 'bg-white text-blue-700 shadow font-bold' : 'text-slate-600'" class="py-2 rounded-lg border">1. Pouvoir d'achat</button>
                 <button type="button" @click="mode = 'calculer_mensualite'" :class="mode === 'calculer_mensualite' ? 'bg-white text-blue-700 shadow font-bold' : 'text-slate-600'" class="py-2 rounded-lg border">2. Mensualité</button>
-                <button type="button" @click="mode = 'calculer_duree'" :class="mode === 'calculer_duree' ? 'bg-white text-blue-700 shadow font-bold' : 'text-slate-600'" class="py-2 rounded-lg border">3. Durée</button>
+                <button type="button"  x-show="financement_type !== 'maison'" @click="mode = 'calculer_duree'" :class="mode === 'calculer_duree' ? 'bg-white text-blue-700 shadow font-bold' : 'text-slate-600'" class="py-2 rounded-lg border">3. Durée</button>
             </div>
         </div>
 
@@ -237,7 +257,12 @@
                             Durée de remboursement (Mois) 
                             <span class="text-[10px] text-blue-600 font-normal" x-text="'(Max. ' + dureeMax + ' mois)'"></span>
                         </label>
-                        <input type="number" x-model.number="duree" min="1" :max="dureeMax" class="w-full p-2 border rounded-lg text-sm bg-slate-50">
+                           <input type="number"
+                               x-model.number="duree"
+                               min="1"
+                               :max="dureeMax"
+                               @input="duree = Math.min(Math.max(Number($event.target.value) || 1, 1), dureeMax); $event.target.value = duree"
+                               class="w-full p-2 border rounded-lg text-sm bg-slate-50">
                     </div>
                    
                      <div>
@@ -264,18 +289,33 @@
                         <div x-show="mode === 'calculer_mensualite'" class="mt-2 text-2xl font-black text-blue-700 font-mono" x-text="mensualiteCalculee.toLocaleString() + ' FCFA/mois'"></div>
                         <div x-show="mode === 'calculer_duree'" class="mt-2 text-2xl font-black text-blue-700 font-mono" x-text="dureeCalculee + ' Mois'"></div>
 
+                        <div x-show="dureeAlerte"
+                             class="mt-3 p-3 rounded-lg border border-amber-200 bg-amber-50 text-xs text-amber-800">
+                            <i class="fas fa-exclamation-triangle mr-1"></i>
+                            <span x-text="dureeNecessaire === null
+                                ? 'Cette mensualité est trop faible pour rembourser le montant financé.'
+                                : 'Cette mensualité nécessite ' + dureeNecessaire + ' mois avec les intérêts. La durée est limitée à ' + dureeMax + ' mois.'">
+                            </span>
+                        </div>
+
                         <!-- ALERTE DE COHÉRENCE VISUELLE -->
-                        <div class="mt-4 p-3 rounded-lg text-xs"
+                            <div x-show="mode === 'estimer_prix' && prixVehiculeEstimeSansInteret > 0">
+                            Prix brut estimé du véhicule, hors intérêts :
+                            <strong x-text="prixVehiculeEstimeSansInteret.toLocaleString() + ' FCFA'"></strong>
+                        </div>
+                        <div x-show="mode === 'estimer_prix'" class="mt-4 p-3 rounded-lg text-xs"
                              :class="{
                                 'bg-emerald-50 border border-emerald-200 text-emerald-800': controleCoherence.valide,
                                 'bg-amber-50 border border-amber-200 text-amber-800': !controleCoherence.valide
                              }">
+                            
                             <div class="font-bold flex items-center gap-1.5">
                                 <i :class="controleCoherence.valide ? 'fas fa-check-circle text-emerald-600' : 'fas fa-exclamation-triangle text-amber-600'"></i>
                                 <span x-text="controleCoherence.valide ? 'Simulation Cohérente' : 'Incohérence Détectée'"></span>
                             </div>
                             <p class="mt-1 text-[11px]" x-text="controleCoherence.message"></p>
                         </div>
+                        
                     </div>
 
                     <button type="submit" class="w-full py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition">

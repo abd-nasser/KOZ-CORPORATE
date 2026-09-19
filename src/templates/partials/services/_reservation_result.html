@@ -1,0 +1,55 @@
+{% load static %}
+<div id="result-toast-container" class="result-toast-container" hx-swap-oob="innerHTML">
+    <div class="fixed inset-0 z-[100] flex items-center justify-center bg-black/40">
+        <div class="bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full ">
+            <h3 class="font-bold text-lg {% if success %}text-green-600{% else %}text-red-600{% endif %}">
+                {{ title }}
+                {% if success %}
+                <img src="{% static 'images/Message_Sent_Successfully_Plane.gif' %}" class="mx-auto w-20 h-20 mb-3">
+                {% else %}
+                <img src="{% static 'images/Sign_for_error.gif' %}" class="mx-auto w-20 h-20 mb-3">
+                {% endif %}
+            </h3>
+            <p class="py-4 text-gray-600">{{ message }}</p>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    if (window._toastTimeout) clearTimeout(window._toastTimeout);
+
+    requestAnimationFrame(function() {
+        const bar = document.getElementById('toast-progress-bar');
+        if (bar) bar.style.width = '0%';
+    });
+
+    window._toastTimeout = setTimeout(function() {
+        closeResultToast({{ reload_on_close|yesno:'true,false' }});
+    }, 4000);
+})();
+
+function closeResultToast(shouldReload) {
+    if (window._toastTimeout) {
+        clearTimeout(window._toastTimeout);
+        window._toastTimeout = null;
+    }
+    const container = document.getElementById('result-toast-container');
+    if (container) container.innerHTML = '';
+
+    if (shouldReload) {
+        window.location.reload();
+    }
+}
+</script>
+
+<script>
+    gsap.registerPlugin(ScrollTrigger);
+    gsap.from("#result-toast-container .bg-white", {
+        opacity: 0,
+        scale: 0,
+        rotation: -15,
+        duration: 2,
+        ease: "elastic.out(1, 0.4)"
+    });
+</script>

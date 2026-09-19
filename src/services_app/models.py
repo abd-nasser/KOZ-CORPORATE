@@ -2,6 +2,8 @@ from django.db import models
 from django.utils import timezone
 from datetime import timedelta
 
+from client_app.models import Maintenance
+
 class TypesServices(models.Model):
     """
     Types de services proposés par KOZ
@@ -106,6 +108,19 @@ class Services(models.Model):
         blank=True,
         null=True,
         verbose_name="Périodicité"
+    )
+    
+    necessite_maintenance = models.BooleanField(
+        default=True,
+        verbose_name="Ce service nécessite une planification de maintenance"
+    )
+    type_maintenance_associe = models.CharField(
+        max_length=30,
+        choices=Maintenance.TYPE_CHOICES,  # réutilise les mêmes choix, une seule source de vérité
+        null=True,
+        blank=True,
+        verbose_name="Type de maintenance correspondant",
+        help_text="Rempli automatiquement le type de maintenance à la réservation de ce service"
     )
     
     # Disponibilité

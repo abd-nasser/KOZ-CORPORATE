@@ -50,6 +50,7 @@ class Maintenance(models.Model):
     
     # Infos véhicule
     vehicul = models.ForeignKey("vehicul_app.vehicul", on_delete=models.SET_NULL, related_name="maintenance", null=True, blank=True)
+    service = models.ForeignKey("services_app.services", on_delete=models.SET_NULL,null=True,blank=True,related_name="maintenances")
     marque = models.CharField(max_length=50, null=True, blank=True)
     modele = models.CharField(max_length=100, blank=True, null=True)
     annee = models.IntegerField(null=True, blank=True)

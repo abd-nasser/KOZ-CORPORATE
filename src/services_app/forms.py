@@ -1,4 +1,6 @@
 from django import forms
+
+from client_app.models import Maintenance
 from .models import TypesServices, Services, ServiceImages, ServiceAvis
 
 
@@ -134,3 +136,67 @@ class ServiceAvisApprobationForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['est_approuve'].label = "Approuver cet avis"
         
+
+# maintenance_app/forms.py (ou l'app concernée)
+from django import forms
+
+from vehicul_app.models import Vehicul
+
+
+class ReservationMaintenanceForm(forms.ModelForm):
+    origine = forms.ChoiceField(
+        choices=Maintenance.ORIGINE_CHOICES,
+        widget=forms.RadioSelect,
+        label="Véhicule acheté chez KOZ ou externe ?"
+    )
+    vehicul = forms.ModelChoiceField(
+        queryset=Vehicul.objects.none(),  # rempli dynamiquement dans __init__
+        required=False,
+        label="Sélectionnez votre véhicule",
+        widget=forms.Select(attrs={'class': 'select select-bordered w-full'})
+    )
+    marque = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'input input-bordered w-full'}))
+    modele = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'input input-bordered w-full'}))
+    annee = forms.IntegerField(required=False, widget=forms.NumberInput(attrs={'class': 'input input-bordered w-full'}))
+    immatriculation = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'input input-bordered w-full'}))
+
+    class Meta:
+        model = Maintenance
+        fields = ['date_prevue', 'kilometrage_actuel', 'notes_client']
+        widgets = {
+            'date_prevue': forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'input input-bordered w-full'}),
+            'kilometrage_actuel': forms.NumberInput(attrs={'class': 'input input-bordered w-full'}),
+            'notes_client': forms.Textarea(attrs={'class': 'textarea textarea-bordered w-full', 'rows': 3}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        self.client = kwargs.pop('client', None)
+        super().__init__(*args, **kwargs)
+        if self.client:
+            # Ne propose que les véhicules réellement achetés par CE client chez KOZ
+            self.fields['vehicul'].queryset = Vehicul.objects.filter(
+                ventes__client=self.client
+            ).distinct()
+
+    def clean(self):
+        cleaned_data = super().clean()
+        origine = cleaned_data.get('origine')
+        vehicul = cleaned_data.get('vehicul')
+        marque = cleaned_data.get('marque')
+        modele = cleaned_data.get('modele')
+
+        if origine == 'koz':
+            if not vehicul:
+                raise forms.ValidationError("Merci de sélectionner votre véhicule dans la liste.")
+            # On nettoie les champs externes pour ne jamais avoir les deux remplis en même temps
+            cleaned_data['marque'] = None
+            cleaned_data['modele'] = None
+            cleaned_data['annee'] = None
+            cleaned_data['immatriculation'] = None
+
+        elif origine == 'externe':
+            if not marque or not modele:
+                raise forms.ValidationError("Merci de renseigner au moins la marque et le modèle de votre véhicule.")
+            cleaned_data['vehicul'] = None
+
+        return cleaned_data

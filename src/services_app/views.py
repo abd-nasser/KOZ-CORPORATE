@@ -5,8 +5,11 @@ from django.views.generic import ListView, CreateView, UpdateView, DeleteView, D
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy, reverse
 from django.contrib import messages
+
+from client_app.models import Maintenance
+from vehicul_app.models import Vehicul
 from .models import TypesServices, Services
-from .forms import TypesServicesForm, ServicesForm
+from .forms import ReservationMaintenanceForm, TypesServicesForm, ServicesForm
 from .models import Services, ServiceAvis
 from .models import Services, ServiceImages
 from .forms import ServiceImagesForm, ServiceAvisForm, ServiceAvisApprobationForm
@@ -200,6 +203,9 @@ class SITE_ServiceDetailView(DetailView):
         # Formulaire d'avis pour les clients
         if 'service_avis_form' not in context:
             context['service_avis_form'] = ServiceAvisForm()
+        
+        if 'reserver_service_form' not in context:
+            context['reserver_service_form']=ReservationMaintenanceForm(client=self.request.user)
         return context
 
 
@@ -230,6 +236,40 @@ class SITE_ServiceAvisCreateView(LoginRequiredMixin, CreateView):
     def get_success_url(self):
         return reverse_lazy('services_app:service-detail-public', kwargs={'pk': self.service.pk})
 
+@login_required
+def reserver_service(request, service_id):
+    service = get_object_or_404(Services, pk=service_id)
+
+    if request.method == 'POST':
+        form = ReservationMaintenanceForm(request.POST, client=request.user)
+        if form.is_valid():
+            maintenance = Maintenance.objects.create(
+                client=request.user,
+                service=service,
+                type_maintenance=service.type_maintenance_associe,
+                origine=form.cleaned_data['origine'],
+                vehicul=form.cleaned_data.get('vehicul'),
+                marque=form.cleaned_data.get('marque'),
+                modele=form.cleaned_data.get('modele'),
+                annee=form.cleaned_data.get('annee'),
+                immatriculation=form.cleaned_data.get('immatriculation'),
+                kilometrage_actuel=form.cleaned_data.get('kilometrage_actuel'),
+                date_prevue=form.cleaned_data.get('date_prevue'),
+                notes_client=form.cleaned_data.get('notes_client', ''),
+                statut='en_attente',
+            )
+            response = render(request, "partials/services/_reservation_result.html", {
+                "success": True,
+                "title": "✅ Réservation envoyée",
+                "message": "Votre demande de maintenance a été enregistrée.",
+            })
+            response["HX-Triggrer"] = "CloseReservationModal"
+            return response
+        else:
+            return render(request, "partials/services/_reservation_form_errors.html", {"reserver_service_form": form})
+
+    return redirect("services_app:service-detail-public", service.pk)
+
 
 @login_required
 def contacter_service(request, service_id):
@@ -258,3 +298,4 @@ def contacter_service(request, service_id):
     
     messages.success(request, f"✅ Votre demande pour {service.nom} a été envoyée.")
     return redirect('chat_app:chat-view')
+    

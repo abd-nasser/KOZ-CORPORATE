@@ -1,4 +1,7 @@
 from django import forms
+from django.urls import reverse
+
+from vehicul_app.models import Vehicul
 from .models import Maintenance
 
 class MaintenanceForm(forms.ModelForm):
@@ -39,7 +42,35 @@ class MaintenanceForm(forms.ModelForm):
         }
         
     def __init__(self, *args, **kwargs):
+        self.client = kwargs.pop('client', None)
         super().__init__(*args, **kwargs)
+
+        if self.client is None and self.instance and self.instance.client_id:
+            self.client = self.instance.client
+
+        if self.client is None and self.is_bound:
+            client_id = self.data.get(self.add_prefix('client'))
+            if client_id:
+                self.client = self.fields['client'].queryset.filter(
+                    pk=client_id,
+                    role='client',
+                ).first()
+        
+        if self.client:
+            # Ne propose que les véhicules réellement achetés par CE client chez KOZ
+            self.fields['vehicul'].queryset = Vehicul.objects.filter(
+                ventes__client=self.client
+            ).distinct()
+        else:
+            self.fields['vehicul'].queryset = Vehicul.objects.none()
+
+        self.fields['client'].widget.attrs.update({
+            'hx-get': reverse('commercial_app:maintenance-client-vehicles'),
+            'hx-target': '#id_vehicul',
+            'hx-swap': 'outerHTML',
+            'hx-trigger': 'change',
+        })
+        
         self.fields['date_prevue'].required = True
         self.fields['date_prochaine'].required = True
         self.fields['kilometrage_prochain'].required = True
@@ -104,9 +135,17 @@ class ClientMaintenanceForm(forms.ModelForm):
             'date_prevue': forms.DateTimeInput(attrs={'class': 'input input-bordered w-full text-sm bg-white', 'type': 'datetime-local'}),
             'notes_client': forms.Textarea(attrs={'class': 'textarea textarea-bordered w-full text-sm bg-white', 'rows': 3, 'placeholder': 'Expliquez brièvement le problème...'}),
         }
+  
 
     def __init__(self, *args, **kwargs):
+        self.client = kwargs.pop('client', None)
         super().__init__(*args, **kwargs)
+        
+        if self.client:
+            # Ne propose que les véhicules réellement achetés par CE client chez KOZ
+            self.fields['vehicul'].queryset = Vehicul.objects.filter(
+                ventes__client=self.client
+            ).distinct()
         
         # 1. Rendre ces champs NON obligatoires par défaut au niveau du formulaire
         # (pour éviter que Django ne bloque la soumission si l'un d'eux est masqué/vide)

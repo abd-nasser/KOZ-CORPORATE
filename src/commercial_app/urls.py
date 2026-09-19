@@ -22,6 +22,7 @@ urlpatterns = [
     
     #######################________Maintenance____________#############################
     path('maintenances/',views.MaintenanceListView.as_view(), name='maintenance-list'),
+    path('maintenances/client-vehicles/', views.maintenance_client_vehicles, name='maintenance-client-vehicles'),
     path('maintenances/ajouter/',views.MaintenanceCreateView.as_view(), name='maintenance-create'),
     path('creer/maintenance/',views.ClientCreateMaintenance.as_view(),name="client-create-maintenance"),
     path('maintenances/<int:pk>/',views.MaintenanceDetailView.as_view(), name='maintenance-detail'),

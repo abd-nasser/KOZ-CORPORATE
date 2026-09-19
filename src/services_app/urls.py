@@ -28,7 +28,7 @@ urlpatterns = [
     # Services_SITE
     path('detail/<int:pk>/service/public',SITE_ServiceDetailView.as_view(), name="service-detail-public"),
     path('resverver/<int:service_id>/service/public', reserver_service , name="reserver-service"),
-    path('resverver/<int:service_id>/service/public', contacter_service , name="contacter-service"),
+    path('contacter/<int:service_id>/service/public', contacter_service , name="contacter-service"),
     path('service/list/', SITE_ServicesListView.as_view(), name='services-list-public'),
 
     

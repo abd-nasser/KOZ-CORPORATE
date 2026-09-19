@@ -1,74 +1,142 @@
-<!-- Modale (DaisyUI / Tailwind) -->
-<dialog id="modal_reserver_service" class="modal">
-  <div class="modal-box max-w-lg w-full p-6">
+<!-- Modale (DaisyUI / Tailwind / Alpine.js) -->
+{% load static %}
+<dialog id="modal_reserver_service" 
+        class="modal modal-bottom sm:modal-middle"
+        x-data="{ origine: 'koz' }"
+        @close-reservation-modal.window="document.getElementById('modal_reserver_service').close()">
+        
+  <div class="modal-box max-w-xl w-full p-6 bg-base-100 shadow-2xl rounded-2xl border border-base-200">
     
     <!-- En-tête de la modale -->
-    <div class="flex justify-between items-center pb-3 mb-4 border-b">
-      <h3 class="font-bold text-lg text-gray-800">Sélection du véhicule</h3>
+    <div class="flex justify-between items-center pb-4 mb-5 border-b border-base-200">
+      <div class="flex items-center gap-2">
+        <div class="p-2 bg-primary/10 text-primary rounded-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+          </svg>
+        </div>
+        <div>
+          <h3 class="font-bold text-lg text-base-content">Réserver un Service</h3>
+          <p class="text-xs text-base-content/60">Configurez le véhicule et la date de passage</p>
+        </div>
+      </div>
+<div id="reserver_result" class="mb-4"></div>
       <form method="dialog">
-        <button class="btn btn-sm btn-circle btn-ghost">✕</button>
+        <button class="btn btn-sm btn-circle btn-ghost text-base-content/50 hover:text-base-content">✕</button>
       </form>
     </div>
 
     <!-- Formulaire HTMX -->
     <form hx-post="{% url 'services_app:reserver-service' service.pk %}" 
-          hx-target="#modal_reserver_service" 
-          hx-swap="outerHTML" 
-          hx-indicator="#submit-spinner"
-          class="space-y-4">
+          hx-target="#reserver_result" 
+          hx-indicator="#reserve-indicator"
+          class="space-y-5">
       
       {% csrf_token %}
 
-      <!-- Choix Origine -->
+      <!-- Sélecteur d'origine Premium (Segmented Control avec Alpine.js) -->
       <div class="form-control">
-        <label class="label font-semibold">{{ reserver_service_form.origine.label }}</label>
-        <div class="flex items-center gap-4">
-          {{ reserver_service_form.origine }}
+        <label class="label text-xs font-bold uppercase tracking-wider text-base-content/70">
+          {{ reserver_service_form.origine.label|default:"Provenance du véhicule" }}
+        </label>
+        
+        <div class="grid grid-cols-2 gap-2 p-1.5 bg-base-200/60 rounded-xl">
+          <label class="btn btn-sm border-0 flex-1 cursor-pointer transition-all duration-200"
+                 :class="origine === 'koz' ? 'btn-primary shadow-sm' : 'btn-ghost text-base-content/70 hover:bg-base-300/50'">
+            <input type="radio" name="origine" value="koz" x-model="origine" class="hidden">
+            <span>Véhicule KOZ</span>
+          </label>
+
+          <label class="btn btn-sm border-0 flex-1 cursor-pointer transition-all duration-200"
+                 :class="origine === 'externe' ? 'btn-primary shadow-sm' : 'btn-ghost text-base-content/70 hover:bg-base-300/50'">
+            <input type="radio" name="origine" value="externe" x-model="origine" class="hidden">
+            <span>Véhicule Externe</span>
+          </label>
+        </div>
+      </div>
+        <!-- Overlay de chargement HTMX (Loading Indicator) -->
+                <div id="reserve-indicator" class="htmx-indicator absolute inset-0 bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center z-50 rounded-2xl transition-all">
+                    <div class="p-6 text-center flex flex-col items-center">
+                        <img src="{% static 'images/Loading_animation.svg' %}" class="w-16 h-16 mb-3 object-contain animate-pulse" alt="Chargement...">
+                        <p class="text-sm font-bold text-slate-800">Authentification en cours...</p>
+                        <p class="text-xs text-slate-500 mt-1">Connexion sécurisée aux serveurs KOZ Services</p>
+                    </div>
+                </div>
+      <!-- SECTION DYNAMIQUE 1: Sélection Véhicule KOZ -->
+      <div x-show="origine === 'koz'" 
+           x-transition:enter="transition ease-out duration-200"
+           x-transition:enter-start="opacity-0 -translate-y-2"
+           x-transition:enter-end="opacity-100 translate-y-0"
+           class="p-4 bg-base-200/30 rounded-xl border border-base-200 space-y-3">
+        
+        <div class="form-control">
+          <label class="label text-xs font-semibold text-base-content/80">
+            {{ reserver_service_form.vehicul.label }}
+          </label>
+          {{ reserver_service_form.vehicul }}
         </div>
       </div>
 
-      <!-- Bloc Véhicule KOZ -->
-      <div id="bloc-vehicul-koz" class="form-control hidden">
-        <label class="label font-semibold">{{ reserver_service_form.vehicul.label }}</label>
-        {{ reserver_service_form.vehicul }}
-      </div>
-
-      <!-- Bloc Véhicule Externe -->
-      <div id="bloc-vehicul-externe" class="hidden space-y-3">
-        <div class="grid grid-cols-2 gap-3">
+      <!-- SECTION DYNAMIQUE 2: Véhicule Externe (Marque, Modèle, Année) -->
+      <div x-show="origine === 'externe'" 
+           x-transition:enter="transition ease-out duration-200"
+           x-transition:enter-start="opacity-0 -translate-y-2"
+           x-transition:enter-end="opacity-100 translate-y-0"
+           class="p-4 bg-base-200/30 rounded-xl border border-base-200 space-y-3"
+           x-cloak>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div class="form-control">
-            <label class="label text-xs font-medium">{{ reserver_service_form.marque.label }}</label>
+            <label class="label text-xs font-semibold text-base-content/80">{{ reserver_service_form.marque.label }}</label>
             {{ reserver_service_form.marque }}
           </div>
           <div class="form-control">
-            <label class="label text-xs font-medium">{{ reserver_service_form.modele.label }}</label>
+            <label class="label text-xs font-semibold text-base-content/80">{{ reserver_service_form.modele.label }}</label>
             {{ reserver_service_form.modele }}
           </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
-          <div class="form-control">
-            <label class="label text-xs font-medium">{{ reserver_service_form.annee.label }}</label>
-            {{ reserver_service_form.annee }}
-          </div>
-          <div class="form-control">
-            <label class="label text-xs font-medium">{{ reserver_service_form.immatriculation.label }}</label>
-            {{ reserver_service_form.immatriculation }}
-          </div>
+        <div class="form-control">
+          <label class="label text-xs font-semibold text-base-content/80">{{ reserver_service_form.annee.label }}</label>
+          {{ reserver_service_form.annee }}
         </div>
       </div>
 
-      <!-- Actions & Loader HTMX -->
-      <div class="modal-action border-t pt-4 mt-6">
+      <!-- SECTION COMMUNE : Détails Techniques & Réservation -->
+      <div class="space-y-3 pt-2">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="form-control">
+            <label class="label text-xs font-semibold text-base-content/80">{{ reserver_service_form.immatriculation.label }}</label>
+            {{ reserver_service_form.immatriculation }}
+          </div>
+          <div class="form-control">
+            <label class="label text-xs font-semibold text-base-content/80">{{ reserver_service_form.kilometrage_actuel.label }}</label>
+            {{ reserver_service_form.kilometrage_actuel }}
+          </div>
+        </div>
+
+        <div class="form-control">
+          <label class="label text-xs font-semibold text-base-content/80">{{ reserver_service_form.date_prevue.label }}</label>
+          {{ reserver_service_form.date_prevue }}
+        </div>
+
+        <div class="form-control">
+          <label class="label text-xs font-semibold text-base-content/80">{{ reserver_service_form.notes_client.label }}</label>
+          {{ reserver_service_form.notes_client }}
+        </div>
+      </div>
+
+      <!-- Actions & HTMX Loader -->
+      <div class="modal-action border-t border-base-200 pt-4 mt-6">
         <button type="button" 
                 class="btn btn-ghost" 
                 onclick="document.getElementById('modal_reserver_service').close()">
           Annuler
         </button>
 
-        <button type="submit" class="btn btn-primary min-w-[120px]">
+        <button type="submit" class="btn btn-primary gap-2 min-w-[140px]">
           <span id="submit-spinner" class="loading loading-spinner loading-xs htmx-indicator"></span>
-          <span>Enregistrer</span>
+          <span>Confirmer</span>
         </button>
       </div>
 
@@ -76,20 +144,12 @@
   </div>
 </dialog>
 
+<!-- Écouteur global pour fermer la modale via l'événement personnalisé -->
 <script>
-    document.addEventListener('CloseReservationModal'){
-        document.getElementById('modal_reserver_service').close()
+  window.addEventListener('CloseReservationModal', () => {
+    const modal = document.getElementById('modal_reserver_service');
+    if (modal && modal.open) {
+      modal.close();
     }
-</script>
-<script>
-    // Délégation d'événement pour que le toggle fonctionne même après un rechargement HTMX
-    document.addEventListener('change', function(e) {
-        if (e.target && e.target.name === 'origine') {
-            const isKoz = e.target.value === 'koz';
-            const isExterne = e.target.value === 'externe';
-            
-            document.getElementById('bloc-vehicul-koz')?.classList.toggle('hidden', !isKoz);
-            document.getElementById('bloc-vehicul-externe')?.classList.toggle('hidden', !isExterne);
-        }
-    });
+  });
 </script>

@@ -16,6 +16,7 @@
     <link rel="alternate" href="https://koz-corporate.pro/" hreflang="fr" />
     <link rel="alternate" href="https://koz-corporate.pro/" hreflang="x-default" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="{% static 'js/htmx.min.js' %}" defer></script>
     <script src="{% static 'js/vendor/gsap.min.js' %}" defer></script>
     <script src="{% static 'js/vendor/ScrollTrigger.min.js' %}" defer></script>
@@ -446,8 +447,12 @@
             </div>
 
             <!-- ===== BOUTON ===== -->
-        
-             {% if user.is_authenticated and user.role == 'client' %}
+            {% if user.is_authenticated and user.role == 'client' and service.necessite_maintenance  %}
+                 <button onclick="document.getElementById('modal_reserver_service').showModal()" 
+                    class="btn btn-primary w-full text-center py-3 rounded-xl flex items-center justify-center gap-2">
+                    <i class="fas fa-calendar-check"></i> Réserver ce service
+                </button>
+             {% elif user.is_authenticated and user.role == 'client' %}
                 <a href="{% url 'services_app:contacter-service' service.pk %}" 
                 class="btn btn-primary w-full text-center py-3 rounded-xl flex items-center justify-center gap-2">
                     <i class="fas fa-calendar-check"></i> Réserver ce service

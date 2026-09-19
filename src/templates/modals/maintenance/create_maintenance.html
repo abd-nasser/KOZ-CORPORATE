@@ -46,7 +46,11 @@
                                 {% endif %}
                             </label>
 
-                            {{ field }}
+                            {% if field.name == 'vehicul' %}
+                                <span id="maintenance-vehicul-field">{{ field }}</span>
+                            {% else %}
+                                {{ field }}
+                            {% endif %}
 
                             {% if field.help_text %}
                                 <p class="text-[11px] text-base-content/50 mt-1">{{ field.help_text }}</p>

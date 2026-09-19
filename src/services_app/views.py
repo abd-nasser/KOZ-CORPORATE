@@ -1,6 +1,8 @@
+from django.db import transaction
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 # Create your views here.
+from django.utils import timezone
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy, reverse
@@ -16,8 +18,20 @@ from .forms import ServiceImagesForm, ServiceAvisForm, ServiceAvisApprobationFor
 from chat_app.models import Message
 from auth_app.models import kozUser
 
+from django.core.mail import send_mail
+from koz_flow.tasks import send_email_task, send_receipt_email_task
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from leads_app.utils import generer_echeances_offre, generer_echeances_demande, calculer_mensualite
+from utils.pdf import render_to_pdf
+from django.conf import settings
 
 
+import logging
+
+
+
+logger = logging.getLogger(__name__)
 # ============================================================
 # TYPES DE SERVICES
 # ============================================================
@@ -240,37 +254,78 @@ class SITE_ServiceAvisCreateView(LoginRequiredMixin, CreateView):
 def reserver_service(request, service_id):
     service = get_object_or_404(Services, pk=service_id)
 
-    if request.method == 'POST':
-        form = ReservationMaintenanceForm(request.POST, client=request.user)
-        if form.is_valid():
-            maintenance = Maintenance.objects.create(
-                client=request.user,
-                service=service,
-                type_maintenance=service.type_maintenance_associe,
-                origine=form.cleaned_data['origine'],
-                vehicul=form.cleaned_data.get('vehicul'),
-                marque=form.cleaned_data.get('marque'),
-                modele=form.cleaned_data.get('modele'),
-                annee=form.cleaned_data.get('annee'),
-                immatriculation=form.cleaned_data.get('immatriculation'),
-                kilometrage_actuel=form.cleaned_data.get('kilometrage_actuel'),
-                date_prevue=form.cleaned_data.get('date_prevue'),
-                notes_client=form.cleaned_data.get('notes_client', ''),
-                statut='en_attente',
-            )
-            response = render(request, "partials/services/_reservation_result.html", {
-                "success": True,
-                "title": "✅ Réservation envoyée",
-                "message": "Votre demande de maintenance a été enregistrée.",
+    if request.method != 'POST':
+        return redirect("services_app:service-detail-public", service.pk)
+    
+        
+    form = ReservationMaintenanceForm(request.POST, client=request.user)
+    if not form.is_valid():
+         return render(request, "partials/services/_reservation_form_errors.html", {"reserver_service_form": form})
+        
+    try:
+        with transaction.atomic():
+            maintenance = form.save(commit=False)
+            maintenance.client = request.user
+            maintenance.service = service
+            maintenance.type_maintenance = service.type_maintenance_associe
+            maintenance.origine = form.cleaned_data.get("origine")
+            maintenance.vehicul = form.cleaned_data.get("vehicul")
+            maintenance.marque = form.cleaned_data.get('marque')
+            maintenance.modele = form.cleaned_data.get('modele')
+            maintenance.annee = form.cleaned_data.get('annee')
+            maintenance.immatriculation = form.cleaned_data.get('immatriculation')
+            maintenance.save()
+
+            commerciaux = kozUser.objects.filter(role='commercial', is_active=True)
+            context_email = {
+                'client': request.user,
+                'maintenance': maintenance,
+                "vehicule": maintenance.vehicul if maintenance.vehicul else f'{maintenance.marque}-{maintenance.modele}',
+                'date_prevue': maintenance.date_prevue,
+                'notes_client': maintenance.notes_client if maintenance.notes_client else "",
+                'type_maintenance': maintenance.type_maintenance if maintenance.type_maintenance else "Révision",
+                'lien_detail': request.build_absolute_uri(maintenance.get_absolute_url()),
+                'date_creation': timezone.now(),
+            }
+            html_message = render_to_string('emails/maintenance/maintenance_creation_client_commercial.html', context_email)
+            plain_message = strip_tags(html_message)
+
+            recipients = [com.email for com in commerciaux if com.email]
+
+            if recipients:
+                transaction.on_commit(
+                    lambda: send_email_task.delay(
+                        subject=f"🛠️ Nouvelle maintenance demandée par {request.user.nom_complet}",
+                        plain_message=plain_message,
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        recipient_list=recipients,
+                        html_message=html_message,
+                    )
+                )
+                logger.info(f"Email maintenance envoyé à {len(recipients)} commerciaux")
+            else:
+                logger.warning("Aucun commercial actif trouvé pour l'envoi de l'email")
+
+            response = render(request, "partials/maintenance/_maintenance_result.html", {
+                'success': True,
+                'title': '✅ Demande envoyée',
+                'message': 'Votre demande de maintenance a bien été enregistrée.',
+                'reload_on_close': True,
             })
-            response["HX-Triggrer"] = "CloseReservationModal"
+            response["HX-Trigger"] = "CloseReservationModal"
             return response
-        else:
-            return render(request, "partials/services/_reservation_form_errors.html", {"reserver_service_form": form})
 
-    return redirect("services_app:service-detail-public", service.pk)
-
-
+    except Exception as e:
+        logger.error(f"Erreur {e} -- sur la création de la maintenance")
+        response = render(request, "partials/maintenance/_maintenance_result.html", {
+            'success': False,
+            'title': '❌ Erreur',
+            'message': "Une erreur est survenue. Merci de réessayer.",
+            'reload_on_close':True
+        })
+        return response
+                        
+           
 @login_required
 def contacter_service(request, service_id):
     service = get_object_or_404(Services, pk=service_id)

@@ -53,11 +53,17 @@
                             <div class="flex items-center gap-2 text-gray-600">
                                 <i class="fas fa-road text-blue-500 w-5"></i>
                                 <span><strong>Km restants :</strong> 
-                                    {% if maintenance.km_restant > 0 %}
-                                        {{ maintenance.km_restant|intcomma }} km
-                                    {% else %}
-                                        <span class="text-red-500">⚠️ Dépassé</span>
-                                    {% endif %}
+                                     {% if maintenance.km_restant > 0 %}
+                            <p class="  text-emerald-600 truncate">{{ maintenance.km_restant|intcomma }} <span class="text-xs font-normal">km</span></p>
+                        {% else %}
+                            
+                            {% if maintenance.kilometrage_prochain%}
+                                <p class="  text-rose-600 truncate">Dépassé</p>
+                                {% else %}
+                                <p class="  text-amber-500 truncate"> Non définie</p>
+                            {% endif %}
+
+                        {% endif %}
                                 </span>
                             </div>
                         </div>

@@ -1830,8 +1830,25 @@ class MaintenanceListView(LoginRequiredMixin, ListView):
         if 'maintenance_form' not in context:
             context["maintenance_form"] = MaintenanceForm()
         if 'client_form' not in context:
-            context['client_form'] = ClientMaintenanceForm()
+            form_kwargs = {}
+            if self.request.user.role == "client":
+                form_kwargs["client"] = self.request.user
+            context['client_form'] = ClientMaintenanceForm(**form_kwargs)
         return context
+
+
+@login_required
+def maintenance_client_vehicles(request):
+    if request.user.role not in ['commercial', 'directeur']:
+        raise PermissionDenied
+
+    client_id = request.GET.get('client')
+    client = kozUser.objects.filter(pk=client_id, role='client').first()
+    form = MaintenanceForm(client=client)
+
+    return render(request, 'partials/maintenance/_vehicle_field.html', {
+        'vehicul_field': form['vehicul'],
+    })
     
 class MaintenanceCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = Maintenance
@@ -1841,10 +1858,19 @@ class MaintenanceCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView)
     def test_func(self):
         return self.request.user.role in ['commercial', 'directeur']
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        client_id = self.request.POST.get('client') or self.request.GET.get('client')
+        if client_id:
+            kwargs['client'] = kozUser.objects.filter(
+                pk=client_id,
+                role='client',
+            ).first()
+        return kwargs
+    
+
     def form_valid(self, form):
         # ⏱️ Simule un traitement (à supprimer en prod)
-
-        
         # ✅ Sauvegarde du formulaire
         maintenance = form.save()
         
@@ -2026,6 +2052,11 @@ class ClientCreateMaintenance(LoginRequiredMixin, UserPassesTestMixin, CreateVie
     
     def test_func(self):
         return self.request.user.role == 'client'
+    
+    def get_form_kwargs(self, *args, **kwargs):
+        kwargs = super().get_form_kwargs(*args, **kwargs)
+        kwargs["client"] = self.request.user
+        return kwargs
 
     def form_valid(self, form):
         # ==========================================

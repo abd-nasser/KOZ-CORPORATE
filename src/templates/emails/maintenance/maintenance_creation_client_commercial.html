@@ -34,7 +34,7 @@
                                 Bonjour l'équipe commerciale,
                             </h2>
                             <p style="color: #475569; font-size: 14px; line-height: 1.6; margin-bottom: 20px;">
-                                Le client <strong>{{ client.nom_complet|default:client.get_full_name|default:client.username }}</strong> vient de soumettre une nouvelle demande de maintenance sur la plateforme.
+                                Le client <strong>{{ client.nom_complet }}</strong> vient de soumettre une nouvelle demande de maintenance sur la plateforme.
                             </p>
 
                             <!-- Encadré d'action requise -->
@@ -52,12 +52,12 @@
                                 <tr>
                                     <td style="padding: 8px 0; color: #64748b; font-size: 13px; width: 40%;"><strong>Client :</strong></td>
                                     <td style="padding: 8px 0; color: #0f172a; font-size: 13px; font-weight: 600;">
-                                        {{ client.nom_complet|default:client.get_full_name|default:client.username }}
+                                        {{ client.nom_complet}}
                                     </td>
                                 </tr>
                                 <tr>
                                     <td style="padding: 8px 0; color: #64748b; font-size: 13px;"><strong>Véhicule :</strong></td>
-                                    <td style="padding: 8px 0; color: #0f172a; font-size: 13px; font-weight: 600;">{{ vehicule }}</td>
+                                    <td style="padding: 8px 0; color: #0f172a; font-size: 13px; font-weight: 600;">{{ vehicule.marque.nom }} - {{ vehicule.modele }}</td>
                                 </tr>
                                 <tr>
                                     <td style="padding: 8px 0; color: #64748b; font-size: 13px;"><strong>Type intervention :</strong></td>

@@ -88,7 +88,7 @@ class RdvForm(forms.ModelForm):
             'prenom': forms.TextInput(attrs={'class': 'input input-bordered w-full', 'placeholder': 'Prénom'}),
             'telephone': forms.TextInput(attrs={'class': 'input input-bordered w-full', 'placeholder': 'Téléphone'}),
             'duree': forms.NumberInput(attrs={'class': 'input input-bordered w-full', 'min': '15', 'step': '15'}),
-            'motif': forms.TextInput(attrs={'class': 'input input-bordered w-full', 'placeholder': 'Ex: Essai véhicule / Signature contrat'}),
+            'motif': forms.Textarea(attrs={'class': 'input input-bordered w-full', 'rows': 3, 'placeholder': 'Ex: Essai véhicule / Signature contrat'}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -129,5 +129,5 @@ class ClientRdvForm(forms.ModelForm):
             ),
             
             'duree': forms.NumberInput(attrs={'class': 'input input-bordered w-full', 'min': '15', 'step': '15'}),
-            'motif': forms.TextInput(attrs={'class': 'input input-bordered w-full', 'placeholder': 'Ex: Essai véhicule / Signature contrat'}),
+            'motif': forms.Textarea(attrs={'class': 'input input-bordered w-full', 'rows': 4, 'placeholder': 'Ex: Essai véhicule / Signature contrat'}),
         }

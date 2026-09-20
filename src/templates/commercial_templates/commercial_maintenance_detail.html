@@ -253,19 +253,35 @@
                                 </span>
                             {% endif %}
                         </div>
+
                         <div class="p-6 grid grid-cols-2 sm:grid-cols-4 gap-6 text-sm">
-                            <div class="space-y-1">
-                                <span class="text-xs font-medium text-slate-400 block">Marque</span>
-                                <span class="font-bold text-slate-800 text-base">{{ maintenance.marque }}</span>
-                            </div>
-                            <div class="space-y-1">
-                                <span class="text-xs font-medium text-slate-400 block">Modèle</span>
-                                <span class="font-bold text-slate-800 text-base">{{ maintenance.modele }}</span>
-                            </div>
-                            <div class="space-y-1">
-                                <span class="text-xs font-medium text-slate-400 block">Année</span>
-                                <span class="font-bold text-slate-800 text-base">{{ maintenance.annee }}</span>
-                            </div>
+                            {% if maintenance.origine == 'koz' %}
+                                <div class="space-y-1">
+                                    <span class="text-xs font-medium text-slate-400 block">Marque</span>
+                                    <span class="font-bold text-slate-800 text-base">{{ maintenance.vehicul.marque.nom }}</span>
+                                </div>
+                                <div class="space-y-1">
+                                    <span class="text-xs font-medium text-slate-400 block">Modèle</span>
+                                    <span class="font-bold text-slate-800 text-base">{{ maintenance.vehicul.modele }}</span>
+                                </div>
+                                <div class="space-y-1">
+                                    <span class="text-xs font-medium text-slate-400 block">Année</span>
+                                    <span class="font-bold text-slate-800 text-base">{{ maintenance.vehicul.annee }}</span>
+                                </div>
+                            {% else %}
+                                <div class="space-y-1">
+                                    <span class="text-xs font-medium text-slate-400 block">Marque</span>
+                                    <span class="font-bold text-slate-800 text-base">{{ maintenance.marque }}</span>
+                                </div>
+                                <div class="space-y-1">
+                                    <span class="text-xs font-medium text-slate-400 block">Modèle</span>
+                                    <span class="font-bold text-slate-800 text-base">{{ maintenance.modele }}</span>
+                                </div>
+                                <div class="space-y-1">
+                                    <span class="text-xs font-medium text-slate-400 block">Année</span>
+                                    <span class="font-bold text-slate-800 text-base">{{ maintenance.annee }}</span>
+                                </div>
+                            {% endif %}
                             <div class="space-y-1">
                                 <span class="text-xs font-medium text-slate-400 block">Immatriculation</span>
                                 <span class="inline-block px-2.5 py-0.5 rounded bg-slate-100 border border-slate-200 font-mono font-bold text-slate-800 text-sm tracking-wider">

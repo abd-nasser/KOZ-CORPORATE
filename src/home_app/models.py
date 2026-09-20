@@ -41,8 +41,8 @@ class Actualite(models.Model):
     
     # ===== TYPES =====
     TYPE_CHOICES = [
-        ('evenement', 'Événement'),
-        ('nouveaute', 'Nouveauté / Lancement'),
+        ('tutos', 'Tutos & Conseils Auto'),
+        ('decouverte', "Découvrir des modèles"),
         ('communique', 'Communiqué de presse'),
         ('offre', 'Offre spéciale'),
         ('reception', 'Réception / Gala'),
@@ -428,7 +428,7 @@ class RendezVous(models.Model):
     email = models.EmailField(verbose_name="Email", null=True, blank=True)
     date_rendez_vous = models.DateTimeField(verbose_name="Date et heure")
     duree = models.PositiveIntegerField(default=60, verbose_name="Durée (minutes)")
-    motif = models.CharField(max_length=255, verbose_name="Motif")
+    motif = models.TextField(verbose_name="Motif")
     statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='en_attente')
     date_creation = models.DateTimeField(auto_now_add=True)
     date_modification = models.DateTimeField(auto_now=True)

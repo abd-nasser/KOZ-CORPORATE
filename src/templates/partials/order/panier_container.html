@@ -193,9 +193,10 @@
         map = L.map('map').setView([DEFAULT_LAT, DEFAULT_LNG], 13);
 
         // 2. Chargement du fond de carte OpenStreetMap
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '© OpenStreetMap'
+        L.tileLayer('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
+            maxZoom: 20,
+            subdomains: 'abc',
+            attribution: '&copy; OpenStreetMap France | &copy; OpenStreetMap'
         }).addTo(map);
 
         // 3. Création du marqueur déplaçable (draggable)

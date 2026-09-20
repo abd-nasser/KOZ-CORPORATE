@@ -129,6 +129,8 @@
                         <i class="fas fa-car text-blue-600"></i> Véhicule concerné
                     </h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                        
+                        {% if maintenance.origine == "externe" %}
                         <div>
                             <span class="text-gray-500 block text-xs uppercase tracking-wider font-medium">Marque & Modèle</span>
                             <strong class="text-gray-800 text-base">{{ maintenance.marque }} {{ maintenance.modele }}</strong>
@@ -137,13 +139,25 @@
                             <span class="text-gray-500 block text-xs uppercase tracking-wider font-medium">Année</span>
                             <span class="text-gray-800 font-semibold">{{ maintenance.annee }}</span>
                         </div>
+                        {% else %}
+                        <div>
+                            <span class="text-gray-500 block text-xs uppercase tracking-wider font-medium">Marque & Modèle</span>
+                            <strong class="text-gray-800 text-base">{{ maintenance.vehicul.marque.nom }} {{ maintenance.vehicul.modele }}</strong>
+                        </div>
+                        <div>
+                            <span class="text-gray-500 block text-xs uppercase tracking-wider font-medium">Année</span>
+                            <span class="text-gray-800 font-semibold">{{ maintenance.vehicul.annee }}</span>
+                        </div>
+                        {% endif %}
+                            
+                       
                         <div>
                             <span class="text-gray-500 block text-xs uppercase tracking-wider font-medium">Immatriculation</span>
                             <span class="font-mono font-semibold text-gray-800 bg-white px-2 py-0.5 rounded border border-gray-200 inline-block mt-0.5">{{ maintenance.immatriculation }}</span>
                         </div>
                         <div>
                             <span class="text-gray-500 block text-xs uppercase tracking-wider font-medium">Kilométrage actuel</span>
-                            <span class="text-gray-800 font-semibold">{{ maintenance.kilometrage_actuel|intcomma }} km</span>
+                            <span class="text-gray-800 font-semibold">{{ maintenance.kilometrage_actuel|default:"0"|intcomma }} km</span>
                         </div>
                         <div class="sm:col-span-2 pt-1">
                             <span class="text-gray-500 block text-xs uppercase tracking-wider font-medium">Origine</span>

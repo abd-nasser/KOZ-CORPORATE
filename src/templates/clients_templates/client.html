@@ -1,191 +1,193 @@
 {% load static %}
 {% load tailwind_tags %}
 <!DOCTYPE html>
-<html lang="fr" class="h-full bg-slate-50/60">
+<html lang="fr" class="h-full bg-slate-50 font-sans selection:bg-indigo-600 selection:text-white">
 <head>
-    <link rel="icon" type="image/png" href="{% static 'images/Koz_logo_noBack.png' %}">
-    <link rel="apple-touch-icon" href="{% static 'images/Koz_logo_noBack.png' %}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Mon Espace Client - KOZ Services</title>
+    <title>Espace Client — KOZ Services</title>
+
+    <link rel="icon" type="image/png" href="{% static 'images/Koz_logo_noBack.png' %}">
+    <link rel="apple-touch-icon" href="{% static 'images/Koz_logo_noBack.png' %}">
+
+    <!-- Typographie Inter & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Scripts & CSS de base -->
-    <script src="{% static 'js/htmx.min.js' %}" defer></script>
     {% tailwind_css %}
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/client/client_style.css' %}">
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://unpkg.com/lenis@1.3.25/dist/lenis.min.js"></script> 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
-    <script src="https://unpkg.com/splitting/dist/splitting.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/splitting/dist/splitting.css">
-    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
-    <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
+
+    <!-- Scripts en defer -->
+    <script src="{% static 'js/htmx.min.js' %}" defer></script>
+    <script src="https://unpkg.com/lenis@1.3.25/dist/lenis.min.js" defer></script> 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
 
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        
-        /* Ambient Background Light */
-        .ambient-glow {
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100%;
-            max-width: 1400px;
-            height: 500px;
-            background: radial-gradient(circle at 50% 0%, rgba(37, 99, 235, 0.08) 0%, rgba(241, 245, 249, 0) 70%);
-            pointer-events: none;
-            z-index: 0;
+        body { font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; }
+
+        /* Animations d'arrière-plan flottant doux */
+        @keyframes blob-float-1 {
+            0%, 100% { transform: translate(0px, 0px) scale(1); }
+            50% { transform: translate(40px, -30px) scale(1.08); }
+        }
+        @keyframes blob-float-2 {
+            0%, 100% { transform: translate(0px, 0px) scale(1); }
+            50% { transform: translate(-30px, 40px) scale(1.12); }
+        }
+        .animate-blob-1 { animation: blob-float-1 14s ease-in-out infinite; }
+        .animate-blob-2 { animation: blob-float-2 18s ease-in-out infinite; }
+
+        /* Grille vectorielle claire */
+        .tech-grid-pattern-light {
+            background-size: 40px 40px;
+            background-image: 
+                linear-gradient(to right, rgba(15, 23, 42, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(15, 23, 42, 0.03) 1px, transparent 1px);
         }
 
-        /* Subtiles Particules */
-        #particles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            pointer-events: none;
-            z-index: 0;
-            opacity: 0.6;
-        }
-        .particle {
-            position: absolute;
-            border-radius: 50%;
-            animation: float 15s infinite ease-in-out;
-        }
-        @keyframes float {
-            0%, 100% { transform: translateY(0) scale(1); }
-            50% { transform: translateY(-30px) scale(1.1); }
+        /* Effet Glassmorphism Blanc Premium */
+        .glass-card-light {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(226, 232, 240, 0.9);
         }
     </style>
 </head>
-<div id="result-toast-container"></div>
-<body class="min-h-full flex flex-col text-slate-800 antialiased relative selection:bg-blue-600 selection:text-white">
 
-    <!-- Glowing backdrop & Particules -->
-    <div class="ambient-glow"></div>
-    <div id="particles"></div>
+<body class="min-h-full flex flex-col bg-slate-50 text-slate-800 antialiased relative selection:bg-indigo-600 selection:text-white overflow-x-hidden">
 
-    <!-- Messages flash -->
+    <div id="result-toast-container"></div>
+
+    <!-- 1. TOILE D'ARRIÈRE-PLAN LUMINEUSE ET VIVANTE (Global Light Canvas) -->
+    <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <!-- Halos de lumière pastel (Glow Orbs) en bleu & indigo -->
+        <div class="absolute top-[-10%] left-[-5%] w-[650px] h-[650px] bg-blue-200/40 rounded-full blur-[130px] animate-blob-1"></div>
+        <div class="absolute top-[25%] right-[-5%] w-[600px] h-[600px] bg-indigo-200/40 rounded-full blur-[140px] animate-blob-2"></div>
+        <div class="absolute bottom-[-10%] left-[20%] w-[700px] h-[700px] bg-sky-200/35 rounded-full blur-[150px] animate-blob-1" style="animation-delay: -6s;"></div>
+        
+        <!-- Superposition Grille Vectorielle Claires -->
+        <div class="absolute inset-0 tech-grid-pattern-light opacity-80"></div>
+        
+        <!-- Fondu radial pour adoucir le centre -->
+        <div class="absolute inset-0 bg-gradient-to-b from-white/60 via-transparent to-slate-100/80"></div>
+    </div>
+
+    <!-- Alerts / Messages Flash -->
     {% if messages %}
     <div class="fixed top-6 right-6 z-50 space-y-3 max-w-sm w-full">
         {% for message in messages %}
-        <div class="alert alert-{{ message.tags }} bg-white/90 backdrop-blur-md border border-slate-200 shadow-xl rounded-2xl p-4 flex items-center gap-3 animate-fade-in-down">
-            <i class="fas fa-info-circle text-blue-600 text-lg"></i>
-            <span class="text-sm font-medium text-slate-700">{{ message }}</span>
+        <div class="alert alert-{{ message.tags }} bg-white/95 backdrop-blur-xl border border-slate-200 shadow-2xl rounded-2xl p-4 flex items-center gap-3 animate-fade-in-down">
+            <div class="w-8 h-8 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 shrink-0 border border-indigo-100">
+                <i class="fas fa-circle-info text-sm"></i>
+            </div>
+            <span class="text-xs font-semibold text-slate-700 leading-tight">{{ message }}</span>
         </div>
         {% endfor %}
     </div>
     {% endif %}
-    
-    <!-- ========== NAVBAR ========== -->
-    <nav class="bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200/80 shadow-sm transition-all">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex justify-between items-center gap-4">
+
+    <!-- Navbar Épurée & Lumineuse -->
+    <nav class="relative z-40 border-b border-slate-200/80 backdrop-blur-xl bg-white/80 sticky top-0 transition-all shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between items-center">
             
-            <!-- Logo KOZ -->
-            <a href="{% url 'home_app:home-page' %}" class="flex items-center gap-3 group">
-              
-                    <img src="{% static 'images/Koz_logo_noBack.png' %}" alt="KOZ Logo" class="w-12 h-12 object-contain filter drop-shadow">
-               
+            <!-- Logo & Brand KOZ -->
+            <a href="{% url 'home_app:home-page' %}" class="flex items-center gap-3.5 group">
+                <div class="p-1.5 rounded-2xl bg-indigo-50 border border-indigo-100/80 group-hover:bg-indigo-100/80 transition-all duration-300 shadow-sm">
+                    <img src="{% static 'images/Koz_logo_noBack.png' %}" alt="KOZ Logo" class="w-7 h-7 object-contain">
+                </div>
                 <div class="flex flex-col">
-                    <span class="text-lg font-extrabold text-slate-900 tracking-tight leading-none">KOZ <span class="text-blue-600">Services</span></span>
-                    <span class="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Espace Client Pro</span>
+                    <span class="text-base font-black text-slate-900 tracking-tight flex items-center gap-1.5">
+                        KOZ <span class="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 bg-clip-text text-transparent">SERVICES</span>
+                    </span>
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-slate-600">Portail Client ERP</span>
                 </div>
             </a>
 
-            <!-- Actions Navbar -->
-            <div class="flex items-center gap-3 sm:gap-5">
+            <!-- Right Actions Nav -->
+            <div class="flex items-center gap-3">
                 <a href="{% url 'home_app:home-page' %}" 
-                   class="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-600 hover:text-blue-600 px-3 py-2 rounded-lg hover:bg-slate-100/80 transition group">
-                    <i class="fas fa-arrow-left text-xs text-slate-400 group-hover:text-blue-600 group-hover:-translate-x-1 transition-all"></i>
-                    <span class="hidden sm:inline">Retour à l'accueil</span>
+                   class="hidden sm:inline-flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-slate-100/80 hover:bg-slate-200/80 border border-slate-200 px-4 py-2.5 rounded-xl transition-all">
+                    <i class="fas fa-arrow-left text-[10px] text-slate-600"></i>
+                    <span>Site principal</span>
                 </a>
 
-                <div class="h-4 w-px bg-slate-200 hidden sm:block"></div>
-
-                <a href="{% url 'auth_app:logout-sur-erp' %}" id="logoutBtn" 
-                   class="inline-flex items-center gap-2 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200/80 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition shadow-xs">
-                    <i class="fas fa-sign-out-alt text-xs"></i>
+                <a href="{% url 'auth_app:logout-sur-erp' %}" 
+                   class="inline-flex items-center gap-2 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200/80 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all">
+                    <i class="fas fa-power-off text-xs"></i>
                     <span class="hidden sm:inline">Déconnexion</span>
                 </a>
             </div>
         </div>
     </nav>
 
-    <!-- ========== HEADER BIENVENUE ========== -->
-    <header class="relative z-10 pt-8 pb-4">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="bg-white/90 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xl shadow-slate-200/50 relative overflow-hidden">
+    <!-- Header / Banner Client Lumineux -->
+    <header class="relative z-10 w-full pt-8 pb-10 border-b border-slate-200/80 bg-white/50 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="w-full relative">
                 
-                <!-- Motif décoratif discret -->
-                <div class="absolute -right-12 -bottom-12 w-48 h-48 bg-gradient-to-br from-blue-500/10 to-indigo-500/5 rounded-full blur-2xl pointer-events-none"></div>
-
                 <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 relative z-10">
                     
-                    <!-- Salutation & Informations -->
-                    <div class="space-y-3">
-                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold border border-blue-100">
-                            <span class="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></span>
-                            Espace sécurisé v1.0
+                    <!-- Client Greeting -->
+                    <div class="space-y-3 max-w-2xl">
+                        <div class="inline-flex items-center gap-2.5 px-3.5 py-1 rounded-full bg-indigo-50 border border-indigo-200/80 text-indigo-700 text-xs font-semibold">
+                            <span class="relative flex h-2 w-2">
+                              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                              <span class="relative inline-flex rounded-full h-2 w-2 bg-indigo-600"></span>
+                            </span>
+                            <span>Espace d'administration vérifié</span>
                         </div>
 
-                        <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight">
-                            Bienvenue,
-                            {% if client.genre == "masculin" %}Mr{% elif client.genre == "féminin" %}Mme{% endif %}
-                            <span class="bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                                {{ client.nom_complet }}
+                        <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">
+                            Bonjour, <br class="hidden sm:inline"/>
+                            <span class="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 bg-clip-text text-transparent">
+                                {% if client.genre == "masculin" %}Mr{% elif client.genre == "féminin" %}Mme{% endif %} {{ client.nom_complet }}
                             </span>
                         </h1>
 
-                        <!-- Équipe commerciale support -->
+                        <!-- Commercial Contact Chips -->
                         <div class="flex flex-wrap items-center gap-3 pt-1">
-                            <div class="flex items-center gap-2 text-xs font-semibold text-slate-500">
-                                <i class="fas fa-headset text-blue-600 text-sm"></i>
-                                <span>Support dédié :</span>
-                            </div>
-
+                            <span class="text-xs font-semibold text-slate-600 flex items-center gap-1.5">
+                                <i class="fas fa-headset text-indigo-600"></i> Conseiller dédié :
+                            </span>
                             <div class="flex flex-wrap items-center gap-2">
                                 {% for commercial in commerciaux %}
-                                    <div class="inline-flex items-center gap-2 bg-slate-100/90 border border-slate-200/70 px-3 py-1 rounded-full text-xs font-medium text-slate-700">
-                                        <span class="w-2 h-2 rounded-full 
-                                            {% if commercial.est_en_ligne %}bg-emerald-500 shadow-xs shadow-emerald-500/50
-                                            {% elif commercial.est_hors_ligne %}bg-slate-400
-                                            {% else %}bg-rose-400{% endif %}">
-                                        </span>
-                                        <span>{{ commercial.nom_complet }}</span>
+                                    <div class="inline-flex items-center gap-2 bg-white border border-slate-200/80 px-3 py-1 rounded-full text-xs font-medium text-slate-700 shadow-sm">
+                                        <span class="w-2 h-2 rounded-full {% if commercial.est_en_ligne %}bg-emerald-500 shadow-sm shadow-emerald-500/80 animate-pulse{% else %}bg-slate-300{% endif %}"></span>
+                                        <span class="font-semibold">{{ commercial.nom_complet }}</span>
                                         {% if commercial == client.assigned_commercial %}
-                                            <span class="text-[10px] bg-blue-100 text-blue-700 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Assigné</span>
+                                            <span class="text-[9px] bg-indigo-100 text-indigo-700 font-bold px-1.5 py-0.5 rounded uppercase border border-indigo-200">Référent</span>
                                         {% endif %}
                                     </div>
                                 {% empty %}
-                                    <span class="text-xs italic text-slate-400">Aucun commercial assigné pour le moment.</span>
+                                    <span class="text-xs text-slate-600 italic">Équipe support KOZ</span>
                                 {% endfor %}
                             </div>
                         </div>
                     </div>
 
-                    <!-- Boutons d'actions rapides & Date -->
-                    <div class="flex flex-col sm:flex-row lg:flex-col items-start sm:items-center lg:items-end gap-3 w-full lg:w-auto pt-4 lg:pt-0 border-t lg:border-t-0 border-slate-100">
-                        <div class="inline-flex items-center gap-2 text-xs font-semibold text-slate-400 bg-slate-50 border border-slate-200/60 px-3 py-1.5 rounded-xl">
-                            <i class="fas fa-calendar-alt text-blue-500"></i>
+                    <!-- Quick Actions CTA -->
+                    <div class="flex flex-col sm:flex-row lg:flex-col items-stretch sm:items-center lg:items-end gap-3 w-full lg:w-auto">
+                        <div class="inline-flex items-center justify-center gap-2 text-xs font-semibold text-slate-600 bg-white border border-slate-200/80 px-4 py-2.5 rounded-xl shadow-sm">
+                            <i class="far fa-clock text-indigo-600"></i>
                             <span class="capitalize">{% now "l d F Y" %}</span>
                         </div>
 
-                        <div class="flex items-center gap-2 w-full sm:w-auto">
+                        <div class="flex items-center gap-3">
                             <a href="{% url 'chat_app:chat-view' %}" 
-                               class="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 text-xs sm:text-sm font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-4 py-2.5 rounded-xl transition-all shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30">
-                                <i class="fas fa-comment-dots"></i>
-                                <span>Discuter</span>
+                               class="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-3 rounded-2xl text-xs sm:text-sm transition-all shadow-lg shadow-indigo-600/25 hover:shadow-indigo-600/40 hover:scale-[1.02] active:scale-[0.98]">
+                                <i class="fas fa-paper-plane text-xs"></i>
+                                <span>Contacter le support</span>
                             </a>
 
                             <button onclick="document.getElementById('change_pass_modal').showModal()" 
-                                    class="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 text-xs sm:text-sm font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl transition border border-slate-200/80">
-                                <i class="fas fa-key text-slate-500"></i>
-                                <span>Mot de passe</span>
+                                    class="p-3 bg-white hover:bg-slate-50 text-slate-700 rounded-2xl border border-slate-200 shadow-sm transition-all hover:scale-[1.02]"
+                                    title="Changer le mot de passe">
+                                <i class="fas fa-lock text-sm"></i>
                             </button>
                         </div>
                     </div>
@@ -195,188 +197,246 @@
         </div>
     </header>
 
-    <!-- ========== MAIN DASHBOARD ========== -->
-    <style>
-        main{
-            min-height:65vh;
-        }
-    </style>
-    
-    <main class="flex-1 relative z-10 py-6 ">
-        
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+    <!-- Main Content Section -->
+    <main class="flex-1 relative z-10 py-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
 
-            <!-- Dynamic Section Dossier (Conditionnelle) -->
+            <!-- Banner GED Documents (si disponible) -->
             {% if client.documents.all %}
-            <div class="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 rounded-3xl p-6 sm:p-8 text-white shadow-xl shadow-blue-600/15 relative overflow-hidden">
-                <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
-                
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative z-10">
+            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-700 p-6 sm:p-8 text-white shadow-xl shadow-indigo-500/15">
+                <div class="absolute right-0 top-0 bottom-0 w-1/3 bg-gradient-to-l from-white/10 to-transparent pointer-events-none"></div>
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 relative z-10">
                     <div class="space-y-1">
-                        <div class="inline-flex items-center gap-2 text-blue-200 text-xs font-semibold uppercase tracking-wider">
-                            <i class="fas fa-shield-alt"></i> Espace Sécurisé GED
+                        <div class="inline-flex items-center gap-2 text-blue-100 text-xs font-semibold uppercase tracking-wider">
+                            <i class="fas fa-shield-halved"></i> Espace GED Sécurisé
                         </div>
-                        <h3 class="text-xl font-bold tracking-tight">Mon dossier documentaire</h3>
-                        <p class="text-sm text-blue-100/90">Consultez et téléchargez vos pièces justificatives, contrats et attestations.</p>
+                        <h3 class="text-xl font-bold text-white tracking-tight">Vos documents & contrats sont disponibles</h3>
+                        <p class="text-xs sm:text-sm text-blue-100">Téléchargez vos attestations, factures et pièces justificatives en un clic.</p>
                     </div>
-
                     <a href="{% url 'leads_app:documents-list' %}" 
-                       class="inline-flex items-center gap-2 bg-white text-blue-700 hover:bg-blue-50 font-bold px-5 py-3 rounded-2xl text-sm transition shadow-lg shadow-black/10 hover:scale-[1.02] active:scale-[0.98]">
-                        <i class="fas fa-folder-open text-blue-600"></i>
-                        <span>Accéder à mes documents</span>
+                       class="inline-flex items-center gap-2 bg-white hover:bg-slate-50 text-indigo-700 font-bold px-6 py-3 rounded-2xl text-xs sm:text-sm transition-all shadow-md hover:scale-105 shrink-0">
+                        <i class="fas fa-folder-open text-indigo-600"></i>
+                        <span>Ouvrir mes documents</span>
                     </a>
                 </div>
             </div>
             {% endif %}
 
-            <!-- Grille des modules principaux -->
+            <!-- SECTION SERVICES & APPLICATIONS ERP -->
             <div>
-                <div class="flex items-center justify-between mb-5">
-                    <h2 class="text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                        <i class="fas fa-th-large text-blue-600"></i> Services & Suivis
-                    </h2>
-                    <span class="text-xs font-medium text-slate-400">Sélectionnez un module</span>
+                <!-- En-tête de section -->
+                <div class="flex items-center justify-between mb-8">
+                    <div>
+                        <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2.5">
+                            <i class="fas fa-sparkles text-indigo-600"></i> Services & Applications ERP
+                        </h2>
+                        <p class="text-xs sm:text-sm text-slate-600 mt-1">Sélectionnez un espace pour gérer vos opérations et requêtes KOZ</p>
+                    </div>
+                    <span class="text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/80 px-3.5 py-1.5 rounded-full shadow-sm">
+                        6 Services actifs
+                    </span>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <!-- GRILLE DES SERVICES 3x2 -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     
-                    <!-- Card 1: Catalogue -->
+                    <!-- Card 1: Catalogue Véhicules -->
                     <a href="{% url 'vehicul_app:list-vehicul' %}" 
-                       class="group bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-xl hover:shadow-slate-200/60 hover:border-blue-300 transition-all duration-300 flex flex-col justify-between hover:-translate-y-1 relative overflow-hidden">
-                        <div class="space-y-4">
-                            <div class="w-13 h-13 w-12 h-12 bg-blue-50 border border-blue-100 rounded-2xl flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300 shadow-xs">
-                                <i class="fas fa-car text-xl"></i>
+                       class="group relative rounded-3xl p-7 transition-all duration-300 hover:-translate-y-1.5 overflow-hidden flex flex-col justify-between glass-card-light hover:border-blue-300 hover:shadow-xl hover:shadow-blue-500/10">
+                        
+                        <!-- Ligne Néon Top au survol -->
+                        <div class="absolute top-0 inset-x-0 h-[3px] bg-gradient-to-r from-blue-400 via-blue-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+                        <!-- Content Top -->
+                        <div class="relative z-10 space-y-5">
+                            <div class="flex items-center justify-between">
+                                <div class="w-14 h-14 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white group-hover:shadow-lg group-hover:shadow-blue-600/30 transition-all duration-300">
+                                    <i class="fas fa-car text-2xl"></i>
+                                </div>
+                                <!-- Badge Statut Vivant -->
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                    Disponible
+                                </span>
                             </div>
-                            <div>
-                                <h3 class="font-bold text-slate-900 text-base group-hover:text-blue-600 transition-colors">Catalogue véhicules</h3>
-                                <p class="text-xs text-slate-500 mt-1 leading-relaxed">Découvrez notre gamme complète disponible immédiatement.</p>
+
+                            <div class="space-y-1.5">
+                                <h3 class="text-lg font-bold text-slate-900 group-hover:text-blue-600 transition-colors">Catalogue Véhicules</h3>
+                                <p class="text-xs text-slate-600 leading-relaxed">Explorez la gamme complète de véhicules disponibles en parc et réservation.</p>
                             </div>
                         </div>
-                        <div class="pt-6 flex items-center text-xs font-bold text-blue-600 gap-1 group-hover:gap-2 transition-all">
-                            <span>Parcourir</span>
-                            <i class="fas fa-arrow-right text-[10px]"></i>
+
+                        <!-- Content Bottom Action -->
+                        <div class="relative z-10 pt-6 flex items-center justify-between border-t border-slate-100 mt-6 text-xs font-bold text-blue-600">
+                            <span class="group-hover:text-blue-700 transition-colors">Accéder au catalogue</span>
+                            <i class="fas fa-arrow-right text-[11px] group-hover:translate-x-1.5 transition-transform"></i>
                         </div>
                     </a>
 
-                    <!-- Card 2: Mes Demandes -->
+                    <!-- Card 2: Boutique & Produits -->
+                    <a href="{% url 'products_app:products-list' %}" 
+                       class="group relative rounded-3xl p-7 transition-all duration-300 hover:-translate-y-1.5 overflow-hidden flex flex-col justify-between glass-card-light hover:border-indigo-300 hover:shadow-xl hover:shadow-indigo-500/10">
+                        
+                        <div class="absolute top-0 inset-x-0 h-[3px] bg-gradient-to-r from-indigo-400 via-indigo-600 to-violet-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+                        <div class="relative z-10 space-y-5">
+                            <div class="flex items-center justify-between">
+                                <div class="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 group-hover:scale-110 group-hover:bg-indigo-600 group-hover:text-white group-hover:shadow-lg group-hover:shadow-indigo-600/30 transition-all duration-300">
+                                    <i class="fas fa-boxes-stacked text-2xl"></i>
+                                </div>
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span>
+                                    En ligne
+                                </span>
+                            </div>
+
+                            <div class="space-y-1.5">
+                                <h3 class="text-lg font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">Boutique & Produits</h3>
+                                <p class="text-xs text-slate-600 leading-relaxed">Commandez vos pièces détachées, consommables et équipements automobiles.</p>
+                            </div>
+                        </div>
+
+                        <div class="relative z-10 pt-6 flex items-center justify-between border-t border-slate-100 mt-6 text-xs font-bold text-indigo-600">
+                            <span class="group-hover:text-indigo-700 transition-colors">Boutique en ligne</span>
+                            <i class="fas fa-arrow-right text-[11px] group-hover:translate-x-1.5 transition-transform"></i>
+                        </div>
+                    </a>
+
+                    <!-- Card 3: Mes Demandes -->
                     <a href="{% url 'leads_app:list-demande-financement' %}" 
-                       class="group bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-xl hover:shadow-slate-200/60 hover:border-emerald-300 transition-all duration-300 flex flex-col justify-between hover:-translate-y-1 relative overflow-hidden">
-                        <div class="space-y-4">
-                            <div class="w-12 h-12 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300 shadow-xs">
-                                <i class="fas fa-file-invoice-dollar text-xl"></i>
+                       class="group relative rounded-3xl p-7 transition-all duration-300 hover:-translate-y-1.5 overflow-hidden flex flex-col justify-between glass-card-light hover:border-emerald-300 hover:shadow-xl hover:shadow-emerald-500/10">
+                        
+                        <div class="absolute top-0 inset-x-0 h-[3px] bg-gradient-to-r from-emerald-400 via-emerald-600 to-teal-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+                        <div class="relative z-10 space-y-5">
+                            <div class="flex items-center justify-between">
+                                <div class="w-14 h-14 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white group-hover:shadow-lg group-hover:shadow-emerald-600/30 transition-all duration-300">
+                                    <i class="fas fa-file-invoice-dollar text-2xl"></i>
+                                </div>
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+                                    En suivi
+                                </span>
                             </div>
-                            <div>
-                                <h3 class="font-bold text-slate-900 text-base group-hover:text-emerald-600 transition-colors">Mes demandes</h3>
-                                <p class="text-xs text-slate-500 mt-1 leading-relaxed">Suivez l'état d'avancement de vos financements.</p>
+
+                            <div class="space-y-1.5">
+                                <h3 class="text-lg font-bold text-slate-900 group-hover:text-emerald-600 transition-colors">Mes Demandes</h3>
+                                <p class="text-xs text-slate-600 leading-relaxed">Suivez l'état d'instruction de vos dossiers de financement et requêtes.</p>
                             </div>
                         </div>
-                        <div class="pt-6 flex items-center text-xs font-bold text-emerald-600 gap-1 group-hover:gap-2 transition-all">
-                            <span>Consulter</span>
-                            <i class="fas fa-arrow-right text-[10px]"></i>
+
+                        <div class="relative z-10 pt-6 flex items-center justify-between border-t border-slate-100 mt-6 text-xs font-bold text-emerald-600">
+                            <span class="group-hover:text-emerald-700 transition-colors">Suivre mes dossiers</span>
+                            <i class="fas fa-arrow-right text-[11px] group-hover:translate-x-1.5 transition-transform"></i>
                         </div>
                     </a>
 
-                    <!-- Card 3: Mes Offres -->
+                    <!-- Card 4: Mes Offres -->
                     <a href="{% url 'commercial_app:offre-list' %}" 
-                       class="group bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-xl hover:shadow-slate-200/60 hover:border-purple-300 transition-all duration-300 flex flex-col justify-between hover:-translate-y-1 relative overflow-hidden">
-                        <div class="space-y-4">
-                            <div class="w-12 h-12 bg-purple-50 border border-purple-100 rounded-2xl flex items-center justify-center text-purple-600 group-hover:bg-purple-600 group-hover:text-white transition-all duration-300 shadow-xs">
-                                <i class="fas fa-tags text-xl"></i>
+                       class="group relative rounded-3xl p-7 transition-all duration-300 hover:-translate-y-1.5 overflow-hidden flex flex-col justify-between glass-card-light hover:border-purple-300 hover:shadow-xl hover:shadow-purple-500/10">
+                        
+                        <div class="absolute top-0 inset-x-0 h-[3px] bg-gradient-to-r from-purple-400 via-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+                        <div class="relative z-10 space-y-5">
+                            <div class="flex items-center justify-between">
+                                <div class="w-14 h-14 rounded-2xl bg-purple-50 border border-purple-100 flex items-center justify-center text-purple-600 group-hover:scale-110 group-hover:bg-purple-600 group-hover:text-white group-hover:shadow-lg group-hover:shadow-purple-600/30 transition-all duration-300">
+                                    <i class="fas fa-tags text-2xl"></i>
+                                </div>
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-purple-50 text-purple-700 border border-purple-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-purple-600"></span>
+                                    Propositions
+                                </span>
                             </div>
-                            <div>
-                                <h3 class="font-bold text-slate-900 text-base group-hover:text-purple-600 transition-colors">Mes offres</h3>
-                                <p class="text-xs text-slate-500 mt-1 leading-relaxed">Consultez les propositions commerciales reçues.</p>
+
+                            <div class="space-y-1.5">
+                                <h3 class="text-lg font-bold text-slate-900 group-hover:text-purple-600 transition-colors">Mes Offres</h3>
+                                <p class="text-xs text-slate-600 leading-relaxed">Consultez les devis et propositions commerciales personnalisées reçues.</p>
                             </div>
                         </div>
-                        <div class="pt-6 flex items-center text-xs font-bold text-purple-600 gap-1 group-hover:gap-2 transition-all">
-                            <span>Voir les offres</span>
-                            <i class="fas fa-arrow-right text-[10px]"></i>
+
+                        <div class="relative z-10 pt-6 flex items-center justify-between border-t border-slate-100 mt-6 text-xs font-bold text-purple-600">
+                            <span class="group-hover:text-purple-700 transition-colors">Voir les propositions</span>
+                            <i class="fas fa-arrow-right text-[11px] group-hover:translate-x-1.5 transition-transform"></i>
                         </div>
                     </a>
 
-                    <!-- Card 4: Maintenance -->
+                    <!-- Card 5: Maintenance -->
                     <a href="{% url 'commercial_app:maintenance-list' %}" 
-                       class="group bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-xl hover:shadow-slate-200/60 hover:border-amber-300 transition-all duration-300 flex flex-col justify-between hover:-translate-y-1 relative overflow-hidden">
-                        <div class="space-y-4">
-                            <div class="w-12 h-12 bg-amber-50 border border-amber-100 rounded-2xl flex items-center justify-center text-amber-600 group-hover:bg-amber-600 group-hover:text-white transition-all duration-300 shadow-xs">
-                                <i class="fas fa-tools text-xl"></i>
+                       class="group relative rounded-3xl p-7 transition-all duration-300 hover:-translate-y-1.5 overflow-hidden flex flex-col justify-between glass-card-light hover:border-amber-300 hover:shadow-xl hover:shadow-amber-500/10">
+                        
+                        <div class="absolute top-0 inset-x-0 h-[3px] bg-gradient-to-r from-amber-400 via-amber-600 to-orange-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+                        <div class="relative z-10 space-y-5">
+                            <div class="flex items-center justify-between">
+                                <div class="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600 group-hover:scale-110 group-hover:bg-amber-600 group-hover:text-white group-hover:shadow-lg group-hover:shadow-amber-600/30 transition-all duration-300">
+                                    <i class="fas fa-wrench text-2xl"></i>
+                                </div>
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                    Carnet d'entretien
+                                </span>
                             </div>
-                            <div>
-                                <h3 class="font-bold text-slate-900 text-base group-hover:text-amber-600 transition-colors">Maintenance</h3>
-                                <p class="text-xs text-slate-500 mt-1 leading-relaxed">Gérez l'entretien et le suivi technique de vos véhicules.</p>
+
+                            <div class="space-y-1.5">
+                                <h3 class="text-lg font-bold text-slate-900 group-hover:text-amber-600 transition-colors">Maintenance & Atelier</h3>
+                                <p class="text-xs text-slate-600 leading-relaxed">Suivez le carnet d'entretien, révisions et réparations de vos véhicules.</p>
                             </div>
                         </div>
-                        <div class="pt-6 flex items-center text-xs font-bold text-amber-600 gap-1 group-hover:gap-2 transition-all">
-                            <span>Planning entretien</span>
-                            <i class="fas fa-arrow-right text-[10px]"></i>
+
+                        <div class="relative z-10 pt-6 flex items-center justify-between border-t border-slate-100 mt-6 text-xs font-bold text-amber-600">
+                            <span class="group-hover:text-amber-700 transition-colors">Planning maintenance</span>
+                            <i class="fas fa-arrow-right text-[11px] group-hover:translate-x-1.5 transition-transform"></i>
                         </div>
                     </a>
 
-                    <!-- Card 5: Rendez-vous -->
-                    <a href="{% url 'client_app:mes-rendez-vous'  %}" 
-                    class="group bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-xl hover:shadow-slate-200/60 hover:border-blue-300 transition-all duration-300 flex flex-col justify-between hover:-translate-y-1 relative overflow-hidden">
-                        <div class="space-y-4">
-                            <div class="w-12 h-12 bg-blue-50 border border-blue-100 rounded-2xl flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300 shadow-xs">
-                                <i class="fas fa-calendar-alt text-xl"></i>
+                    <!-- Card 6: Rendez-vous -->
+                    <a href="{% url 'client_app:mes-rendez-vous' %}" 
+                       class="group relative rounded-3xl p-7 transition-all duration-300 hover:-translate-y-1.5 overflow-hidden flex flex-col justify-between glass-card-light hover:border-teal-300 hover:shadow-xl hover:shadow-teal-500/10">
+                        
+                        <div class="absolute top-0 inset-x-0 h-[3px] bg-gradient-to-r from-teal-400 via-teal-600 to-emerald-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+                        <div class="relative z-10 space-y-5">
+                            <div class="flex items-center justify-between">
+                                <div class="w-14 h-14 rounded-2xl bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-600 group-hover:scale-110 group-hover:bg-teal-600 group-hover:text-white group-hover:shadow-lg group-hover:shadow-teal-600/30 transition-all duration-300">
+                                    <i class="fas fa-calendar-check text-2xl"></i>
+                                </div>
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-teal-50 text-teal-700 border border-teal-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-teal-600"></span>
+                                    Planification
+                                </span>
                             </div>
-                            <div>
-                                <h3 class="font-bold text-slate-900 text-base group-hover:text-blue-600 transition-colors">Rendez-vous</h3>
-                                <p class="text-xs text-slate-500 mt-1 leading-relaxed">Consultez l'historique et planifiez vos prochains rendez-vous.</p>
+
+                            <div class="space-y-1.5">
+                                <h3 class="text-lg font-bold text-slate-900 group-hover:text-teal-600 transition-colors">Rendez-vous</h3>
+                                <p class="text-xs text-slate-600 leading-relaxed">Planifiez vos rendez-vous d'essai ou entretiens avec votre conseiller.</p>
                             </div>
                         </div>
-                        <div class="pt-6 flex items-center text-xs font-bold text-blue-600 gap-1 group-hover:gap-2 transition-all">
-                            <span>Mes rendez-vous</span>
-                            <i class="fas fa-arrow-right text-[10px]"></i>
+
+                        <div class="relative z-10 pt-6 flex items-center justify-between border-t border-slate-100 mt-6 text-xs font-bold text-teal-600">
+                            <span class="group-hover:text-teal-700 transition-colors">Mes rendez-vous</span>
+                            <i class="fas fa-arrow-right text-[11px] group-hover:translate-x-1.5 transition-transform"></i>
                         </div>
                     </a>
 
                 </div>
             </div>
-
         </div>
     </main>
 
     {% include 'modals/auth/change_password.html' %}
 
-    <!-- ========== FOOTER ========== -->
-    <footer class="bg-white border-t border-slate-200/80 py-8 mt-auto">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs font-medium text-slate-500">
-            <div class="flex items-center gap-2">
-                <span class="font-bold text-slate-800">KOZ Services</span>
-                <span>— Plateforme de gestion client</span>
+    <!-- Footer Light Style -->
+    <footer class="bg-white text-slate-500 border-t border-slate-200/80 py-8 mt-auto relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs font-medium">
+            <div class="flex items-center gap-3">
+                <span class="font-bold text-slate-900 tracking-wide">KOZ SERVICES</span>
+                <span class="text-slate-300">•</span>
+                <span class="text-slate-500">Plateforme de Gestion Client ERP</span>
             </div>
-            <p>&copy; {% now "Y" %} KOZ Services. Tous droits réservés.</p>
-            <p class="font-medium text-slate-700">Conçu par <strong>SPIRIT-DIGIT Agency</strong></p>
+            <p class="text-slate-600">&copy; {% now "Y" %} KOZ Services. Tous droits réservés.</p>
+            <p class="text-slate-600">Conçu par <span class="font-semibold text-indigo-600">SPIRIT-DIGIT agency</span></p>
         </div>
     </footer>
 
-    <!-- Script Particules -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const particlesContainer = document.getElementById('particles');
-            if (!particlesContainer) return;
-
-            for (let i = 0; i < 25; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                
-                particle.style.left = Math.random() * 100 + 'vw';
-                particle.style.top = Math.random() * 100 + 'vh';
-                
-                const size = Math.random() * 6 + 3;
-                particle.style.width = size + 'px';
-                particle.style.height = size + 'px';
-                
-                // Palette bleu clair/indigo pur
-                const opacity = Math.random() * 0.25 + 0.1;
-                particle.style.backgroundColor = `rgba(37, 99, 235, ${opacity})`;
-                
-                particle.style.animationDuration = Math.random() * 15 + 10 + 's';
-                particle.style.animationDelay = Math.random() * 5 + 's';
-                
-                particlesContainer.appendChild(particle);
-            }
-        });
-    </script>
 </body>
 </html>

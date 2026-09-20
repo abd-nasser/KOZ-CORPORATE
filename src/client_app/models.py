@@ -16,7 +16,6 @@ class Maintenance(models.Model):
         ('freins', 'Freins/plaquettes'),
         ('climatisation', 'Climatisation'),
         ('batterie', 'Batterie'),
-        ('courroie', 'Courroie de distribution'),
         ('autre', 'Autre'),
     ]
     

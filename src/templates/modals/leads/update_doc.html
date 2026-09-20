@@ -170,7 +170,7 @@
                         </div>
                     </div>
                 </div>
-                   <!-- BLOC GÉOLOCALISATION DOSSIER -->
+                <!-- BLOC GÉOLOCALISATION DOSSIER -->
                 <div class="card bg-base-100 border border-base-300 p-4 shadow-sm space-y-4">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                         <div>
@@ -314,10 +314,11 @@
 
     // Initialisation de la carte Leaflet
     const map = L.map('map-preview').setView([defaultLat, defaultLng], initialZoom);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '© OpenStreetMap'
-    }).addTo(map);
+    L.tileLayer('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
+    maxZoom: 20,
+    subdomains: 'abc',
+    attribution: '&copy; OpenStreetMap France | &copy; OpenStreetMap'
+}).addTo(map);
 
     // Marqueur déplaçable
     let marker = L.marker([defaultLat, defaultLng], { draggable: true }).addTo(map);

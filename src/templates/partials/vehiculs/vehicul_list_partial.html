@@ -16,7 +16,7 @@
     <!-- Grille des véhicules -->
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {% for vehicule in vehicules %}
-            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden flex flex-col">
+            <a href="{% url 'vehicul_app:site-vehicul-detail-slug' vehicule.slug %}" class="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:border-blue-500 hover:shadow-md hover:-translate-y-1 transition-all duration-200 overflow-hidden flex flex-col">
                 
                 <!-- Image -->
                 <div class="relative h-48 bg-gray-100 overflow-hidden">
@@ -53,13 +53,13 @@
                                 {% if vehicule.prix %}{{ vehicule.prix|intcomma }} F CFA {% endif %}
                             </span>
                         </div>
-                        <a href="{% url 'vehicul_app:site-vehicul-detail-slug' vehicule.slug %}" class="btn btn-primary btn-sm rounded-xl">
+                        <span class="btn btn-primary btn-sm rounded-xl">
                             Détails
-                        </a>
+                        </span>
                     </div>
                 </div>
 
-            </div>
+            </a>
         {% endfor %}
     </div>
 

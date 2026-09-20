@@ -274,6 +274,7 @@ def reserver_service(request, service_id):
             maintenance.modele = form.cleaned_data.get('modele')
             maintenance.annee = form.cleaned_data.get('annee')
             maintenance.immatriculation = form.cleaned_data.get('immatriculation')
+            maintenance.statut = 'en_attente'
             maintenance.save()
 
             commerciaux = kozUser.objects.filter(role='commercial', is_active=True)

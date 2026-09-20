@@ -50,7 +50,8 @@
             
             {% for service in services %}
                 {% if service.est_disponible %}
-                <div class="service-card group flex flex-col justify-between rounded-3xl bg-white border border-slate-200/80 overflow-hidden hover:border-blue-400 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 shadow-md shadow-slate-200/50" data-type="type-{{ service.types.id|default:'none' }}">
+                <a href="{% url 'services_app:service-detail-public' service.pk %}" 
+                    class="service-card group flex flex-col justify-between rounded-3xl bg-white border border-slate-200/80 overflow-hidden hover:border-blue-400 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 shadow-md shadow-slate-200/50" data-type="type-{{ service.types.id|default:'none' }}">
                     
                     <div>
                         <!-- Media Header / Badge Stack -->
@@ -157,13 +158,13 @@
                         </div>
 
                         <!-- Bouton Détails -->
-                        <a href="{% url 'services_app:service-detail-public' service.pk %}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-blue-50 text-blue-600 font-bold text-xs hover:bg-blue-600 hover:text-white transition-all duration-300 shadow-sm">
+                        <span class="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-blue-50 text-blue-600 font-bold text-xs group-hover:bg-blue-600 group-hover:text-white transition-all duration-300 shadow-sm">
                             <span>Détails</span>
                             <i class="fas fa-arrow-right text-[10px]"></i>
-                        </a>
+                        </span>
                     </div>
 
-                </div>
+                </a>
                 {% endif %}
             {% empty %}
                 <!-- State vide -->

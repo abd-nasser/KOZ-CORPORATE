@@ -217,9 +217,9 @@ class SITE_ServiceDetailView(DetailView):
         # Formulaire d'avis pour les clients
         if 'service_avis_form' not in context:
             context['service_avis_form'] = ServiceAvisForm()
-        
-        if 'reserver_service_form' not in context:
-            context['reserver_service_form']=ReservationMaintenanceForm(client=self.request.user)
+        if self.request.user.is_authenticated:
+            if 'reserver_service_form' not in context:
+                context['reserver_service_form']=ReservationMaintenanceForm(client=self.request.user)
         return context
 
 

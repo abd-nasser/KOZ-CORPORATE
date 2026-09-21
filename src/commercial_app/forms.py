@@ -129,5 +129,5 @@ class ClientRdvForm(forms.ModelForm):
             ),
             
             'duree': forms.NumberInput(attrs={'class': 'input input-bordered w-full', 'min': '15', 'step': '15'}),
-            'motif': forms.Textarea(attrs={'class': 'input input-bordered w-full', 'rows': 4, 'placeholder': 'Ex: Essai véhicule / Signature contrat'}),
+            'motif': forms.Textarea(attrs={'class': 'input input-bordered w-full', 'rows': 4, 'placeholder': 'Ex: Essai véhicule / Achat /Signature contrat'}),
         }

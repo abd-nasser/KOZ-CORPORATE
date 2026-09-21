@@ -89,10 +89,17 @@
             <!-- Actions Métiers -->
             <div class="flex items-center gap-2 flex-wrap border-t lg:border-t-0 pt-4 lg:pt-0 border-slate-100">
                 {% if user.is_authenticated and not user.is_superuser and user.role != "directeur" %}
+
+                 <button type="button" onclick="modal_demande_rdv.showModal()"
+                            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg shadow-sm transition">
+                        <i class="fas fa-money-bill-wave mr-2"></i> Achat cash
+                    </button>
+                    
                     <a href="{% url 'leads_app:simulation-financement' vehicul.pk %}"
                             class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition">
                         <i class="fas fa-file-invoice-dollar"></i> Demander un financement
                     </a>
+                   
                 {% endif %}
 
                 {% if user.is_authenticated and user.is_superuser or user.role == "directeur" %}
@@ -331,6 +338,7 @@
     {% include 'modals/vehicul/up_vehicul.html' %}
     {% include 'modals/vehicul/vehicul_confirm_delete.html' %}
     {% include 'modals/leads/demande_financement.html' %}
+    {% include 'modals/contact/prise_de_rdv.html' %}
 
     <!-- ========== JAVASCRIPT LÉGER ========== -->
     <script>

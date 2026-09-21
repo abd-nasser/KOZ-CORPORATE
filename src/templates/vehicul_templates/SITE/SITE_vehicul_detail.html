@@ -506,22 +506,33 @@
                     </h3>
                     <div class="space-y-3 sm:space-y-4">
                         {% if user.is_authenticated and user.role == "client" %}
-                            <!-- Contacter -->
-                            <a href="{% url 'vehicul_app:contacter-vehicule' vehicul.pk %}" 
-                                class="btn btn-outline w-full text-center py-3 rounded-xl border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition">
-                                <i class="fas fa-comment-dots mr-2"></i> Contacter pour ce véhicule
-                            </a>
-                            <!-- Demander un financement -->
+                              <!-- Achat comptant -->
+                            <button type="button" onclick="modal_demande_rdv.showModal()"
+                                class="block w-full cursor-pointer text-center py-3.5 bg-gradient-to-r from-emerald-600 to-green-700 hover:from-emerald-700 hover:to-green-800 text-white rounded-xl font-semibold transition shadow-lg shadow-emerald-600/20">
+                                <i class="fas fa-money-bill-wave mr-2"></i> Achat cash
+                            </button>
                             <a href="{% url 'leads_app:simulation-financement' vehicul.pk %}" 
                                     class="block w-full text-center py-3.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl font-semibold transition shadow-lg shadow-blue-600/20">
                                     <i class="fas fa-hand-holding-usd mr-2"></i> Demander un financement
                             </a>
+                             <!-- Contacter -->
+                             <a href="{% url 'vehicul_app:contacter-vehicule' vehicul.pk %}" 
+                                class="btn btn-outline w-full text-center py-3 rounded-xl border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition">
+                                <i class="fas fa-comment-dots mr-2"></i> Discuter avec un commercial
+                            </a>
+                              
 
                         {% else %}
+
+                            <a href="{% url 'home_app:home-page' %}#infos-rdv"
+                                class="block w-full cursor-pointer text-center py-3.5 bg-gradient-to-r from-emerald-600 to-green-700 hover:from-emerald-700 hover:to-green-800 text-white rounded-xl font-semibold transition shadow-lg shadow-emerald-600/20">
+                                <i class="fas fa-money-bill-wave mr-2"></i> Prendre rendez-vous
+                            </a>
                             <button onclick="document.getElementById('contact_modal').showModal()" 
                                      class="btn btn-outline w-full text-center py-3 rounded-xl border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition">
-                                    <i class="fas fa-envelope mr-2"></i> Contacter le commercial
+                                    <i class="fas fa-envelope mr-2"></i> Contacter un commercial
                             </button>
+
                             <button onclick="document.getElementById('login_simple_modal').showModal()" 
                                     class="block w-full text-center py-3.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl font-semibold transition shadow-lg shadow-blue-600/20">
                                     <i class="fas fa-hand-holding-usd mr-2"></i> Connectez-vous pour un financement
@@ -609,6 +620,8 @@
     {% include 'modals/auth/login_simple_modal.html' %}
     {% include 'modals/home/register.html' %}
     {% include 'modals/contact/contact_modal.html' %}
+    {% include 'modals/contact/prise_de_rdv.html' %}
+    
 
     <!-- ============================================================ -->
     <!-- SCRIPTS -->

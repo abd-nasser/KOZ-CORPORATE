@@ -1,6 +1,8 @@
 from rest_framework import generics, filters
 from rest_framework.permissions import AllowAny
 from django_filters.rest_framework import DjangoFilterBackend
+
+from commercial_app.forms import ClientRdvForm
 from .models import Vehicul
 from .serializers import VehiculSerializer
 
@@ -277,6 +279,9 @@ class ERP_VehiculDetailView(LoginRequiredMixin, DetailView):
         # Formulaire de modification
         if "vehicul_form" not in context:
             context["update_vehicul_form"] = VehiculForm(instance=self.object)
+        
+        if "rdv_form" not in context:
+            context["rdv_form"] = ClientRdvForm()
         
         # Formulaire de demande de financement
         initial = {"duree_mois": 36, "apport": 0}
@@ -692,6 +697,8 @@ class SITE_VehiculDetailView(DetailView):
         context['total_page'] = paginator.num_pages
         context['current_page'] = page_number
         context['direction'] = self.request.GET.get('direction', 'right')
+        if "rdv_form" not in context:
+            context['rdv_form']=ClientRdvForm()
 
         return context
     

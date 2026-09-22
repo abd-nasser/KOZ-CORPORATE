@@ -257,20 +257,22 @@
         
         <!-- Box 1 : Gauche (Rendez-vous) -->
         <a href="#infos-rdv" id="hero-box-left" 
-        class="group relative bg-slate-950/65 backdrop-blur-xl border border-blue-200/40 p-5 md:p-6 rounded-3xl shadow-2xl shadow-blue-950/30 hover:bg-blue-950/75 hover:border-blue-300/70 transition duration-300 flex flex-col justify-between max-w-lg w-full justify-self-start">
+        class="group relative overflow-hidden bg-slate-950/20 backdrop-blur-sm border border-blue-200/50 p-5 md:p-6 rounded-3xl shadow-2xl shadow-blue-950/30 hover:border-blue-300/80 transition duration-300 flex flex-col justify-between max-w-lg w-full min-h-[290px] md:min-h-[320px] lg:min-h-[350px] justify-self-start">
+            <img src="{% static 'images/prendre-rdv.jpg' %}" alt="Conseil automobile personnalisé" class="absolute inset-0 w-full h-full object-cover opacity-90 transition duration-700 group-hover:scale-105">
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-slate-950/25 to-transparent"></div>
             
-            <div class="flex items-center gap-3.5 mb-2.5">
-                <div class="w-11 h-11 rounded-2xl bg-blue-400/25 border border-blue-200/50 flex items-center justify-center text-blue-200 text-lg shadow-lg shadow-blue-500/20">
+            <div class="relative z-10 flex items-center gap-3.5 mb-2.5">
+                <div class="w-11 h-11 rounded-2xl bg-blue-500/35 border border-blue-100/70 flex items-center justify-center text-blue-100 text-lg shadow-lg shadow-blue-500/30">
                     <i class="fas fa-calendar-check"></i>
                 </div>
-                <h3 class="text-lg md:text-xl font-bold text-white drop-shadow-md">Prendre un rendez-vous</h3>
+                <h3 class="text-lg md:text-xl font-bold text-blue-50 drop-shadow-md">Prendre un rendez-vous</h3>
             </div>
             
-            <p class="text-xs md:text-sm text-white/90 leading-relaxed font-medium drop-shadow-sm">
-                Acheter une voiture est une décision importante. Avec <strong class="text-white font-semibold">KOZ SERVICES</strong>, évitez les mauvaises surprises grâce à notre expertise automobile.
+            <p class="relative z-10 text-xl md:text-sm text-blue-50/95 leading-relaxed font-medium drop-shadow-sm">
+                Un échange avec nos experts pour choisir votre véhicule en toute confiance.
             </p>
 
-            <div class="mt-3 flex items-center gap-2 text-xs font-bold text-blue-200">
+            <div class="relative z-10 mt-3 flex items-center gap-2 text-xs font-bold text-blue-200">
                 <span>En savoir plus</span>
                 <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
             </div>
@@ -278,22 +280,24 @@
 
         <!-- Box 2 : Droite (Financement) -->
         <a href="#financement" id="hero-box-right" 
-        class="group relative bg-slate-950/65 backdrop-blur-xl border border-emerald-200/40 p-5 md:p-6 rounded-3xl shadow-2xl shadow-emerald-950/30 hover:bg-emerald-950/75 hover:border-emerald-300/70 transition duration-300 flex flex-col justify-between max-w-lg w-full justify-self-end">
+        class="group relative overflow-hidden bg-slate-950/20 backdrop-blur-sm border border-emerald-200/50 p-5 md:p-6 rounded-3xl shadow-2xl shadow-emerald-950/30 hover:border-emerald-300/80 transition duration-300 flex flex-col justify-between max-w-lg w-full min-h-[290px] md:min-h-[320px] lg:min-h-[350px] justify-self-end">
+            <img src="{% static 'images/financement-flexible.jpg' %}" alt="Véhicules et solutions de financement" class="absolute inset-0 w-full h-full object-cover opacity-90 transition duration-700 group-hover:scale-105">
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-slate-950/25 to-transparent"></div>
             
-            <div class="flex items-center gap-3.5 mb-2.5">
-                <div class="w-11 h-11 rounded-2xl bg-emerald-400/25 border border-emerald-200/50 flex items-center justify-center text-emerald-200 text-lg shadow-lg shadow-emerald-500/20">
+            <div class="relative z-10 flex items-center gap-3.5 mb-2.5">
+                <div class="w-11 h-11 rounded-2xl bg-emerald-500/35 border border-emerald-100/70 flex items-center justify-center text-emerald-100 text-lg shadow-lg shadow-emerald-500/30">
                     <i class="fas fa-hand-holding-usd"></i>
                 </div>
-                <h3 class="text-lg md:text-xl font-bold text-white drop-shadow-md">Financement Flexible</h3>
+                <h3 class="text-lg md:text-xl font-bold text-emerald-50 drop-shadow-md">Financement Flexible</h3>
             </div>
             
-            <div class="space-y-1 text-xs md:text-sm text-white/90 font-medium drop-shadow-sm">
-                <p><i class="fas fa-check text-emerald-400 text-xs mr-2"></i><strong class="text-white font-semibold">Paiement</strong> en plusieurs fois</p>
-                <p><i class="fas fa-check text-emerald-400 text-xs mr-2"></i>Adapté à votre budget</p>
-                <p class="text-xs text-white/75 pt-0.5">Découvrez tout sur les demandes et offres de financement.</p>
+            <div class="relative z-10 space-y-1 text-xl md:text-sm text-emerald-50/95 font-medium drop-shadow-sm">
+                <p><i class="fas fa-check text-emerald-300 text-xl mr-2"></i><strong class="text-emerald-50 font-semibold">Paiement</strong> en plusieurs fois</p>
+                <p><i class="fas fa-check text-emerald-300 text-xl mr-2"></i>Adapté à votre budget</p>
+                <p class="text-xl md:text-sm text-emerald-100/80 pt-0.5">Découvrez nos offres de financement.</p>
             </div>
 
-            <div class="mt-3 flex items-center gap-2 text-xs font-bold text-emerald-200">
+            <div class="relative z-10 mt-3 flex items-center gap-2 text-xs font-bold text-emerald-200">
                 <span>Voir les détails</span>
                 <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
             </div>

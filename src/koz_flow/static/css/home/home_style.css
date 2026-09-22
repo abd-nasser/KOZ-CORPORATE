@@ -407,7 +407,7 @@ video {
 @media (max-width: 375px) {
     /* HERO SECTION */
     .hero-section{
-        min-height: 200vh;
+        min-height: 225vh;
     }
     .trois_box{
         top: 50rem;
@@ -427,7 +427,7 @@ video {
 
 @media (max-width: 360px){
     .hero-section{
-        min-height: 200vh;
+        min-height: 225vh;
     }
     .trois_box{
         top: 55rem;

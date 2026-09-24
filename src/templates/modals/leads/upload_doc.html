@@ -317,10 +317,11 @@
 
     // Initialisation de la carte Leaflet
     const map = L.map('map-preview').setView([defaultLat, defaultLng], initialZoom);
-   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '© OpenStreetMap'
-        }).addTo(map);
+    L.tileLayer('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
+    maxZoom: 20,
+    subdomains: 'abc',
+    attribution: '&copy; OpenStreetMap France | &copy; OpenStreetMap'
+}).addTo(map);
 
     // Marqueur déplaçable
     let marker = L.marker([defaultLat, defaultLng], { draggable: true }).addTo(map);
@@ -386,6 +387,8 @@
     }
 </script>
 
+
+<style>
 
 <style>
     /* Bouton d'action principal */

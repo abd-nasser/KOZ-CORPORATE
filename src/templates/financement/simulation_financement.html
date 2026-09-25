@@ -309,10 +309,21 @@
                 <!-- Résultats et Bloc de Cohérence -->
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-4 flex flex-col justify-between">
                     <div>
-                        <h4 class="text-xs font-bold text-slate-500 uppercase">Résultat estimé</h4>
+                        <template x-if="mode === 'estimer_prix' && financement_type === 'externe'">
+                            <h4 class="text-xs font-bold text-slate-500 uppercase">Valeur max du véhicule accessible</h4>
+                        </template>
+                        <template x-else-if="mode === 'calculer_mensualite'">
+                            <h4 class="text-xs font-bold text-slate-500 uppercase">Mensualité estimée</h4>
+                        </template>
+                        <template x-else-if="mode === 'calculer_duree'">
+                            <h4 class="text-xs font-bold text-slate-500 uppercase">Durée estimée</h4>
+                        </template>
+                        <template x-else>
+                            <h4 class="text-xs font-bold text-slate-500 uppercase">Résultat</h4>
+                        </template>
                         
                         <!-- Affiches dynamiques -->
-                        <div x-show="mode === 'estimer_prix'" class="mt-2 text-2xl font-black text-blue-700 font-mono" x-text="prixVehiculeEstime.toLocaleString() + ' FCFA'"></div>
+                        <div x-show="mode === 'estimer_prix' && financement_type === 'externe'" class="mt-2 text-2xl font-black text-blue-700 font-mono" x-text="prixVehiculeEstime.toLocaleString() + ' FCFA'"></div>
                         <div x-show="mode === 'calculer_mensualite'" class="mt-2 text-2xl font-black text-blue-700 font-mono" x-text="mensualiteCalculee.toLocaleString() + ' FCFA/mois'"></div>
                         <div x-show="mode === 'calculer_duree'" class="mt-2 text-2xl font-black text-blue-700 font-mono" x-text="dureeCalculee + ' Mois'"></div>
 
@@ -326,18 +337,18 @@
                         </div>
 
                         <!-- ALERTE DE COHÉRENCE VISUELLE -->
-                            <div x-show="mode === 'estimer_prix' && prixVehiculeEstimeSansInteret > 0"
+                            <div x-show="mode === 'estimer_prix' && financement_type === 'externe' && prixVehiculeEstimeSansInteret > 0"
                                  class="mt-3 flex items-center gap-3 rounded-xl border border-blue-100 bg-blue-50/70 px-4 py-3 text-xs text-blue-900 shadow-sm">
                                 <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-blue-600 shadow-sm">
                                     <i class="fas fa-receipt"></i>
                                 </span>
                                 <span class="leading-relaxed">
-                                    <span class="block font-medium text-blue-700">Prix brut estimé, hors intérêts</span>
+                                    <span class="block font-medium text-blue-700">Capacité de financement totale</span>
                                     <strong class="mt-0.5 block text-base font-extrabold tracking-tight text-blue-900"
                                             x-text="prixVehiculeEstimeSansInteret.toLocaleString() + ' FCFA'"></strong>
                                 </span>
                             </div>
-                        <div x-show="mode === 'estimer_prix'" class="mt-4 p-3 rounded-lg text-xs"
+                        <div x-show="mode === 'estimer_prix' && financement_type === 'externe'" class="mt-4 p-3 rounded-lg text-xs"
                              :class="{
                                 'bg-emerald-50 border border-emerald-200 text-emerald-800': controleCoherence.valide,
                                 'bg-amber-50 border border-amber-200 text-amber-800': !controleCoherence.valide

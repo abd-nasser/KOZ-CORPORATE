@@ -91,6 +91,12 @@
             );
         },
 
+        get interetsBancairesEstimes() {
+            if (this.mensualite <= 0 || this.duree <= 0) return 0;
+            let capitalEmprunte = this.prixVehiculeEstime - this.apport;
+            return Math.max(0, Math.round(this.mensualite * this.duree - capitalEmprunte));
+        },
+
         // Mode 2 : Calcul Mensualité
         get mensualiteCalculee() {
             let mFinancer = this.prixVehiculeBase - this.apport;
@@ -348,6 +354,17 @@
                                             x-text="prixVehiculeEstimeSansInteret.toLocaleString() + ' FCFA'"></strong>
                                 </span>
                             </div>
+                                <div x-show="mode === 'estimer_prix' && financement_type === 'externe' && mensualite > 0 && duree > 0"
+                                     class="mt-2 flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50/70 px-4 py-3 text-xs text-amber-900 shadow-sm">
+                                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-amber-600 shadow-sm">
+                                        <i class="fas fa-percent"></i>
+                                    </span>
+                                    <span class="leading-relaxed">
+                                        <span class="block font-medium text-amber-700">Intérêts estimés de la banque</span>
+                                        <strong class="mt-0.5 block text-base font-extrabold tracking-tight text-amber-900"
+                                                x-text="interetsBancairesEstimes.toLocaleString() + ' FCFA'"></strong>
+                                    </span>
+                                </div>
                         <div x-show="mode === 'estimer_prix' && financement_type === 'externe'" class="mt-4 p-3 rounded-lg text-xs"
                              :class="{
                                 'bg-emerald-50 border border-emerald-200 text-emerald-800': controleCoherence.valide,

@@ -97,10 +97,8 @@ class  kozUser(AbstractBaseUser, PermissionsMixin):
         ]
     
     PROFESSION_CHOICES = [
-        ("employe", "Employé"), 
-        ("chef_d_equipe", "Chef d'équipe"), 
-        ("gerant", "Gérant"),
-        ("etudiant", "Étudiant"),
+        ("Salarie", "Salarié"), 
+        ("entrepreneur", " Entrepreneur"),
         ("autre", "Autre")]
     
     # ----- CHAMPS IDENTITÉ -----

@@ -138,7 +138,7 @@ class Documents(models.Model):
     attestation_travail = models.FileField(upload_to='documents/%Y/%m/%d/', verbose_name="Attestation de travail (<3 mois)")
     
     # === BANQUE ===
-    relevé_bancaire = models.FileField(upload_to='documents/%Y/%m/%d/', verbose_name="Relevé bancaire (12 mois) + RIB")
+    relevé_bancaire = models.FileField(upload_to='documents/%Y/%m/%d/', verbose_name="Relevé bancaire (24 mois) + RIB")
     specimen_signature = models.FileField(upload_to='documents/%Y/%m/%d/', verbose_name="Spécimen de recueil de signature")
     
     # === BULLETINS DE PAIE ===
@@ -157,8 +157,21 @@ class Documents(models.Model):
     garanties = models.FileField(upload_to='documents/%Y/%m/%d/', verbose_name="Garanties proposées (supports)", blank=True, null=True)
     recu_acompte = models.FileField(upload_to='documents/%Y/%m/%d/', verbose_name="Reçu des frais d'acompte de dossier", blank=True, null=True)
     fiche_demande = models.FileField(upload_to='documents/%Y/%m/%d/', verbose_name="Fiche de demande de financement", blank=True, null=True)
-    
-    # Statut du dossier
+
+    # === PIÈCES COMPLÉMENTAIRES POUR LES ENTREPRENEURS ===
+    formulaire_kyc = models.FileField(upload_to='documents/%Y/%m/%d/', verbose_name="Formulaire KYC", blank=True, null=True)
+    consentement_bic = models.FileField(upload_to='documents/%Y/%m/%d/', verbose_name="Formulaire de consentement BIC", blank=True, null=True)
+    extrait_rccm_ifu = models.FileField(upload_to='documents/%Y/%m/%d/', verbose_name="Extrait RCCM et IFU", blank=True, null=True)
+    statuts_enregistres = models.FileField(upload_to='documents/%Y/%m/%d/', verbose_name="Statuts dûment enregistrés (SA, SARL, SNC)", blank=True, null=True)
+    attestation_regularite_fiscale = models.FileField(upload_to='documents/%Y/%m/%d/', verbose_name="Attestation de régularité / situation fiscale", blank=True, null=True)
+    pieces_identite_signataires = models.FileField(upload_to='documents/%Y/%m/%d/', verbose_name="Pièces d'identité de chaque signataire", help_text="Réunir les pièces des signataires dans un seul fichier.", blank=True, null=True)
+    pieces_beneficiaires_effectifs = models.FileField(upload_to='documents/%Y/%m/%d/', verbose_name="Pièces des bénéficiaires effectifs (identité et/ou RCCM)", help_text="Réunir les justificatifs de chaque bénéficiaire effectif dans un seul fichier.", blank=True, null=True)
+    cv_promoteur_gerant = models.FileField(upload_to='documents/%Y/%m/%d/', verbose_name="CV du promoteur ou du gérant", blank=True, null=True)
+    etats_financiers_1 = models.FileField(upload_to='documents/%Y/%m/%d/', verbose_name="États financiers certifiés du dernier exercice", blank=True, null=True)
+    etats_financiers_2 = models.FileField(upload_to='documents/%Y/%m/%d/', verbose_name="États financiers certifiés de l'avant-dernier exercice", blank=True, null=True)
+    etats_financiers_3 = models.FileField(upload_to='documents/%Y/%m/%d/', verbose_name="États financiers certifiés du troisième exercice", blank=True, null=True)
+    plan_affaires = models.FileField(upload_to='documents/%Y/%m/%d/', verbose_name="Plan d'affaires sur la durée du prêt", blank=True, null=True)
+   
     STATUT_DOCS = [
         ("vide", "Dossier vide"),
         ('incomplet', 'Dossier incomplet'),
@@ -192,24 +205,44 @@ class Documents(models.Model):
         return None
 
     def verifier_completude(self):
-        """Vérifie si les documents OBLIGATOIRES et la position GPS sont présents"""
-        # Vérification des coordonnées GPS
-        has_geoloc = bool(self.latitude and self.longitude)
+        """Vérifie les documents requis et la présence d'une localisation."""
+        has_coordinates = self.latitude is not None and self.longitude is not None
+        has_location_document = bool(self.plan_geolocalisation)
+        has_location = has_coordinates or has_location_document
 
         requis = [
-            self.cni_passeport,
-            self.justificatif_domicile,
-            self.attestation_non_engagement,
-            self.contrat_travail,
-            self.attestation_travail,
-            self.relevé_bancaire,
-            self.specimen_signature,
-            self.bulletin_1,
-            self.bulletin_2,
-            self.bulletin_3,
+            'cni_passeport',
+            'justificatif_domicile',
+            'relevé_bancaire',
+            'specimen_signature',
         ]
+
+        if self.client.profession_choisie == 'entrepreneur':
+            requis.extend([
+                'formulaire_kyc',
+                'consentement_bic',
+                'extrait_rccm_ifu',
+                'statuts_enregistres',
+                'attestation_regularite_fiscale',
+                'pieces_identite_signataires',
+                'pieces_beneficiaires_effectifs',
+                'cv_promoteur_gerant',
+                'etats_financiers_1',
+                'etats_financiers_2',
+                'etats_financiers_3',
+                'plan_affaires',
+            ])
+        else:
+            requis.extend([
+                'attestation_non_engagement',
+                'contrat_travail',
+                'attestation_travail',
+                'bulletin_1',
+                'bulletin_2',
+                'bulletin_3',
+            ])
         
-        if all(requis) and has_geoloc:
+        if all(getattr(self, field_name) for field_name in requis) and has_location:
             self.statut_dossier = 'complet'
             self.save()
             return True

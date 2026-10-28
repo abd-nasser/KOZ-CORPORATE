@@ -231,6 +231,18 @@ class DocumentsUploadForm(forms.ModelForm):
             'garanties',
             'recu_acompte',
             'fiche_demande',
+            'formulaire_kyc',
+            'consentement_bic',
+            'extrait_rccm_ifu',
+            'statuts_enregistres',
+            'attestation_regularite_fiscale',
+            'pieces_identite_signataires',
+            'pieces_beneficiaires_effectifs',
+            'cv_promoteur_gerant',
+            'etats_financiers_1',
+            'etats_financiers_2',
+            'etats_financiers_3',
+            'plan_affaires',
         ]
         
         # Widgets pour styliser les champs de fichier
@@ -238,6 +250,52 @@ class DocumentsUploadForm(forms.ModelForm):
             field: forms.ClearableFileInput(attrs={'class': 'file-input file-input-bordered w-full'})
             for field in fields
         }
+
+    COMMON_REQUIRED_FIELDS = (
+        'cni_passeport',
+        'justificatif_domicile',
+        'relevé_bancaire',
+        'specimen_signature',
+    )
+    SALARIE_REQUIRED_FIELDS = (
+        'attestation_non_engagement',
+        'contrat_travail',
+        'attestation_travail',
+        'bulletin_1',
+        'bulletin_2',
+        'bulletin_3',
+    )
+    ENTREPRENEUR_REQUIRED_FIELDS = (
+        'formulaire_kyc',
+        'consentement_bic',
+        'extrait_rccm_ifu',
+        'statuts_enregistres',
+        'attestation_regularite_fiscale',
+        'pieces_identite_signataires',
+        'pieces_beneficiaires_effectifs',
+        'cv_promoteur_gerant',
+        'etats_financiers_1',
+        'etats_financiers_2',
+        'etats_financiers_3',
+        'plan_affaires',
+    )
+
+    def __init__(self, *args, client=None, **kwargs):
+        instance = kwargs.get('instance')
+        self.client = client or getattr(instance, 'client', None)
+        super().__init__(*args, **kwargs)
+
+        self.is_entrepreneur = getattr(self.client, 'profession_choisie', None) == 'entrepreneur'
+        required_fields = self.COMMON_REQUIRED_FIELDS + (
+            self.ENTREPRENEUR_REQUIRED_FIELDS
+            if self.is_entrepreneur
+            else self.SALARIE_REQUIRED_FIELDS
+        )
+
+        for field in self.fields.values():
+            field.required = False
+        for field_name in required_fields:
+            self.fields[field_name].required = True
     
     # === CONSTANTES DE VALIDATION ===
     MAX_FILE_SIZE = 100 * 1024 * 1024  # 100 Mo (100 millions d'octets)
@@ -268,22 +326,15 @@ class DocumentsUploadForm(forms.ModelForm):
         
         # === 1. VALIDATION DES CHAMPS OBLIGATOIRES ===
         missing_docs = []
-        required_fields = [
-            ('cni_passeport', 'CNI / Passeport'),
-            ('justificatif_domicile', 'Justificatif de domicile'),
-            ('attestation_non_engagement', 'Attestation de non-engagement'),
-            ('contrat_travail', 'Contrat de travail'),
-            ('attestation_travail', 'Attestation de travail (<3 mois)'),
-            ('bulletin_1', 'Bulletin de paie (mois -3)'),
-            ('bulletin_2', 'Bulletin de paie (mois -2)'),
-            ('bulletin_3', 'Bulletin de paie (mois -1)'),
-            ('relevé_bancaire', 'Relevé bancaire (12 mois) + RIB'),
-            ('specimen_signature', 'Spécimen de signature'),
-        ]
+        required_fields = self.COMMON_REQUIRED_FIELDS + (
+            self.ENTREPRENEUR_REQUIRED_FIELDS
+            if self.is_entrepreneur
+            else self.SALARIE_REQUIRED_FIELDS
+        )
         
-        for field_name, field_label in required_fields:
+        for field_name in required_fields:
             if not cleaned_data.get(field_name): 
-                missing_docs.append(field_label)
+                missing_docs.append(self.fields[field_name].label)
         
         if missing_docs:
             raise forms.ValidationError(

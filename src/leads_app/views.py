@@ -1,5 +1,5 @@
 from datetime import timedelta, datetime
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from django.utils import timezone
 from django.db.models import Q
 from django.db import transaction
@@ -734,7 +734,7 @@ class DemandeDetailView(LoginRequiredMixin, DetailView):
         # Seul le client peut uploader des documents pour sa propre demande
         if self.request.user.role == "client":
             dossier, created = Documents.objects.get_or_create(client=self.request.user, demande_financement=self.object)
-            context["upload_doc_form"] = DocumentsUploadForm(instance=dossier)
+            context["upload_doc_form"] = DocumentsUploadForm(instance=dossier, client=self.request.user)
             
         if self.request.user.role in ["directeur", "commercial"]:
             initial = {
@@ -769,6 +769,29 @@ class GestionTypeFinancementView(LoginRequiredMixin, UserPassesTestMixin, Update
         
 
 ################################################### DOCUMENTS VIEWS #####################################################################
+def _posted_coordinates(request):
+    raw_latitude = request.POST.get("latitude", "").strip()
+    raw_longitude = request.POST.get("longitude", "").strip()
+
+    if not raw_latitude or not raw_longitude:
+        return None, None
+
+    try:
+        latitude = Decimal(raw_latitude)
+        longitude = Decimal(raw_longitude)
+    except InvalidOperation:
+        return None, None
+
+    if not latitude.is_finite() or not longitude.is_finite():
+        return None, None
+    if not Decimal("-90") <= latitude <= Decimal("90"):
+        return None, None
+    if not Decimal("-180") <= longitude <= Decimal("180"):
+        return None, None
+
+    return latitude, longitude
+
+
 @login_required
 def upload_multiple_documents(request, demande_id):
     demande = get_object_or_404(demande_financement, id=demande_id, client=request.user)
@@ -779,7 +802,7 @@ def upload_multiple_documents(request, demande_id):
     if request.method != 'POST':
         return redirect('leads_app:detail-demande', demande.pk)
 
-    form = DocumentsUploadForm(request.POST, request.FILES, instance=dossier)
+    form = DocumentsUploadForm(request.POST, request.FILES, instance=dossier, client=request.user)
 
     if not form.is_valid():
         return render(
@@ -792,8 +815,7 @@ def upload_multiple_documents(request, demande_id):
         # 🔴 1. TRANSACTIONS ATOMIQUES : Tout est sauvegardé ensemble ou rien du tout
         with transaction.atomic():
             dossier = form.save(commit=False)
-            dossier.latitude = request.POST.get("latitude")
-            dossier.longitude = request.POST.get("longitude")
+            dossier.latitude, dossier.longitude = _posted_coordinates(request)
 
             # Vérification de la complétude du dossier
             est_complet = dossier.verifier_completude()
@@ -903,7 +925,7 @@ def upload_offre_documents(request, offre_id):
     if request.method != "POST":
         return redirect('commercial_app:offre-detail', pk=offre.pk)
 
-    form = DocumentsUploadForm(request.POST, request.FILES, instance=dossier)
+    form = DocumentsUploadForm(request.POST, request.FILES, instance=dossier, client=request.user)
 
     # 🛑 Guard Clause : Sortie précoce si formulaire invalide
     if not form.is_valid():
@@ -917,8 +939,7 @@ def upload_offre_documents(request, offre_id):
         # 🔴 1. TRANSACTION ATOMIQUE : Atomicitée complète BDD
         with transaction.atomic():
             dossier = form.save(commit=False)
-            dossier.latitude = request.POST.get("latitude")
-            dossier.longitude = request.POST.get("longitude")
+            dossier.latitude, dossier.longitude = _posted_coordinates(request)
 
             # Vérification de la complétude
             est_complet = dossier.verifier_completude()
@@ -1830,7 +1851,7 @@ class DocumentDetailView(LoginRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         if self.request.user.role == "client": 
             if "update_doc_form" not in context:
-                context["update_doc_form"] = DocumentsUploadForm(instance=self.object)
+                context["update_doc_form"] = DocumentsUploadForm(instance=self.object, client=self.object.client)
         return context
 
 class DocumentUpdateView(LoginRequiredMixin, UpdateView):
@@ -1839,15 +1860,13 @@ class DocumentUpdateView(LoginRequiredMixin, UpdateView):
     template_name = "clients_templates/client_detail_doc.html"
 
     def form_valid(self, form):
-        latitude = self.request.POST.get("latitude")
-        longitude = self.request.POST.get("longitude")
+        latitude, longitude = _posted_coordinates(self.request)
 
         # 💾 1. Transaction atomique BDD
         with transaction.atomic():
             dossier = form.save(commit=False)
-            if latitude:
+            if latitude is not None and longitude is not None:
                 dossier.latitude = latitude
-            if longitude:
                 dossier.longitude = longitude
 
             dossier.save()

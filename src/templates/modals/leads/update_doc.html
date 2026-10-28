@@ -80,6 +80,9 @@
                     </div>
                 </div>
 
+                {% if update_doc_form.is_entrepreneur %}
+                    {% include 'partials/documents/_entrepreneur_fields.html' with document_form=update_doc_form %}
+                {% else %}
                 <!-- 2. EMPLOI & REVENUS -->
                 <div class="bg-slate-50/70 border border-slate-200/80 rounded-xl p-4 transition-colors">
                     <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-200/60">
@@ -140,6 +143,7 @@
                         </div>
                     </div>
                 </div>
+                {% endif %}
 
                 <!-- 3. BANQUE -->
                 <div class="bg-slate-50/70 border border-slate-200/80 rounded-xl p-4 transition-colors">
@@ -209,12 +213,12 @@
                             <div>
                                 <label class="label py-1"><span class="label-text-alt font-bold">Latitude</span></label>
                                 <input type="text" name="latitude" id="id_latitude" value="{{ update_doc_form.latitude.value|default:'' }}" 
-                                    class="input input-bordered input-sm w-full bg-base-200 text-xs" readonly required placeholder="Ex: 12.371428" />
+                                    class="input input-bordered input-sm w-full bg-base-200 text-xs" readonly placeholder="Ex: 12.371428" />
                             </div>
                             <div>
                                 <label class="label py-1"><span class="label-text-alt font-bold">Longitude</span></label>
                                 <input type="text" name="longitude" id="id_longitude" value="{{ update_doc_form.longitude.value|default:'' }}" 
-                                    class="input input-bordered input-sm w-full bg-base-200 text-xs" readonly required placeholder="Ex: -1.519722" />
+                                    class="input input-bordered input-sm w-full bg-base-200 text-xs" readonly placeholder="Ex: -1.519722" />
                             </div>
                         </div>
                         <!-- Champs Django (optionnel) -->

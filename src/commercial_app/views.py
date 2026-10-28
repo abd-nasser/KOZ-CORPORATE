@@ -808,7 +808,7 @@ class OffreDetailView(LoginRequiredMixin,UserPassesTestMixin ,DetailView):
     def get_context_data(self, **kwargs):
         context =  super().get_context_data(**kwargs)
         if "upload_doc_form" not in context:
-            context["upload_doc_form"] = DocumentsUploadForm()
+            context["upload_doc_form"] = DocumentsUploadForm(client=self.object.client)
         if self.request.user.role != "client":
             if "update_offre_form" not in context:
                 context["update_offre_form"] = OffreFinancementForm(instance=self.object)

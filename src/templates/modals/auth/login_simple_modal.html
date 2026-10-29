@@ -55,7 +55,8 @@
                         <label for="password" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
                             Mot de passe
                         </label>
-                        <a href="#" class="text-xs text-blue-600 hover:text-blue-800 font-medium hover:underline">
+                        {# Le lien sort de la modale et ouvre la page qui demande l'adresse e-mail du compte. #}
+                        <a href="{% url 'auth_app:password_reset' %}" class="text-xs text-blue-600 hover:text-blue-800 font-medium hover:underline">
                             Mot de passe oublié ?
                         </a>
                     </div>

@@ -23,6 +23,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 
+# Permet à Django de générer des liens HTTPS lorsque Nginx transmet le protocole original de la requête.
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 
 # Application definition
 
@@ -172,7 +175,7 @@ if DEBUG:
         }
     }
 else:'''
-    # 3. Base de données avec valeurs de secours
+   # 3. Base de données avec valeurs de secours
 DATABASES = {
                 'default': {
                     'ENGINE': 'django.db.backends.postgresql',

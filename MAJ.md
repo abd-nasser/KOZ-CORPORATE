@@ -72,3 +72,52 @@ La migration `client_app/migrations/0011_documents_attestation_regularite_fiscal
 
 - La checklist precise que les statuts sont demandes pour les formes SA, SARL et SNC. En l'absence d'un champ de forme juridique dans le profil client, le formulaire et le controle de completude les exigent actuellement pour tous les entrepreneurs. Une condition plus precise necessitera de stocker la forme juridique de l'entreprise.
 - Les identites de tous les signataires et beneficiaires sont chacune envoyees dans un seul fichier. Pour permettre un upload distinct par personne, il faudrait remplacer cette convention par un modele de pieces jointes multiples.
+
+# Reinitialisation du mot de passe oublie
+
+## Objectif
+
+Permettre a un utilisateur qui ne peut plus se connecter de demander un lien temporaire par e-mail, puis de choisir un nouveau mot de passe. Le parcours utilise les vues natives de Django pour la generation et la validation du jeton, au lieu de stocker un jeton personnalise.
+
+## Parcours utilisateur
+
+Le lien « Mot de passe oublie ? » de la modale de connexion ouvre le formulaire de demande. L'utilisateur entre son adresse e-mail. Django envoie un courriel uniquement si un compte actif correspondant peut se connecter, mais affiche la meme confirmation dans tous les cas pour ne pas reveler si l'adresse est inscrite.
+
+Le lien du courriel contient l'identifiant utilisateur encode et un jeton signe temporaire. Django verifie ce lien avant d'afficher les champs du nouveau mot de passe. Les validateurs de mot de passe deja configures s'appliquent, puis Django enregistre le nouveau hash et affiche la confirmation finale. Un lien invalide ou expire est refuse.
+
+## Fichiers concernes
+
+- `src/auth_app/urls.py` declare les quatre etapes : demande, confirmation neutre, validation du jeton et confirmation finale. Des commentaires expliquent chaque route et les parametres transmis aux vues Django.
+- `src/templates/modals/auth/login_simple_modal.html` relie le lien d'oubli de mot de passe a la route de demande.
+- `src/templates/auth_templates/password_reset_page.html` gere trois rendus : le formulaire (demande d'e-mail ou choix du nouveau mot de passe), l'avertissement de lien invalide/expire et la confirmation sans formulaire. Les vues `password_reset_done` et `password_reset_complete` utilisent cette derniere branche avec des titres et messages differents. Les commentaires Django expliquent les blocs du template sans etre inclus dans le HTML envoye au navigateur.
+- `src/templates/auth_templates/password_reset_email.txt` et `src/templates/auth_templates/password_reset_subject.txt` definissent le contenu texte et le sujet du message de reinitialisation.
+- `src/koz_flow/settings.py` indique a Django que Nginx transmet le protocole HTTPS, pour generer des liens de reinitialisation HTTPS en production.
+- `src/auth_app/tests.py` verifie l'envoi du courriel, la reponse neutre pour une adresse inconnue, le lien du formulaire de connexion et le changement de mot de passe avec un jeton valide.
+
+## Securite et configuration
+
+L'envoi utilise le backend SMTP deja configure dans les parametres Django. Les variables de connexion e-mail de production doivent etre presentes pour que le message sorte effectivement. Le backend e-mail memoire est active uniquement dans les tests. Les vues Django natives limitent la validite des jetons et evitent de creer une table ou une migration supplementaire.
+
+## Verifications executees
+
+- `manage.py test auth_app.tests.PasswordResetTests` : quatre tests reussis avec la base locale.
+- `manage.py check` execute par le lanceur de tests : aucun probleme Django signale.
+
+# Correction Nginx du simulateur de financement
+
+## Probleme corrige
+
+La politique Content-Security-Policy configuree dans `nginx.conf` n'autorisait pas `cdn.jsdelivr.net`, alors que `src/templates/base.html` charge Alpine.js depuis ce domaine. En production, le navigateur bloquait le script ; les interactions Alpine de `src/templates/financement/simulation_financement.html` (calculs, choix du financement et champs dynamiques) ne pouvaient donc pas fonctionner.
+
+## Correction
+
+Le domaine `https://cdn.jsdelivr.net` a ete ajoute a la directive `script-src` de la CSP Nginx. Les erreurs de console ont ensuite confirme qu'Alpine.js avait aussi besoin de `'unsafe-eval'` pour evaluer ses expressions avec son build CDN standard ; cette source a donc ete autorisee. La directive `connect-src` autorise `https://cdn.plyr.io` pour eviter le blocage de la source map de Plyr dans les outils de developpement du navigateur.
+
+L'autorisation de `'unsafe-eval'` assouplit la CSP et reduit sa protection contre l'execution de scripts injectes. A terme, privilegier une version CSP-compatible d'Alpine ou une configuration sans evaluation dynamique si toutes les expressions du site le permettent.
+
+Apres deploiement, verifier la configuration dans le conteneur avec `docker compose exec nginx nginx -t`, puis la recharger avec `docker compose exec nginx nginx -s reload`.
+
+## Verification
+
+- `git diff --check` : aucune erreur de whitespace.
+- `nginx -t` et le rechargement ont ete executes sur le serveur avec succes. Nginx a affiche des avertissements de deprecation pour la syntaxe `listen ... http2`, sans empecher le rechargement.

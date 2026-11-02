@@ -1,5 +1,6 @@
 {% load static %}
 {% load humanize %}
+{% load tailwind_tags %}
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -13,7 +14,7 @@
     <link rel="apple-touch-icon" href="{% static 'images/Koz_logo_noBack.png' %}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://cdn.tailwindcss.com"></script>
+    {% tailwind_css %}
     <style>
         * { font-family: 'Inter', sans-serif; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }

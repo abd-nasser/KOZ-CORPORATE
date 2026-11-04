@@ -178,7 +178,7 @@
                 Finaliser votre paiement
             </h1>
             <p class="text-gray-500 mt-2 max-w-md mx-auto">
-                Payez en toute sécurité via Orange Money
+                Payez en toute sécurité avec votre wallet LigdiCash
             </p>
         </div>
 
@@ -204,13 +204,8 @@
                 <div class="instruction-step">
                     <span class="step-number">1</span>
                     <div>
-                        <p class="text-sm text-gray-700 font-medium">Composez le code</p>
-                        *144*4*6*montant#
-                        <p class="text-xs text-gray-400 mt-1">Sur votre téléphone Orange Money</p>
-                        <p class="text-xs text-gray-400 mt-1">En remplaçant "montant" par le prix exact de votre achat (par exemple *144*4*6*750# pour 750 FCFA).</p>
-                        <p class="text-xs text-gray-400 mt-1">Validez avec votre code secret.</p>
-                        <p class="text-xs text-gray-400 mt-1">Recevez le code OTP par SMS sur votre téléphone.</p>
-                        
+                        <p class="text-sm text-gray-700 font-medium">Demandez un code OTP</p>
+                        <p class="text-xs text-gray-500 mt-1">Saisissez le numéro associé à votre compte LigdiCash. Un code vous sera envoyé par SMS ou dans l’application.</p>
                     </div>
                 </div>
                 
@@ -219,8 +214,8 @@
                 <div class="instruction-step">
                     <span class="step-number">2</span>
                     <div>
-                        <p class="text-sm text-gray-700 font-medium">Saisissez votre OTP</p>
-                        <p class="text-sm text-gray-500">Saisissez le code reçu par SMS</p>
+                        <p class="text-sm text-gray-700 font-medium">Confirmez le paiement</p>
+                        <p class="text-sm text-gray-500">Saisissez le code reçu après l’envoi de la demande.</p>
                         <p class="text-xs text-yellow-600 mt-1">
                             <i class="fas fa-clock mr-1"></i> L'OTP expire rapidement
                         </p>
@@ -232,11 +227,7 @@
             <form id="payment-form" 
                   method="post" 
                   action="{% url 'paiement_app:initier-paiement' commande.id %}"
-                  hx-post="{% url 'paiement_app:initier-paiement' commande.id %}"
-                  hx-target="#payment-result"
-                  hx-swap="innerHTML"
-                  hx-indicator="#payment-spinner"
-                  hx-on::after-request="if(event.detail.successful) setTimeout(() => { window.location.href = '{% url 'paiement_app:confirmation' %}' }, 2000)">
+                  data-otp-url="{% url 'paiement_app:envoyer-otp' commande.id %}">
                 
                 {% csrf_token %}
                 
@@ -244,21 +235,22 @@
                     <!-- Numéro de téléphone -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1.5">
-                            <i class="fas fa-phone mr-1 text-blue-500"></i> Numéro Orange Money
+                            <i class="fas fa-phone mr-1 text-blue-500"></i> Numéro du compte LigdiCash
                         </label>
                         <input type="tel" 
                                name="telephone" 
                                id="telephone"
-                               placeholder="70 00 00 00"
+                               placeholder="70000000"
                                class="input-field"
                                pattern="[0-9]{8}"
+                               inputmode="numeric"
                                maxlength="8"
                                required>
-                        <p class="text-xs text-gray-400 mt-1">Format : 70 00 00 00 (8 chiffres)</p>
+                        <p class="text-xs text-gray-400 mt-1">Numéro burkinabè à 8 chiffres, sans indicatif.</p>
                     </div>
 
                     <!-- OTP -->
-                    <div>
+                    <div id="otp-field" class="hidden">
                         <label class="block text-sm font-medium text-gray-700 mb-1.5">
                             <i class="fas fa-key mr-1 text-blue-500"></i> Code OTP
                         </label>
@@ -267,27 +259,27 @@
                                id="otp"
                                placeholder="Entrez le code reçu par SMS"
                                class="input-field"
+                               inputmode="numeric"
+                               pattern="[0-9]{6}"
                                maxlength="6"
-                               required>
+                               disabled>
                         <p class="text-xs text-gray-400 mt-1">Code à 6 chiffres reçu par SMS</p>
+                        <button type="button" id="otp-resend" class="hidden text-sm text-blue-600 hover:text-blue-800 mt-2">
+                            Renvoyer le code OTP
+                        </button>
                     </div>
 
                     <!-- Résultat du paiement -->
-                    <div id="payment-result"></div>
+                    <div id="payment-result" role="status" aria-live="polite"></div>
 
                     <!-- Bouton de paiement -->
-                    <div class="relative group w-full" title="Option non disponible pour le moment">
-                        <button type="submit" 
+                    <div class="w-full">
+                        <button type="submit"
                                 id="payment-btn"
-                                aria-disabled="true"
-                                disabled
                                 class="btn-primary w-full py-3.5 rounded-xl font-semibold flex items-center justify-center gap-2 text-base mt-2">
-                            <span id="btn-text"><i class="fas fa-check-circle mr-1"></i> Confirmer le paiement</span>
+                            <span id="btn-text"><i class="fas fa-comment-dots mr-1"></i> Envoyer le code OTP</span>
                             <span id="payment-spinner" class="hidden"><i class="fas fa-spinner fa-spin"></i> Traitement...</span>
                         </button>
-                        <span class="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 hidden -translate-x-1/2 whitespace-nowrap rounded-lg bg-gray-800 px-3 py-2 text-xs text-white shadow-lg group-hover:block">
-                            Option non disponible pour le moment
-                        </span>
                     </div>
                 </div>
             </form>
@@ -321,36 +313,95 @@
     <!-- SCRIPTS                                                       -->
     <!-- ============================================================ -->
     <script>
-        // ===== GESTION DU SPINNER =====
-        document.addEventListener('htmx:beforeRequest', function(evt) {
-            if (evt.target.id === 'payment-form') {
-                const btn = document.getElementById('payment-btn');
-                const text = document.getElementById('btn-text');
-                const spinner = document.getElementById('payment-spinner');
-                btn.disabled = true;
-                text.classList.add('hidden');
-                spinner.classList.remove('hidden');
-            }
-        });
+        const paymentForm = document.getElementById('payment-form');
+        const paymentButton = document.getElementById('payment-btn');
+        const buttonText = document.getElementById('btn-text');
+        const paymentSpinner = document.getElementById('payment-spinner');
+        const otpField = document.getElementById('otp-field');
+        const otpInput = document.getElementById('otp');
+        const otpResend = document.getElementById('otp-resend');
+        const paymentResult = document.getElementById('payment-result');
+        let otpRequested = false;
 
-        document.addEventListener('htmx:afterRequest', function(evt) {
-            if (evt.target.id === 'payment-form') {
-                const btn = document.getElementById('payment-btn');
-                const text = document.getElementById('btn-text');
-                const spinner = document.getElementById('payment-spinner');
-                btn.disabled = false;
-                text.classList.remove('hidden');
-                spinner.classList.add('hidden');
+        async function resendOtp() {
+            otpResend.disabled = true;
+            try {
+                const response = await fetch(paymentForm.dataset.otpUrl, {
+                    method: 'POST',
+                    body: new FormData(paymentForm),
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const result = await response.json();
+                paymentResult.textContent = response.ok && result.success
+                    ? result.message
+                    : result.error || 'Impossible de renvoyer le code OTP.';
+                if (response.ok && result.success) {
+                    otpInput.value = '';
+                    otpInput.focus();
+                }
+            } catch (error) {
+                paymentResult.textContent = 'Impossible de contacter le serveur. Vérifiez votre connexion et réessayez.';
+            } finally {
+                otpResend.disabled = false;
             }
-        });
+        }
 
-        // ===== FORMATAGE DU NUMÉRO DE TÉLÉPHONE =====
-        document.getElementById('telephone').addEventListener('input', function(e) {
-            this.value = this.value.replace(/\D/g, '').slice(0, 8);
-            // Ajoute des espaces automatiquement
-            let formatted = this.value.replace(/(\d{2})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4');
-            if (formatted !== this.value) {
-                this.value = formatted;
+        otpResend.addEventListener('click', resendOtp);
+
+        paymentForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            if (!paymentForm.reportValidity()) return;
+
+            paymentButton.disabled = true;
+            buttonText.classList.add('hidden');
+            paymentSpinner.classList.remove('hidden');
+            paymentResult.textContent = '';
+
+            try {
+                const endpoint = otpRequested ? paymentForm.action : paymentForm.dataset.otpUrl;
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    body: new FormData(paymentForm),
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+                    paymentResult.textContent = result.error || 'Une erreur est survenue. Veuillez réessayer.';
+                    if (result.error === 'Demandez un nouveau code OTP avant de confirmer le paiement.') {
+                        otpRequested = false;
+                        otpField.classList.add('hidden');
+                        otpInput.disabled = true;
+                        otpInput.required = false;
+                        otpInput.value = '';
+                        otpResend.classList.add('hidden');
+                        buttonText.innerHTML = '<i class="fas fa-comment-dots mr-1"></i> Envoyer le code OTP';
+                    }
+                    return;
+                }
+
+                paymentResult.textContent = result.message;
+                if (!otpRequested) {
+                    otpRequested = true;
+                    otpField.classList.remove('hidden');
+                    otpResend.classList.remove('hidden');
+                    otpInput.disabled = false;
+                    otpInput.required = true;
+                    buttonText.innerHTML = '<i class="fas fa-check-circle mr-1"></i> Confirmer le paiement';
+                    otpInput.focus();
+                } else {
+                    paymentButton.disabled = true;
+                    buttonText.textContent = 'Paiement en cours de validation';
+                    return;
+                }
+            } catch (error) {
+                paymentResult.textContent = 'Impossible de contacter le serveur. Vérifiez votre connexion et réessayez.';
+            } finally {
+                if (!otpRequested || !paymentButton.disabled || buttonText.textContent !== 'Paiement en cours de validation') {
+                    paymentButton.disabled = false;
+                }
+                paymentSpinner.classList.add('hidden');
+                buttonText.classList.remove('hidden');
             }
         });
     </script>

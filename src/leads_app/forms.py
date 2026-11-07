@@ -243,6 +243,7 @@ class DocumentsUploadForm(forms.ModelForm):
             'etats_financiers_2',
             'etats_financiers_3',
             'plan_affaires',
+            'reglement_interieur',
         ]
         
         # Widgets pour styliser les champs de fichier
@@ -278,6 +279,7 @@ class DocumentsUploadForm(forms.ModelForm):
         'etats_financiers_2',
         'etats_financiers_3',
         'plan_affaires',
+        'fiche_demande',
     )
 
     def __init__(self, *args, client=None, **kwargs):

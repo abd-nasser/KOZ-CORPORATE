@@ -167,10 +167,11 @@ class Documents(models.Model):
     pieces_identite_signataires = models.FileField(upload_to='documents/%Y/%m/%d/', verbose_name="Pièces d'identité de chaque signataire", help_text="Réunir les pièces des signataires dans un seul fichier.", blank=True, null=True)
     pieces_beneficiaires_effectifs = models.FileField(upload_to='documents/%Y/%m/%d/', verbose_name="Pièces des bénéficiaires effectifs (identité et/ou RCCM)", help_text="Réunir les justificatifs de chaque bénéficiaire effectif dans un seul fichier.", blank=True, null=True)
     cv_promoteur_gerant = models.FileField(upload_to='documents/%Y/%m/%d/', verbose_name="CV du promoteur ou du gérant", blank=True, null=True)
-    etats_financiers_1 = models.FileField(upload_to='documents/%Y/%m/%d/', verbose_name="États financiers certifiés du dernier exercice", blank=True, null=True)
-    etats_financiers_2 = models.FileField(upload_to='documents/%Y/%m/%d/', verbose_name="États financiers certifiés de l'avant-dernier exercice", blank=True, null=True)
-    etats_financiers_3 = models.FileField(upload_to='documents/%Y/%m/%d/', verbose_name="États financiers certifiés du troisième exercice", blank=True, null=True)
+    etats_financiers_1 = models.FileField(upload_to='documents/%Y/%m/%d/', verbose_name="États financiers certifiés de l'an - 1", blank=True, null=True)
+    etats_financiers_2 = models.FileField(upload_to='documents/%Y/%m/%d/', verbose_name="États financiers certifiés de l'an - 2", blank=True, null=True)
+    etats_financiers_3 = models.FileField(upload_to='documents/%Y/%m/%d/', verbose_name="États financiers certifiés de l'an - 3", blank=True, null=True)
     plan_affaires = models.FileField(upload_to='documents/%Y/%m/%d/', verbose_name="Plan d'affaires sur la durée du prêt", blank=True, null=True)
+    reglement_interieur = models.FileField(upload_to='documents/%Y/%m/%d/', verbose_name="Règlement intérieur (associations, ONG et organismes similaires)", blank=True, null=True)
    
     STATUT_DOCS = [
         ("vide", "Dossier vide"),
@@ -231,6 +232,7 @@ class Documents(models.Model):
                 'etats_financiers_2',
                 'etats_financiers_3',
                 'plan_affaires',
+                'fiche_demande',
             ])
         else:
             requis.extend([

@@ -268,6 +268,7 @@
                                 {{ update_doc_form.recu_acompte }}
                             </div>
                         </div>
+                        {% if not update_doc_form.is_entrepreneur %}
                         <div class="md:col-span-2">
                             <label class="block text-xs font-medium text-slate-600 mb-1">
                                 {{ update_doc_form.fiche_demande.label }}
@@ -276,6 +277,7 @@
                                 {{ update_doc_form.fiche_demande }}
                             </div>
                         </div>
+                        {% endif %}
                     </div>
                 </div>
 

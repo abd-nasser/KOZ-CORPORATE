@@ -141,7 +141,7 @@ def site_user_register(request):
                 pays=pays,
                 ville=ville,
                 genre=genre,
-                profession=profession,
+                profession_choisie=profession,
                 role='client',
                 is_active=True,
             )
